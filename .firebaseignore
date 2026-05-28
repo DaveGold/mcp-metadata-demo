@@ -1,0 +1,28 @@
+firebase.json
+.firebaserc
+.firebaseignore
+
+# Source — only dist/ is needed at runtime
+src/**
+test-utils/**
+scripts/**
+docs/**
+ui/**
+
+# Dev artifacts
+.git/**
+.github/**
+.env
+.env.example
+.mcp.json
+.nvmrc
+.gitignore
+
+# Repo metadata
+README.md
+LICENSE
+CLAUDE.md
+*.md
+tsconfig.json
+vitest.config.ts
+vite.config.ts

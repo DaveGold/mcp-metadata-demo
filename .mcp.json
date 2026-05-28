@@ -2,7 +2,7 @@
   "mcpServers": {
     "metadata-demo": {
       "command": "node",
-      "args": ["--env-file=.env", "dist/index.js"]
+      "args": ["--env-file=.env", "dist/stdio.js"]
     }
   }
 }

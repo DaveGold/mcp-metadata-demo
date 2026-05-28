@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "source": ".",
+    "runtime": "nodejs22",
+    "codebase": "default",
+    "predeploy": ["npm run build"]
+  }
+}

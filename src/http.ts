@@ -1,38 +1,53 @@
 #!/usr/bin/env node
 /**
- * Optional streamable-HTTP entrypoint.
+ * Streamable-HTTP entrypoint.
  *
- * ⚠️  This transport has NO AUTHENTICATION. It binds to 127.0.0.1 by default.
- *     Do NOT expose it on a public interface — anyone who can reach the port
- *     can make unlimited requests against your EP-Online API key.
+ * Two modes:
+ *   - Local dev: bind to 127.0.0.1, no protection middleware. Run with
+ *     `node dist/http.js`.
+ *   - Cloud deploy: import `createHttpApp()` from src/functions.ts, wrap
+ *     with Firebase Functions v2 onRequest. Daily-cap + rate-limit +
+ *     request-logging middleware are active there.
  *
- * Use this when you want to run the server as a long-lived background process
- * (for example, to share a single EP-Online quota across multiple agents on
- * the same machine) instead of the default stdio transport.
- *
- * Start: `PORT=3000 node dist/http.js`
+ * The split lets local dev stay zero-config while the hosted demo gets
+ * the protection layers described in docs/RUNBOOK.md.
  */
 
-import express, { type Request, type Response } from 'express';
+import express, {
+  type Express,
+  type Request,
+  type Response,
+} from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { createServer } from './server.js';
 import { logger } from './logger.js';
+import { dailyCap } from './middleware/daily-cap.js';
+import { rateLimitMcp } from './middleware/rate-limit.js';
+import { requestLog } from './middleware/request-log.js';
 
-const PORT = Number(process.env.PORT ?? 3000);
-const HOST = process.env.HOST ?? '127.0.0.1';
+export interface CreateHttpAppOptions {
+  /** When true, mount daily-cap + rate-limit + request-logging on `/mcp`. */
+  hosted?: boolean;
+}
 
-async function main(): Promise<void> {
+export function createHttpApp(options: CreateHttpAppOptions = {}): Express {
   const app = express();
+  app.set('trust proxy', true);
   app.use(express.json({ limit: '1mb' }));
+
+  if (options.hosted) {
+    app.use(requestLog);
+  }
 
   app.get('/healthz', (_req: Request, res: Response) => {
     res.json({ status: 'ok' });
   });
 
-  app.post('/mcp', async (req: Request, res: Response) => {
+  const mcpMiddleware = options.hosted ? [dailyCap, rateLimitMcp] : [];
+
+  app.post('/mcp', ...mcpMiddleware, async (req: Request, res: Response) => {
     try {
       // Stateless: one fresh McpServer + transport pair per request.
-      // Simple and scales fine for a single-user local setup.
       const server = createServer();
       const transport = new StreamableHTTPServerTransport({
         sessionIdGenerator: undefined,
@@ -42,6 +57,7 @@ async function main(): Promise<void> {
       await transport.handleRequest(req, res, req.body);
     } catch (error) {
       logger.error('http.handler_error', {
+        requestId: req.requestId,
         error: error instanceof Error ? error.message : String(error),
       });
       if (!res.headersSent) {
@@ -50,18 +66,23 @@ async function main(): Promise<void> {
     }
   });
 
+  return app;
+}
+
+// ── Local-dev startup (only when invoked directly) ──────────────────────────
+
+const isMain = import.meta.url === `file://${process.argv[1]}`;
+
+if (isMain) {
+  const PORT = Number(process.env.PORT ?? 3000);
+  const HOST = process.env.HOST ?? '127.0.0.1';
+
+  const app = createHttpApp({ hosted: false });
   app.listen(PORT, HOST, () => {
     logger.info('server.started', { transport: 'http', host: HOST, port: PORT });
     process.stderr.write(
-      `\nmcp-building-profile-nl listening on http://${HOST}:${PORT}/mcp\n` +
+      `\nmcp-metadata-demo listening on http://${HOST}:${PORT}/mcp\n` +
         `⚠️  No auth — keep this bound to localhost.\n\n`
     );
   });
 }
-
-main().catch((error) => {
-  logger.error('server.fatal', {
-    error: error instanceof Error ? error.message : String(error),
-  });
-  process.exit(1);
-});

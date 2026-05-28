@@ -4,7 +4,7 @@
   "description": "Demo MCP server + MCP apps showing a rich-metadata strategy for AI tooling. Companion to the paper '<title>'. Uses Dutch open building data (BAG + EP-Online) as the domain.",
   "type": "module",
   "bin": {
-    "mcp-metadata-demo": "./dist/index.js"
+    "mcp-metadata-demo": "./dist/stdio.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,9 +20,9 @@
   "scripts": {
     "build": "npm run build:ui && tsc",
     "build:ui": "node scripts/build-ui.js",
-    "start": "node dist/index.js",
-    "dev": "tsx watch src/index.ts",
-    "inspect": "npm run build && npx @modelcontextprotocol/inspector node --env-file=.env dist/index.js",
+    "start": "node dist/stdio.js",
+    "dev": "tsx watch src/stdio.ts",
+    "inspect": "npm run build && npx @modelcontextprotocol/inspector node --env-file=.env dist/stdio.js",
     "http": "node dist/http.js",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -66,10 +66,10 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.7.2",
     "@modelcontextprotocol/sdk": "^1.27.1",
-    "@modelcontextprotocol/ext-apps": "^1.7.0",
     "express": "^5.2.1",
-    "express-rate-limit": "^7.4.1",
+    "express-rate-limit": "^7.5.1",
     "firebase-functions": "^7.2.5",
     "zod": "^3.25.76"
   },
@@ -77,7 +77,7 @@
     "@modelcontextprotocol/inspector": "^0.14.0",
     "@types/express": "^5.0.6",
     "@types/node": "^22.19.11",
-    "@vitest/coverage-v8": "^4.1.6",
+    "@vitest/coverage-v8": "^4.1.7",
     "tsx": "^4.20.4",
     "typescript": "^5.9.3",
     "vitest": "^4.1.6"
