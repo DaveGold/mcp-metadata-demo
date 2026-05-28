@@ -5,10 +5,13 @@
  * Called by the render_table Angular component via bridge.callTool() to
  * bypass Claude.ai's iframe CSP which blocks img-src to external domains.
  *
- * Three-layer cache:
+ * Two-layer cache:
  *   L1 — in-memory Map (per-instance, instant, lost on cold start / deploy)
- *   L2 — Firestore imageCache collection (persistent, shared across instances, 30-day TTL)
- *   L3 — origin fetch when L1 + L2 miss
+ *   L2 — origin fetch when L1 misses
+ *
+ * (wb-mcp-server's Firestore L2 cache stripped — keeping the demo
+ * Firestore-free. Cold-starts re-fetch from origin, which is fine at
+ * the request volumes this demo expects.)
  *
  * Security (SSRF hardening):
  *   - Only http(s) URLs accepted (mailto/javascript/data/file rejected)
@@ -31,20 +34,12 @@ import { lookup as dnsLookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerAppTool } from '@modelcontextprotocol/ext-apps/server';
-import { initializeApp, getApps } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { logger } from '../logger.js';
 import { RESOURCE_URI } from './render-table.js';
 
-if (getApps().length === 0) {
-  initializeApp();
-}
-
 const MAX_IMAGES_PER_CALL = 50;
 const MAX_BYTES = 2 * 1024 * 1024; // 2MB
-const TTL_DAYS = 30;
 const FETCH_TIMEOUT_MS = 15_000;
-const IMAGE_COLLECTION = 'imageCache';
 const ALLOWED_MIMES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml']);
 
 const MAX_REDIRECT_HOPS = 3;
@@ -94,37 +89,8 @@ interface CachedImage {
 const memoryCache = new Map<string, CachedImage>();
 const MEMORY_CACHE_MAX = 200;
 
-// ── L2: Firestore cache ─────────────────────────────────────────────────────
-
 function cacheKey(url: string): string {
   return createHash('sha256').update(url).digest('hex').slice(0, 32);
-}
-
-async function getFirestoreImage(key: string): Promise<CachedImage | null> {
-  try {
-    const doc = await getFirestore().collection(IMAGE_COLLECTION).doc(key).get();
-    if (!doc.exists) return null;
-    const d = doc.data();
-    if (!d?.data || !d?.mime) return null;
-    return { data: d.data as string, mime: d.mime as string };
-  } catch {
-    return null;
-  }
-}
-
-async function setFirestoreImage(key: string, entry: CachedImage): Promise<void> {
-  try {
-    const expireAt = Timestamp.fromDate(new Date(Date.now() + TTL_DAYS * 24 * 60 * 60 * 1000));
-    await getFirestore()
-      .collection(IMAGE_COLLECTION)
-      .doc(key)
-      .set({ ...entry, expireAt });
-  } catch (error) {
-    logger.warn('fetch_image.firestore_write_error', {
-      key,
-      error: error instanceof Error ? error.message : String(error),
-    });
-  }
 }
 
 // ── URL validation (SSRF guard) ─────────────────────────────────────────────
@@ -256,18 +222,7 @@ async function resolveImage(
   const memHit = memoryCache.get(key);
   if (memHit) return { url: rawUrl, data: memHit.data, mime: memHit.mime };
 
-  // L2
-  const fsHit = await getFirestoreImage(key);
-  if (fsHit) {
-    if (memoryCache.size >= MEMORY_CACHE_MAX) {
-      const firstKey = memoryCache.keys().next().value;
-      if (firstKey) memoryCache.delete(firstKey);
-    }
-    memoryCache.set(key, fsHit);
-    return { url: rawUrl, data: fsHit.data, mime: fsHit.mime };
-  }
-
-  // L3
+  // L2 — origin fetch
   const fetched = await fetchWithTimeout(safety.url.toString());
   if (!fetched) {
     return { url: rawUrl, data: null, mime: null, reason: 'fetch_failed' };
@@ -278,7 +233,6 @@ async function resolveImage(
     if (firstKey) memoryCache.delete(firstKey);
   }
   memoryCache.set(key, fetched);
-  setFirestoreImage(key, fetched).catch(() => {});
 
   return { url: rawUrl, data: fetched.data, mime: fetched.mime };
 }

@@ -1,177 +1,141 @@
-# mcp-building-profile-nl
+# mcp-metadata-demo
 
-> **📚 Demonstration / reference implementation.** This repository exists to show what a *rich-domain* MCP server looks like — one that doesn't just proxy an API, but fuses two registers, validates both ends with Zod, and encodes domain knowledge (bouwjaar eras, Paris Proof thresholds, BENG compliance, Nader Voorschrift unit quirks) into a curated `alerts[]` array so the agent can reason without being primed. It's meant to be read, forked, and learned from. It is not a supported product.
+> 📄 **Read the paper**: [*TODO — paper title*](TODO-paper-url) — the metadata strategy this repo demonstrates.
 
-An [MCP](https://modelcontextprotocol.io) server that returns a rich building profile for any Dutch address by combining data from two open government registers:
+A working demo of the metadata strategy described in the paper. It applies that strategy in **two places at once**:
 
-- **BAG** (Basisregistratie Adressen en Gebouwen) via PDOK — `postcode + huisnummer` → bouwjaar, oppervlakte, gebruiksdoel, coordinates
-- **EP-Online** (RVO) — registered energielabels, EP-1/EP-2, warmtebehoefte, CO₂, BENG compliance
+- **Rich-domain MCP server** — `get_building_profile` shows how dense tool metadata (input/output schemas, curated `alerts[]`, interpretation guidance) lets an AI reason about a domain (Dutch building data via BAG + EP-Online) without external priming.
+- **MCP apps with self-describing config** — `render_chart`, `render_table`, `render_map` apply the *same* approach to UI configuration. The agent doesn't just call `render_chart` — it knows from the schema which chart type fits the data, which axes to bind, when to use a stacked variant, which cell formatters apply, what each badge color means.
 
-The server exposes one tool, `get_building_profile`. What makes it worth studying rather than just calling: strict Zod input/output schemas, a long and opinionated tool description, domain post-processing (alerts), and zero infrastructure dependencies beyond Node.
+When tool metadata is rich enough, the AI doesn't need a wrapper agent telling it *how* to use the tool — the tool tells the AI itself.
 
-Example session in Claude Code:
+## Two levels, one strategy
 
-> **You:** Is The Edge (Gustav Mahlerlaan 2970, 1081LA Amsterdam) actually as green as it claims?
->
-> **Claude:** *calls `get_building_profile`*
-> The Edge, Deloitte's 60.362 m² kantoorpand, was built in **2013** and carries a **Label A**. EP-Online lists an EnergieIndex of **0.54** — A-range runs roughly 1.2 and below, so 0.54 is at the very top of the range. CO₂ emissie is **21,26 kg/m²/jaar**, label geldig tot **2030-12-18**. No alerts fired: no Paris Proof breach, no Label C risk, no expired certificate. The sustainability claim holds up against the register data.
+**Level 1 — domain tool**: an agent calls `get_building_profile`, reads the `alerts[]` array, and formulates a follow-up question from the curated advisory text:
 
-## Install
+```
+> get_building_profile({ postcode: "1071XX", huisnummer: 1 })
+  ... → alerts: ["Pre-Bouwbesluit 1992 — likely limited insulation.",
+                  "EP-1 above Paris Proof 2040 target (70 kWh/m² for offices).",
+                  "Possibly Label-C relevant — verify whether office share >50% and area >100m²."]
 
-```bash
-git clone https://github.com/<you>/mcp-building-profile-nl.git
-cd mcp-building-profile-nl
+> "Given the Pre-1992 era and Label-C exposure, what would the next investigation step look like?"
+```
+
+The agent didn't need separate priming on Dutch energy regulation — the tool's metadata supplied it.
+
+**Level 2 — self-describing app config**: the same agent then picks an appropriate visualisation for the data it has. The chart-type metadata tells it sankey is for flows, treemap is for hierarchical area shares, bar is for category comparison. No wrapper logic needed.
+
+```
+> Agent looks at three buildings' EP-1 data and chooses render_chart({ type: 'bar', ... })
+  because the schema's REFUSE rules say sankey requires flows (this data has none).
+```
+
+## What's inside
+
+- `get_building_profile` — rich-domain tool combining BAG (Kadaster) + EP-Online (RVO)
+- `render_chart` — 14 chart types via Chart.js with annotations
+- `render_table` — TanStack Table with badge/icon/cell formatters
+- `render_map` — Leaflet maps with markers (car, building, project, pin)
+- `fetch_image` — server-side image proxy with SSRF protection (used by `render_table` when the iframe CSP blocks `img-src`)
+
+## Quick start (local stdio)
+
+```sh
+git clone https://github.com/DaveGold/mcp-metadata-demo
+cd mcp-metadata-demo
 npm install
-cp .env.example .env
-# edit .env, paste your EP-Online key
+cp .env.example .env  # then add your EP_ONLINE_API_KEY
 npm run build
+npm run inspect       # opens MCP Inspector to test interactively
 ```
 
-You need Node.js **22 or newer** (for native `fetch` + `AbortSignal.timeout`).
-
-### Getting an EP-Online API key
-
-EP-Online is the RVO's public energy-label register. Register for a free API key at **<https://public.ep-online.nl>** — no approval needed. Drop the key into `.env` as `EP_ONLINE_API_KEY`.
-
-Without a key the server will fail to start. BAG data alone cannot be returned in this server — BAG + EP-Online are presented as a single composite tool on purpose, so agents always see the full picture.
-
-## Run
-
-### Option 1 — MCP Inspector (quickest smoke test)
-
-```bash
-npm run inspect
-```
-
-This launches the Inspector UI, auto-connects over stdio, and lets you invoke `get_building_profile` with a form.
-
-### Option 2 — Claude Code
-
-A [`.mcp.json`](.mcp.json) is committed at the repo root — you don't need to write one:
+Add to your `.mcp.json` (Claude Code) or Claude Desktop config:
 
 ```json
 {
   "mcpServers": {
-    "building-profile-nl": {
+    "metadata-demo": {
       "command": "node",
-      "args": ["--env-file=.env", "dist/index.js"]
+      "args": ["--env-file=.env", "/absolute/path/to/dist/stdio.js"]
     }
   }
 }
 ```
 
-It uses Node 22's native `--env-file=.env` flag to load `EP_ONLINE_API_KEY` from your local (gitignored) `.env` — no secrets in the committed config, no absolute paths, no wrapper script.
+## Try the hosted demo
 
-From a fresh clone:
-
-```bash
-npm install
-cp .env.example .env    # then paste your EP-Online key into .env
-npm run build
-```
-
-Then open the project in Claude Code, run `/mcp` and approve `building-profile-nl`. The `get_building_profile` tool appears in the tool list.
-
-### Option 3 — Streamable HTTP (advanced, local-only)
-
-```bash
-npm run http
-# → POST http://127.0.0.1:3000/mcp
-```
-
-⚠️ **No authentication.** Keep this bound to `127.0.0.1`. If you need a remote-reachable server, put an auth proxy in front — don't expose this port directly.
-
-## Try it out
-
-Once `/mcp` shows `building-profile-nl` as connected, paste any of these into Claude Code. They're chosen to exercise different branches of the tool's logic — era alerts, Paris Proof thresholds, BENG compliance, multi-VBO disambiguation:
-
-### A 140-year-old monument with no EP-Online label
-
-> **You:** Wat voor gebouw is het Rijksmuseum (Museumstraat 1, 1071XX Amsterdam)? Wat zou je moeten uitzoeken voor een energierenovatie?
-
-Rijksmuseum's BAG pand is from **1885**, 38.149 m², `bijeenkomstfunctie`, no energielabel in EP-Online. The server will emit the alert *"Pre-Bouwbesluit 1992 — waarschijnlijk beperkte isolatiewaarde"*, which is exactly the era-awareness signal a renovation advisor needs before sizing anything.
-
-### A modern office that misses Paris Proof
-
-> **You:** Is WTC Amsterdam (Gustav Mahlerlaan 10, 1082PP Amsterdam) klaar voor de Paris Proof doelstelling 2040?
-
-1999 kantoor, label **A**, EP-1 van **81,68 kWh/m²**. Sounds fine — until the server flags *"EP-1 boven Paris Proof 2040 richtwaarde (70 kWh/m² voor kantoor)"*. A plain label-A check would have missed it. The `alerts[]` array is how the tool teaches the agent to reason.
-
-### A real portfolio comparison (the money prompt)
-
-> **You:** Ik maak een pitchdeck over de energie-retrofit-opgave in Nederlands commercieel vastgoed. Haal voor mij het gebouwprofiel op van drie iconische Amsterdamse panden:
+> 🌐 **Hosted demo — generously open**
 >
-> 1. Het Rijksmuseum — Museumstraat 1, 1071XX
-> 2. WTC Amsterdam — Gustav Mahlerlaan 10, 1082PP
-> 3. Deloitte's "The Edge" — Gustav Mahlerlaan 2970, 1081LA
->
-> Zet per gebouw bouwjaar, energielabel, EnergieIndex, berekeningstype en de belangrijkste alerts in een tabel. Rangschik ze daarna op urgentie voor energetische ingreep en licht de volgorde toe met verwijzing naar Paris Proof 2040 en Label C-plicht.
+> This endpoint is funded as a personal investment in the paper's reach. Provisioned for ~75k requests/day shared across all users; per-IP rate limit of 30 calls/min. Best-effort uptime, no SLA. For sustained heavy use, deploy your own copy.
 
-This is the use case the tool was designed for: three concurrent lookups, cross-building synthesis, and the agent using the domain `alerts[]` — not its own training — to defend its ranking.
+Add this to your `.mcp.json` (Claude Code):
 
-## Tool reference
-
-### `get_building_profile`
-
-| Input          | Type                | Required | Example    |
-| -------------- | ------------------- | -------- | ---------- |
-| `postcode`     | `string` (`4 digits + 2 upper`) | ✅ | `1081LA` |
-| `huisnummer`   | `integer > 0`       | ✅       | `2970`     |
-| `huisletter`   | `string`            | optional | `A`        |
-| `toevoeging`   | `string`            | optional | `bis`      |
-
-Output is a ~40-field object covering:
-
-- **Match metadata** — `matchStatus` (`exact` / `multiple_vbos` / `not_found`), candidate count
-- **BAG** — `bouwjaar`, `oppervlakte_m2`, `gebruiksdoel`, `coordinaten`, `vbo_status`, `pand_status`, `aantal_verblijfsobjecten`
-- **EP-Online** — `energielabel`, `ep1_energiebehoefte_kwh_m2`, `ep2_fossiel_kwh_m2`, `warmtebehoefte_kwh_m2`, `co2_emissie_kg_m2`, `energie_index`, BENG eisen, EMG forfaitair, `gebouwtype`, `certificaathouder`, ...
-- **`alerts[]`** — curated advisory strings (bouwjaar era, Paris Proof breach, BENG pass/fail summary, label expiry, warmtepomp-indicatie, estimated gas consumption for residential)
-
-See [`src/tools/get-building-profile.ts`](src/tools/get-building-profile.ts) for the full Zod output schema with per-field `.describe()` docs.
-
-## Tests
-
-```bash
-npm test          # vitest — fast, no network
-npm run test:live # live smoke against PDOK + EP-Online (needs API key)
+```json
+{
+  "mcpServers": {
+    "metadata-demo": {
+      "url": "https://TODO-hosted-url.run.app/mcp"
+    }
+  }
+}
 ```
-
-The test suite covers the alert rules, label-selection tiebreaking, client fetch behavior (mocked), and an end-to-end tool call over in-memory MCP transports.
 
 ## Architecture
 
-```
-src/
-├── index.ts                     # stdio entrypoint (default)
-├── http.ts                      # optional streamable-HTTP entrypoint
-├── server.ts                    # createServer() — single factory used by both transports
-├── clients/
-│   ├── bag-client.ts            # PDOK Locatieserver + BAG OGC v2 (no auth), Zod-validated
-│   └── ep-online-client.ts      # EP-Online V5 (API key), Zod-validated
-├── tools/
-│   └── get-building-profile.ts  # Zod schemas + handler
-├── domain/
-│   ├── build-profile.ts         # pure mapping: upstream records → BuildingProfile
-│   ├── select-best-label.ts     # pick best of N EP-Online labels
-│   └── generate-alerts.ts       # post-processing (era, Paris Proof, BENG, heat pump)
-└── logger.ts                    # stderr-only structured logger
-```
+Single MCP server factory in [src/server.ts](src/server.ts), exposed through three transports:
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the reasoning behind each layer, and [docs/EXTENDING.md](docs/EXTENDING.md) for a walkthrough of adding a second tool.
+- **stdio** ([src/stdio.ts](src/stdio.ts)) — default for Claude Desktop / Code / Inspector
+- **Local HTTP** ([src/http.ts](src/http.ts)) — bind to 127.0.0.1 for browser-based testing
+- **Cloud Function** ([src/functions.ts](src/functions.ts)) — the hosted endpoint above
 
-## Why this is a reference implementation
+All three call the same `createServer()` factory; tool registration lives in exactly one place. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the layered design (clients → domain → tools → server).
 
-1. **Rich tool description.** The `description` passed to `registerTool` is ~50 lines of structured guidance: `RETURNS`, `WHEN TO USE`, `WHEN NOT TO USE`, `QUERY STRATEGY`, `INTERPRETATION`, `ALERTS`. Agents use this to reason well without any prompt engineering on the caller side.
-2. **Zod on both ends.** Input validation stops bad calls at the boundary. Upstream responses from PDOK and EP-Online are parsed with Zod at the client layer — if the wire format drifts, the server fails loudly with field-level errors instead of shipping malformed data to the agent. The tool output type is `z.infer<typeof outputSchema>`, so there's exactly one definition of the profile shape across the codebase.
-3. **Domain post-processing belongs in the server.** The `alerts[]` array encodes knowledge that the agent would otherwise need to be primed with: Dutch building-regulation eras, Paris Proof thresholds, Nader Voorschrift unit quirks. Keep that logic with the data.
-4. **Single factory, multiple transports.** Both `index.ts` (stdio) and `http.ts` call the same `createServer()`. Tool registration lives in exactly one place.
-5. **Stdio logs go to stderr.** Stdio MCP frames use stdout — any stray `console.log` corrupts the protocol. See [src/logger.ts](src/logger.ts).
-6. **Hand-rolled test stubs.** No mocking library — tests implement small `BagClientLike` / `EpOnlineClientLike` `Pick<>` types with plain object literals, which reads more clearly than `vi.mock()`.
+### How an MCP app gets to the client
 
-## Data sources & disclaimer
+A factual explainer of how a chart, table, or map actually appears in the chat.
 
-Data is served directly from the Dutch public registers (Kadaster/PDOK and RVO/EP-Online). This project is **not affiliated with** Kadaster, RVO, or the Dutch government. Data accuracy, completeness, and availability are subject to upstream terms.
+**The protocol**: MCP Apps delivers UI as a `ui://` resource. The host client (Claude Desktop, claude.ai) receives a complete HTML string and renders it in an iframe. The resource exposes `_meta.ui` for declarations like the CSP allow-list (`resourceDomains`), which is how `render_map` reaches `tile.openstreetmap.org` even though the host CSP blocks external resources by default.
+
+**The constraint that drives the stack**: one HTML string means all JS and CSS must be inlined. No `<script src>` to a CDN, no separate stylesheets, no runtime chunk loading.
+
+**The stack**:
+
+- **Vite** bundler with **`vite-plugin-singlefile`** inlines every asset into one `index.html`. Output: one file per app — `build/ui/chart.html`, `build/ui/table.html`, `build/ui/map.html`. The server reads that file at startup and registers it with `registerAppResource(...)`.
+- **Angular** (via `@analogjs/vite-plugin-angular`) so the framework slots into the same Vite pipeline. The choice of Angular is incidental, not required — React, Svelte, or vanilla TS would work the same way; Angular fits because the table renderer (cell formatters with badges, icons, sparklines) benefits from a strongly-typed component model.
+- **Per-app entries** — `ui/apps/{chart,table,map}/index.html` are discovered by `scripts/build-ui.js` and built independently. One broken app doesn't block the others; each gets only the libraries it needs (Chart.js for chart, Leaflet for map, TanStack Table for table) instead of every library in every bundle.
+
+**The data bridge**: the tool handler returns `structuredContent` (the chart config, table rows, map markers) alongside `_meta.ui.resourceUri` pointing at the HTML. The MCP Apps SDK exposes that `structuredContent` to the iframe as `window.mcpAppData`. The Angular component reads it at bootstrap and renders. No follow-up fetch from iframe to server, no runtime API — one tool response is everything.
+
+The result: the same metadata principle that powers `get_building_profile`'s output schema also powers `render_chart`'s input schema. Both are AI-generated from the schema; in one the output is domain data, in the other it's UI configuration. The Angular-plus-Vite-single-file part is just how that UI configuration becomes pixels.
+
+## Language policy
+
+Code, docs, and agent-facing tool descriptions are English. Field names mirror their Dutch upstream APIs (BAG, EP-Online) — `huisnummer`, `bouwjaar`, `oppervlakte_m2`, `gebruiksdoel`, `energielabel`. Regulatory references (Bouwbesluit, NTA 8800, BENG, Paris Proof) keep their Dutch names; they have no English equivalents.
+
+## Deploy your own copy
+
+The hosted endpoint runs as a Firebase Cloud Function. To deploy your own:
+
+1. Create a Firebase project + upgrade to Blaze (pay-as-you-go) — Cloud Functions v2 + Secret Manager require it
+2. `firebase login` and update [.firebaserc](.firebaserc) with your project ID
+3. `npm run deploy:setup-secret` — paste your EP-Online API key (get one at https://www.ep-online.nl)
+4. `npm run deploy`
+
+Cost: well under €25/month for typical demo usage. See [docs/RUNBOOK.md](docs/RUNBOOK.md) for the full cost posture, protection layers, and emergency kill-switch.
+
+## Logging
+
+The hosted endpoint logs request metadata (IP, User-Agent, tool name, duration) to Cloud Logging for usage analytics and abuse prevention. Retention is 30 days (Cloud Logging default). Legal basis: legitimate interest. Contact via the GitHub issues tracker if you'd like your data scrubbed.
+
+## Extending
+
+See [docs/EXTENDING.md](docs/EXTENDING.md) for the walkthrough of adding a new tool.
+
+## Author
+
+Built by [David Golverdingen](https://davidgolverdingen.nl/en) as a companion to the metadata-strategy paper.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT
