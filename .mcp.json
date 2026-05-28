@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "building-profile-nl": {
+    "metadata-demo": {
       "command": "node",
       "args": ["--env-file=.env", "dist/index.js"]
     }

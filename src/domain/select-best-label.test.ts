@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { selectBestLabel } from '../src/domain/select-best-label.js';
-import type { PandEnergielabelV5 } from '../src/clients/ep-online-client.js';
+import { selectBestLabel } from './select-best-label.js';
+import type { PandEnergielabelV5 } from '../clients/ep-online-client.js';
 
 // All label fields are nullable+optional, so a partial override is a complete label.
 function label(overrides: Partial<PandEnergielabelV5>): PandEnergielabelV5 {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { generateAlerts } from '../src/domain/generate-alerts.js';
-import type { ProfileCore } from '../src/domain/generate-alerts.js';
+import { generateAlerts } from './generate-alerts.js';
+import type { ProfileCore } from './generate-alerts.js';
 
 // Minimal baseline — every alert rule reads from this shape, so tests set the
 // relevant fields and rely on null for everything else.
@@ -75,9 +75,9 @@ describe('generateAlerts', () => {
       })
     );
     // Per-m² interpretation would multiply by 79 → ~331k. Total interpretation keeps ~4200.
-    const co2Alert = alerts.find((a) => a.includes('CO₂-uitstoot'));
+    const co2Alert = alerts.find((a) => a.includes('CO₂ emissions'));
     expect(co2Alert).toBeDefined();
-    expect(co2Alert).toMatch(/~4200 kg\/jaar/);
+    expect(co2Alert).toMatch(/~4200 kg\/year/);
   });
 
   it('fires Paris Proof office threshold only for offices', () => {
@@ -87,7 +87,7 @@ describe('generateAlerts', () => {
         gebruiksdoel: 'kantoorfunctie',
       })
     );
-    expect(officeAlerts.some((a) => a.includes('Paris Proof 2040 richtwaarde (70'))).toBe(true);
+    expect(officeAlerts.some((a) => a.includes('Paris Proof 2040 target (70'))).toBe(true);
 
     const industrialAlerts = generateAlerts(
       baseProfile({
@@ -107,9 +107,9 @@ describe('generateAlerts', () => {
         aandeel_hernieuwbaar_pct: 50, // passes
       })
     );
-    const beng = alerts.find((a) => a.startsWith('BENG-toetsing:'));
+    const beng = alerts.find((a) => a.startsWith('BENG compliance:'));
     expect(beng).toBeDefined();
-    expect(beng).toMatch(/BENG-1[\s\S]*OVERSCHRIJDING/);
+    expect(beng).toMatch(/BENG-1[\s\S]*EXCEEDED/);
     expect(beng).toMatch(/BENG-3[\s\S]*✓/);
   });
 
@@ -123,8 +123,8 @@ describe('generateAlerts', () => {
         label_geldig_tot: yesterday,
       })
     );
-    expect(alerts.some((a) => a.includes('Meerdere verblijfsobjecten (4)'))).toBe(true);
-    expect(alerts.some((a) => a.includes('Energielabel is verlopen'))).toBe(true);
+    expect(alerts.some((a) => a.includes('Multiple verblijfsobjecten (4)'))).toBe(true);
+    expect(alerts.some((a) => a.includes('Energy label has expired'))).toBe(true);
   });
 
   it('does not emit the "no EP label" alert on not_found (EP was never queried)', () => {
@@ -135,7 +135,7 @@ describe('generateAlerts', () => {
         energielabel: null,
       })
     );
-    expect(alerts.some((a) => a.includes('Geen geregistreerd energielabel'))).toBe(false);
+    expect(alerts.some((a) => a.includes('No registered energy label'))).toBe(false);
   });
 
   it('emits the "no EP label" alert when BAG matched but EP-Online returned nothing', () => {
@@ -148,7 +148,7 @@ describe('generateAlerts', () => {
         bouwjaar: 2010,
       })
     );
-    expect(alerts.some((a) => a.includes('Geen geregistreerd energielabel'))).toBe(true);
+    expect(alerts.some((a) => a.includes('No registered energy label'))).toBe(true);
   });
 
   it('does not flag a date-only Geldig_tot as expired on its own valid-through day', () => {
@@ -160,6 +160,6 @@ describe('generateAlerts', () => {
     const alerts = generateAlerts(
       baseProfile({ energielabel: 'C', label_geldig_tot: farFutureDateOnly })
     );
-    expect(alerts.some((a) => a.includes('Energielabel is verlopen'))).toBe(false);
+    expect(alerts.some((a) => a.includes('Energy label has expired'))).toBe(false);
   });
 });

@@ -14,7 +14,7 @@ import {
   type EpOnlineClientLike,
 } from './tools/get-building-profile.js';
 
-const VERSION = '0.1.0';
+const VERSION = '1.0.0';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -27,26 +27,44 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
   const epOnlineClient = options.epOnlineClient ?? new EpOnlineClient();
 
   const server = new McpServer(
-    { name: 'building-profile-nl', version: VERSION },
+    { name: 'metadata-demo', version: VERSION },
     {
       instructions:
-        'You are connected to the building-profile-nl MCP server.\n\n' +
-        'This server exposes Dutch building data from two open government registers:\n' +
+        'You are connected to the metadata-demo MCP server — a demonstration of a ' +
+        'rich-metadata strategy for AI tooling, applied at two levels at once:\n\n' +
+        '1. RICH-DOMAIN TOOL — `get_building_profile` shows how dense tool metadata ' +
+        '(input/output schemas, curated alerts, interpretation guidance) lets you reason ' +
+        'about a domain (Dutch building data: BAG + EP-Online) without external priming.\n' +
+        '2. SELF-DESCRIBING MCP APPS — `render_chart`, `render_table`, `render_map` apply ' +
+        'the same approach to UI configuration. The schemas tell you which chart type fits ' +
+        'which data shape, how cell formatters work, when to choose a stacked variant.\n\n' +
+        'BUILDING-PROFILE TOOL:\n' +
+        'This tool exposes Dutch building data from two open government registers:\n' +
         '- BAG (Basisregistratie Adressen en Gebouwen) via PDOK — postcode/huisnummer → ' +
         'bouwjaar, oppervlakte, gebruiksdoel, coordinates.\n' +
         '- EP-Online (RVO) — registered energielabels, EP-1/EP-2, warmtebehoefte, CO₂ emissie.\n\n' +
         'USAGE:\n' +
-        '- Call get_building_profile with a Dutch postcode (e.g. "3543AR") and a huisnummer ' +
+        '- Call `get_building_profile` with a Dutch postcode (e.g. "3543AR") and a huisnummer ' +
         '(integer only). Optionally include huisletter and/or toevoeging to disambiguate ' +
         'multi-unit buildings.\n' +
         '- Always read the `alerts` array — it contains bouwjaar-era warnings, Paris Proof ' +
         'threshold breaches, BENG compliance summaries, and (for residential) estimated gas ' +
         'consumption + warmtepomp-geschiktheidsindicatie.\n\n' +
+        'RENDER TOOLS (MCP APPS):\n' +
+        '- `render_chart` — render data as a chart (bar/line/pie/sankey/etc.). Read the ' +
+        'schema descriptions to choose the right chart type for your data shape.\n' +
+        '- `render_table` — render data as an interactive table with cell formatters ' +
+        '(currency, dates, badges, icons).\n' +
+        '- `render_map` — render geographic data on an interactive map with markers.\n' +
+        '- `fetch_image` — server-side image proxy with SSRF protection (used by render_table ' +
+        'for image cells when the host iframe CSP blocks external img-src).\n\n' +
         'LIMITATIONS:\n' +
         '- This server returns a snapshot of public-register data only. It does not provide ' +
         'metered energy consumption, weather data, or building automation data.\n' +
         '- EP-Online coverage is incomplete for older residential buildings — `energielabel: null` ' +
-        'does not mean the building has no label, just that none is registered in EP-Online.',
+        'does not mean the building has no label, just that none is registered in EP-Online.\n\n' +
+        'This server demonstrates the metadata strategy from <paper-url>. The tool descriptions ' +
+        'below are the strategy in practice.',
     }
   );
 

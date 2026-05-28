@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { BagClient } from '../src/clients/bag-client.js';
-import { EpOnlineClient } from '../src/clients/ep-online-client.js';
+import { BagClient } from './bag-client.js';
+import { EpOnlineClient } from './ep-online-client.js';
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {

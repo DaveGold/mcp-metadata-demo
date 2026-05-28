@@ -1,10 +1,10 @@
 {
-  "name": "mcp-building-profile-nl",
-  "version": "0.1.0",
-  "description": "MCP server exposing a rich Dutch building profile tool (BAG Kadaster + EP-Online RVO energielabels). A reference implementation of a well-designed MCP server.",
+  "name": "mcp-metadata-demo",
+  "version": "1.0.0",
+  "description": "Demo MCP server + MCP apps showing a rich-metadata strategy for AI tooling. Companion to the paper '<title>'. Uses Dutch open building data (BAG + EP-Online) as the domain.",
   "type": "module",
   "bin": {
-    "mcp-building-profile-nl": "./dist/index.js"
+    "mcp-metadata-demo": "./dist/index.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,42 +18,68 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "npm run build:ui && tsc",
+    "build:ui": "node scripts/build-ui.js",
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "inspect": "npm run build && npx @modelcontextprotocol/inspector node --env-file=.env dist/index.js",
     "http": "node dist/http.js",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "test:live": "tsx scripts/smoke.ts 3543AR 1",
     "typecheck": "tsc --noEmit",
+    "deploy": "npm run build && firebase deploy --only functions:mcp",
+    "deploy:setup-secret": "firebase functions:secrets:set EP_ONLINE_API_KEY",
+    "logs": "firebase functions:log --only mcp",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
     "mcp",
     "model-context-protocol",
+    "mcp-apps",
+    "metadata-strategy",
+    "rich-domain-tools",
+    "self-describing-tools",
+    "ai-tooling",
+    "claude",
     "bag",
     "kadaster",
     "ep-online",
     "energielabel",
     "nederland",
     "dutch",
-    "buildings",
-    "claude"
+    "buildings"
   ],
-  "author": "David Golverdingen",
+  "author": {
+    "name": "David Golverdingen",
+    "email": "5216270+DaveGold@users.noreply.github.com",
+    "url": "https://www.linkedin.com/in/<TODO-linkedin-slug>"
+  },
+  "homepage": "https://davidgolverdingen.nl/en",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DaveGold/mcp-metadata-demo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DaveGold/mcp-metadata-demo/issues"
+  },
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
+    "@modelcontextprotocol/ext-apps": "^1.7.0",
     "express": "^5.2.1",
+    "express-rate-limit": "^7.4.1",
+    "firebase-functions": "^7.2.5",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "^0.14.0",
     "@types/express": "^5.0.6",
     "@types/node": "^22.19.11",
+    "@vitest/coverage-v8": "^4.1.6",
     "tsx": "^4.20.4",
     "typescript": "^5.9.3",
-    "vitest": "^2.1.8"
+    "vitest": "^4.1.6"
   }
 }

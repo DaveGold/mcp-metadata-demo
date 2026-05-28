@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { createServer } from '../src/server.js';
+import { createServer } from '../server.js';
 import {
   outputSchema,
   type BagClientLike,
   type EpOnlineClientLike,
-} from '../src/tools/get-building-profile.js';
-import type { BagAddress, BagVerblijfsobject, BagPand } from '../src/clients/bag-client.js';
-import type { PandEnergielabelV5 } from '../src/clients/ep-online-client.js';
+} from './get-building-profile.js';
+import type { BagAddress, BagVerblijfsobject, BagPand } from '../clients/bag-client.js';
+import type { PandEnergielabelV5 } from '../clients/ep-online-client.js';
 
 // Hand-rolled stubs against the *Like types — no `as unknown as` casts.
 function stubBag(result: {

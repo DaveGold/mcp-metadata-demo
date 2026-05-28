@@ -6,7 +6,7 @@
  * all expect when launching a local MCP server. The protocol is framed over
  * stdin/stdout; stderr is free for diagnostics.
  *
- * Start: `node dist/index.js` (or `mcp-building-profile-nl` after `npm install`).
+ * Start: `node dist/index.js` (or `mcp-metadata-demo` after `npm install`).
  */
 
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';

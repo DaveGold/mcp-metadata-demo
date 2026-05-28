@@ -23,9 +23,9 @@ RETURNS:
 Building profile combining BAG data (bouwjaar, oppervlakte, gebruiksdoel, status, coordinates) and EP-Online energy label data (energieklasse, energie_index or EP-1/EP-2, CO₂ emissie, warmtebehoefte, BENG eisen, SBI sector description, gebouwtype, EMG forfaitair). All data from a single postcode + huisnummer lookup.
 
 WHEN TO USE:
-- "Wat voor gebouw staat op [adres]?"
-- "Heeft dit gebouw een energielabel?"
-- "Check het bouwjaar en oppervlakte van [adres]"
+- "What kind of building is at [address]?"
+- "Does this building have an energy label?"
+- "Check the construction year and floor area of [address]"
 - Before starting an energy analysis — get building context first (bouwjaar, label, oppervlakte)
 
 WHEN NOT TO USE:
@@ -221,7 +221,7 @@ export function registerGetBuildingProfileTool(
   server.registerTool(
     'get_building_profile',
     {
-      title: 'Gebouwprofiel (BAG + Energielabel)',
+      title: 'Building Profile (BAG + Energy Label)',
       description,
       inputSchema: z.object(inputSchema),
       outputSchema,

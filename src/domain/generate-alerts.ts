@@ -2,10 +2,10 @@
  * Domain post-processing: turn a BuildingProfile into human-readable alerts.
  *
  * This is where generic upstream data becomes actionable advice:
- *   - "Pre-Bouwbesluit 1992 — waarschijnlijk beperkte isolatiewaarde"
- *   - "EP-1 boven Paris Proof 2040 richtwaarde (70 kWh/m² voor kantoor)"
+ *   - "Pre-Bouwbesluit 1992 — likely limited insulation"
+ *   - "EP-1 above Paris Proof 2040 target (70 kWh/m² for offices)"
  *   - BENG compliance pass/fail summary
- *   - Warmtepomp-geschiktheidsindicatie (residential only)
+ *   - Heat-pump suitability indicator (residential only)
  *
  * Why this lives in the tool (not the agent): these rules depend on
  * non-obvious knowledge of Dutch building regulation eras, unit quirks in
@@ -24,14 +24,14 @@ export function generateAlerts(profile: ProfileCore): string[] {
 
   if (profile.matchStatus === 'multiple_vbos') {
     alerts.push(
-      `Meerdere verblijfsobjecten (${profile.candidateCount}) op dit adres — getoond profiel is eerste match. Specificeer huisletter/toevoeging voor exacte match.`
+      `Multiple verblijfsobjecten (${profile.candidateCount}) at this address — profile shown is the first match. Specify huisletter/toevoeging for an exact match.`
     );
   }
 
   // Large multi-unit building: oppervlakte_m2 is just one VBO, not the total building
   if (profile.aantal_verblijfsobjecten !== null && profile.aantal_verblijfsobjecten > 10) {
     alerts.push(
-      `Groot pand met ${profile.aantal_verblijfsobjecten} verblijfsobjecten — oppervlakte_m2 (${profile.oppervlakte_m2} m²) is slechts één VBO, niet het totale gebouw. Gebruik bouwjaar en energielabel voor kwaliteitsanalyse; gebruik NIET oppervlakte_m2 als benchmark-noemer.`
+      `Large pand with ${profile.aantal_verblijfsobjecten} verblijfsobjecten — oppervlakte_m2 (${profile.oppervlakte_m2} m²) is only one VBO, not the total building. Use bouwjaar and energielabel for quality analysis; do NOT use oppervlakte_m2 as a benchmark denominator.`
     );
   }
 
@@ -43,11 +43,11 @@ export function generateAlerts(profile: ProfileCore): string[] {
 
     if (!goodLabel) {
       if (profile.bouwjaar < 1992) {
-        alerts.push('Pre-Bouwbesluit 1992 — waarschijnlijk beperkte isolatiewaarde.');
+        alerts.push('Pre-Bouwbesluit 1992 — likely limited insulation.');
       } else if (profile.bouwjaar < 2003) {
-        alerts.push('Pre-EPC — isolatie waarschijnlijk onder huidige norm.');
+        alerts.push('Pre-EPC — insulation likely below current norm.');
       } else if (profile.bouwjaar < 2015) {
-        alerts.push('Pre-BENG — matige energieprestatie verwacht.');
+        alerts.push('Pre-BENG — moderate energy performance expected.');
       }
     }
   }
@@ -58,21 +58,21 @@ export function generateAlerts(profile: ProfileCore): string[] {
       ['D', 'E', 'F', 'G'].includes(letter) &&
       profile.gebruiksdoel?.toLowerCase().includes('kantoor')
     ) {
-      alerts.push('Mogelijk Label C-relevant — verifieer of kantooraandeel >50% en oppervlakte >100m².');
+      alerts.push('Possibly Label-C relevant — verify whether office share >50% and area >100m².');
     }
   }
 
   if (profile.ep1_energiebehoefte_kwh_m2 !== null) {
     if (profile.ep1_energiebehoefte_kwh_m2 > 150) {
-      alerts.push('EP-1 sterk boven benchmark (>150 kWh/m²) — groot besparingspotentieel.');
+      alerts.push('EP-1 well above benchmark (>150 kWh/m²) — large savings potential.');
     } else {
       const isResidential = profile.gebouwklasse === 'Woningbouw';
       const isOffice = profile.gebruiksdoel?.toLowerCase().includes('kantoorfunctie') ?? false;
 
       if (isResidential && profile.ep1_energiebehoefte_kwh_m2 > 100) {
-        alerts.push('EP-1 boven Paris Proof 2040 richtwaarde (100 kWh/m² voor woningbouw).');
+        alerts.push('EP-1 above Paris Proof 2040 target (100 kWh/m² for residential).');
       } else if (isOffice && profile.ep1_energiebehoefte_kwh_m2 > 70) {
-        alerts.push('EP-1 boven Paris Proof 2040 richtwaarde (70 kWh/m² voor kantoor).');
+        alerts.push('EP-1 above Paris Proof 2040 target (70 kWh/m² for offices).');
       }
     }
   }
@@ -83,7 +83,7 @@ export function generateAlerts(profile: ProfileCore): string[] {
     // pads null), which would wrongly mark a still-valid label expired.
     const expiry = new Date(profile.label_geldig_tot).getTime();
     if (Number.isFinite(expiry) && expiry < Date.now()) {
-      alerts.push('Energielabel is verlopen — heropname kan nodig zijn.');
+      alerts.push('Energy label has expired — re-inspection may be required.');
     }
   }
 
@@ -91,12 +91,12 @@ export function generateAlerts(profile: ProfileCore): string[] {
   // branch we short-circuit after BAG, so a missing label is "never looked up",
   // not "looked up and not there" — conflating the two would mislead the agent.
   if (!profile.energielabel && profile.matchStatus !== 'not_found') {
-    alerts.push('Geen geregistreerd energielabel gevonden in EP-Online.');
+    alerts.push('No registered energy label found in EP-Online.');
   }
 
   if (profile.vbo_status && !profile.vbo_status.toLowerCase().includes('in gebruik')) {
     alerts.push(
-      `VBO status: "${profile.vbo_status}" — gebouw mogelijk niet in gebruik. Controleer of analyse relevant is.`
+      `VBO status: "${profile.vbo_status}" — building may not be in use. Check whether the analysis is relevant.`
     );
   }
 
@@ -107,12 +107,12 @@ export function generateAlerts(profile: ProfileCore): string[] {
     profile.eis_aandeel_hernieuwbare_energie_pct !== null;
 
   if (hasBengEisen) {
-    const lines: string[] = ['BENG-toetsing:'];
+    const lines: string[] = ['BENG compliance:'];
 
     if (profile.eis_energiebehoefte_kwh_m2 !== null && profile.ep1_energiebehoefte_kwh_m2 !== null) {
       const pass = profile.ep1_energiebehoefte_kwh_m2 <= profile.eis_energiebehoefte_kwh_m2;
       lines.push(
-        `  BENG-1 Energiebehoefte: ${profile.ep1_energiebehoefte_kwh_m2} kWh/m² (max ${profile.eis_energiebehoefte_kwh_m2}) ${pass ? '✓' : '✗ OVERSCHRIJDING'}`
+        `  BENG-1 Energy demand: ${profile.ep1_energiebehoefte_kwh_m2} kWh/m² (max ${profile.eis_energiebehoefte_kwh_m2}) ${pass ? '✓' : '✗ EXCEEDED'}`
       );
     }
 
@@ -122,7 +122,7 @@ export function generateAlerts(profile: ProfileCore): string[] {
     ) {
       const pass = profile.ep2_fossiel_kwh_m2 <= profile.eis_primaire_fossiele_energie_kwh_m2;
       lines.push(
-        `  BENG-2 Fossiel energiegebruik: ${profile.ep2_fossiel_kwh_m2} kWh/m² (max ${profile.eis_primaire_fossiele_energie_kwh_m2}) ${pass ? '✓' : '✗ OVERSCHRIJDING'}`
+        `  BENG-2 Fossil energy use: ${profile.ep2_fossiel_kwh_m2} kWh/m² (max ${profile.eis_primaire_fossiele_energie_kwh_m2}) ${pass ? '✓' : '✗ EXCEEDED'}`
       );
     }
 
@@ -133,7 +133,7 @@ export function generateAlerts(profile: ProfileCore): string[] {
       const pass =
         profile.aandeel_hernieuwbaar_pct >= profile.eis_aandeel_hernieuwbare_energie_pct;
       lines.push(
-        `  BENG-3 Hernieuwbare energie: ${profile.aandeel_hernieuwbaar_pct}% (min ${profile.eis_aandeel_hernieuwbare_energie_pct}%) ${pass ? '✓' : '✗ NIET GEHAALD'}`
+        `  BENG-3 Renewable energy share: ${profile.aandeel_hernieuwbaar_pct}% (min ${profile.eis_aandeel_hernieuwbare_energie_pct}%) ${pass ? '✓' : '✗ NOT MET'}`
       );
     }
 
@@ -147,7 +147,7 @@ export function generateAlerts(profile: ProfileCore): string[] {
     profile.bouwjaar !== profile.ep_online_bouwjaar
   ) {
     alerts.push(
-      `Bouwjaar discrepantie: BAG ${profile.bouwjaar} vs EP-Online ${profile.ep_online_bouwjaar} — mogelijk renovatie of registratiefout.`
+      `Bouwjaar discrepancy: BAG ${profile.bouwjaar} vs EP-Online ${profile.ep_online_bouwjaar} — possible renovation or registration error.`
     );
   }
 
@@ -156,18 +156,18 @@ export function generateAlerts(profile: ProfileCore): string[] {
     const delta = profile.ep2_fossiel_kwh_m2 - profile.ep2_fossiel_emg_forfaitair_kwh_m2;
     if (delta > 5) {
       alerts.push(
-        `Gebiedsgebonden maatregel (stadsverwarming/WKO/collectief PV) verlaagt EP-2 met ${Math.round(delta)} kWh/m².`
+        `Area-bound measure (district heating / WKO / collective PV) lowers EP-2 by ${Math.round(delta)} kWh/m².`
       );
     }
   }
 
-  // Woning-specific consumer insights (only for residential buildings)
+  // Residential-specific consumer insights (only for woning use)
   const isWoning = profile.gebruiksdoel?.toLowerCase().includes('woonfunctie');
   if (isWoning) {
     if (profile.warmtebehoefte_kwh_m2 !== null && profile.oppervlakte_m2 !== null) {
       const gasM3 = Math.round((profile.warmtebehoefte_kwh_m2 * profile.oppervlakte_m2) / 31.65 / 0.95);
       alerts.push(
-        `Geschat gasverbruik: ~${gasM3} m³/jaar (o.b.v. warmtebehoefte ${profile.warmtebehoefte_kwh_m2} kWh/m², oppervlakte ${profile.oppervlakte_m2} m², HR-ketel 95%).`
+        `Estimated gas use: ~${gasM3} m³/year (based on warmtebehoefte ${profile.warmtebehoefte_kwh_m2} kWh/m², area ${profile.oppervlakte_m2} m², HR boiler 95%).`
       );
     }
 
@@ -178,12 +178,12 @@ export function generateAlerts(profile: ProfileCore): string[] {
         // Nader Voorschrift: co2_emissie is already a total (kg/year), not per m²
         const totalCo2 = Math.round(profile.co2_emissie_kg_m2);
         alerts.push(
-          `Totale CO₂-uitstoot: ~${totalCo2} kg/jaar (Nader Voorschrift — waarde is totaal gebouw).`
+          `Total CO₂ emissions: ~${totalCo2} kg/year (Nader Voorschrift — value is whole-building total).`
         );
       } else {
         const totalCo2 = Math.round(profile.co2_emissie_kg_m2 * profile.oppervlakte_m2);
         alerts.push(
-          `Totale CO₂-uitstoot: ~${totalCo2} kg/jaar (${profile.co2_emissie_kg_m2} kg/m² × ${profile.oppervlakte_m2} m²).`
+          `Total CO₂ emissions: ~${totalCo2} kg/year (${profile.co2_emissie_kg_m2} kg/m² × ${profile.oppervlakte_m2} m²).`
         );
       }
     }
@@ -192,13 +192,13 @@ export function generateAlerts(profile: ProfileCore): string[] {
       const wb = profile.warmtebehoefte_kwh_m2;
       const indicatie =
         wb < 50
-          ? 'zeer geschikt voor warmtepomp'
+          ? 'very suitable for a heat pump'
           : wb < 70
-            ? 'geschikt voor warmtepomp'
+            ? 'suitable for a heat pump'
             : wb < 100
-              ? 'geschikt voor warmtepomp mits isolatie-aanpak'
-              : 'eerst isoleren voor warmtepomp';
-      alerts.push(`Warmtepomp-indicatie: ${indicatie} (warmtebehoefte ${wb} kWh/m²).`);
+              ? 'suitable for a heat pump provided some insulation upgrades'
+              : 'insulate first before considering a heat pump';
+      alerts.push(`Heat-pump suitability: ${indicatie} (warmtebehoefte ${wb} kWh/m²).`);
     }
   }
 
