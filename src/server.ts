@@ -13,6 +13,10 @@ import {
   type BagClientLike,
   type EpOnlineClientLike,
 } from './tools/get-building-profile.js';
+import { registerRenderChartTool } from './tools/render-chart.js';
+import { registerRenderTableTool } from './tools/render-table.js';
+import { registerRenderMapTool } from './tools/render-map.js';
+import { registerFetchImageTool } from './tools/fetch-image.js';
 
 const VERSION = '1.0.0';
 
@@ -69,6 +73,10 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
   );
 
   registerGetBuildingProfileTool(server, bagClient, epOnlineClient);
+  registerRenderChartTool(server);
+  registerRenderTableTool(server);
+  registerRenderMapTool(server);
+  registerFetchImageTool(server);
 
   return server;
 }

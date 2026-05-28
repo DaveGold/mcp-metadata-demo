@@ -1,0 +1,158 @@
+/* Import Tailwind CSS v4 and restrict scanning to UI sources only. */
+@import 'tailwindcss' source(none);
+@source './apps';
+@source './shared';
+
+/* Enable dark mode via data-theme attribute (set by MCP Apps SDK applyDocumentTheme) */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Warmtebouw Design System Theme
+   Source: wb-ds/projects/components/src/styles/tokens.scss */
+@theme {
+  /* Primary: Warmteblauw */
+  --color-primary: #002b49;
+  --color-primary-lighter: #0a99ff;
+  --color-primary-low: #0083e0;
+  --color-primary-middle: #006bb8;
+  --color-primary-high: #00538f;
+  --color-primary-darker: #000c14;
+  --color-primary-surface: #e8f1f6;
+
+  /* Secondary: Industrial Green */
+  --color-secondary: #496457;
+  --color-secondary-lighter: #d0ddd6;
+  --color-secondary-low: #b8ccc2;
+  --color-secondary-middle: #95b2a4;
+  --color-secondary-high: #719885;
+  --color-secondary-darker: #33473e;
+
+  /* Petrol */
+  --color-petrol: #004c69;
+  --color-petrol-lighter: #33c5ff;
+  --color-petrol-low: #0abaff;
+  --color-petrol-middle: #00a1e0;
+  --color-petrol-high: #0084b8;
+  --color-petrol-darker: #002c3d;
+
+  /* Grey Blue */
+  --color-grey-blue: #859a9f;
+  --color-grey-blue-lighter: #e8eced;
+  --color-grey-blue-low: #d1d9db;
+  --color-grey-blue-middle: #bac6c9;
+  --color-grey-blue-high: #a4b3b7;
+  --color-grey-blue-darker: #6c8389;
+
+  /* Grey Beige */
+  --color-grey-beige: #97938b;
+  --color-grey-beige-lighter: #ecebea;
+  --color-grey-beige-low: #d8d7d4;
+  --color-grey-beige-middle: #c5c3bf;
+  --color-grey-beige-high: #b1afa9;
+  --color-grey-beige-darker: #817c74;
+
+  /* Neutral */
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* System: Error */
+  --color-error: #aa1a12;
+  --color-error-lighter: #fbdcda;
+  --color-error-low: #f5a7a3;
+  --color-error-middle: #ec4f46;
+  --color-error-high: #e82b21;
+  --color-error-darker: #81130e;
+
+  /* System: Warning */
+  --color-warning: #b57a0c;
+  --color-warning-lighter: #fdf0d9;
+  --color-warning-low: #f9d99f;
+  --color-warning-middle: #f5c366;
+  --color-warning-high: #f2ac2c;
+  --color-warning-darker: #865a09;
+
+  /* System: Success & Focus */
+  --color-success: #43a047;
+  --color-focus: #0084b8;
+
+  /* Spacing */
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-s: 12px;
+  --spacing-m: 16px;
+  --spacing-l: 20px;
+  --spacing-xl: 24px;
+  --spacing-xxl: 32px;
+  --spacing-xxxl: 40px;
+  --spacing-xxxxl: 48px;
+
+  /* Border Radius */
+  --radius-s: 6px;
+  --radius-m: 7px;
+  --radius-l: 8px;
+  --radius-xl: 10px;
+  --radius-xxl: 15px;
+  --radius-xxxl: 25px;
+  --radius-card: 0px;
+  --radius-badge: 99px;
+  --radius-item: 10px;
+  --radius-icon: 12px;
+
+  /* Typography */
+  --font-sans: 'Roboto', 'Open Sans', sans-serif;
+
+  /* Elevation */
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+
+  /* Dark mode surfaces */
+  --color-dark-surface: #121214;
+  --color-dark-surface-raised: #1c1c20;
+  --color-dark-border: #303036;
+
+  /* Neutral grays (standard Tailwind scale, used across UI components) */
+  --color-wb-gray-50: #F9FAFB;
+  --color-wb-gray-100: #F3F4F6;
+  --color-wb-gray-200: #E5E7EB;
+  --color-wb-gray-300: #D1D5DB;
+  --color-wb-gray-400: #9CA3AF;
+  --color-wb-gray-500: #6B7280;
+  --color-wb-gray-600: #4B5563;
+  --color-wb-gray-700: #374151;
+  --color-wb-gray-800: #1F2937;
+  --color-wb-gray-900: #111827;
+}
+
+/* Color scheme */
+:root {
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Base styles */
+@layer base {
+  html,
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-grey-beige-lighter);
+    color: var(--color-primary-darker);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  [data-theme="dark"] body {
+    background-color: var(--color-dark-surface);
+    color: var(--color-grey-beige-lighter);
+  }
+
+}
+
+/* Table striped rows — outside @layer so it can't be overridden by Tailwind utilities */
+.stripe-even {
+  background-color: var(--color-wb-gray-50);
+}
+[data-theme="dark"] .stripe-even {
+  background-color: var(--color-dark-surface-raised);
+}
