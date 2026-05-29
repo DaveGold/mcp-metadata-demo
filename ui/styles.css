@@ -6,7 +6,7 @@
 /* Enable dark mode via data-theme attribute (set by MCP Apps SDK applyDocumentTheme) */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* Warmtebouw Design System Theme
+/* Design System Theme — palette tokens (originally derived from a brand system; renamed but kept consistent)
    Source: wb-ds/projects/components/src/styles/tokens.scss */
 @theme {
   /* Primary: Warmteblauw */

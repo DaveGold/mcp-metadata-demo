@@ -1,6 +1,6 @@
 # mcp-metadata-demo
 
-> 📄 **Read the paper**: [*TODO — paper title*](TODO-paper-url) — the metadata strategy this repo demonstrates.
+> 📄 **Read the paper**: [*The Missing Layer*](https://davidgolverdingen.nl/en/the-missing-layer) — the metadata strategy this repo demonstrates.
 
 A working demo of the metadata strategy described in the paper. It applies that strategy in **two places at once**:
 
@@ -45,7 +45,7 @@ The agent didn't need separate priming on Dutch energy regulation — the tool's
 git clone https://github.com/DaveGold/mcp-metadata-demo
 cd mcp-metadata-demo
 npm install
-cp .env.example .env  # then add your EP_ONLINE_API_KEY
+cp .env.example .env.local  # then add your EP_ONLINE_API_KEY
 npm run build
 npm run inspect       # opens MCP Inspector to test interactively
 ```
@@ -57,7 +57,7 @@ Add to your `.mcp.json` (Claude Code) or Claude Desktop config:
   "mcpServers": {
     "metadata-demo": {
       "command": "node",
-      "args": ["--env-file=.env", "/absolute/path/to/dist/stdio.js"]
+      "args": ["--env-file=.env.local", "/absolute/path/to/dist/stdio.js"]
     }
   }
 }
@@ -65,9 +65,9 @@ Add to your `.mcp.json` (Claude Code) or Claude Desktop config:
 
 ## Try the hosted demo
 
-> 🌐 **Hosted demo — generously open**
+> 🌐 **Hosted demo**
 >
-> This endpoint is funded as a personal investment in the paper's reach. Provisioned for ~75k requests/day shared across all users; per-IP rate limit of 30 calls/min. Best-effort uptime, no SLA. For sustained heavy use, deploy your own copy.
+> Shared endpoint, rate-limited. For sustained heavy use, deploy your own copy.
 
 Add this to your `.mcp.json` (Claude Code):
 
@@ -75,7 +75,7 @@ Add this to your `.mcp.json` (Claude Code):
 {
   "mcpServers": {
     "metadata-demo": {
-      "url": "https://TODO-hosted-url.run.app/mcp"
+      "url": "https://mcp-jtc4p3l6nq-ez.a.run.app"
     }
   }
 }
@@ -83,13 +83,30 @@ Add this to your `.mcp.json` (Claude Code):
 
 ## Architecture
 
-Single MCP server factory in [src/server.ts](src/server.ts), exposed through three transports:
+Five tools, three external APIs, three transports, one MCP Apps UI pipeline.
 
-- **stdio** ([src/stdio.ts](src/stdio.ts)) — default for Claude Desktop / Code / Inspector
-- **Local HTTP** ([src/http.ts](src/http.ts)) — bind to 127.0.0.1 for browser-based testing
-- **Cloud Function** ([src/functions.ts](src/functions.ts)) — the hosted endpoint above
+| Tool | Kind | What it does |
+|---|---|---|
+| `get_building_profile` | Rich-domain data tool | Looks up a Dutch address, fuses BAG + EP-Online, returns a structured profile with curated `alerts[]` |
+| `render_chart` | MCP App | Renders 14 chart types via Chart.js inline in the chat |
+| `render_table` | MCP App | Renders an interactive TanStack table with cell formatters |
+| `render_map` | MCP App | Renders a Leaflet map with markers |
+| `fetch_image` | App-internal helper | Server-side image proxy with SSRF protection; only called by the `render_table` UI |
 
-All three call the same `createServer()` factory; tool registration lives in exactly one place. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the layered design (clients → domain → tools → server).
+### Transports
+
+Single `createServer()` factory in [src/server.ts](src/server.ts), exposed through three entrypoints — tool registration lives in exactly one place:
+
+- **stdio** ([src/stdio.ts](src/stdio.ts)) — default for Claude Desktop / Code / Inspector. JSON-RPC over stdin/stdout, no network, no ports.
+- **Local HTTP** ([src/http.ts](src/http.ts)) — Streamable-HTTP bound to `127.0.0.1` for browser-based testing, no middleware.
+- **Cloud Function** ([src/functions.ts](src/functions.ts)) — Firebase Cloud Function v2 wrapping the same HTTP app with `hosted: true`, which mounts request-logging, daily-cap, and rate-limit middleware on `/mcp`. EP-Online key injected from Secret Manager.
+
+### Layers
+
+- **Tools** (`src/tools/`) — each tool's `description` and Zod `inputSchema`/`outputSchema` (`.describe()` on every field) carry the metadata that drives agent reasoning. `get-building-profile.ts` encodes `RETURNS` / `WHEN TO USE` / `INTERPRETATION` / `ALERTS`; the render tools register a `ui://` resource + tool pair and return `structuredContent` for the iframe.
+- **Clients** (`src/clients/`) — one class per upstream, each owning its URL, auth, timeout, and Zod-validated response parsing, so upstream wire-format drift surfaces here rather than silently downstream. `BagClient` is auth-free; `EpOnlineClient` needs an API key.
+- **Domain** (`src/domain/`) — pure functions: `buildProfile` (raw registers → `BuildingProfile`), `selectBestLabel`, and `generateAlerts` (regulation eras, Paris Proof 2040 thresholds, BENG, heat-pump suitability — knowledge moved server-side, to where the data lives).
+- **Logger** (`src/logger.ts`) — stderr-only structured JSON. **Never** writes to stdout, which stdio MCP framing owns; a stray `console.log` would corrupt the JSON-RPC stream.
 
 ### How an MCP app gets to the client
 
@@ -109,6 +126,22 @@ A factual explainer of how a chart, table, or map actually appears in the chat.
 
 The result: the same metadata principle that powers `get_building_profile`'s output schema also powers `render_chart`'s input schema. Both are AI-generated from the schema; in one the output is domain data, in the other it's UI configuration. The Angular-plus-Vite-single-file part is just how that UI configuration becomes pixels.
 
+### External APIs
+
+| API | Auth | Used by |
+|---|---|---|
+| PDOK Locatieserver | none | `BagClient.findAddress` |
+| BAG OGC v2 | none | `BagClient.getVerblijfsobject` / `getPand` |
+| EP-Online V5 | API key | `EpOnlineClient` (per-key rate limits apply) |
+| OpenStreetMap tiles | none | `render_map` iframe, via CSP `resourceDomains` allow-list |
+| Arbitrary image URLs | none | user-supplied via `render_table`, validated through the `fetch_image` SSRF guard |
+
+### Non-goals
+
+- **Authentication.** The hosted endpoint is intentionally public — add an auth proxy upstream if you fork it for a private use case.
+- **Persistence.** Tools are idempotent and stateless; the `fetch_image` cache is in-memory only.
+- **Mocking framework.** Test stubs are hand-rolled object literals typed against the `*Like` `Pick<>` types.
+
 ## Language policy
 
 Code, docs, and agent-facing tool descriptions are English. Field names mirror their Dutch upstream APIs (BAG, EP-Online) — `huisnummer`, `bouwjaar`, `oppervlakte_m2`, `gebruiksdoel`, `energielabel`. Regulatory references (Bouwbesluit, NTA 8800, BENG, Paris Proof) keep their Dutch names; they have no English equivalents.
@@ -122,15 +155,10 @@ The hosted endpoint runs as a Firebase Cloud Function. To deploy your own:
 3. `npm run deploy:setup-secret` — paste your EP-Online API key (get one at https://www.ep-online.nl)
 4. `npm run deploy`
 
-Cost: well under €25/month for typical demo usage. See [docs/RUNBOOK.md](docs/RUNBOOK.md) for the full cost posture, protection layers, and emergency kill-switch.
 
 ## Logging
 
 The hosted endpoint logs request metadata (IP, User-Agent, tool name, duration) to Cloud Logging for usage analytics and abuse prevention. Retention is 30 days (Cloud Logging default). Legal basis: legitimate interest. Contact via the GitHub issues tracker if you'd like your data scrubbed.
-
-## Extending
-
-See [docs/EXTENDING.md](docs/EXTENDING.md) for the walkthrough of adding a new tool.
 
 ## Author
 

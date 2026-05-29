@@ -58,20 +58,20 @@ Renders an interactive chart inline in the conversation. Supports 14 chart types
 bar, line, pie, doughnut, radar, polarArea, bubble, scatter, sankey,
 matrix (heatmap), treemap, boxplot, funnel, graph.
 The chart is interactive — hover for tooltips, click legend to toggle datasets.
-Uses Warmtebouw brand colors by default.
+Uses a built-in palette by default.
 
 Annotations (threshold/target lines and bands) can be layered on top of bar, line,
-scatter, bubble, matrix, and mixed charts via options.annotations — ideal for Paris
-Proof targets, budget thresholds, SLA bands, buitentemperatuur zones, office-hours
-boxes on calendar heatmaps.
+scatter, bubble, matrix, and mixed charts via options.annotations — ideal for target
+thresholds, SLA bands, comfort/operating zones, office-hours boxes on calendar
+heatmaps.
 
 WHEN TO USE:
-Any request that calls for a visualization — explicit ("toon/visualiseer/plot/maak een grafiek", "show me a chart", "graph this") or implicit (questions about trend, verdeling, ranking, spreiding, 2D-patronen, correlatie, or stromen that a single number or a table wouldn't answer). Pick \`type\` using the REFUSE rules on that parameter + the decision path below.
+Any request that calls for a visualization — explicit ("show me a chart", "graph this", "visualize") or implicit (questions about trend, distribution, ranking, spread, 2D-patterns, correlation, or flows that a single number or a table wouldn't answer). Pick \`type\` using the REFUSE rules on that parameter + the decision path below.
 
 WHEN NOT TO USE:
 - The answer is a single number or short list → respond with text
 - User wants to browse/sort/filter individual records → use render_table
-- You need to fetch data first → call the appropriate data tool (get_nacalculatie, get_usages, get_elements, etc.) THEN pass the result here
+- You need to fetch data first → call the appropriate data source THEN pass the result here
 - More than 3000 data points per dataset (line), 500 (most types), 2000 cells (matrix), or 200 flows/nodes (sankey/graph) → pre-aggregate first
 
 INTERPRETATION:
@@ -80,36 +80,36 @@ Question-first decision path (ask these before picking \`type\`; the per-type ru
 2. How many series / categories / datapoints? Pie hard-caps at 5, radar at 3 overlays, line at 5 series, sankey at 10 flows per tier, matrix sweet spots 7×24 / 12×N / 52×N.
 3. Is the total meaningful, just proportions, or both? Total → stacked. Proportions only → 100% stacked or percentage bars. Both → grouped bar or small multiples (multiple render_chart calls).
 4. What is the purpose — ranking, distribution, flow, correlation, composition, deviation, trend? This is the primary trigger for the \`type\` rules.
-5. Are units consistent across series? No → no radar, no dual-axis line+bar unless there's a mechanistic link (gas vs buitentemperatuur).
-6. Is there a target/baseline/SLA (Paris Proof, budget, SLA, BENG)? Yes → add an \`options.annotations\` overlay.
+5. Are units consistent across series? No → no radar, no dual-axis line+bar unless there's a mechanistic link.
+6. Is there a target/baseline/SLA? Yes → add an \`options.annotations\` overlay.
 
 Hard rejections — if the agent catches itself drifting toward any of these, pick the alternative instead:
 - Pie for a ranking question → horizontal bar, sorted desc
 - Line with a categorical x-axis → bar
 - Radar with mixed units or >3 overlays → matrix or small multiples (normalize to 0-100 if you must use radar)
-- Sankey without a natural flow ("verkoop per regio") → bar
+- Sankey without a natural flow → bar
 - Treemap with one item >80% → horizontal bar with log scale
 - Matrix with a dense continuous dimension (365 daily dates on one axis) → aggregate to week/month, or line
 - Boxplot with n<5 per category → dot plot (scatter with individual points)
 - Funnel with stages that can grow (non-subset) → bar
-- Stacked bar with >5 segments → grouped bar, or aggregate to "top-N + overig"
+- Stacked bar with >5 segments → grouped bar, or aggregate to "top-N + other"
 - Dual-axis with two same-unit series → single axis
 
-Warmtebouw tool → chart patterns (use these when the question matches; they cover the non-obvious choices):
-- get_nacalculatie aggregated medewerker × week → matrix (capacity/anomaly grid); raw rows uren-per-dag per medewerker → boxplot (outliers = overboekingen, SLA annotation on 12h line)
-- get_usages quarter-hourly kWh, aggregated uur × weekdag → matrix (calendar heatmap; add \`options.annotations\` box for office hours or weekend columns); kWh/m² per pand → horizontal bar + annotation line on Paris Proof target (70 kWh/m² kantoor, 100 woningen)
-- get_usages gas m³ vs get_weather_context HDD → scatter + trendline (helling = m³/HDD efficiency metric; outliers = stook-problemen)
-- get_project + get_nacalculatie → bubble (x=Omzet, y=Marge%, r=Uren) with quadrant annotation lines on x=mediaan and y=mediaan; aanneemsom vs gerealiseerd → scatter + 45° diagonal annotation (above line = over budget)
-- get_voorcalculatieregel / get_nacalculatie hiërarchisch (project → fase → post, ≥6 items, max 3 levels) → treemap; kostenstromen over 2-3 tiers (budget → discipline → kostenpost) → sankey
-- get_dossier Pareto — welke storingscodes veroorzaken 80% → bar sorted desc + line dataset with type="line" for cumulative % + annotation line on 80; doorlooptijd per prioriteit → boxplot + annotation SLA line
-- get_driver_scores 1-3 chauffeurs over ≤6 normalized dimensions → radar; vloot van 10+ chauffeurs over dezelfde dimensies → matrix (radar falls apart past 3 overlays)
-- get_elements_by_project per discipline → category → family → treemap (BIM is inherently hiërarchisch); element-afhankelijkheden over systemen → graph with layout="force"
-- get_usages energy mix (elektra / gas / warmte, 3 slices) → pie; verloop per maand per jaar → line (≤5 series); energie-allocatie bron → systeem → eindgebruik → sankey
+Question → chart patterns (use these when the question matches; they cover the non-obvious choices):
+- Hours-by-person × week aggregated → matrix (capacity/anomaly grid); raw daily rows per person → boxplot (outliers = misbookings; SLA annotation line where relevant)
+- Quarter-hourly usage aggregated to hour × weekday → matrix (calendar heatmap; add \`options.annotations\` box for office hours / weekend columns); per-unit kWh/m² across many buildings → horizontal bar + annotation line on target (e.g. Paris Proof 70 kWh/m² offices, 100 residential)
+- Gas usage vs heating-degree-days → scatter + trendline (slope = m³/HDD efficiency; outliers = heating issues)
+- Revenue × margin × volume → bubble (x=revenue, y=margin%, r=volume) with quadrant annotation lines on x=median and y=median; budgeted vs realised → scatter + 45° diagonal annotation (above line = over budget)
+- Hierarchical breakdown (project → phase → item, ≥6 items, max 3 levels) → treemap; cost flow over 2-3 tiers (budget → discipline → cost item) → sankey
+- Pareto — which codes cause 80% → bar sorted desc + line dataset with type="line" for cumulative % + annotation line on 80; lead-time by priority → boxplot + annotation SLA line
+- 1-3 entities over ≤6 normalized dimensions → radar; 10+ entities over the same dimensions → matrix (radar falls apart past 3 overlays)
+- Per-discipline → category → family hierarchy → treemap; element dependencies across systems → graph with layout="force"
+- Energy mix (electric / gas / heat, 3 slices) → pie; monthly trend per year → line (≤5 series); allocation source → system → end-use → sankey
 
-Annotation overlay: add via \`options.annotations\` on bar / line / scatter / bubble / matrix whenever a target, SLA, Paris-Proof, budget, benchmark-zone or event-marker is relevant. \`scaleID\` is REQUIRED on every line-type annotation ('y' for horizontal, 'x' for vertical) — without it nothing renders. Not supported on pie / doughnut / radar / polarArea / sankey / treemap / funnel / graph.
+Annotation overlay: add via \`options.annotations\` on bar / line / scatter / bubble / matrix whenever a target, SLA, threshold, budget, benchmark-zone or event-marker is relevant. \`scaleID\` is REQUIRED on every line-type annotation ('y' for horizontal, 'x' for vertical) — without it nothing renders. Not supported on pie / doughnut / radar / polarArea / sankey / treemap / funnel / graph.
 
 QUERY STRATEGY:
-1. Fetch data from the relevant MCP server tool (get_nacalculatie, get_usages, get_project, get_utilization, etc.)
+1. Fetch data from the relevant data source
 2. Use summaryOnly=true or limit results to keep data under 500 points
 3. Transform the response into labels[] + datasets[] (or sankey.flows[])
 4. Call render_chart with the prepared data
@@ -125,7 +125,7 @@ OUTPUT EFFICIENCY (important — tool-call payloads are user-visible and expensi
     Graph node:    ["<id>"] or ["<id>","<label>"] or ["<id>","<label>","<group>"]   instead of {id, label?, group?}
     Graph edge:    ["<source>","<target>"] or ["<source>","<target>",<weight>]      instead of {source, target, weight?}
   Tuples save ~40-60% per entry on dense data — especially important for matrix (up to 2000 cells), treemap (up to 500 rows), and graph (up to 500 edges). Fall back to the keyed object form only when you need extra optional fields (e.g. pre-computed node coordinates, edge weight, dataset styling overrides, scatter/bubble scatterData, dashed lines, mixed chart type overrides, area fill, or tension).
-- Omit optional fields when the default is fine. Chart colors auto-cycle through the Warmtebouw palette — don't set backgroundColor/borderColor unless overriding.
+- Omit optional fields when the default is fine. Chart colors auto-cycle through the default palette — don't set backgroundColor/borderColor unless overriding.
 - Keep datasets short. Each dataset is one legend entry; 5-7 series is the practical max for legibility regardless of payload cost.
 
 RELATED TOOLS:
@@ -199,7 +199,7 @@ const inputSchema = {
       z.union([
         // Tuple shorthand: [label, data] — for simple datasets with no extra styling.
         // ~20 chars saved per dataset vs the keyed object form. Use for the common
-        // line/bar case where Warmtebouw palette auto-cycling is fine.
+        // line/bar case where default palette auto-cycling is fine.
         z.tuple([z.string(), z.array(z.number().nullable())]),
         // Full object form — required for scatter/bubble (scatterData), dashed lines,
         // custom colors, per-dataset type overrides, area fill, tension, etc.
@@ -242,12 +242,12 @@ const inputSchema = {
             .union([z.string(), z.array(z.string())])
             .optional()
             .describe(
-              'Fill color(s). Omit to use Warmtebouw palette auto-cycling. Single string for uniform, array for per-segment (pie/doughnut).'
+              'Fill color(s). Omit to use default palette auto-cycling. Single string for uniform, array for per-segment (pie/doughnut).'
             ),
           borderColor: z
             .union([z.string(), z.array(z.string())])
             .optional()
-            .describe('Border color(s). Omit to use Warmtebouw palette.'),
+            .describe('Border color(s). Omit to use default palette.'),
           borderDash: z
             .array(z.number())
             .optional()
@@ -311,7 +311,7 @@ const inputSchema = {
     .describe(
       'Chart datasets. Each dataset is one series/legend entry. Omit for sankey type (use sankey field instead).\n' +
         'Two accepted shapes per entry:\n' +
-        '- Tuple shorthand: [label, data]  — preferred for simple bar/line series. Use Warmtebouw palette default.\n' +
+        '- Tuple shorthand: [label, data]  — preferred for simple bar/line series. Use default palette default.\n' +
         '  Example: ["Elektriciteit (kWh)", [1800, 1620, 1240, null, null, 120]]\n' +
         '- Full object: {label, data, backgroundColor?, borderColor?, borderDash?, fill?, tension?, scatterData?, type?, order?, spanGaps?}\n' +
         '  Required when you need styling overrides, scatter/bubble data, dashed lines, mixed charts, or area fills.'
@@ -346,7 +346,7 @@ const inputSchema = {
       colors: z
         .record(z.string(), z.string())
         .optional()
-        .describe('Custom color per node. Keys = node names, values = hex colors. Omit to use Warmtebouw palette.'),
+        .describe('Custom color per node. Keys = node names, values = hex colors. Omit to use default palette.'),
       priority: z
         .record(z.string(), z.number())
         .optional()
@@ -406,8 +406,8 @@ const inputSchema = {
           min: z
             .string()
             .optional()
-            .describe('Low-value color (hex or CSS color). Default: Warmtebouw primary-lighter.'),
-          max: z.string().optional().describe('High-value color (hex or CSS color). Default: Warmtebouw primary.'),
+            .describe('Low-value color (hex or CSS color). Default: palette primary-lighter.'),
+          max: z.string().optional().describe('High-value color (hex or CSS color). Default: palette primary.'),
           reverse: z.boolean().optional().describe('Reverse scale (high values get the low color).'),
         })
         .optional()
@@ -525,7 +525,7 @@ const inputSchema = {
     .optional()
     .describe(
       'Graph config. Use ONLY with type=graph. ' +
-        'Perfect for relational data: BIM element dependencies, project-klant netwerk, nacalculatie project→klant tree.'
+        'Perfect for relational data: element dependencies, network graphs, hierarchical trees.'
     ),
   options: z
     .object({
@@ -584,7 +584,7 @@ const inputSchema = {
             xMax: z.union([z.number(), z.string()]).optional().describe('For box/label: x-axis upper bound.'),
             yMin: z.number().optional().describe('For box/label: y-axis lower bound.'),
             yMax: z.number().optional().describe('For box/label: y-axis upper bound.'),
-            borderColor: z.string().optional().describe('Line/box border color. Default: Warmtebouw warning.'),
+            borderColor: z.string().optional().describe('Line/box border color. Default: palette warning.'),
             borderDash: z
               .array(z.number())
               .optional()
@@ -619,10 +619,10 @@ const inputSchema = {
     .optional()
     .describe('Chart options. Most have sensible defaults — only set what you need to override.'),
   theme: z
-    .enum(['warmtebouw', 'auto'])
+    .enum(['default', 'auto'])
     .optional()
-    .default('warmtebouw')
-    .describe('Color theme. warmtebouw = Warmteblauw brand palette (default). auto = adapts to host light/dark mode.'),
+    .default('default')
+    .describe('Color theme. default = built-in palette. auto = adapts to host light/dark mode.'),
   width: z
     .number()
     .optional()

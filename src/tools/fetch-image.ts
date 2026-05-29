@@ -172,7 +172,7 @@ async function fetchWithTimeout(rawUrl: string): Promise<CachedImage | null> {
       const response = await fetch(current, {
         signal: controller.signal,
         redirect: 'manual',
-        headers: { 'User-Agent': 'Warmtebouw MCP Server/1.0 (image proxy for render_table)' },
+        headers: { 'User-Agent': 'mcp-metadata-demo/1.0 (image proxy for render_table)' },
       });
 
       // 3xx: follow manually after revalidation.

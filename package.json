@@ -1,7 +1,7 @@
 {
   "name": "mcp-metadata-demo",
   "version": "1.0.0",
-  "description": "Demo MCP server + MCP apps showing a rich-metadata strategy for AI tooling. Companion to the paper '<title>'. Uses Dutch open building data (BAG + EP-Online) as the domain.",
+  "description": "Demo MCP server + MCP apps showing a rich-metadata strategy for AI tooling. Companion to the paper 'The Missing Layer'. Uses Dutch open building data (BAG + EP-Online) as the domain.",
   "type": "module",
   "bin": {
     "mcp-metadata-demo": "./dist/stdio.js"
@@ -22,7 +22,7 @@
     "build:ui": "node scripts/build-ui.js",
     "start": "node dist/stdio.js",
     "dev": "tsx watch src/stdio.ts",
-    "inspect": "npm run build && npx @modelcontextprotocol/inspector node --env-file=.env dist/stdio.js",
+    "inspect": "npm run build && npx @modelcontextprotocol/inspector node --env-file=.env.local dist/stdio.js",
     "http": "node dist/http.js",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -54,7 +54,7 @@
   "author": {
     "name": "David Golverdingen",
     "email": "5216270+DaveGold@users.noreply.github.com",
-    "url": "https://www.linkedin.com/in/<TODO-linkedin-slug>"
+    "url": "https://www.linkedin.com/in/davidgolverdingen/"
   },
   "homepage": "https://davidgolverdingen.nl/en",
   "repository": {

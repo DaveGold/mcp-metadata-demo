@@ -67,8 +67,9 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
         'metered energy consumption, weather data, or building automation data.\n' +
         '- EP-Online coverage is incomplete for older residential buildings — `energielabel: null` ' +
         'does not mean the building has no label, just that none is registered in EP-Online.\n\n' +
-        'This server demonstrates the metadata strategy from <paper-url>. The tool descriptions ' +
-        'below are the strategy in practice.',
+        'This server demonstrates the metadata strategy from the paper "The Missing Layer" ' +
+        '(https://davidgolverdingen.nl/en/the-missing-layer). The tool descriptions below are ' +
+        'the strategy in practice.',
     }
   );
 

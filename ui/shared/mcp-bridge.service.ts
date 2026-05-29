@@ -1,7 +1,7 @@
 /**
  * Angular service wrapping the MCP Apps `App` class (`@modelcontextprotocol/ext-apps`).
  *
- * This is the **shared bridge** for all Warmtebouw MCP App UIs. Every app component
+ * This is the **shared bridge** for all MCP App UIs in this repo. Every app component
  * injects this service to communicate with the MCP host (Claude.ai, VS Code, ChatGPT, etc.).
  *
  * ## Quick reference — which method to use
@@ -114,7 +114,7 @@ export class McpBridgeService {
   private app: App;
 
   constructor() {
-    this.app = new App({ name: 'Warmtebouw MCP App', version: '1.0.0' }, {}, { autoResize: true });
+    this.app = new App({ name: 'mcp-metadata-demo', version: '1.0.0' }, {}, { autoResize: true });
 
     // Register notification handlers before connect() to avoid missing events.
     //
@@ -188,7 +188,7 @@ export class McpBridgeService {
    *
    * This is the key method for **cross-MCP server orchestration**: the app
    * injects a user message, the agent resolves it using whichever MCP servers
-   * are connected — AFAS, BIM, Fleet, Warmtebouw Duurzaam, Priva, etc.
+   * the user has connected.
    *
    * **When to use:**
    * - Button clicks that should trigger AI analysis across multiple data sources
@@ -201,11 +201,8 @@ export class McpBridgeService {
    *
    * @example
    * ```ts
-   * // Button in a Priva dashboard app
-   * await bridge.sendMessage('Vergelijk energiekosten van dit gebouw via Warmtebouw Duurzaam');
-   *
-   * // Drill-down from a project overview card
-   * await bridge.sendMessage(`Toon nacalculatie details voor project ${projectId}`);
+   * // Button on a chart asking for a deeper comparison
+   * await bridge.sendMessage('Compare this metric across other locations.');
    * ```
    */
   async sendMessage(text: string): Promise<{ isError?: boolean }> {
@@ -267,7 +264,7 @@ export class McpBridgeService {
    *
    * @example
    * ```ts
-   * const result = await bridge.readResource('ui://warmtebouw/report-template.html');
+   * const result = await bridge.readResource('ui://metadata-demo/report-template.html');
    * ```
    */
   async readResource(uri: string): Promise<unknown> {
@@ -393,7 +390,7 @@ export class McpBridgeService {
    */
   async log(level: 'debug' | 'info' | 'warning' | 'error', data: string): Promise<void> {
     try {
-      await this.app.sendLog({ level, data, logger: 'Warmtebouw MCP App' });
+      await this.app.sendLog({ level, data, logger: 'mcp-metadata-demo' });
     } catch {
       // Best-effort — don't surface log failures to the UI
     }
@@ -542,59 +539,23 @@ export class McpBridgeService {
    * @throws {Error} Host rejects the request (unsupported, user declined, policy).
    * @throws {Error} Request timeout or connection loss.
    *
-   * @example Inline explanation of a dashboard row
+   * @example Inline explanation of a row
    * ```ts
-   * async explainProjectMargin(project: { id: string; margin: number; kosten: number }) {
+   * async explain(row: { id: string; value: number }) {
    *   if (!this.bridge.supportsSampling()) return; // older host — hide the button
    *   const result = await this.bridge.createSamplingMessage({
    *     messages: [{
    *       role: 'user',
    *       content: {
    *         type: 'text',
-   *         text: `Project ${project.id} draait ${(project.margin * 100).toFixed(1)}% marge op €${project.kosten} kosten. Leg in 2 zinnen uit wat dit betekent voor de projectleider en of actie nodig is.`,
+   *         text: `Explain in 2 sentences what value ${row.value} means for record ${row.id}.`,
    *       },
    *     }],
    *     maxTokens: 200,
    *   });
    *   this.explanation.set(
-   *     result.content.type === 'text' ? result.content.text : '(geen tekstresultaat)',
+   *     result.content.type === 'text' ? result.content.text : '(no text result)',
    *   );
-   * }
-   * ```
-   *
-   * @example Auto-narrative opening summary (called in ngOnInit)
-   * ```ts
-   * async generateNarrative(buildingName: string, usages: unknown[]) {
-   *   const result = await this.bridge.createSamplingMessage({
-   *     messages: [{
-   *       role: 'user',
-   *       content: {
-   *         type: 'text',
-   *         text: `Schrijf een Nederlandstalige executive summary (max 3 zinnen) over het energieverbruik van ${buildingName}. Data: ${JSON.stringify(usages)}`,
-   *       },
-   *     }],
-   *     maxTokens: 400,
-   *     systemPrompt: 'Je bent een duurzaamheidsadviseur bij Warmtebouw. Gebruik helder Nederlands, vermijd jargon.',
-   *   });
-   *   this.narrative.set(result.content.type === 'text' ? result.content.text : '');
-   * }
-   * ```
-   *
-   * @example Smart form-field suggestion
-   * ```ts
-   * async suggestDossierTitle(partialText: string, context: string) {
-   *   const result = await this.bridge.createSamplingMessage({
-   *     messages: [{
-   *       role: 'user',
-   *       content: {
-   *         type: 'text',
-   *         text: `Stel een beknopte dossier-titel voor (max 8 woorden) op basis van:\nContext: ${context}\nGebruiker begint met: "${partialText}"`,
-   *       },
-   *     }],
-   *     maxTokens: 40,
-   *     temperature: 0.3,
-   *   });
-   *   return result.content.type === 'text' ? result.content.text.trim() : '';
    * }
    * ```
    */

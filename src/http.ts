@@ -45,7 +45,7 @@ export function createHttpApp(options: CreateHttpAppOptions = {}): Express {
 
   const mcpMiddleware = options.hosted ? [dailyCap, rateLimitMcp] : [];
 
-  app.post('/mcp', ...mcpMiddleware, async (req: Request, res: Response) => {
+  async function handleMcpRequest(req: Request, res: Response): Promise<void> {
     try {
       // Stateless: one fresh McpServer + transport pair per request.
       const server = createServer();
@@ -64,7 +64,14 @@ export function createHttpApp(options: CreateHttpAppOptions = {}): Express {
         res.status(500).json({ error: 'Internal server error' });
       }
     }
-  });
+  }
+
+  // Mount on both '/' and '/mcp' so:
+  //   - Cloud Function URL `https://.../mcp` (Firebase strips the function-name
+  //     prefix, Express sees '/') routes correctly.
+  //   - Local dev URL `http://127.0.0.1:3000/mcp` keeps the conventional path.
+  app.post('/', ...mcpMiddleware, handleMcpRequest);
+  app.post('/mcp', ...mcpMiddleware, handleMcpRequest);
 
   return app;
 }

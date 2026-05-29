@@ -61,40 +61,40 @@ Supports cell formatting: numbers, currency (€), dates, percentages, booleans 
 and colored badges for status fields. Footer aggregation (sum, avg, count, min, max).
 
 WHEN TO USE:
-- User asks to "toon een tabel", "laat de data zien", "geef een overzicht"
-- Displaying individual records with multiple fields (medewerkers, projecten, facturen, uren, assets)
+- User asks for a table, overview, or list view of data
+- Displaying individual records with multiple fields
 - User needs to sort, filter, or browse through records
 - Data has mixed types (text + numbers + dates + statuses) in one view
-- Follow-up to a chart: "toon de onderliggende data" → render_table with the same dataset
-- Comparing records side by side (e.g. all projects sorted by marge)
-- Presenting structured key-value pairs or compact summaries (e.g. energiebalans, projectkengetallen, gebouwprofiel) — even 5-10 rows benefit from proper formatting (currency, dates, percentages, badges) over plain markdown tables
+- Follow-up to a chart: "show the underlying data" → render_table with the same dataset
+- Comparing records side by side
+- Presenting structured key-value pairs or compact summaries — even 5-10 rows benefit from proper formatting (currency, dates, percentages, badges) over plain markdown tables
 - ALWAYS prefer render_table over markdown tables. Markdown tables lack number formatting, sorting, and visual hierarchy. Use render_table for ANY structured data presentation.
 
 WHEN NOT TO USE:
 - Data has 1-2 columns only → respond with a text list
 - Visual trends or comparisons → use render_chart
-- Single aggregate answer ("hoeveel uur totaal?") → respond with text + call render_chart if visualization helps
+- Single aggregate answer ("total hours?") → respond with text + call render_chart if visualization helps
 - You need to fetch data first → call the appropriate data tool THEN pass results here
 - More than 500 rows → pre-aggregate (group by, top-N) or filter before calling
 
 QUERY STRATEGY:
-1. Fetch data from the relevant MCP server tool
-2. Limit to ≤500 rows (use filters, take/skip, or summaryOnly=false with small date ranges)
+1. Fetch data from the relevant data source
+2. Limit to ≤500 rows (use filters, take/skip, or small date ranges)
 3. Extract the specific fields you need into columns[] + data[]
 4. Choose column types for proper formatting (currency for money, date for timestamps, badge for statuses)
 5. Enable features based on data size: filtering/globalSearch for >50 rows, compact density for >10 columns
-NEVER pass raw API responses — extract, rename to Dutch headers, and set proper column types.
+NEVER pass raw API responses — extract, set proper column types, and choose column headers in the language of the conversation.
 
 OUTPUT EFFICIENCY (important — tool-call payloads are user-visible and expensive to stream):
 - Pass the records directly as the "data" argument. Do NOT print/echo the JSON to chat or to stdout in an analysis step first — that doubles the tokens for no gain.
 - Prefer POSITIONAL rows over keyed objects for any dataset larger than ~20 rows. "data" accepts TWO shapes:
     Positional (preferred): data = [["3451","André","andre@x.nl"], ["3452","Jane","jane@x.nl"]]  — values match the order of columns[]
-    Keyed (fine for tiny tables):  data = [{"Id":"3451","Naam":"André","Email":"andre@x.nl"}]
+    Keyed (fine for tiny tables):  data = [{"id":"3451","name":"André","email":"andre@example.com"}]
   The positional form cuts ~40% off per-row tokens by omitting the repeated keys. Use it by default; only fall back to keyed objects when the dataset is tiny (<10 rows) and readability in the request payload matters more than size.
 - Only set "type" on columns that need non-text formatting. Plain string fields (names, addresses, free text) can omit "type" — the default is text.
 - Only include "badgeMap", "formatConfig", "iconMap", "ratingConfig", etc. on the specific column that needs it. Do not add these "just in case" on every column.
 - Auto-formatting in text columns (the default): the renderer auto-detects and formats these value shapes, so send the plain string — no type, no wrapping:
-  - Emails ("foo@warmtebouw.nl") render as clickable mailto links.
+  - Emails ("foo@example.com") render as clickable mailto links.
   - Http(s) URLs render as clickable links.
   - ISO dates ("2025-03-14" or full timestamps) render as nl-NL dates.
   Only set type: "date" / use "link" with {label, href} when the label differs from the URL or you need a non-default target.
@@ -111,26 +111,26 @@ DATA VALUE SHAPES (per column type — send the SIMPLEST value that fits; column
   link                                                      → plain email or URL string (shorthand); OR {label, href} only when label ≠ value
   image                                                     → URL string (http(s) or data:image/*)
   trend                                                     → {value, delta} object — both numbers, intrinsically per-row
-Cells in a single positional row can mix scalars and objects as their column type requires. Example row for columns [Id, Naam, Email, Trend, Status]: ["3451", "André", "andre@x.nl", {"value": 120000, "delta": 0.08}, "active"]. Only the trend cell needs an object — everything else is scalar. Define color/label/threshold/scale metadata ONCE on the column (badgeMap, iconMap, progressConfig, ratingConfig, trendConfig) and let the renderer apply it across all rows.
+Cells in a single positional row can mix scalars and objects as their column type requires. Example row for columns [id, name, email, trend, status]: ["3451", "André", "andre@example.com", {"value": 120000, "delta": 0.08}, "active"]. Only the trend cell needs an object — everything else is scalar. Define color/label/threshold/scale metadata ONCE on the column (badgeMap, iconMap, progressConfig, ratingConfig, trendConfig) and let the renderer apply it across all rows.
 
 INTERPRETATION:
 Column type selection — pick the most specific type that fits the value, and read the "Pick instead of" hints when two types look similar:
 | Data shape | Column type | Example | Pick instead of |
-| euro bedragen | currency | Omzet, Kosten, Factuurbedrag | number (currency adds € prefix + locale separators) |
-| aantallen, uren, km | number | Uren, Aantal, Km | text (number enables numeric sort + footer aggregation) |
-| percentages (0..1) | percentage | Marge, Dekking, Slagingspercentage | progress (percentage is pure numeric, progress has a visual bar with thresholds) |
-| voortgang met kleurdrempel (0..1) | progress | Budget besteed, Voortgang onderhoud, Capaciteitsbenutting, Compliance score (invertColors=true) | percentage (use progress when threshold color guides the reader's eye) |
-| datums (ISO) | date | Startdatum, Factuurdatum, Datum melding | text (date parses + formats nl-NL; text doesn't) |
-| ja/nee | boolean | Geaccordeerd, Actief, Doorbelast, Betaald | badge (boolean is 2-state; badge is 3+ states) |
-| statussen, types, categorieën (enum) | badge + badgeMap | Status, TypeItem (Wst/Kst/Art), SoortInstallatie, Conditiescore | text / multi_badge (badge is single-value enum; multi_badge for arrays) |
-| enkele iconische indicator | icon + iconMap | Health (groen/rood/grijs pijl), Compliance (shield-check), Trend-pijltje op één numeriek veld | badge (icon is purely visual, badge shows text) |
-| tijdreeks per rij (number[]) | sparkline | Verbruikstrend 12 mnd, Storingstrend, Urentrend per medewerker | render_chart (sparkline is per-row inline; render_chart is one chart for all rows) |
-| waarde + periode-delta | trend ({value, delta}) | Verbruik YoY, Kosten MoM, Omzet delta, BENG-score delta | twee aparte kolommen value + percentage (trend co-renders with arrow + color) |
-| meerdere tags per rij (string[]) | multi_badge + badgeMap | Kenmerken installatie (R410A + Conditie 03 + Subcontractor), Certificeringen medewerker | concatenated text (multi_badge gives per-tag color + wrapping) |
-| klikbare URL | link ({label, href}) | Dossier-link, Project-link, Klant-e-mail, externe rapportage | text (link navigates; text shows URL as text) |
-| bounded score op vaste schaal | rating + ratingConfig | Conditie 0..6 (shape=dots, max=6), SLA 1..5 sterren, Klanttevredenheid | number (rating visualizes a fixed scale; number is for unbounded counts) |
-| foto / QR / avatar (URL) | image + imageConfig | Installatiefoto, Typeplaatje-thumbnail, QR naar rapport, monteur-avatar | text (image shows the thumbnail; text shows the URL) |
-| rest | text | Naam, Adres, Omschrijving, Email-adres als tekst | — |
+| money amounts | currency | revenue, cost, invoice amount | number (currency adds € prefix + locale separators) |
+| counts, hours, km | number | hours, count, distance | text (number enables numeric sort + footer aggregation) |
+| ratios (0..1) | percentage | margin, coverage, success rate | progress (percentage is pure numeric, progress has a visual bar with thresholds) |
+| progress with threshold colors (0..1) | progress | budget spent, maintenance progress, capacity utilisation, compliance score (invertColors=true) | percentage (use progress when threshold color guides the reader's eye) |
+| dates (ISO) | date | start date, invoice date, event date | text (date parses + formats per locale; text doesn't) |
+| yes/no | boolean | approved, active, paid | badge (boolean is 2-state; badge is 3+ states) |
+| statuses, types, categories (enum) | badge + badgeMap | status, item type, classification | text / multi_badge (badge is single-value enum; multi_badge for arrays) |
+| single iconic indicator | icon + iconMap | health (green/red/grey arrow), compliance (shield-check), trend arrow on a single numeric field | badge (icon is purely visual, badge shows text) |
+| time series per row (number[]) | sparkline | consumption trend over 12 months, incident trend, hours trend per employee | render_chart (sparkline is per-row inline; render_chart is one chart for all rows) |
+| value + period delta | trend ({value, delta}) | consumption YoY, cost MoM, revenue delta | two separate columns value + percentage (trend co-renders with arrow + color) |
+| multiple tags per row (string[]) | multi_badge + badgeMap | feature tags, certifications | concatenated text (multi_badge gives per-tag color + wrapping) |
+| clickable URL | link ({label, href}) | record link, contact email, external report | text (link navigates; text shows URL as text) |
+| bounded score on fixed scale | rating + ratingConfig | condition 0..6 (shape=dots, max=6), SLA 1..5 stars, satisfaction score | number (rating visualizes a fixed scale; number is for unbounded counts) |
+| photo / QR / avatar (URL) | image + imageConfig | thumbnail, type plate, QR code, profile photo | text (image shows the thumbnail; text shows the URL) |
+| rest | text | name, address, description, email as text | — |
 
 Feature selection:
 | Scenario | Recommended features |
@@ -140,34 +140,16 @@ Feature selection:
 | Selection for action | add selection=true (adds checkbox column) |
 | Wide table (>8 columns) | add columnVisibility=true |
 
-Domain examples (Warmtebouw):
-- Nacalculatie uren: get_nacalculatie → columns [Medewerker, Datum(date), TypeItem(badge), Uren(number), Doorbelast(boolean)], density=compact, filtering=true
-- Projectoverzicht: get_project → columns [ProjectId, Naam, Omzet(currency), Kosten(currency), Marge(percentage), Status(badge)], footer sum on Omzet/Kosten
-- Factuuroverzicht: get_verkoopfactuurregel → columns [FactuurNr, Klant, Bedrag(currency), BTW(currency), Datum(date), Betaald(boolean)], globalSearch=true
-- Budgetoverzicht: get_voorcalculatieregel → columns [Fase, TypeItem(badge), BedragBegroting(currency), UrenBegroting(number)], footer sum on bedragen
-- Abonnementsregels: get_abonnementsregel → columns [ProjectId, SoortInstallatie(badge), Fabrikaat, Conditiescore(badge), Begindatum(date)], filtering=true
-- Dossieroverzicht: get_dossier → columns [DossieritemId, Type(badge), Omschrijving, Status(badge), Datum(date), Afgehandeld(boolean)], filtering=true
-- Medewerkers: get_medewerker → columns [Naam, Afdeling(badge), Email, Startdatum(date)], comfortable density, pagination=false
-- Wagenpark: get_assets → columns [Kenteken, Merk, Chauffeur, Km(number), Brandstof(number), Score(number)], sorting=true
-- Ritten: get_trips → columns [Chauffeur, Datum(date), Afstand(number), Duur(text), Type(badge)], filtering=true
-- Rijscores: get_driver_scores / get_asset_scores → columns [Naam, Score(number), Remmen(number), Versnellen(number), Snelheid(number)], compact
-- Energieverbruik: get_usages → columns [Periode, Verbruik(number), Eenheid(text), Levering(number)], footer sum on Verbruik
-- Energiebalans: get_usages → columns [Kengetal(text), Waarde(number), Eenheid(text)], pagination=false, comfortable density
-- Meteroverzicht: get_meters → columns [Bedrijf, EAN, Type(badge), Meter, Actief(boolean)], filtering=true
-- Gebouwprofiel: get_building_profile → columns [Kenmerk(text), Waarde(text)], pagination=false — building year, surface, energy label, usage type
-- BIM elementen: get_elements / get_elements_by_project → columns [Name, Category(badge), Family, Diameter(number), System], filtering=true, compact
-- BIM modellen: get_element_groups → columns [Naam, Project, Elementen(number)], pagination=false
-- Installatiepark met storingstrend: get_abonnementsregel + get_dossier aggregaten → columns [Installatie(text), Fabrikaat(text), Bouwjaar(number), StoringTrend(sparkline, sparklineConfig.sortBy="last"), Conditie(rating, ratingConfig.max=6, shape="dots"), Kenmerken(multi_badge), OnderhoudYoY(trend, trendConfig.valueType="currency"), Status(badge)]
-- Portfolio gebouwen: get_project + get_building_profile + get_usages YoY → columns [Foto(image), Gebouw(link), Adres(text), BudgetBesteed(progress, thresholds 0.7/0.9), VerbruikYoY(trend, invertColors=false), OmzetYoY(trend, invertColors=true), Tevredenheid(rating, max=5), Label(badge)]
-- Projectlinks: get_project → columns [ProjectId(link with href to EBS), Naam(text), Omzet(currency), Marge(percentage), Status(badge)] — use link column when ProjectId should jump to external system
+Example patterns (composition guidance — adapt to your data):
+- Key-value summary: columns [Attribute(text), Value(text)], pagination=false — e.g. a building profile shown as 8-15 attribute rows
+- Records overview: columns [Id(text), Name(text), Amount(currency), Date(date), Status(badge)], sorting=true, footer sum on Amount
+- Wide analysis table: columns include sparkline (per-row time series), rating (bounded score), trend ({value, delta}) — pair with filtering=true and compact density
+- Portfolio layout: columns [Image(image), Name(link), Address(text), Progress(progress, thresholds 0.7/0.9), Rating(rating, max=5), Status(badge)]
+- External links: columns include a link-type column when an ID should navigate to another system
 
 RELATED TOOLS:
 - render_chart — for visual trends, comparisons, compositions (complementary: often useful to show both chart + table of the same data)
 - render_map — for geographic context (complementary: table for detail, map for spatial overview)
-- report_problem — if column formatting is wrong, a badge color doesn't match status semantics, or the table layout is confusing
-
-FEEDBACK:
-If the column type guide or feature selection guide was unhelpful, call report_problem with severity "low".
 
 ALERTS:
 Maximum 500 rows. Always set column types for proper formatting — default "text" loses number sorting and currency display.
@@ -183,12 +165,12 @@ const inputSchema = {
         key: z
           .string()
           .describe(
-            'Property key in each data row object. Must match exactly (case-sensitive). E.g. "MedewerkerNaam", "ProjectId", "Bedrag".'
+            'Property key in each data row object. Must match exactly (case-sensitive). E.g. "id", "name", "amount".'
           ),
         header: z
           .string()
           .describe(
-            'Column header text shown to the user. Use Dutch for Warmtebouw data (e.g. "Medewerker", "Project", "Bedrag (€)").'
+            'Column header text shown to the user. Use the language of the conversation (e.g. "Name", "Project", "Amount (€)").'
           ),
         type: z
           .enum([
@@ -218,13 +200,13 @@ const inputSchema = {
               '- date: dd-MM-yyyy via Intl.DateTimeFormat nl-NL. Left-aligned. Data: ISO date string (YYYY-MM-DD) or ISO datetime. Pick over text for any datum field.\n' +
               '- percentage: value 0..1 shown as percentage ("0.15" → "15,0%"). Right-aligned. Data: number in [0, 1]. Pick over progress for pure numeric presentation (marge, dekking). Pick progress instead when you want a visual bar with threshold coloring.\n' +
               '- boolean: true → ✓ (green), false → ✗ (red). Center-aligned. Data: true/false. Pick over badge for pure ja/nee (geaccordeerd, actief, doorbelast). Pick badge when you have more than two states.\n' +
-              '- badge: colored pill. Center-aligned. Data: a string key; requires badgeMap. Pick over text for any enumerated status/type/category (Status, TypeItem, Conditiescore, SoortInstallatie). Pick multi_badge when multiple tags apply per row.\n' +
+              '- badge: colored pill. Center-aligned. Data: a string key; requires badgeMap. Pick over text for any enumerated status/type/category. Pick multi_badge when multiple tags apply per row.\n' +
               '- icon: single Heroicon. Center-aligned. Data: the icon name (or a key looked up in iconMap). Pick over badge when the value is inherently iconic (health indicator, compliance check, direction). Pick boolean for plain ja/nee.\n' +
               '- sparkline: inline trend mini-chart (80×24 SVG). Center-aligned. Data: number[] (e.g. 12 monthly values, ideally 2–60 points). Sortable on last/avg/min/max via sparklineConfig.sortBy. Pick over rendering render_chart next to the table when the trend is a per-row attribute (verbruikstrend per gebouw, storingstrend per installatie). Pick render_chart when you have one shared trend across rows, not one per row.\n' +
               '- progress: filled horizontal bar 0–100% with numeric label. Left-aligned. Data: number in [0, 1]. Thresholds (default: green <70%, orange 70–90%, red >90%) via progressConfig.thresholds. For up-is-good metrics (compliance score, voortgang) set progressConfig.invertColors=true. Pick over percentage when threshold emphasis matters (budget besteed, voortgang, capaciteit). Pick percentage for analytical figures (marge, dekking).\n' +
               '- trend: value + directional arrow + signed delta ("€ 1.234 ▲ +12,0%"). Right-aligned. Data: { value: number, delta: number, direction?: "up"|"down"|"flat" } — direction is inferred from delta sign if omitted; delta is a fraction (0.12 = +12,0%). Default colors: up=red/down=green (correct for verbruik, kosten, storingen — rising is bad). Set trendConfig.invertColors=true when rising is good (omzet, marge, Paris-Proof progress). Pick over two separate columns (value + delta%) when the pair should be read together and space is tight.\n' +
               '- multi_badge: multiple colored pills per cell, flex-wrapped. Left-aligned. Data: string[] (array of keys). Reuses the same badgeMap as badge — no separate map needed. Global search matches any label. Pick over concatenated text ("R410A | Conditie 03 | Subcontractor") when users benefit from per-tag color. Pick over separate columns when the tags are a variable-length set that belongs together (kenmerken, systemen, certificeringen).\n' +
-              '- link: clickable navigation. Left-aligned. Data: a string (used as both label and href) OR { label: string, href: string }. Safe schemes only: http(s) and mailto — anything else renders as plain text (no javascript:, no data:). Opens in new tab by default (linkConfig.target="_self" to override). Pick over text when the user should navigate (dossier-URL, project-URL, klant-e-mail). Pick text when the URL is reference-only or when the destination is another row in the same table.\n' +
+              '- link: clickable navigation. Left-aligned. Data: a string (used as both label and href) OR { label: string, href: string }. Safe schemes only: http(s) and mailto — anything else renders as plain text (no javascript:, no data:). Opens in new tab by default (linkConfig.target="_self" to override). Pick over text when the user should navigate (record URL, contact email, external report). Pick text when the URL is reference-only or when the destination is another row in the same table.\n' +
               '- rating: filled/half/empty glyphs (★/★½/☆ or ●/◐/○). Center-aligned. Data: a number — HALF-GLYPHS SUPPORTED, values snap to nearest 0.5 via Math.round(n*2)/2 (3.4 → 3½, 3.5 → 3½, 7.6 → 7½). Configure max (default 5; common scales: 5 for sterren, 6 for Conditie-dots, 10 for 0..10 waarderingen), shape ("stars" | "dots"), color via ratingConfig. Sorts numerically. Pick over number when the value is a bounded, fixed-scale score. Pick number when the count is unbounded.\n' +
               '- image: thumbnail (default 32×32). Center-aligned. Data: a string URL — http(s) or data:image/*. External http(s) URLs are fetched server-side via the fetch_image companion tool (bypasses iframe CSP, first-load delay, 2MB cap, allowed MIMEs: jpeg/png/webp/gif/svg+xml). data:image/* URLs render directly. URLs with other schemes, broken responses, or blocked hosts render as a grey placeholder. Configure size/shape/alt via imageConfig. Not sortable by default. Pick over text for foto, typeplaatje-thumbnail, avatar, QR-code. Pick text when the URL is display-only.'
           ),
@@ -374,9 +356,9 @@ const inputSchema = {
               'Data value (explicit): { label: string, href: string } — ONLY when label ≠ href (e.g. show "G240286 Vitrum" but navigate to a long URL). Unsafe schemes (javascript:, data:, file:) render as plain text.\n' +
               'Default target="_blank" opens in a new tab with rel=noopener. Use "_self" only when navigation within the same tab is intended.\n' +
               'Example config: {"target": "_blank"}\n' +
-              'Example cell value (shorthand, URL): "https://warmtebouw.nl/dossier/2707962"\n' +
-              'Example cell value (shorthand, email): "heuvel@warmtebouw.nl"  // → mailto link\n' +
-              'Example cell value (explicit): {"label": "G240286 Vitrum", "href": "https://warmtebouw.nl/projecten/G240286"}'
+              'Example cell value (shorthand, URL): "https://example.com/record/12345"\n' +
+              'Example cell value (shorthand, email): "person@example.com"  // → mailto link\n' +
+              'Example cell value (explicit): {"label": "Record #12345", "href": "https://example.com/record/12345"}'
           ),
         ratingConfig: z
           .object({
@@ -397,7 +379,7 @@ const inputSchema = {
             'Config for type=rating. Only meaningful when type=rating.\n' +
               'Data value is a number. HALF-GLYPHS ARE SUPPORTED: values snap to the nearest 0.5 via Math.round(n*2)/2, so 3.4 renders as 3½, 3.5 renders as 3½, 4.7 renders as 4½.\n' +
               'Values outside [0, max] are clamped.\n' +
-              'Common scales: Klanttevredenheid/SLA uses max=5 + shape="stars" (yellow); Conditiescore uses max=6 + shape="dots" (Warmtebouw convention); generic 1..10 waarderingen use max=10 + shape="stars".\n' +
+              'Common scales: satisfaction/SLA uses max=5 + shape="stars" (yellow); fixed condition scales use max=6 + shape="dots"; generic 1..10 ratings use max=10 + shape="stars".\n' +
               'Example config (sterren 5-schaal, halve toegestaan): {"max": 5, "shape": "stars", "color": "yellow"} — cell value 4.5 renders ★★★★½\n' +
               'Example config (0..10 schaal): {"max": 10, "shape": "stars", "color": "yellow"} — cell value 7.5 renders 7 filled + 1 half + 2 empty\n' +
               'Example config (Conditie): {"max": 6, "shape": "dots", "color": "primary"} — cell value 3 renders ●●●○○○\n' +
@@ -438,7 +420,7 @@ const inputSchema = {
     )
     .describe(
       'Column definitions. Order determines display order left to right.\n' +
-        'Tip: put the most important identifying column first (e.g. ProjectId, Medewerker, Factuur #), ' +
+        'Tip: put the most important identifying column first (e.g. id, name, reference number), ' +
         'status/badge columns near the end, numeric totals right-aligned.'
     ),
   data: z
@@ -447,10 +429,10 @@ const inputSchema = {
       'Row data. Two accepted shapes:\n' +
         '1. Array of ARRAYS (positional, preferred for datasets >20 rows — ~40% smaller payload):\n' +
         '   Each inner array is one row. Values are in the SAME ORDER as "columns[]".\n' +
-        '   Example: columns=[{key:"Id"},{key:"Naam"},{key:"Email"}], data=[["3451","André","andre@x.nl"], ["3452","Jane","jane@x.nl"]]\n' +
+        '   Example: columns=[{key:"id"},{key:"name"},{key:"email"}], data=[["3451","André","andre@example.com"], ["3452","Jane","jane@example.com"]]\n' +
         '2. Array of OBJECTS (keyed, fine for small tables):\n' +
         '   Each object is one row. Keys must match column key values.\n' +
-        '   Example: [{"Id":"3451","Naam":"André","Email":"andre@x.nl"}]\n' +
+        '   Example: [{"id":"3451","name":"André","email":"andre@example.com"}]\n' +
         'Maximum 500 rows — pre-aggregate or filter before calling for larger datasets.\n' +
         'Dates as ISO strings (YYYY-MM-DD). Booleans as true/false. Numbers as numbers (not strings).'
     ),
@@ -471,7 +453,7 @@ const inputSchema = {
         .optional()
         .default(false)
         .describe(
-          'Enable a search box above the table that filters across ALL columns simultaneously. Useful for "zoek medewerker X" type queries. Default: false.'
+          'Enable a search box above the table that filters across ALL columns simultaneously. Useful for "find record matching X" type queries. Default: false.'
         ),
       pagination: z
         .boolean()
@@ -511,7 +493,7 @@ const inputSchema = {
     .string()
     .optional()
     .describe(
-      'Table title. Use Dutch, descriptive (e.g. "Nacalculatie Q1 2025", "Factuuroverzicht", "Medewerkers afdeling W").'
+      'Table title. Use the language of the conversation, descriptive (e.g. "Q1 2025 Hours", "Invoice Overview", "Team Members").'
     ),
   emptyMessage: z
     .string()
@@ -524,7 +506,7 @@ const inputSchema = {
     .default('normal')
     .describe(
       'Row height density:\n' +
-        '- compact: minimal padding, small font — for data-heavy tables with many rows/columns (nacalculatie, uren)\n' +
+        '- compact: minimal padding, small font — for data-heavy tables with many rows/columns\n' +
         '- normal: balanced padding — default for most tables\n' +
         '- comfortable: spacious padding, larger font — for dashboard-style overviews with few rows'
     ),
@@ -543,10 +525,10 @@ const inputSchema = {
       'Add borders between cells. Default: false (cleaner look). Set true for data-dense tables where column separation helps.'
     ),
   theme: z
-    .enum(['warmtebouw', 'auto'])
+    .enum(['default', 'auto'])
     .optional()
-    .default('warmtebouw')
-    .describe('Color theme. warmtebouw = Warmteblauw header + brand colors (default). auto = adapts to host theme.'),
+    .default('default')
+    .describe('Color theme. default = built-in palette. auto = adapts to host theme.'),
   maxHeight: z
     .string()
     .optional()

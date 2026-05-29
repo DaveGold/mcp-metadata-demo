@@ -1,5 +1,5 @@
 /**
- * Heroicons Mini (20x20, solid) — full set for Warmtebouw MCP Apps.
+ * Heroicons Mini (20x20, solid) — full set used by MCP App tables.
  * 324 icons from heroicons.com (via @ng-icons/heroicons).
  *
  * Each icon is a named export (tree-shakeable per icon).

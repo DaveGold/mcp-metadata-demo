@@ -90,27 +90,22 @@ OUTPUT EFFICIENCY (important — tool-call payloads are user-visible and expensi
 
 INTERPRETATION:
 Marker type selection:
-| Data source | Marker type | Example |
-| get_vehicle_positions | car | Bedrijfswagens met GPS positie |
-| get_building_profile | building | Gebouwen met energielabel |
-| get_project / search_projects | project | Projectlocaties |
-| custom / mixed | pin | Overige locaties |
+| Data shape | Marker type | Example |
+| vehicle/fleet positions with lat/lng | car | GPS positions, real-time tracking |
+| buildings / addresses | building | building profiles, asset locations |
+| project sites | project | construction or service-project locations |
+| anything else | pin | generic locations |
 
-Domain examples (Warmtebouw):
-- Wagenpark: "toon alle bedrijfswagens op de kaart" → get_vehicle_positions → render_map with type=car
-- Projecten: "waar zitten onze projecten in Utrecht" → search_projects → render_map with type=project
-- Gebouwen: "toon het gebouw op de kaart" → get_building_profile → render_map with type=building
-- Combinatie: "toon project G25011600 met de bedrijfswagens in de buurt" → mixed marker types
-- Energie: "toon energiepartners gebouwen in Utrecht op kaart" → get_meters → get_building_profile per adres → render_map with type=building
-- Realtime fleet: "waar staan de bussen/wagens nu" → get_vehicle_positions → render_map with type=car. Each vehicle has lat/lng, speed, driver, and timestamp. Show driver + speed + last update in marker description.
+Example patterns:
+- Single building: a building-profile tool → render_map with one marker of type=building
+- Building portfolio: multiple addresses → render_map with markers[type=building], one per address
+- Project locations: a project-search result → render_map with markers[type=project]
+- Mixed: combine building + project + car markers in one call when comparing them spatially
+- Real-time fleet: each marker carries lat/lng + speed/driver/timestamp metadata in the description field
 
 RELATED TOOLS:
 - render_chart — for data visualization (complementary: map for geographic context, chart for numeric insight)
 - render_table — for tabular data with sorting/filtering
-- report_problem — if map rendering is confusing, markers don't display correctly, or data mapping is unclear
-
-FEEDBACK:
-If a domain example is missing or the marker types are insufficient, call report_problem with severity "low".
 
 ALERTS:
 Maximum 500 markers. Pre-filter or aggregate before passing large datasets.
@@ -130,7 +125,7 @@ const inputSchema = {
           label: z
             .string()
             .describe(
-              'Marker popup title. Use Dutch domain terms (e.g. "Peugeot Expert 12-AB-34", "Kantoorpand Ceresstraat", "G25011600").'
+              'Marker popup title. Use the language of the conversation (e.g. "Van #12-AB-34", "Office building", "Project ABC").'
             ),
           description: z
             .string()
@@ -138,17 +133,17 @@ const inputSchema = {
             .describe(
               'Popup body text. Supports simple HTML (<br>, <b>, <i>). ' +
                 'Use for details like address, project number, driver name, energy label, status. ' +
-                'Example: "Chauffeur: Jan de Vries<br>Snelheid: 65 km/h<br>Laatste update: 14:32"'
+                'Example: "Driver: Jane Doe<br>Speed: 65 km/h<br>Last update: 14:32"'
             ),
           type: z
             .enum(['car', 'building', 'project', 'pin'])
             .optional()
             .describe(
               'Marker icon type:\n' +
-                '- car: vehicle icon (blue) — for bedrijfswagens / fleet positions\n' +
-                '- building: building icon (green) — for gebouwen / adressen\n' +
-                '- project: construction icon (petrol) — for Warmtebouw projecten\n' +
-                '- pin: default pin icon (blue) — for overige locaties\n' +
+                '- car: vehicle icon (blue) — fleet positions\n' +
+                '- building: building icon (green) — buildings / addresses\n' +
+                '- project: construction icon (petrol) — project sites\n' +
+                '- pin: default pin icon (blue) — anything else\n' +
                 'Default: pin'
             ),
           color: z

@@ -287,7 +287,7 @@ function normalizeChartInput(raw: ChartInput): NormalizedChartInput {
   };
 }
 
-// ── Warmtebouw Palette ───────────────────────────────────────────────────────
+// ── Color Palette ────────────────────────────────────────────────────────────
 
 function readToken(name: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();

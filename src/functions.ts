@@ -5,11 +5,6 @@
  * Cloud Run URL Firebase assigns. No auth: the endpoint is public so
  * anyone can paste the URL into their MCP client and try the demo.
  *
- * Protection layers (see docs/RUNBOOK.md):
- *   - maxInstances: 3 caps concurrent compute / blast-radius
- *   - dailyCap middleware: ~75k requests/day soft cap (per-instance)
- *   - rateLimitMcp: 30/min per (IP, UA)
- *
  * EP-Online API key flows in via Firebase secret `EP_ONLINE_API_KEY`,
  * which Cloud Functions exposes as process.env at runtime — same code
  * path as local `.env`.
