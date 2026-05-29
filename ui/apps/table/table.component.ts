@@ -25,6 +25,7 @@ import type {
   Updater,
 } from '@tanstack/angular-table';
 import { McpBridgeService } from '../../shared/mcp-bridge.service';
+import { decodeUnicodeEscapes } from '../../shared/decode-escapes';
 import {
   NL_NUMBER,
   NL_CURRENCY,
@@ -367,8 +368,8 @@ function slugify(text: string): string {
           class="overflow-hidden rounded-[var(--radius-card)] border border-wb-gray-200 dark:border-dark-border bg-white dark:bg-dark-surface"
         >
           <div class="bg-primary px-3 py-1.5 flex items-center justify-between gap-2">
-            @if (input()!.title) {
-              <h3 class="text-sm font-medium text-white truncate">{{ input()!.title }}</h3>
+            @if (title()) {
+              <h3 class="text-sm font-medium text-white truncate">{{ title() }}</h3>
             }
             <button
               type="button"
@@ -815,6 +816,11 @@ export class TableComponent implements OnInit {
     return result as unknown as TableInput;
   });
 
+  readonly title = computed(() => {
+    const t = this.input()?.title;
+    return t ? decodeUnicodeEscapes(t) : null;
+  });
+
   /**
    * Normalizes data to record shape regardless of input form. When rows are
    * arrays, values are zipped with `columns[]` positionally — the first value
@@ -850,14 +856,15 @@ export class TableComponent implements OnInit {
       const enableSorting = col.sortable === false ? false : col.sortable === true ? true : type !== 'image';
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const decodedHeader = col.header ? decodeUnicodeEscapes(col.header) : col.header;
       const columnDef: any = {
         accessorKey: col.key,
-        header: col.header,
+        header: decodedHeader,
         enableSorting,
         meta: {
           type,
           align: col.align ?? DEFAULT_ALIGN[type] ?? 'left',
-          header: col.header,
+          header: decodedHeader,
           badgeMap: col.badgeMap,
           iconMap: col.iconMap,
           sparklineConfig: col.sparklineConfig,

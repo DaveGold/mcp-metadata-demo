@@ -44,6 +44,7 @@ import { FunnelController, TrapezoidElement } from 'chartjs-chart-funnel';
 import { ForceDirectedGraphController, TreeController, DendrogramController, EdgeLine } from 'chartjs-chart-graph';
 import annotationPlugin from 'chartjs-plugin-annotation';
 import { McpBridgeService } from '../../shared/mcp-bridge.service';
+import { decodeUnicodeEscapes } from '../../shared/decode-escapes';
 
 // Tree-shaken selective imports — Decimation enables min/max downsampling for large line datasets
 Chart.register(
@@ -424,7 +425,10 @@ export class ChartComponent implements OnInit, OnDestroy {
     return normalizeChartInput(result as unknown as ChartInput);
   });
 
-  readonly title = computed(() => this.input()?.title ?? null);
+  readonly title = computed(() => {
+    const t = this.input()?.title;
+    return t ? decodeUnicodeEscapes(t) : null;
+  });
 
   readonly chartHeight = computed(() => {
     const inp = this.input();
@@ -673,14 +677,14 @@ export class ChartComponent implements OnInit, OnDestroy {
         grid: { display: showGrid, color: gridColor },
         ticks: { color: textColor },
         stacked: opts.stacked ?? false,
-        ...(opts.xAxisLabel ? { title: { display: true, text: opts.xAxisLabel, color: textColor } } : {}),
+        ...(opts.xAxisLabel ? { title: { display: true, text: decodeUnicodeEscapes(opts.xAxisLabel), color: textColor } } : {}),
       };
       scales[yKey] = {
         display: true,
         grid: { display: showGrid, color: gridColor },
         ticks: { color: textColor },
         stacked: opts.stacked ?? false,
-        ...(opts.yAxisLabel ? { title: { display: true, text: opts.yAxisLabel, color: textColor } } : {}),
+        ...(opts.yAxisLabel ? { title: { display: true, text: decodeUnicodeEscapes(opts.yAxisLabel), color: textColor } } : {}),
       };
 
       // Mixed chart: add secondary y-axis on right side
@@ -928,7 +932,7 @@ export class ChartComponent implements OnInit, OnDestroy {
             grid: { display: false, color: gridColor },
             ticks: { color: textColor },
             ...(inp.options?.xAxisLabel
-              ? { title: { display: true, text: inp.options.xAxisLabel, color: textColor } }
+              ? { title: { display: true, text: decodeUnicodeEscapes(inp.options.xAxisLabel), color: textColor } }
               : {}),
           },
           y: {
@@ -939,7 +943,7 @@ export class ChartComponent implements OnInit, OnDestroy {
             grid: { display: false, color: gridColor },
             ticks: { color: textColor },
             ...(inp.options?.yAxisLabel
-              ? { title: { display: true, text: inp.options.yAxisLabel, color: textColor } }
+              ? { title: { display: true, text: decodeUnicodeEscapes(inp.options.yAxisLabel), color: textColor } }
               : {}),
           },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
