@@ -7,7 +7,7 @@
  * This is a pass-through tool — validates input, enforces payload limits,
  * and returns structuredContent for the Angular UI to render.
  *
- * @see ui/apps/utility/map/ for the Angular MCP App
+ * @see ui/apps/map/ for the Angular MCP App
  */
 
 import fs from 'node:fs/promises';
@@ -27,8 +27,8 @@ export const RESOURCE_URI = 'ui://metadata-demo/map.html';
 
 /**
  * Path to the Vite-built UI directory.
- * At runtime: build/servers/utility-tools/tools/render-map.js
- * UI output:  build/ui/utility-map.html
+ * At runtime: dist/tools/render-map.js
+ * UI output:  build/ui/map.html
  */
 const UI_DIR = path.resolve(import.meta.dirname, '..', '..', 'build', 'ui');
 
@@ -57,14 +57,13 @@ Renders a fully interactive map inline in the conversation with clickable marker
 Uses OpenStreetMap tiles loaded directly in the browser — the UI resource declares _meta.ui.csp.resourceDomains so the iframe can reach tile.openstreetmap.org.
 
 WHEN TO USE:
-- "toon op de kaart", "toon op map", "laat zien op kaart", "waar is/zijn/staat/staan", "plot op een map"
-- "toon locatie(s)", "laat de positie(s) zien", "waar liggen", "kaart met", "map van"
-- Vehicle positions → get_vehicle_positions → render_map
-- Project locations → get_project or search_projects → render_map
-- Building locations → get_building_profile → render_map
-- Multiple locations for comparison ("toon alle projecten in Amsterdam op de kaart")
+- "show on the map", "plot on a map", "where is/are", "show the location(s)", "map of"
+- Vehicle/fleet positions → render_map with type=car
+- Project locations → render_map with type=project
+- Building locations → get_building_profile → render_map with type=building
+- Multiple locations for comparison ("show all projects in Amsterdam on the map")
 - Any question that benefits from geographic/spatial context
-- ALWAYS use this tool when the user mentions "kaart", "map", "locatie", "positie" in combination with data
+- Use this tool when the user mentions a map, location, or position in combination with data
 
 WHEN NOT TO USE:
 - Single address without visual context → respond with text
@@ -72,7 +71,7 @@ WHEN NOT TO USE:
 - No coordinates available yet → fetch data first, THEN call render_map
 
 QUERY STRATEGY:
-1. Fetch data from the relevant data tool (get_vehicle_positions, get_project, get_building_profile, search_projects, etc.)
+1. Fetch data from the relevant data source
 2. Extract lat/lng, names, and relevant details
 3. Transform into markers[] with lat, lng, label, description, type
 4. Call render_map — NEVER pass raw API responses, always reshape first
@@ -171,7 +170,7 @@ const inputSchema = {
     .string()
     .optional()
     .describe(
-      'Map title displayed above the map. Use Dutch, concise (e.g. "Bedrijfswagens positie", "Projectlocaties Utrecht").'
+      'Map title displayed above the map. Use the language of the conversation, concise (e.g. "Fleet positions", "Project locations").'
     ),
   center: z
     .object({
@@ -267,7 +266,7 @@ export function registerRenderMapTool(server: McpServer): void {
     server,
     'render_map',
     {
-      title: 'Kaart weergeven',
+      title: 'Render Map',
       description,
       inputSchema,
       annotations: {
@@ -392,7 +391,7 @@ async function logToolCall({
     await writeToolCallLog({
       sessionId: ctx.sessionId,
       environment: ctx.environment,
-      server: 'utility-tools',
+      server: 'metadata-demo',
       user: auth?.email ?? 'unknown',
       userId: auth?.userId ?? 'unknown',
       tool: 'render_map',

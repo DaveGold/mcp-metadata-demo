@@ -8,7 +8,7 @@
  * This is a pass-through tool — validates input, enforces payload limits,
  * and returns structuredContent for the Angular UI to render.
  *
- * @see ui/apps/utility/chart/ for the Angular MCP App
+ * @see ui/apps/chart/ for the Angular MCP App
  */
 
 import fs from 'node:fs/promises';
@@ -28,8 +28,8 @@ const RESOURCE_URI = 'ui://metadata-demo/chart.html';
 
 /**
  * Path to the Vite-built UI directory.
- * At runtime: build/servers/utility-tools/tools/render-chart.js
- * UI output:  build/ui/utility-chart.html
+ * At runtime: dist/tools/render-chart.js
+ * UI output:  build/ui/chart.html
  */
 const UI_DIR = path.resolve(import.meta.dirname, '..', '..', 'build', 'ui');
 
@@ -131,10 +131,6 @@ OUTPUT EFFICIENCY (important — tool-call payloads are user-visible and expensi
 RELATED TOOLS:
 - render_table — for tabular data with sorting/filtering/pagination (complementary: chart for visual insight, table for detail drill-down)
 - render_map — for geographic context (complementary: chart for numeric trends, map for spatial patterns)
-- report_problem — if chart rendering is confusing, data mapping is unclear, or a chart type doesn't match expectations
-
-FEEDBACK:
-If the chart type selection rules were unhelpful, ambiguous, or led you to the wrong chart, call report_problem with severity "low".
 
 ALERTS:
 Always check that data is pre-processed (aggregated, filtered, limited) before passing.
@@ -618,11 +614,6 @@ const inputSchema = {
     })
     .optional()
     .describe('Chart options. Most have sensible defaults — only set what you need to override.'),
-  theme: z
-    .enum(['default', 'auto'])
-    .optional()
-    .default('default')
-    .describe('Color theme. default = built-in palette. auto = adapts to host light/dark mode.'),
   width: z
     .number()
     .optional()
@@ -759,7 +750,6 @@ interface ChartArgs {
     xAxisLabel?: string;
     annotations?: AnnotationConfig[];
   };
-  theme?: string;
   width?: number;
   height?: number;
 }
@@ -831,7 +821,7 @@ export function registerRenderChartTool(server: McpServer): void {
     server,
     'render_chart',
     {
-      title: 'Grafiek weergeven',
+      title: 'Render Chart',
       description,
       inputSchema,
       annotations: {
@@ -1140,7 +1130,7 @@ async function logToolCall({
     await writeToolCallLog({
       sessionId: ctx.sessionId,
       environment: ctx.environment,
-      server: 'utility-tools',
+      server: 'metadata-demo',
       user: auth?.email ?? 'unknown',
       userId: auth?.userId ?? 'unknown',
       tool: 'render_chart',

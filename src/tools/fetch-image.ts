@@ -9,9 +9,8 @@
  *   L1 — in-memory Map (per-instance, instant, lost on cold start / deploy)
  *   L2 — origin fetch when L1 misses
  *
- * (wb-mcp-server's Firestore L2 cache stripped — keeping the demo
- * Firestore-free. Cold-starts re-fetch from origin, which is fine at
- * the request volumes this demo expects.)
+ * (In-memory only — no persistent cache. Cold-starts re-fetch from
+ * origin, which is fine at the request volumes this demo expects.)
  *
  * Security (SSRF hardening):
  *   - Only http(s) URLs accepted (mailto/javascript/data/file rejected)

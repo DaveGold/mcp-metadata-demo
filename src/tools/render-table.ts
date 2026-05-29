@@ -9,7 +9,7 @@
  * This is a pass-through tool — validates input, enforces payload limits,
  * and returns structuredContent for the Angular UI to render.
  *
- * @see ui/apps/utility/table/ for the Angular MCP App
+ * @see ui/apps/table/ for the Angular MCP App
  */
 
 import fs from 'node:fs/promises';
@@ -29,8 +29,8 @@ export const RESOURCE_URI = 'ui://metadata-demo/table.html';
 
 /**
  * Path to the Vite-built UI directory.
- * At runtime: build/servers/utility-tools/tools/render-table.js
- * UI output:  build/ui/utility-table.html
+ * At runtime: dist/tools/render-table.js
+ * UI output:  build/ui/table.html
  */
 const UI_DIR = path.resolve(import.meta.dirname, '..', '..', 'build', 'ui');
 
@@ -102,9 +102,9 @@ OUTPUT EFFICIENCY (important — tool-call payloads are user-visible and expensi
 
 DATA VALUE SHAPES (per column type — send the SIMPLEST value that fits; column-level config does the styling):
   text / number / currency / percentage / date / boolean   → scalar (string / number / boolean)
-  badge                                                     → scalar value; badgeMap on the column maps it to label + color  (e.g. value "active" + badgeMap {active:{color:"green", label:"Actief"}})
+  badge                                                     → scalar value; badgeMap on the column maps it to label + color  (e.g. value "active" + badgeMap {active:{color:"green", label:"Active"}})
   icon                                                      → scalar value; iconMap on the column maps it to icon + color
-  multi_badge                                               → ARRAY of scalars (string[]); badgeMap maps each element      (e.g. ["R410A","Subcontractor"])
+  multi_badge                                               → ARRAY of scalars (string[]); badgeMap maps each element      (e.g. ["priority","external"])
   progress                                                  → number 0..1; progressConfig.thresholds colors the bar
   rating                                                    → number; ratingConfig.max defines the scale
   sparkline                                                 → number[] (intrinsically per-row — each row's time series)
@@ -202,10 +202,10 @@ const inputSchema = {
               '- boolean: true → ✓ (green), false → ✗ (red). Center-aligned. Data: true/false. Pick over badge for pure ja/nee (geaccordeerd, actief, doorbelast). Pick badge when you have more than two states.\n' +
               '- badge: colored pill. Center-aligned. Data: a string key; requires badgeMap. Pick over text for any enumerated status/type/category. Pick multi_badge when multiple tags apply per row.\n' +
               '- icon: single Heroicon. Center-aligned. Data: the icon name (or a key looked up in iconMap). Pick over badge when the value is inherently iconic (health indicator, compliance check, direction). Pick boolean for plain ja/nee.\n' +
-              '- sparkline: inline trend mini-chart (80×24 SVG). Center-aligned. Data: number[] (e.g. 12 monthly values, ideally 2–60 points). Sortable on last/avg/min/max via sparklineConfig.sortBy. Pick over rendering render_chart next to the table when the trend is a per-row attribute (verbruikstrend per gebouw, storingstrend per installatie). Pick render_chart when you have one shared trend across rows, not one per row.\n' +
+              '- sparkline: inline trend mini-chart (80×24 SVG). Center-aligned. Data: number[] (e.g. 12 monthly values, ideally 2–60 points). Sortable on last/avg/min/max via sparklineConfig.sortBy. Pick over rendering render_chart next to the table when the trend is a per-row attribute (consumption trend per building, incident trend per asset). Pick render_chart when you have one shared trend across rows, not one per row.\n' +
               '- progress: filled horizontal bar 0–100% with numeric label. Left-aligned. Data: number in [0, 1]. Thresholds (default: green <70%, orange 70–90%, red >90%) via progressConfig.thresholds. For up-is-good metrics (compliance score, voortgang) set progressConfig.invertColors=true. Pick over percentage when threshold emphasis matters (budget besteed, voortgang, capaciteit). Pick percentage for analytical figures (marge, dekking).\n' +
               '- trend: value + directional arrow + signed delta ("€ 1.234 ▲ +12,0%"). Right-aligned. Data: { value: number, delta: number, direction?: "up"|"down"|"flat" } — direction is inferred from delta sign if omitted; delta is a fraction (0.12 = +12,0%). Default colors: up=red/down=green (correct for verbruik, kosten, storingen — rising is bad). Set trendConfig.invertColors=true when rising is good (omzet, marge, Paris-Proof progress). Pick over two separate columns (value + delta%) when the pair should be read together and space is tight.\n' +
-              '- multi_badge: multiple colored pills per cell, flex-wrapped. Left-aligned. Data: string[] (array of keys). Reuses the same badgeMap as badge — no separate map needed. Global search matches any label. Pick over concatenated text ("R410A | Conditie 03 | Subcontractor") when users benefit from per-tag color. Pick over separate columns when the tags are a variable-length set that belongs together (kenmerken, systemen, certificeringen).\n' +
+              '- multi_badge: multiple colored pills per cell, flex-wrapped. Left-aligned. Data: string[] (array of keys). Reuses the same badgeMap as badge — no separate map needed. Global search matches any label. Pick over concatenated text ("priority | external | urgent") when users benefit from per-tag color. Pick over separate columns when the tags are a variable-length set that belongs together (attributes, systems, certifications).\n' +
               '- link: clickable navigation. Left-aligned. Data: a string (used as both label and href) OR { label: string, href: string }. Safe schemes only: http(s) and mailto — anything else renders as plain text (no javascript:, no data:). Opens in new tab by default (linkConfig.target="_self" to override). Pick over text when the user should navigate (record URL, contact email, external report). Pick text when the URL is reference-only or when the destination is another row in the same table.\n' +
               '- rating: filled/half/empty glyphs (★/★½/☆ or ●/◐/○). Center-aligned. Data: a number — HALF-GLYPHS SUPPORTED, values snap to nearest 0.5 via Math.round(n*2)/2 (3.4 → 3½, 3.5 → 3½, 7.6 → 7½). Configure max (default 5; common scales: 5 for sterren, 6 for Conditie-dots, 10 for 0..10 waarderingen), shape ("stars" | "dots"), color via ratingConfig. Sorts numerically. Pick over number when the value is a bounded, fixed-scale score. Pick number when the count is unbounded.\n' +
               '- image: thumbnail (default 32×32). Center-aligned. Data: a string URL — http(s) or data:image/*. External http(s) URLs are fetched server-side via the fetch_image companion tool (bypasses iframe CSP, first-load delay, 2MB cap, allowed MIMEs: jpeg/png/webp/gif/svg+xml). data:image/* URLs render directly. URLs with other schemes, broken responses, or blocked hosts render as a grey placeholder. Configure size/shape/alt via imageConfig. Not sortable by default. Pick over text for foto, typeplaatje-thumbnail, avatar, QR-code. Pick text when the URL is display-only.'
@@ -401,7 +401,7 @@ const inputSchema = {
               'Data value: string URL. Accepted schemes: http, https, data:image/*. Other schemes, broken hosts, disallowed MIMEs, and images over 2 MB render as a grey placeholder (not an error).\n' +
               'External http(s) URLs are fetched server-side via the fetch_image companion tool — expect ~100–500 ms delay on first load for each unique URL (cached thereafter in Firestore). data:image/* URLs render instantly without the proxy.\n' +
               'Default size 32×32 square. Use larger sizes (48–64) for table density="comfortable", and shape="circle" for avatars.\n' +
-              'Example config: {"width": 48, "height": 48, "shape": "square", "alt": "Gebouwfoto"}\n' +
+              'Example config: {"width": 48, "height": 48, "shape": "square", "alt": "Building photo"}\n' +
               'Example cell value (http): "https://storage.example.com/vitrum.jpg"\n' +
               'Example cell value (data): "data:image/svg+xml;base64,PHN2Zy4uLg=="'
           ),
@@ -524,11 +524,6 @@ const inputSchema = {
     .describe(
       'Add borders between cells. Default: false (cleaner look). Set true for data-dense tables where column separation helps.'
     ),
-  theme: z
-    .enum(['default', 'auto'])
-    .optional()
-    .default('default')
-    .describe('Color theme. default = built-in palette. auto = adapts to host theme.'),
   maxHeight: z
     .string()
     .optional()
@@ -573,7 +568,6 @@ interface TableArgs {
   density?: string;
   striped?: boolean;
   bordered?: boolean;
-  theme?: string;
   maxHeight?: string;
 }
 
@@ -596,7 +590,7 @@ export function registerRenderTableTool(server: McpServer): void {
     server,
     'render_table',
     {
-      title: 'Tabel weergeven',
+      title: 'Render Table',
       description,
       inputSchema,
       annotations: {
@@ -677,7 +671,7 @@ async function logToolCall({
     await writeToolCallLog({
       sessionId: ctx.sessionId,
       environment: ctx.environment,
-      server: 'utility-tools',
+      server: 'metadata-demo',
       user: auth?.email ?? 'unknown',
       userId: auth?.userId ?? 'unknown',
       tool: 'render_table',

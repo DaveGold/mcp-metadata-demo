@@ -9,6 +9,8 @@ A working demo of the metadata strategy described in the paper. It applies that 
 
 When tool metadata is rich enough, the AI doesn't need a wrapper agent telling it *how* to use the tool — the tool tells the AI itself.
 
+> **Note** — This is a distilled extraction of a production MCP system I built in industry. The domain enrichment shown here (the `alerts[]` rules, the chart/table/map metadata) is deliberately lighter than the original: enough to demonstrate the strategy, not the full production depth.
+
 ## Two levels, one strategy
 
 **Level 1 — domain tool**: an agent calls `get_building_profile`, reads the `alerts[]` array, and formulates a follow-up question from the curated advisory text:
