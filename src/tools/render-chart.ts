@@ -196,7 +196,12 @@ const inputSchema = {
         // Tuple shorthand: [label, data] — for simple datasets with no extra styling.
         // ~20 chars saved per dataset vs the keyed object form. Use for the common
         // line/bar case where default palette auto-cycling is fine.
-        z.tuple([z.string(), z.array(z.number().nullable())]),
+        // Modeled as a loose positional array (NOT z.tuple) so the emitted JSON
+        // Schema uses single-object `items` instead of the array-form `items: [...]`
+        // that strict connectors (OpenAI/ChatGPT) reject. Payload stays identical.
+        // .length(2) restores the tuple's arity check via minItems/maxItems (not
+        // array-form items), so a malformed [label] can't yield data:undefined.
+        z.array(z.union([z.string(), z.array(z.number().nullable())])).length(2),
         // Full object form — required for scatter/bubble (scatterData), dashed lines,
         // custom colors, per-dataset type overrides, area fill, tension, etc.
         z.object({
@@ -318,7 +323,9 @@ const inputSchema = {
         .array(
           z.union([
             // Tuple shorthand: [from, to, flow] — big win on large diagrams (50+ flows).
-            z.tuple([z.string(), z.string(), z.number()]),
+            // Loose positional array (not z.tuple) for connector-safe JSON Schema;
+            // .length(3) restores arity via minItems/maxItems so flow can't be undefined.
+            z.array(z.union([z.string(), z.number()])).length(3),
             z.object({
               from: z.string().describe('Source node name (e.g. "Elektriciteit", "Budget Projecten")'),
               to: z.string().describe('Target node name (e.g. "Warmtepomp", "Afdeling W")'),
@@ -368,7 +375,9 @@ const inputSchema = {
         .array(
           z.union([
             // Tuple shorthand: [x, y, v] — preferred for dense heatmaps (saves ~20 chars/cell).
-            z.tuple([z.union([z.string(), z.number()]), z.union([z.string(), z.number()]), z.number()]),
+            // Loose positional array (not z.tuple) for connector-safe JSON Schema;
+            // .length(3) restores arity via minItems/maxItems so v can't be undefined.
+            z.array(z.union([z.string(), z.number()])).length(3),
             z.object({
               x: z.union([z.string(), z.number()]).describe('X-axis category or numeric position'),
               y: z.union([z.string(), z.number()]).describe('Y-axis category or numeric position'),
@@ -477,9 +486,9 @@ const inputSchema = {
         .array(
           z.union([
             // Tuple shorthand: [id] | [id, label] | [id, label, group]
-            z.tuple([z.string()]),
-            z.tuple([z.string(), z.string()]),
-            z.tuple([z.string(), z.string(), z.string()]),
+            // Loose positional array (not z.tuple) for connector-safe JSON Schema;
+            // .min(1).max(3) restores arity via minItems/maxItems so id can't be undefined.
+            z.array(z.string()).min(1).max(3),
             z.object({
               id: z.string().describe('Unique node identifier referenced from edges.'),
               label: z.string().optional().describe('Display label. Falls back to id.'),
@@ -500,8 +509,12 @@ const inputSchema = {
         .array(
           z.union([
             // Tuple shorthand: [source, target] or [source, target, weight]
-            z.tuple([z.string(), z.string()]),
-            z.tuple([z.string(), z.string(), z.number()]),
+            // Loose positional array (not z.tuple) for connector-safe JSON Schema;
+            // .min(2).max(3) restores arity via minItems/maxItems so target can't be undefined.
+            z
+              .array(z.union([z.string(), z.number()]))
+              .min(2)
+              .max(3),
             z.object({
               source: z.string().describe('Source node id (must match a node.id).'),
               target: z.string().describe('Target node id (must match a node.id).'),
@@ -832,9 +845,15 @@ export function registerRenderChartTool(server: McpServer): void {
       },
       _meta: { ui: { resourceUri: RESOURCE_URI } },
     },
-    async (args: ChartArgs, extra: { authInfo?: AuthInfo }) => {
+    async (rawArgs, extra: { authInfo?: AuthInfo }) => {
       const start = Date.now();
       let auth: { email: string; userId: string; roles: string[] } | null = null;
+
+      // The input schema models tuple shorthands as loose positional arrays
+      // (for connector-safe JSON Schema), so the inferred arg type is wider than
+      // ChartArgs's precise tuple types. Positional access + normalize* + the
+      // runtime checks below validate the actual shape, so assert ChartArgs here.
+      const args = rawArgs as unknown as ChartArgs;
 
       try {
         auth = getAuthExtra(extra.authInfo);
