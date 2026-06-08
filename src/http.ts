@@ -13,6 +13,7 @@
  * the protection layers described in docs/RUNBOOK.md.
  */
 
+import { randomUUID } from 'node:crypto';
 import express, {
   type Express,
   type Request,
@@ -21,6 +22,7 @@ import express, {
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { createServer } from './server.js';
 import { logger } from './logger.js';
+import { requestContext } from './shared/log-context.js';
 import { dailyCap } from './middleware/daily-cap.js';
 import { rateLimitMcp } from './middleware/rate-limit.js';
 import { requestLog } from './middleware/request-log.js';
@@ -46,24 +48,32 @@ export function createHttpApp(options: CreateHttpAppOptions = {}): Express {
   const mcpMiddleware = options.hosted ? [dailyCap, rateLimitMcp] : [];
 
   async function handleMcpRequest(req: Request, res: Response): Promise<void> {
-    try {
-      // Stateless: one fresh McpServer + transport pair per request.
-      const server = createServer();
-      const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined,
-        enableJsonResponse: true,
-      });
-      await server.connect(transport);
-      await transport.handleRequest(req, res, req.body);
-    } catch (error) {
-      logger.error('http.handler_error', {
-        requestId: req.requestId,
-        error: error instanceof Error ? error.message : String(error),
-      });
-      if (!res.headersSent) {
-        res.status(500).json({ error: 'Internal server error' });
+    // Open a request context so tool handlers can stamp `tool.invoked` audit
+    // rows with a session id (reusing the request-log requestId when present)
+    // and the runtime environment. K_SERVICE is set by Cloud Run / Functions.
+    const sessionId = req.requestId ?? randomUUID();
+    const environment = process.env.K_SERVICE ? 'cloud' : 'local';
+
+    await requestContext.run({ sessionId, environment }, async () => {
+      try {
+        // Stateless: one fresh McpServer + transport pair per request.
+        const server = createServer();
+        const transport = new StreamableHTTPServerTransport({
+          sessionIdGenerator: undefined,
+          enableJsonResponse: true,
+        });
+        await server.connect(transport);
+        await transport.handleRequest(req, res, req.body);
+      } catch (error) {
+        logger.error('http.handler_error', {
+          requestId: req.requestId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        if (!res.headersSent) {
+          res.status(500).json({ error: 'Internal server error' });
+        }
       }
-    }
+    });
   }
 
   // Mount on both '/' and '/mcp' so:

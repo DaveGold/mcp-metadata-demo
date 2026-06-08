@@ -24,6 +24,34 @@ declare global {
   }
 }
 
+/**
+ * Pull the JSON-RPC method (and, for tools/call, the tool name) out of an
+ * already-parsed request body so each MCP message is attributable at the HTTP
+ * layer — `POST /` alone can't distinguish `initialize` from `tools/call`.
+ *
+ * Handles single messages and JSON-RPC batches (reports the first message's
+ * method plus the batch size). Tolerant of non-object bodies (GET probes).
+ */
+function describeRpc(body: unknown): { rpcMethod?: string; tool?: string; batchSize?: number } {
+  if (!body || typeof body !== 'object') return {};
+  const batch = Array.isArray(body) ? body : null;
+  const first = (batch ? batch[0] : body) as Record<string, unknown> | undefined;
+  if (!first || typeof first !== 'object') return {};
+
+  const rpcMethod = typeof first.method === 'string' ? first.method : undefined;
+  let tool: string | undefined;
+  if (rpcMethod === 'tools/call' && first.params && typeof first.params === 'object') {
+    const name = (first.params as Record<string, unknown>).name;
+    if (typeof name === 'string') tool = name;
+  }
+
+  return {
+    ...(rpcMethod ? { rpcMethod } : {}),
+    ...(tool ? { tool } : {}),
+    ...(batch && batch.length > 1 ? { batchSize: batch.length } : {}),
+  };
+}
+
 export function requestLog(req: Request, res: Response, next: NextFunction): void {
   const requestId = randomUUID();
   req.requestId = requestId;
@@ -36,6 +64,7 @@ export function requestLog(req: Request, res: Response, next: NextFunction): voi
     ua,
     method: req.method,
     path: req.path,
+    ...describeRpc(req.body),
   });
 
   res.on('finish', () => {
