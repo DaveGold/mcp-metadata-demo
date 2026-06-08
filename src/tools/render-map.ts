@@ -151,11 +151,34 @@ const inputSchema = {
             .describe('Custom marker color (hex, e.g. "#e82b21"). Overrides the default type color.'),
         })
       ),
-      // Positional tuple with typed first three slots (lat/lng/label). Trailing
-      // slots (description/type/color) stay as z.unknown so valid shorter rows
-      // like [lat, lng, label] still parse; normalizeMarkers() handles the
-      // optional slots and validates them before rendering.
-      z.array(z.tuple([z.number(), z.number(), z.string()]).rest(z.unknown())),
+      // Positional shorthand: [lat, lng, label, description?, type?, color?].
+      // Modeled as a loose positional array (NOT z.tuple().rest()) so the emitted
+      // JSON Schema uses single-object `items` instead of the array-form
+      // `items: [...]` that strict connectors (OpenAI/ChatGPT) reject. The
+      // number|string union covers lat/lng (number) + label/description/type/color
+      // (string); .min(3).max(6) restores arity via minItems/maxItems so a
+      // malformed [lat, lng] can't yield label:undefined. The .refine() restores
+      // the per-slot type enforcement that z.tuple() gave us (so [lat, lng, 123]
+      // can't silently cast a number into label) — refinements are NOT emitted to
+      // JSON Schema, so the schema stays connector-safe while runtime validation
+      // is strict. normalizeMarkers() then maps the validated positional slots.
+      z
+        .array(z.union([z.number(), z.string()]))
+        .min(3)
+        .max(6)
+        .refine(
+          (row) =>
+            typeof row[0] === 'number' &&
+            typeof row[1] === 'number' &&
+            typeof row[2] === 'string' &&
+            (row[3] === undefined || typeof row[3] === 'string') &&
+            (row[4] === undefined || ['car', 'building', 'project', 'pin'].includes(row[4] as string)) &&
+            (row[5] === undefined || typeof row[5] === 'string'),
+          {
+            message:
+              'Invalid positional marker row. Expected [lat:number, lng:number, label:string, description?:string, type?:"car"|"building"|"project"|"pin", color?:string].',
+          }
+        ),
     ])
     .describe(
       'Array of markers to place on the map. Two accepted shapes:\n' +
@@ -277,9 +300,15 @@ export function registerRenderMapTool(server: McpServer): void {
       },
       _meta: { ui: { resourceUri: RESOURCE_URI } },
     },
-    async (args: MapArgs, extra: { authInfo?: AuthInfo }) => {
+    async (rawArgs, extra: { authInfo?: AuthInfo }) => {
       const start = Date.now();
       let auth: { email: string; userId: string; roles: string[] } | null = null;
+
+      // The input schema models the marker shorthand as a loose positional array
+      // (for connector-safe JSON Schema), so the inferred arg type is wider than
+      // MapArgs's precise shape. normalizeMarkers() + the bounds checks below
+      // validate the actual shape, so assert MapArgs here.
+      const args = rawArgs as unknown as MapArgs;
 
       try {
         auth = getAuthExtra(extra.authInfo);
