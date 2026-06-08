@@ -15,6 +15,8 @@ import type { EpOnlineClient } from '../clients/ep-online-client.js';
 import { selectBestLabel } from '../domain/select-best-label.js';
 import { generateAlerts } from '../domain/generate-alerts.js';
 import { buildProfile, emptyProfile } from '../domain/build-profile.js';
+import { requestContext } from '../shared/log-context.js';
+import { writeToolCallLog } from '../shared/log-store.js';
 
 // ── Description ──────────────────────────────────────────────────────────────
 
@@ -233,6 +235,7 @@ export function registerGetBuildingProfileTool(
       },
     },
     async (args: { postcode: string; huisnummer: number; huisletter?: string; toevoeging?: string }) => {
+      const start = Date.now();
       const ok = (profile: BuildingProfile) => ({
         structuredContent: profile,
         content: [{ type: 'text' as const, text: JSON.stringify(profile, null, 2) }],
@@ -248,6 +251,7 @@ export function registerGetBuildingProfileTool(
 
         if (addresses.length === 0) {
           const adres = `${args.postcode} ${args.huisnummer}${args.huisletter ?? ''}${args.toevoeging ? ' ' + args.toevoeging : ''}`;
+          await logToolCall({ args, start, status: 'success', rowCount: 0 });
           return ok({
             ...emptyProfile(adres),
             alerts: [
@@ -278,10 +282,12 @@ export function registerGetBuildingProfileTool(
           labelCount: labels.length,
         });
 
+        await logToolCall({ args, start, status: 'success', rowCount: addresses.length });
         return ok({ ...profile, alerts: generateAlerts(profile) });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         logger.error('tool.error', { tool: 'get_building_profile', error: errorMessage });
+        await logToolCall({ args, start, status: 'error', rowCount: 0 });
         return {
           content: [{ type: 'text' as const, text: `Error in get_building_profile: ${errorMessage}` }],
           isError: true,
@@ -289,4 +295,44 @@ export function registerGetBuildingProfileTool(
       }
     }
   );
+}
+
+/**
+ * Emit a `tool.invoked` audit row. No-op when no request context is active
+ * (stdio transport / local dev), mirroring the render-tool helpers.
+ */
+async function logToolCall({
+  args,
+  start,
+  status,
+  rowCount,
+}: {
+  args: { postcode: string; huisnummer: number; huisletter?: string; toevoeging?: string };
+  start: number;
+  status: 'success' | 'error';
+  rowCount: number;
+}): Promise<void> {
+  const ctx = requestContext.getStore();
+  if (!ctx) return;
+  const adres = `${args.postcode} ${args.huisnummer}${args.huisletter ?? ''}${args.toevoeging ? ' ' + args.toevoeging : ''}`;
+  await writeToolCallLog({
+    sessionId: ctx.sessionId,
+    environment: ctx.environment,
+    server: 'metadata-demo',
+    user: 'unknown',
+    userId: 'unknown',
+    tool: 'get_building_profile',
+    connector: 'GetBuildingProfile',
+    queryIntent: adres,
+    filters: [],
+    filterCount: 0,
+    summaryOnly: false,
+    skip: 0,
+    take: 0,
+    status,
+    rowCount,
+    hasMore: false,
+    durationMs: Date.now() - start,
+    errorType: status === 'error' ? 'ToolError' : null,
+  });
 }

@@ -34,6 +34,8 @@ import { isIP } from 'node:net';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerAppTool } from '@modelcontextprotocol/ext-apps/server';
 import { logger } from '../logger.js';
+import { requestContext } from '../shared/log-context.js';
+import { writeToolCallLog } from '../shared/log-store.js';
 import { RESOURCE_URI } from './render-table.js';
 
 const MAX_IMAGES_PER_CALL = 50;
@@ -266,7 +268,10 @@ export function registerFetchImageTool(server: McpServer): void {
       },
     },
     async ({ urls }) => {
+      const start = Date.now();
+
       if (urls.length > MAX_IMAGES_PER_CALL) {
+        await logToolCall({ start, status: 'error', requested: urls.length, resolved: 0 });
         return {
           content: [
             {
@@ -280,6 +285,9 @@ export function registerFetchImageTool(server: McpServer): void {
 
       const unique = Array.from(new Set(urls));
       const results = await Promise.all(unique.map((u) => resolveImage(u)));
+      const resolved = results.filter((r) => r.data !== null).length;
+
+      await logToolCall({ start, status: 'success', requested: unique.length, resolved });
 
       return {
         content: [
@@ -291,4 +299,43 @@ export function registerFetchImageTool(server: McpServer): void {
       };
     }
   );
+}
+
+/**
+ * Emit a `tool.invoked` audit row. No-op when no request context is active
+ * (stdio transport / local dev), mirroring the render-tool helpers.
+ */
+async function logToolCall({
+  start,
+  status,
+  requested,
+  resolved,
+}: {
+  start: number;
+  status: 'success' | 'error';
+  requested: number;
+  resolved: number;
+}): Promise<void> {
+  const ctx = requestContext.getStore();
+  if (!ctx) return;
+  await writeToolCallLog({
+    sessionId: ctx.sessionId,
+    environment: ctx.environment,
+    server: 'metadata-demo',
+    user: 'unknown',
+    userId: 'unknown',
+    tool: 'fetch_image',
+    connector: 'FetchImage',
+    queryIntent: `fetch-${requested}-image(s)`,
+    filters: [],
+    filterCount: 0,
+    summaryOnly: false,
+    skip: 0,
+    take: 0,
+    status,
+    rowCount: resolved,
+    hasMore: false,
+    durationMs: Date.now() - start,
+    errorType: status === 'error' ? 'ToolError' : null,
+  });
 }
