@@ -90,7 +90,7 @@ interface TableInput {
 
 // ── TanStack v9 Feature Registration ─────────────────────────────────────────
 
-const _features = tableFeatures({
+const features = tableFeatures({
   rowSortingFeature,
   rowPaginationFeature,
   rowSelectionFeature,
@@ -1011,13 +1011,12 @@ export class TableComponent implements OnInit {
   // ── TanStack Table ─────────────────────────────────────────────────────
 
   readonly table = injectTable(() => ({
-    _features,
-    _rowModels: {
+    features,
+    rowModels: {
       sortedRowModel: createSortedRowModel(sortFns),
       paginatedRowModel: createPaginatedRowModel(),
       filteredRowModel: createFilteredRowModel(filterFns),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any,
+    },
     data: this.data(),
     columns: this.columns(),
     state: {
