@@ -458,7 +458,12 @@ export class ChartComponent implements OnInit, OnDestroy {
       if (this.chart) {
         this.chart.destroy();
       }
-      this.chart = new Chart(canvas.nativeElement, config);
+      // Chart's constructor builds a union over every registered controller type.
+      // With our 7+ chartjs-chart-* augmentations that union exceeds TS 6.0's
+      // tightened complexity limit (TS2590). Narrow to a single concrete type for
+      // the type layer — Chart.js ignores the type parameter at runtime and reads
+      // config.type — then widen back to the field's full Chart type.
+      this.chart = new Chart(canvas.nativeElement, config as ChartConfiguration<'bar'>) as unknown as Chart;
     });
   }
 

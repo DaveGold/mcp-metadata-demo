@@ -426,9 +426,9 @@ const inputSchema = {
   data: z
     .union([z.array(z.record(z.string(), z.unknown())), z.array(z.array(z.unknown()))])
     .describe(
-      'Row data. Two accepted shapes:\n' +
+      'Row data. Two accepted shapes (do not mix them — all rows must use the same shape):\n' +
         '1. Array of ARRAYS (positional, preferred for datasets >20 rows — ~40% smaller payload):\n' +
-        '   Each inner array is one row. Values are in the SAME ORDER as "columns[]".\n' +
+        '   Each inner array is one row. Values are in the SAME ORDER as "columns[]" and each row must have exactly one value per column.\n' +
         '   Example: columns=[{key:"id"},{key:"name"},{key:"email"}], data=[["3451","André","andre@example.com"], ["3452","Jane","jane@example.com"]]\n' +
         '2. Array of OBJECTS (keyed, fine for small tables):\n' +
         '   Each object is one row. Keys must match column key values.\n' +
@@ -571,6 +571,30 @@ interface TableArgs {
   maxHeight?: string;
 }
 
+/**
+ * Validates the row data shape against the column definitions. The UI zips
+ * positional rows with columns[] by index and decides keyed-vs-positional on
+ * the FIRST row only — so a length mismatch or a mixed-shape payload would
+ * silently drop values or render empty cells. Reject here with a clear
+ * message instead. Returns an error message, or null when the shape is valid.
+ */
+export function findRowShapeError(columns: TableArgs['columns'], data: TableArgs['data']): string | null {
+  if (!Array.isArray(data) || data.length === 0) return null;
+  const firstRowIsPositional = Array.isArray(data[0]);
+  for (let index = 0; index < data.length; index++) {
+    const row = data[index];
+    if (Array.isArray(row) !== firstRowIsPositional) {
+      return `Row ${index} is ${Array.isArray(row) ? 'a positional array' : 'a keyed object'} but row 0 is ${
+        firstRowIsPositional ? 'a positional array' : 'a keyed object'
+      }. All rows must use the same shape — mixed shapes render incorrectly.`;
+    }
+    if (firstRowIsPositional && (row as unknown[]).length !== columns.length) {
+      return `Positional row ${index} has ${(row as unknown[]).length} values but there are ${columns.length} columns. Each positional row must have exactly one value per column, in columns[] order.`;
+    }
+  }
+  return null;
+}
+
 // ── Tool registration ────────────────────────────────────────────────────────
 
 export function registerRenderTableTool(server: McpServer): void {
@@ -617,6 +641,15 @@ export function registerRenderTableTool(server: McpServer): void {
                 text: `Too many rows (${args.data.length}). Maximum 500. Pre-aggregate or filter before calling render_table.`,
               },
             ],
+            isError: true,
+          };
+        }
+
+        // ── Validate row shape (positional length, mixed shapes) ─────
+        const rowShapeError = findRowShapeError(args.columns, args.data);
+        if (rowShapeError) {
+          return {
+            content: [{ type: 'text' as const, text: rowShapeError }],
             isError: true,
           };
         }
