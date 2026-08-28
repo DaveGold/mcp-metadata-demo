@@ -222,7 +222,9 @@ The hosted endpoints log request metadata (IP, User-Agent, tool name, duration) 
 
 ## Author
 
-Built by [David Golverdingen](https://davidgolverdingen.nl/en) as a companion to the metadata-strategy paper *[The Missing Layer](https://davidgolverdingen.nl/en/the-missing-layer)*.
+Built by **David Golverdingen** — Senior Engineer & MCP Architect — as a companion to *[The Missing Layer](https://davidgolverdingen.nl/en/the-missing-layer)*.
+
+[Website](https://davidgolverdingen.nl/en) · [LinkedIn](https://www.linkedin.com/in/davidgolverdingen/) · [GitHub](https://github.com/DaveGold)
 
 ## License
 

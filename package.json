@@ -33,7 +33,7 @@
     "typecheck": "tsc --noEmit",
     "deploy": "npm run build && firebase deploy --only functions:mcp,functions:mcpMinimal",
     "deploy:setup-secret": "firebase functions:secrets:set EP_ONLINE_API_KEY",
-    "logs": "firebase functions:log --only mcp",
+    "logs": "firebase functions:log --only mcp,mcpMinimal",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -41,8 +41,11 @@
     "model-context-protocol",
     "mcp-apps",
     "metadata-strategy",
+    "context-engineering",
+    "introspective-context-engineering",
     "rich-domain-tools",
     "self-describing-tools",
+    "tool-metadata",
     "ai-tooling",
     "claude",
     "bag",
