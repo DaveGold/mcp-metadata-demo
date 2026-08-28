@@ -1,7 +1,7 @@
 {
   "name": "mcp-metadata-demo",
   "version": "1.1.0",
-  "description": "Demo MCP server + MCP apps showing Introspective Context Engineering for MCP (ICE): rich tool metadata that replaces wrapper agents. Companion to the paper 'The Missing Layer'. Uses Dutch open building data (BAG + EP-Online) as the domain.",
+  "description": "Demo MCP server + MCP Apps showing Introspective Context Engineering for MCP (ICE): using domain knowledge and agent-facing capabilities to turn thin API wrappers into Rich Domain MCP Servers. Companion to 'The Missing Layer', using Dutch open building data (BAG + EP-Online).",
   "type": "module",
   "bin": {
     "mcp-metadata-demo": "./dist/stdio.js"
@@ -44,8 +44,14 @@
     "context-engineering",
     "introspective-context-engineering-for-mcp",
     "rich-domain-tools",
+    "rich-domain-mcp",
     "self-describing-tools",
     "tool-metadata",
+    "domain-knowledge",
+    "domain-semantics",
+    "query-intent",
+    "queryintent",
+    "mcp-server",
     "ai-tooling",
     "claude",
     "bag",
