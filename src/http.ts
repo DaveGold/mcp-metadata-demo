@@ -20,7 +20,7 @@ import express, {
   type Response,
 } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { createServer } from './server.js';
+import { createServer, type ServerVariant } from './server.js';
 import { logger } from './logger.js';
 import { requestContext } from './shared/log-context.js';
 import { dailyCap } from './middleware/daily-cap.js';
@@ -30,6 +30,8 @@ import { requestLog } from './middleware/request-log.js';
 export interface CreateHttpAppOptions {
   /** When true, mount daily-cap + rate-limit + request-logging on `/mcp`. */
   hosted?: boolean;
+  /** Metadata tier this app serves. Default 'rich'. */
+  variant?: ServerVariant;
 }
 
 export function createHttpApp(options: CreateHttpAppOptions = {}): Express {
@@ -57,7 +59,7 @@ export function createHttpApp(options: CreateHttpAppOptions = {}): Express {
     await requestContext.run({ sessionId, environment }, async () => {
       try {
         // Stateless: one fresh McpServer + transport pair per request.
-        const server = createServer();
+        const server = createServer({ variant: options.variant ?? 'rich' });
         const transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: undefined,
           enableJsonResponse: true,
@@ -93,12 +95,13 @@ const isMain = import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
   const PORT = Number(process.env.PORT ?? 3000);
   const HOST = process.env.HOST ?? '127.0.0.1';
+  const variant: ServerVariant = process.env.MCP_VARIANT === 'minimal' ? 'minimal' : 'rich';
 
-  const app = createHttpApp({ hosted: false });
+  const app = createHttpApp({ hosted: false, variant });
   app.listen(PORT, HOST, () => {
-    logger.info('server.started', { transport: 'http', host: HOST, port: PORT });
+    logger.info('server.started', { transport: 'http', host: HOST, port: PORT, variant });
     process.stderr.write(
-      `\nmcp-metadata-demo listening on http://${HOST}:${PORT}/mcp\n` +
+      `\nmcp-metadata-demo (${variant}) listening on http://${HOST}:${PORT}/mcp\n` +
         `⚠️  No auth — keep this bound to localhost.\n\n`
     );
   });

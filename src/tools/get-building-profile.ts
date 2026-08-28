@@ -215,6 +215,56 @@ export type BagClientLike = Pick<BagClient, 'findAddress' | 'getVerblijfsobject'
 /** Minimum surface of the EP-Online client used by this tool. Eases testing. */
 export type EpOnlineClientLike = Pick<EpOnlineClient, 'getByBagVboId'>;
 
+/**
+ * Shared data path for every metadata tier: BAG address → VBO/EP/Pand → profile.
+ *
+ * Returns the profile *without* alerts — each tier decides what metadata layer to
+ * add on top (the rich tier adds `generateAlerts`; the minimal tier adds nothing).
+ * `notFound` is true when BAG has no match, in which case `profile` is the empty
+ * placeholder and the caller supplies any not-found messaging.
+ */
+export async function resolveBuildingProfile(
+  bagClient: BagClientLike,
+  epOnlineClient: EpOnlineClientLike,
+  args: { postcode: string; huisnummer: number; huisletter?: string; toevoeging?: string }
+): Promise<{ profile: Omit<BuildingProfile, 'alerts'>; notFound: boolean }> {
+  const addresses = await bagClient.findAddress(
+    args.postcode,
+    args.huisnummer,
+    args.huisletter,
+    args.toevoeging
+  );
+
+  if (addresses.length === 0) {
+    const adres = `${args.postcode} ${args.huisnummer}${args.huisletter ?? ''}${args.toevoeging ? ' ' + args.toevoeging : ''}`;
+    return { profile: emptyProfile(adres), notFound: true };
+  }
+
+  const bestAddress = addresses[0];
+
+  // VBO + EP-Online both only need the VBO id. Pand lookup chains off VBO.
+  const vboPromise = bagClient.getVerblijfsobject(bestAddress.vboId);
+  const epPromise = epOnlineClient.getByBagVboId(bestAddress.vboId);
+  const pandPromise = vboPromise.then((vbo) =>
+    vbo && vbo.pandLinks.length > 0 ? bagClient.getPand(vbo.pandLinks[0]) : null
+  );
+
+  const [vbo, labels, pand] = await Promise.all([vboPromise, epPromise, pandPromise]);
+  const bestLabel = selectBestLabel(labels);
+
+  const profile = buildProfile({
+    matchStatus: addresses.length === 1 ? 'exact' : 'multiple_vbos',
+    candidateCount: addresses.length,
+    address: bestAddress,
+    vbo,
+    pand,
+    label: bestLabel,
+    labelCount: labels.length,
+  });
+
+  return { profile, notFound: false };
+}
+
 export function registerGetBuildingProfileTool(
   server: McpServer,
   bagClient: BagClientLike,
@@ -242,47 +292,19 @@ export function registerGetBuildingProfileTool(
       });
 
       try {
-        const addresses = await bagClient.findAddress(
-          args.postcode,
-          args.huisnummer,
-          args.huisletter,
-          args.toevoeging
-        );
+        const { profile, notFound } = await resolveBuildingProfile(bagClient, epOnlineClient, args);
 
-        if (addresses.length === 0) {
-          const adres = `${args.postcode} ${args.huisnummer}${args.huisletter ?? ''}${args.toevoeging ? ' ' + args.toevoeging : ''}`;
+        if (notFound) {
           await logToolCall({ args, start, status: 'success', rowCount: 0 });
           return ok({
-            ...emptyProfile(adres),
+            ...profile,
             alerts: [
               'Geen adres gevonden in BAG. Controleer postcode (4 cijfers + 2 hoofdletters) en huisnummer.',
             ],
           });
         }
 
-        const bestAddress = addresses[0];
-
-        // VBO + EP-Online both only need the VBO id. Pand lookup chains off VBO.
-        const vboPromise = bagClient.getVerblijfsobject(bestAddress.vboId);
-        const epPromise = epOnlineClient.getByBagVboId(bestAddress.vboId);
-        const pandPromise = vboPromise.then((vbo) =>
-          vbo && vbo.pandLinks.length > 0 ? bagClient.getPand(vbo.pandLinks[0]) : null
-        );
-
-        const [vbo, labels, pand] = await Promise.all([vboPromise, epPromise, pandPromise]);
-        const bestLabel = selectBestLabel(labels);
-
-        const profile = buildProfile({
-          matchStatus: addresses.length === 1 ? 'exact' : 'multiple_vbos',
-          candidateCount: addresses.length,
-          address: bestAddress,
-          vbo,
-          pand,
-          label: bestLabel,
-          labelCount: labels.length,
-        });
-
-        await logToolCall({ args, start, status: 'success', rowCount: addresses.length });
+        await logToolCall({ args, start, status: 'success', rowCount: profile.candidateCount });
         return ok({ ...profile, alerts: generateAlerts(profile) });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);

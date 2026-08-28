@@ -33,6 +33,31 @@ The agent didn't need separate priming on Dutch energy regulation — the tool's
   because the schema's REFUSE rules say sankey requires flows (this data has none).
 ```
 
+## The ablation: what the metadata layer is worth
+
+To *show* the strategy pays off, the server ships in **two tiers of the same `get_building_profile` tool** — same name, same underlying BAG + EP-Online data path, deployed as two separate endpoints:
+
+| | **rich** (`/mcp`) | **minimal** (`/mcpMinimal`) |
+|---|---|---|
+| Tool description | ~5,100 chars (`RETURNS` / `WHEN TO USE` / `QUERY STRATEGY` / `INTERPRETATION` / `ALERTS`) | one sentence (~50 chars) |
+| Input schema | 4 fields, each `.describe()`d, format-validated | 2 bare fields, no descriptions, no validation |
+| Output schema | full Zod schema (~45 described fields) + `structuredContent` | none — text-only result |
+| Curated `alerts[]` | yes (`generateAlerts`) | none |
+| Other tools | `render_chart` / `render_table` / `render_map` | none |
+
+**The data returned is identical.** Only the layer that tells the model *how to read it* is removed. That isolates the paper's claim: point the same prompts at both endpoints and watch what the agent can and can't do unaided.
+
+The failure the layer prevents is concrete. A residential *Nader Voorschrift* label returns `co2_emissie` and `berekend_energieverbruik` as **MJ-totals for the whole building** (values of 80,000–100,000), not kWh/m². The **rich** tier flags this in `alerts[]`; the **minimal** tier returns the bare number, so an unprimed agent will happily benchmark it as a per-m² intensity and be wrong by orders of magnitude.
+
+Run both locally to compare:
+
+```sh
+npm run inspect          # rich tier
+npm run inspect:minimal  # minimal tier — same tool, metadata stripped
+```
+
+Both tiers deploy together (`npm run deploy`) as the Firebase functions `mcp` and `mcpMinimal`.
+
 ## What's inside
 
 - `get_building_profile` — rich-domain tool combining BAG (Kadaster) + EP-Online (RVO)

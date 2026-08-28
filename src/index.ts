@@ -9,5 +9,5 @@
  * For the stdio binary, see src/stdio.ts (mapped via `bin`).
  */
 
-export { mcp } from './functions.js';
+export { mcp, mcpMinimal } from './functions.js';
 export { createServer } from './server.js';
