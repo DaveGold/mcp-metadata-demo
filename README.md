@@ -16,15 +16,17 @@ Two hosted endpoints. Point Claude Code — or any MCP client — at them and as
 
 | Endpoint | Tool metadata | URL |
 |---|---|---|
-| **rich** | full description, input/output schemas, curated `alerts[]` + interpretation | `https://mcp-jtc4p3l6nq-ez.a.run.app` |
+| **rich** | full description, input/output schemas, curated `alerts[]` + interpretation | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp` |
 | **minimal** | one sentence, no schema, no alerts | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal` |
+
+Same Firebase project, same code — only the function name (`/mcp` vs `/mcpMinimal`) and the metadata tier it serves differ.
 
 Add **both** to your `.mcp.json` (Claude Code) so you can aim a prompt at each:
 
 ```json
 {
   "mcpServers": {
-    "metadata-demo-rich": { "url": "https://mcp-jtc4p3l6nq-ez.a.run.app" },
+    "metadata-demo-rich": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp" },
     "metadata-demo-minimal": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal" }
   }
 }
