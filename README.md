@@ -2,40 +2,60 @@
 
 > 📄 **Read the paper**: [*The Missing Layer*](https://davidgolverdingen.nl/en/the-missing-layer) — the metadata strategy this repo demonstrates.
 
-A working demo of the metadata strategy described in the paper. It applies that strategy in **two places at once**:
+A live, runnable companion to the paper. It tests one question with a working system: **how much of an AI agent's competence comes from the model, and how much from the metadata its tools carry?**
 
-- **Rich-domain MCP server** — `get_building_profile` shows how dense tool metadata (input/output schemas, curated `alerts[]`, interpretation guidance) lets an AI reason about a domain (Dutch building data via BAG + EP-Online) without external priming.
-- **MCP apps with self-describing config** — `render_chart`, `render_table`, `render_map` apply the *same* approach to UI configuration. The agent doesn't just call `render_chart` — it knows from the schema which chart type fits the data, which axes to bind, when to use a stacked variant, which cell formatters apply, what each badge color means.
+The same Dutch building-data tool (`get_building_profile`, over the open BAG + EP-Online registers) is deployed **twice** — once with a rich metadata layer (dense input/output schemas, curated advisories, interpretation guidance) and once with that layer stripped to a single sentence. Same data, same model, same prompts. Only the metadata differs.
 
-When tool metadata is rich enough, the AI doesn't need a wrapper agent telling it *how* to use the tool — the tool tells the AI itself.
+> When tool metadata is rich enough, the AI doesn't need a wrapper agent telling it *how* to use the tool — the tool tells the AI itself. That's the missing layer.
 
-> **Note** — This is a distilled extraction of a production MCP system I built in industry. The domain enrichment shown here (the `alerts[]` rules, the chart/table/map metadata) is deliberately lighter than the original: enough to demonstrate the strategy, not the full production depth.
+## Try it live (no install, no API key)
 
-## Two levels, one strategy
+Two hosted endpoints. Point Claude Code — or any MCP client — at them and ask the **same question** to feel the difference.
 
-**Level 1 — domain tool**: an agent calls `get_building_profile`, reads the `alerts[]` array, and formulates a follow-up question from the curated advisory text:
+| Endpoint | Tool metadata | URL |
+|---|---|---|
+| **rich** | full description, input/output schemas, curated `alerts[]` + interpretation | `https://mcp-jtc4p3l6nq-ez.a.run.app` |
+| **minimal** | one sentence, no schema, no alerts | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal` |
 
-```
-> get_building_profile({ postcode: "1071XX", huisnummer: 1 })
-  ... → alerts: ["Pre-Bouwbesluit 1992 — likely limited insulation.",
-                  "EP-1 above Paris Proof 2040 target (70 kWh/m² for offices).",
-                  "Possibly Label-C relevant — verify whether office share >50% and area >100m²."]
+Add **both** to your `.mcp.json` (Claude Code) so you can aim a prompt at each:
 
-> "Given the Pre-1992 era and Label-C exposure, what would the next investigation step look like?"
-```
-
-The agent didn't need separate priming on Dutch energy regulation — the tool's metadata supplied it.
-
-**Level 2 — self-describing app config**: the same agent then picks an appropriate visualisation for the data it has. The chart-type metadata tells it sankey is for flows, treemap is for hierarchical area shares, bar is for category comparison. No wrapper logic needed.
-
-```
-> Agent looks at three buildings' EP-1 data and chooses render_chart({ type: 'bar', ... })
-  because the schema's REFUSE rules say sankey requires flows (this data has none).
+```json
+{
+  "mcpServers": {
+    "metadata-demo-rich": { "url": "https://mcp-jtc4p3l6nq-ez.a.run.app" },
+    "metadata-demo-minimal": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal" }
+  }
+}
 ```
 
-## The ablation: what the metadata layer is worth
+> Shared endpoints, rate-limited — fine for a demo. For sustained use, [deploy your own](#deploy-your-own-copy).
 
-To *show* the strategy pays off, the server ships in **two tiers of the same `get_building_profile` tool** — same name, same underlying BAG + EP-Online data path, deployed as two separate endpoints:
+### Example prompts
+
+**1 — The A/B (ask BOTH servers, compare the answers):**
+
+> *"What's the energy label of Museumstraat 1, 1071XX Amsterdam, and what should I keep in mind about this building?"*
+
+- **rich** → returns `energielabel: null` **plus** `alerts: ["Pre-Bouwbesluit 1992 — likely limited insulation.", "No registered energy label found in EP-Online."]`. The agent correctly explains that *no label is registered* (not that the building has none) and flags the pre-1992 insulation caveat — with zero priming from you.
+- **minimal** → returns the same bare `null`. An unprimed agent typically concludes *"this building has no energy label"* — wrong, and the exact misread the rich tier's alert exists to prevent.
+
+Same registers, same building (it's the Rijksmuseum, bouwjaar 1885) — the only difference is the metadata layer.
+
+**2 — Domain reasoning without priming (rich):**
+
+> *"Get the building profile for 3543AR 1 and tell me whether it's on track for Paris Proof 2040."*
+
+The tool's `INTERPRETATION` block and `alerts[]` carry the Paris Proof thresholds and label semantics, so the agent reasons about Dutch energy regulation it was never separately taught.
+
+**3 — Self-describing visualization (rich):**
+
+> *"Look up the building profiles for 1071XX 1 and 3543AR 1, then render a table comparing bouwjaar, energy label, and floor area."*
+
+The agent picks `render_table` and its cell formatters straight from the schema — no wrapper logic. (The minimal endpoint exposes only the one bare tool, so it can't do this at all.)
+
+## Why two endpoints — the ablation
+
+To *show* the strategy pays off, you need the contrast. Both endpoints run the same tool name over the same data path; only the metadata wrapper changes:
 
 | | **rich** (`/mcp`) | **minimal** (`/mcpMinimal`) |
 |---|---|---|
@@ -43,20 +63,36 @@ To *show* the strategy pays off, the server ships in **two tiers of the same `ge
 | Input schema | 4 fields, each `.describe()`d, format-validated | 2 bare fields, no descriptions, no validation |
 | Output schema | full Zod schema (~45 described fields) + `structuredContent` | none — text-only result |
 | Curated `alerts[]` | yes (`generateAlerts`) | none |
-| Other tools | `render_chart` / `render_table` / `render_map` | none |
+| Tools exposed | `get_building_profile` + `render_chart` / `render_table` / `render_map` | `get_building_profile` only |
 
-**The data returned is identical.** Only the layer that tells the model *how to read it* is removed. That isolates the paper's claim: point the same prompts at both endpoints and watch what the agent can and can't do unaided.
+**The data returned is identical.** Only the layer that tells the model *how to read it* is removed — which isolates the paper's claim.
 
-The failure the layer prevents is concrete. A residential *Nader Voorschrift* label returns `co2_emissie` and `berekend_energieverbruik` as **MJ-totals for the whole building** (values of 80,000–100,000), not kWh/m². The **rich** tier flags this in `alerts[]`; the **minimal** tier returns the bare number, so an unprimed agent will happily benchmark it as a per-m² intensity and be wrong by orders of magnitude.
+The failure it prevents is concrete: a residential *Nader Voorschrift* label returns `co2_emissie` and `berekend_energieverbruik` as **MJ-totals for the whole building** (values of 80,000–100,000), not kWh/m². The rich tier flags this in `alerts[]`; the minimal tier hands over the bare number, so an unprimed agent benchmarks it as a per-m² intensity and is wrong by orders of magnitude.
 
-Run both locally to compare:
+> **Note** — This is a distilled extraction of a production MCP system built in industry. The domain enrichment shown here (the `alerts[]` rules, the chart/table/map metadata) is deliberately lighter than the original: enough to demonstrate the strategy, not the full production depth.
 
-```sh
-npm run inspect          # rich tier
-npm run inspect:minimal  # minimal tier — same tool, metadata stripped
+## Two levels, one strategy
+
+The demo applies the same metadata principle in **two places at once**:
+
+**Level 1 — domain tool.** An agent calls `get_building_profile`, reads the `alerts[]` array, and formulates a follow-up from the curated advisory text — no separate priming on Dutch energy regulation:
+
+```
+> get_building_profile({ postcode: "1071XX", huisnummer: 1 })
+  ... → alerts: ["Pre-Bouwbesluit 1992 — likely limited insulation.",
+                  "No registered energy label found in EP-Online."]
+
+> "Given the pre-1992 era and the lack of a registered label, what's the next step?"
 ```
 
-Both tiers deploy together (`npm run deploy`) as the Firebase functions `mcp` and `mcpMinimal`.
+**Level 2 — self-describing app config.** The same agent then picks an appropriate visualisation. The chart-type metadata tells it sankey is for flows, treemap for hierarchical area shares, bar for category comparison — no wrapper logic:
+
+```
+> Agent looks at three buildings' data and chooses render_chart({ type: 'bar', ... })
+  because the schema's REFUSE rules say sankey requires flows (this data has none).
+```
+
+Same principle powers `get_building_profile`'s output schema and `render_chart`'s input schema: in one the AI-generated output is domain data, in the other it's UI configuration.
 
 ## What's inside
 
@@ -66,7 +102,7 @@ Both tiers deploy together (`npm run deploy`) as the Firebase functions `mcp` an
 - `render_map` — Leaflet maps with markers (car, building, project, pin)
 - `fetch_image` — server-side image proxy with SSRF protection (used by `render_table` when the iframe CSP blocks `img-src`)
 
-## Quick start (local stdio)
+## Run it locally
 
 ```sh
 git clone https://github.com/DaveGold/mcp-metadata-demo
@@ -74,10 +110,11 @@ cd mcp-metadata-demo
 npm install
 cp .env.example .env.local  # then add your EP_ONLINE_API_KEY
 npm run build
-npm run inspect       # opens MCP Inspector to test interactively
+npm run inspect          # rich tier in the MCP Inspector
+npm run inspect:minimal  # the minimal tier — same tool, metadata stripped
 ```
 
-Add to your `.mcp.json` (Claude Code) or Claude Desktop config:
+Or wire the stdio binary into your `.mcp.json` (Claude Code) / Claude Desktop config:
 
 ```json
 {
@@ -90,48 +127,11 @@ Add to your `.mcp.json` (Claude Code) or Claude Desktop config:
 }
 ```
 
-## Try the hosted demo
-
-> 🌐 **Two hosted endpoints, same data, different metadata.**
->
-> Shared, rate-limited. For sustained use, deploy your own copy.
-
-There are **two live endpoints** so you can experience the paper's thesis by contrast — the *same* `get_building_profile` tool over the *same* Dutch registers, one with the full metadata layer and one with it stripped away:
-
-| Endpoint | Tool metadata | URL |
-|---|---|---|
-| **rich** | full description, input/output schemas, curated `alerts[]` + interpretation | `https://mcp-jtc4p3l6nq-ez.a.run.app` |
-| **minimal** | one-sentence description, no schema, no alerts | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal` |
-
-Add **both** to your `.mcp.json` (Claude Code) so you can aim the same prompt at each:
-
-```json
-{
-  "mcpServers": {
-    "metadata-demo-rich": {
-      "url": "https://mcp-jtc4p3l6nq-ez.a.run.app"
-    },
-    "metadata-demo-minimal": {
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal"
-    }
-  }
-}
-```
-
-### Run the A/B
-
-Ask each server the **same question** and compare the answers:
-
-> **Prompt:** *"What's the energy label of Museumstraat 1, 1071XX Amsterdam, and what should I keep in mind about this building?"*
-
-- **rich** → the tool returns `energielabel: null` **plus** `alerts: ["Pre-Bouwbesluit 1992 — likely limited insulation.", "No registered energy label found in EP-Online."]`. The agent correctly explains that *no label is registered* (not that the building has none) and flags the pre-1992 insulation caveat — without any priming from you.
-- **minimal** → the tool returns the same `energielabel: null` with no schema and no alerts. An unprimed agent typically concludes *"this building has no energy label"* — the exact misread the rich tier's alert exists to prevent.
-
-Same registers, same building (it's the Rijksmuseum, bouwjaar 1885). The only difference is the metadata layer — that's the "missing layer."
+The stdio server honours `MCP_VARIANT=minimal` to serve the stripped tier locally.
 
 ## Architecture
 
-Five tools, three external APIs, three transports, one MCP Apps UI pipeline.
+Five tools, three external APIs, three transports, one MCP Apps UI pipeline — and two metadata tiers selected by a single `variant` flag on the `createServer()` factory.
 
 | Tool | Kind | What it does |
 |---|---|---|
@@ -141,17 +141,17 @@ Five tools, three external APIs, three transports, one MCP Apps UI pipeline.
 | `render_map` | MCP App | Renders a Leaflet map with markers |
 | `fetch_image` | App-internal helper | Server-side image proxy with SSRF protection; only called by the `render_table` UI |
 
-### Transports
+### Transports & tiers
 
-Single `createServer()` factory in [src/server.ts](src/server.ts), exposed through three entrypoints — tool registration lives in exactly one place:
+Single `createServer({ variant })` factory in [src/server.ts](src/server.ts), exposed through three entrypoints — tool registration lives in exactly one place:
 
-- **stdio** ([src/stdio.ts](src/stdio.ts)) — default for Claude Desktop / Code / Inspector. JSON-RPC over stdin/stdout, no network, no ports.
+- **stdio** ([src/stdio.ts](src/stdio.ts)) — default for Claude Desktop / Code / Inspector. JSON-RPC over stdin/stdout, no network, no ports. `MCP_VARIANT` selects the tier.
 - **Local HTTP** ([src/http.ts](src/http.ts)) — Streamable-HTTP bound to `127.0.0.1` for browser-based testing, no middleware.
-- **Cloud Function** ([src/functions.ts](src/functions.ts)) — Firebase Cloud Function v2 wrapping the same HTTP app with `hosted: true`, which mounts request-logging, daily-cap, and rate-limit middleware on `/mcp`. EP-Online key injected from Secret Manager.
+- **Cloud Functions** ([src/functions.ts](src/functions.ts)) — two Firebase Cloud Functions v2 (`mcp` = rich, `mcpMinimal` = minimal) wrapping the same HTTP app with `hosted: true`, which mounts request-logging, daily-cap, and rate-limit middleware. EP-Online key injected from Secret Manager.
 
 ### Layers
 
-- **Tools** (`src/tools/`) — each tool's `description` and Zod `inputSchema`/`outputSchema` (`.describe()` on every field) carry the metadata that drives agent reasoning. `get-building-profile.ts` encodes `RETURNS` / `WHEN TO USE` / `INTERPRETATION` / `ALERTS`; the render tools register a `ui://` resource + tool pair and return `structuredContent` for the iframe.
+- **Tools** (`src/tools/`) — each tool's `description` and Zod `inputSchema`/`outputSchema` (`.describe()` on every field) carry the metadata that drives agent reasoning. `get-building-profile.ts` encodes `RETURNS` / `WHEN TO USE` / `INTERPRETATION` / `ALERTS`; the render tools register a `ui://` resource + tool pair and return `structuredContent` for the iframe. `get-building-profile-minimal.ts` is the ablated twin — same data path (`resolveBuildingProfile`), none of the metadata.
 - **Clients** (`src/clients/`) — one class per upstream, each owning its URL, auth, timeout, and Zod-validated response parsing, so upstream wire-format drift surfaces here rather than silently downstream. `BagClient` is auth-free; `EpOnlineClient` needs an API key.
 - **Domain** (`src/domain/`) — pure functions: `buildProfile` (raw registers → `BuildingProfile`), `selectBestLabel`, and `generateAlerts` (regulation eras, Paris Proof 2040 thresholds, BENG, heat-pump suitability — knowledge moved server-side, to where the data lives).
 - **Logger** (`src/logger.ts`) — stderr-only structured JSON. **Never** writes to stdout, which stdio MCP framing owns; a stray `console.log` would corrupt the JSON-RPC stream.
@@ -186,31 +186,30 @@ The result: the same metadata principle that powers `get_building_profile`'s out
 
 ### Non-goals
 
-- **Authentication.** The hosted endpoint is intentionally public — add an auth proxy upstream if you fork it for a private use case.
+- **Authentication.** The hosted endpoints are intentionally public — add an auth proxy upstream if you fork it for a private use case.
 - **Persistence.** Tools are idempotent and stateless; the `fetch_image` cache is in-memory only.
 - **Mocking framework.** Test stubs are hand-rolled object literals typed against the `*Like` `Pick<>` types.
+
+## Deploy your own copy
+
+The hosted endpoints run as Firebase Cloud Functions. To deploy your own:
+
+1. Create a Firebase project + upgrade to Blaze (pay-as-you-go) — Cloud Functions v2 + Secret Manager require it
+2. `firebase login` and update [.firebaserc](.firebaserc) with your project ID
+3. `npm run deploy:setup-secret` — paste your EP-Online API key (get one at https://www.ep-online.nl)
+4. `npm run deploy` — ships **both** functions (`mcp` and `mcpMinimal`)
 
 ## Language policy
 
 Code, docs, and agent-facing tool descriptions are English. Field names mirror their Dutch upstream APIs (BAG, EP-Online) — `huisnummer`, `bouwjaar`, `oppervlakte_m2`, `gebruiksdoel`, `energielabel`. Regulatory references (Bouwbesluit, NTA 8800, BENG, Paris Proof) keep their Dutch names; they have no English equivalents.
 
-## Deploy your own copy
-
-The hosted endpoint runs as a Firebase Cloud Function. To deploy your own:
-
-1. Create a Firebase project + upgrade to Blaze (pay-as-you-go) — Cloud Functions v2 + Secret Manager require it
-2. `firebase login` and update [.firebaserc](.firebaserc) with your project ID
-3. `npm run deploy:setup-secret` — paste your EP-Online API key (get one at https://www.ep-online.nl)
-4. `npm run deploy`
-
-
 ## Logging
 
-The hosted endpoint logs request metadata (IP, User-Agent, tool name, duration) to Cloud Logging for usage analytics and abuse prevention. Retention is 30 days (Cloud Logging default). Legal basis: legitimate interest. Contact via the GitHub issues tracker if you'd like your data scrubbed.
+The hosted endpoints log request metadata (IP, User-Agent, tool name, duration) to Cloud Logging for usage analytics and abuse prevention. Retention is 30 days (Cloud Logging default). Legal basis: legitimate interest. Contact via the GitHub issues tracker if you'd like your data scrubbed.
 
 ## Author
 
-Built by [David Golverdingen](https://davidgolverdingen.nl/en) as a companion to the metadata-strategy paper.
+Built by [David Golverdingen](https://davidgolverdingen.nl/en) as a companion to the metadata-strategy paper *[The Missing Layer](https://davidgolverdingen.nl/en/the-missing-layer)*.
 
 ## License
 
