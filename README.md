@@ -8,6 +8,8 @@ The same Dutch building-data tool (`get_building_profile`, over the open BAG + E
 
 > When tool metadata is rich enough, the AI doesn't need a wrapper agent telling it *how* to use the tool — the tool tells the AI itself. That's the missing layer.
 
+> ⚠️ **This is a condensed public demo — not the full system.** Even the "rich" endpoint here is a deliberately lightened abstraction of a production MCP system built in industry. The real `alerts[]` rules, schema depth, and domain coverage go considerably further; this repo shows the *strategy*, not its ceiling.
+
 ## Try it live (no install, no API key)
 
 Two hosted endpoints. Point Claude Code — or any MCP client — at them and ask the **same question** to feel the difference.
@@ -69,7 +71,7 @@ To *show* the strategy pays off, you need the contrast. Both endpoints run the s
 
 The failure it prevents is concrete: a residential *Nader Voorschrift* label returns `co2_emissie` and `berekend_energieverbruik` as **MJ-totals for the whole building** (values of 80,000–100,000), not kWh/m². The rich tier flags this in `alerts[]`; the minimal tier hands over the bare number, so an unprimed agent benchmarks it as a per-m² intensity and is wrong by orders of magnitude.
 
-> **Note** — This is a distilled extraction of a production MCP system built in industry. The domain enrichment shown here (the `alerts[]` rules, the chart/table/map metadata) is deliberately lighter than the original: enough to demonstrate the strategy, not the full production depth.
+(And remember: even this "rich" tier is a condensed abstraction — the production system's `alerts[]` and schema depth go well beyond what's shown here.)
 
 ## Two levels, one strategy
 
