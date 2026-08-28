@@ -19,7 +19,7 @@ import { registerRenderTableTool } from './tools/render-table.js';
 import { registerRenderMapTool } from './tools/render-map.js';
 import { registerFetchImageTool } from './tools/fetch-image.js';
 
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 
 /**
  * Which metadata tier to expose. See the paper "The Missing Layer":
