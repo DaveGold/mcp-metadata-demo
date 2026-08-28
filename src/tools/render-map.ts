@@ -114,7 +114,7 @@ Netherlands coordinates are roughly: lat 50.7-53.6, lng 3.3-7.2.`;
 // ── Input schema ─────────────────────────────────────────────────────────────
 // Raw Zod shape (NOT z.object()) — required by registerAppTool
 
-const inputSchema = {
+export const inputSchema = {
   markers: z
     .union([
       z.array(
@@ -151,34 +151,36 @@ const inputSchema = {
             .describe('Custom marker color (hex, e.g. "#e82b21"). Overrides the default type color.'),
         })
       ),
-      // Positional shorthand: [lat, lng, label, description?, type?, color?].
-      // Modeled as a loose positional array (NOT z.tuple().rest()) so the emitted
-      // JSON Schema uses single-object `items` instead of the array-form
-      // `items: [...]` that strict connectors (OpenAI/ChatGPT) reject. The
-      // number|string union covers lat/lng (number) + label/description/type/color
+      // Positional shorthand: array of [lat, lng, label, description?, type?, color?]
+      // rows. Each row is modeled as a loose positional array (NOT z.tuple().rest())
+      // so the emitted JSON Schema uses single-object `items` instead of the
+      // array-form `items: [...]` that strict connectors (OpenAI/ChatGPT) reject.
+      // The number|string union covers lat/lng (number) + label/description/type/color
       // (string); .min(3).max(6) restores arity via minItems/maxItems so a
       // malformed [lat, lng] can't yield label:undefined. The .refine() restores
       // the per-slot type enforcement that z.tuple() gave us (so [lat, lng, 123]
       // can't silently cast a number into label) — refinements are NOT emitted to
       // JSON Schema, so the schema stays connector-safe while runtime validation
       // is strict. normalizeMarkers() then maps the validated positional slots.
-      z
-        .array(z.union([z.number(), z.string()]))
-        .min(3)
-        .max(6)
-        .refine(
-          (row) =>
-            typeof row[0] === 'number' &&
-            typeof row[1] === 'number' &&
-            typeof row[2] === 'string' &&
-            (row[3] === undefined || typeof row[3] === 'string') &&
-            (row[4] === undefined || ['car', 'building', 'project', 'pin'].includes(row[4] as string)) &&
-            (row[5] === undefined || typeof row[5] === 'string'),
-          {
-            message:
-              'Invalid positional marker row. Expected [lat:number, lng:number, label:string, description?:string, type?:"car"|"building"|"project"|"pin", color?:string].',
-          }
-        ),
+      z.array(
+        z
+          .array(z.union([z.number(), z.string()]))
+          .min(3)
+          .max(6)
+          .refine(
+            (row) =>
+              typeof row[0] === 'number' &&
+              typeof row[1] === 'number' &&
+              typeof row[2] === 'string' &&
+              (row[3] === undefined || typeof row[3] === 'string') &&
+              (row[4] === undefined || ['car', 'building', 'project', 'pin'].includes(row[4] as string)) &&
+              (row[5] === undefined || typeof row[5] === 'string'),
+            {
+              message:
+                'Invalid positional marker row. Expected [lat:number, lng:number, label:string, description?:string, type?:"car"|"building"|"project"|"pin", color?:string].',
+            }
+          )
+      ),
     ])
     .describe(
       'Array of markers to place on the map. Two accepted shapes:\n' +
