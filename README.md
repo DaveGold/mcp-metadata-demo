@@ -73,6 +73,15 @@ The failure it prevents is concrete: a residential *Nader Voorschrift* label ret
 
 (And remember: even this "rich" tier is a condensed abstraction — the production system's `alerts[]` and schema depth go well beyond what's shown here.)
 
+### See it in the source
+
+The metadata layer is just code — read the exact pieces the agent consumes, and the ablated twin that drops them:
+
+- **Rich tool description** — the `RETURNS` / `WHEN TO USE` / `QUERY STRATEGY` / `INTERPRETATION` / `ALERTS` prose the model reads before it ever calls the tool: [`get-building-profile.ts` L23–64](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L23-L64)
+- **Input + output schemas** — a `.describe()` on every field, ~45 output fields: [`get-building-profile.ts` L68–206](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L68-L206)
+- **Server-side interpretation** — the `alerts[]` rules (regulation eras, Paris Proof thresholds, the Nader Voorschrift MJ-unit trap): [`generate-alerts.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/generate-alerts.ts)
+- **The minimal twin** — the whole ablated tool, ~60 lines, none of the above: [`get-building-profile-minimal.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-minimal.ts)
+
 ## Two levels, one strategy
 
 The demo applies the same metadata principle in **two places at once**:
@@ -87,7 +96,7 @@ The demo applies the same metadata principle in **two places at once**:
 > "Given the pre-1992 era and the lack of a registered label, what's the next step?"
 ```
 
-**Level 2 — self-describing app config.** The same agent then picks an appropriate visualisation. The chart-type metadata tells it sankey is for flows, treemap for hierarchical area shares, bar for category comparison — no wrapper logic:
+**Level 2 — self-describing app config.** The same agent then picks an appropriate visualisation. The chart-type metadata tells it sankey is for flows, treemap for hierarchical area shares, bar for category comparison — no wrapper logic ([see the `type` REFUSE rules](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart.ts#L162-L200)):
 
 ```
 > Agent looks at three buildings' data and chooses render_chart({ type: 'bar', ... })
