@@ -57,6 +57,16 @@ The tool's `INTERPRETATION` block and `alerts[]` carry the Paris Proof threshold
 
 On **rich**, the agent picks `render_table` and its cell formatters straight from the schema — no wrapper logic. On **minimal**, the same app exists but with a one-sentence description and no guidance, so the agent has to guess the payload shape and formatting unaided — the same ablation, applied to the app config.
 
+## Talks
+
+This repo accompanies talks on embedding domain knowledge in MCP tool descriptions:
+
+- **Most MCP servers are empty** — [AGNTCon + MCPCon Europe 2026](https://agntconmcpconeu26.sched.com/event/2VmKE) · Amsterdam · Sep 17–18 2026
+- **Domain knowledge belongs in the MCP server** — [VibeKode Netherlands 2026](https://vibekode.it/agentic-engineering/domain-knowledge-belongs-in-the-mcp-server/) · Utrecht · Oct 7 2026
+- **Adoption is the hard part: six months of MCP in production at an HVAC company** — [Update Conference Prague 2026](https://prague.updateconference.net/en/2026/schedule/adoption-is-the-hard-part-six-months-of-mcp-in-production-at-an-hvac-company) · Prague · Nov 12–13 2026
+
+Full, up-to-date list: [davidgolverdingen.nl/en/talks](https://davidgolverdingen.nl/en/talks).
+
 ## Why two endpoints — the ablation
 
 To *show* the strategy pays off, you need the contrast. Both endpoints run the same tool name over the same data path; only the metadata wrapper changes:
@@ -219,16 +229,6 @@ Code, docs, and agent-facing tool descriptions are English. Field names mirror t
 ## Logging
 
 The hosted endpoints log request metadata (IP, User-Agent, tool name, duration) to Cloud Logging for usage analytics and abuse prevention. Retention is 30 days (Cloud Logging default). Legal basis: legitimate interest. Contact via the GitHub issues tracker if you'd like your data scrubbed.
-
-## Talks
-
-This repo accompanies talks on embedding domain knowledge in MCP tool descriptions:
-
-- **Most MCP servers are empty** — [AGNTCon + MCPCon Europe 2026](https://agntconmcpconeu26.sched.com/event/2VmKE) · Amsterdam · Sep 17–18 2026
-- **Domain knowledge belongs in the MCP server** — [VibeKode Netherlands 2026](https://vibekode.it/agentic-engineering/domain-knowledge-belongs-in-the-mcp-server/) · Utrecht · Oct 7 2026
-- **Adoption is the hard part: six months of MCP in production at an HVAC company** — [Update Conference Prague 2026](https://prague.updateconference.net/en/2026/schedule/adoption-is-the-hard-part-six-months-of-mcp-in-production-at-an-hvac-company) · Prague · Nov 12–13 2026
-
-Full, up-to-date list: [davidgolverdingen.nl/en/talks](https://davidgolverdingen.nl/en/talks).
 
 ## Author
 
