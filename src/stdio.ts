@@ -10,14 +10,16 @@
  */
 
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { createServer } from './server.js';
+import { createServer, type ServerVariant } from './server.js';
 import { logger } from './logger.js';
 
 async function main(): Promise<void> {
-  const server = createServer();
+  // MCP_VARIANT=minimal serves the metadata-stripped tier (for the ablation demo).
+  const variant: ServerVariant = process.env.MCP_VARIANT === 'minimal' ? 'minimal' : 'rich';
+  const server = createServer({ variant });
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  logger.info('server.started', { transport: 'stdio' });
+  logger.info('server.started', { transport: 'stdio', variant });
 }
 
 main().catch((error) => {

@@ -13,6 +13,7 @@ import {
   type BagClientLike,
   type EpOnlineClientLike,
 } from './tools/get-building-profile.js';
+import { registerGetBuildingProfileMinimalTool } from './tools/get-building-profile-minimal.js';
 import { registerRenderChartTool } from './tools/render-chart.js';
 import { registerRenderTableTool } from './tools/render-table.js';
 import { registerRenderMapTool } from './tools/render-map.js';
@@ -20,15 +21,37 @@ import { registerFetchImageTool } from './tools/fetch-image.js';
 
 const VERSION = '1.0.0';
 
+/**
+ * Which metadata tier to expose. See the paper "The Missing Layer":
+ * - 'rich'    — the full strategy: dense schemas, curated alerts, interpretation guidance.
+ * - 'minimal' — the ablation: one-sentence description, no schema, no alerts. Same data,
+ *               no layer. Deployed side-by-side so the two can be compared.
+ */
+export type ServerVariant = 'rich' | 'minimal';
+
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
   bagClient?: BagClientLike;
   epOnlineClient?: EpOnlineClientLike;
+  /** Metadata tier. Default 'rich'. */
+  variant?: ServerVariant;
 }
 
 export function createServer(options: CreateServerOptions = {}): McpServer {
   const bagClient = options.bagClient ?? new BagClient();
   const epOnlineClient = options.epOnlineClient ?? new EpOnlineClient();
+  const variant = options.variant ?? 'rich';
+
+  if (variant === 'minimal') {
+    // Deliberately bare: a one-line instruction and a single, metadata-stripped tool.
+    // No render tools, so the A/B stays focused on the one domain tool.
+    const server = new McpServer(
+      { name: 'metadata-demo-minimal', version: VERSION },
+      { instructions: 'Building data lookup for the Netherlands.' }
+    );
+    registerGetBuildingProfileMinimalTool(server, bagClient, epOnlineClient);
+    return server;
+  }
 
   const server = new McpServer(
     { name: 'metadata-demo', version: VERSION },
