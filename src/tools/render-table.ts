@@ -597,7 +597,7 @@ export function findRowShapeError(columns: TableArgs['columns'], data: TableArgs
 
 // ── Tool registration ────────────────────────────────────────────────────────
 
-export function registerRenderTableTool(server: McpServer): void {
+export function registerRenderTableTool(server: McpServer, opts: { minimal?: boolean } = {}): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
   registerAppResource(server, 'Table App', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({
     contents: [
@@ -615,7 +615,7 @@ export function registerRenderTableTool(server: McpServer): void {
     'render_table',
     {
       title: 'Render Table',
-      description,
+      description: opts.minimal ? 'Render data as a table.' : description,
       inputSchema,
       annotations: {
         readOnlyHint: true,

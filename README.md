@@ -55,7 +55,7 @@ The tool's `INTERPRETATION` block and `alerts[]` carry the Paris Proof threshold
 
 > *"Look up the building profiles for 1071XX 1 and 3543AR 1, then render a table comparing bouwjaar, energy label, and floor area."*
 
-The agent picks `render_table` and its cell formatters straight from the schema — no wrapper logic. (The minimal endpoint exposes only the one bare tool, so it can't do this at all.)
+On **rich**, the agent picks `render_table` and its cell formatters straight from the schema — no wrapper logic. On **minimal**, the same app exists but with a one-sentence description and no guidance, so the agent has to guess the payload shape and formatting unaided — the same ablation, applied to the app config.
 
 ## Why two endpoints — the ablation
 
@@ -67,7 +67,7 @@ To *show* the strategy pays off, you need the contrast. Both endpoints run the s
 | Input schema | 4 fields, each `.describe()`d, format-validated | 2 bare fields, no descriptions, no validation |
 | Output schema | full Zod schema (~45 described fields) + `structuredContent` | none — text-only result |
 | Curated `alerts[]` | yes (`generateAlerts`) | none |
-| Tools exposed | `get_building_profile` + `render_chart` / `render_table` / `render_map` | `get_building_profile` only |
+| Render apps (`render_chart` / `render_table` / `render_map`) | full self-describing schemas + decision guidance | same apps, stripped to a one-sentence description each |
 
 **The data returned is identical.** Only the layer that tells the model *how to read it* is removed — which isolates the paper's claim.
 

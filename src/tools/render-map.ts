@@ -262,7 +262,7 @@ function normalizeMarkers(raw: MapMarker[] | unknown[][]): MapMarker[] {
 
 // ── Tool registration ────────────────────────────────────────────────────────
 
-export function registerRenderMapTool(server: McpServer): void {
+export function registerRenderMapTool(server: McpServer, opts: { minimal?: boolean } = {}): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
   registerAppResource(server, 'Map App', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({
     contents: [
@@ -290,7 +290,7 @@ export function registerRenderMapTool(server: McpServer): void {
     'render_map',
     {
       title: 'Render Map',
-      description,
+      description: opts.minimal ? 'Render data as a map with markers.' : description,
       inputSchema,
       annotations: {
         readOnlyHint: true,

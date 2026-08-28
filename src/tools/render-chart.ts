@@ -817,7 +817,7 @@ function normalizeTreemapRow(
 
 // ── Tool registration ────────────────────────────────────────────────────────
 
-export function registerRenderChartTool(server: McpServer): void {
+export function registerRenderChartTool(server: McpServer, opts: { minimal?: boolean } = {}): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
   registerAppResource(server, 'Chart App', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({
     contents: [
@@ -835,7 +835,7 @@ export function registerRenderChartTool(server: McpServer): void {
     'render_chart',
     {
       title: 'Render Chart',
-      description,
+      description: opts.minimal ? 'Render data as a chart.' : description,
       inputSchema,
       annotations: {
         readOnlyHint: true,
