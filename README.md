@@ -67,21 +67,42 @@ Add to your `.mcp.json` (Claude Code) or Claude Desktop config:
 
 ## Try the hosted demo
 
-> 🌐 **Hosted demo**
+> 🌐 **Two hosted endpoints, same data, different metadata.**
 >
-> Shared endpoint, rate-limited. For sustained heavy use, deploy your own copy.
+> Shared, rate-limited. For sustained use, deploy your own copy.
 
-Add this to your `.mcp.json` (Claude Code):
+There are **two live endpoints** so you can experience the paper's thesis by contrast — the *same* `get_building_profile` tool over the *same* Dutch registers, one with the full metadata layer and one with it stripped away:
+
+| Endpoint | Tool metadata | URL |
+|---|---|---|
+| **rich** | full description, input/output schemas, curated `alerts[]` + interpretation | `https://mcp-jtc4p3l6nq-ez.a.run.app` |
+| **minimal** | one-sentence description, no schema, no alerts | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal` |
+
+Add **both** to your `.mcp.json` (Claude Code) so you can aim the same prompt at each:
 
 ```json
 {
   "mcpServers": {
-    "metadata-demo": {
+    "metadata-demo-rich": {
       "url": "https://mcp-jtc4p3l6nq-ez.a.run.app"
+    },
+    "metadata-demo-minimal": {
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal"
     }
   }
 }
 ```
+
+### Run the A/B
+
+Ask each server the **same question** and compare the answers:
+
+> **Prompt:** *"What's the energy label of Museumstraat 1, 1071XX Amsterdam, and what should I keep in mind about this building?"*
+
+- **rich** → the tool returns `energielabel: null` **plus** `alerts: ["Pre-Bouwbesluit 1992 — likely limited insulation.", "No registered energy label found in EP-Online."]`. The agent correctly explains that *no label is registered* (not that the building has none) and flags the pre-1992 insulation caveat — without any priming from you.
+- **minimal** → the tool returns the same `energielabel: null` with no schema and no alerts. An unprimed agent typically concludes *"this building has no energy label"* — the exact misread the rich tier's alert exists to prevent.
+
+Same registers, same building (it's the Rijksmuseum, bouwjaar 1885). The only difference is the metadata layer — that's the "missing layer."
 
 ## Architecture
 
