@@ -1,20 +1,24 @@
 # mcp-metadata-demo
 
 > 📄 **Read the paper**: [*The Missing Layer*](https://davidgolverdingen.nl/en/the-missing-layer) — introducing **Introspective Context Engineering for MCP (ICE)**, the pattern this repo demonstrates.
+>
+> 🔁 **Follow-up**: [*Your MCP Server Should Get Smarter Every Week*](https://davidgolverdingen.nl/en/insights/mcp-server-smarter-every-week) — how production usage (a `queryIntent` on every call) keeps surfacing what's still missing.
 
-A live, runnable companion to the paper. It tests one question with a working system: **how much of an AI agent's competence comes from the model, and how much from the metadata its tools carry?**
+A live, runnable companion to the paper. It makes one contrast concrete: the **same** Dutch building capability, served two ways — as a **Rich Domain MCP Server** and as the **thin API wrapper** most MCP servers ship today.
 
-The same Dutch building-data tool (`get_building_profile`, over the open BAG + EP-Online registers) is deployed **twice** — once with a rich metadata layer (dense input/output schemas, curated advisories, interpretation guidance) and once with that layer stripped to a single sentence. Same data, same model, same prompts. Only the metadata differs.
+A Rich Domain MCP Server layers *agent-facing capabilities* on top of the raw registers so the model can reason without external priming: rich **metadata** (descriptions + typed schemas), selective retrieval (**Select**), **summaries**, curated **alerts**, **derived values**, and **self-describing UI**. The thin wrapper — `get_building_profile` with a one-line description, no schema, no alerts — has none of it: same data, no help.
 
-> When tool metadata is rich enough, the AI doesn't need a wrapper agent telling it *how* to use the tool — the tool tells the AI itself. That's the missing layer.
+> When those capabilities are present, the AI doesn't need a wrapper agent telling it *how* to use the tool, or *what the data means* — the server carries that itself. That's the missing layer.
 
-> ⚠️ **This is a condensed public demo — not the full system.** Even the "rich" endpoint here is a deliberately lightened abstraction of a production MCP system built in industry. The real `alerts[]` rules, schema depth, and domain coverage go considerably further; this repo shows the *strategy*, not its ceiling.
+**The progression:** the paper showed that production usage reveals what *metadata* is missing; the follow-up — and this repo — show it reveals what *capabilities* are missing. The feedback loop doesn't just yield better descriptions; it yields Select, Summaries, Alerts and Derived Values.
+
+> ⚠️ **This is a condensed public demo — not the full system.** It shows a *subset* of the capability set: rich **metadata**, curated **alerts**, **derived values** (the gas/CO₂/heat-pump estimates in `generate-alerts.ts`), and **self-describing UI** (the render apps). Selective retrieval, summaries, and the `queryIntent` iterate-loop live in the production system and the [articles](https://davidgolverdingen.nl/en/insights/mcp-server-smarter-every-week), not in this stripped example — and even the capabilities shown here are deliberately lighter than production.
 
 ## Try it live (no install, no API key)
 
-Two hosted endpoints. Point Claude Code — or any MCP client — at them and ask the **same question** to feel the difference.
+Two hosted endpoints — a **Rich Domain MCP Server** and a **thin wrapper** over the same data. Point Claude Code — or any MCP client — at them and ask the **same question** to feel the difference.
 
-| Endpoint | Tool metadata | URL |
+| Endpoint | Capabilities | URL |
 |---|---|---|
 | **rich** | full description, input/output schemas, curated `alerts[]` + interpretation | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp` |
 | **minimal** | one sentence, no schema, no alerts | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal` |
@@ -69,7 +73,7 @@ Full, up-to-date list: [davidgolverdingen.nl/en/talks](https://davidgolverdingen
 
 ## Why two endpoints — the ablation
 
-To *show* the strategy pays off, you need the contrast. Both endpoints run the same tool name over the same data path; only the metadata wrapper changes:
+To *show* the capabilities pay off, you need the contrast. Both endpoints run the same tool name over the same data path; only the capability layer changes:
 
 | | **rich** (`/mcp`) | **minimal** (`/mcpMinimal`) |
 |---|---|---|
@@ -79,7 +83,7 @@ To *show* the strategy pays off, you need the contrast. Both endpoints run the s
 | Curated `alerts[]` | yes (`generateAlerts`) | none |
 | Render apps (`render_chart` / `render_table` / `render_map`) | full self-describing schemas + decision guidance | same apps, stripped to a one-sentence description each |
 
-**The data returned is identical.** Only the layer that tells the model *how to read it* is removed — which isolates the paper's claim.
+**The data returned is identical.** Only the capability layer — metadata, alerts, derived values, self-describing guidance — is removed, which isolates the paper's claim.
 
 The failure it prevents is concrete: a residential *Nader Voorschrift* label returns `co2_emissie` and `berekend_energieverbruik` as **MJ-totals for the whole building** (values of 80,000–100,000), not kWh/m². The rich tier flags this in `alerts[]`; the minimal tier hands over the bare number, so an unprimed agent benchmarks it as a per-m² intensity and is wrong by orders of magnitude.
 
