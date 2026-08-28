@@ -1,21 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
-import {
-  FlexRender,
-  injectTable,
-  tableFeatures,
-  rowSortingFeature,
-  rowPaginationFeature,
-  rowSelectionFeature,
-  columnFilteringFeature,
-  columnVisibilityFeature,
-  createSortedRowModel,
-  createPaginatedRowModel,
-  createFilteredRowModel,
-  sortFns,
-  filterFns,
-  isFunction,
-} from '@tanstack/angular-table';
+import { FlexRender, injectTable, isFunction } from '@tanstack/angular-table';
 import type {
   SortingState,
   ColumnFiltersState,
@@ -39,6 +24,8 @@ import {
   type AutoTextShape,
 } from '../../shared/auto-format';
 import { TABLE_ICONS } from './table-icons';
+import { DEFAULT_PAGE_SIZE, resolveInitialPageSize, resolvePagination } from './pagination-state';
+import { resolveFooterAggregationFn, TABLE_FEATURES } from './table-features';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -88,18 +75,6 @@ interface TableInput {
   maxHeight?: string;
 }
 
-// ── TanStack v9 Feature Registration ─────────────────────────────────────────
-
-const features = tableFeatures({
-  rowSortingFeature,
-  rowPaginationFeature,
-  rowSelectionFeature,
-  columnFilteringFeature,
-  columnVisibilityFeature,
-});
-
-// Row models created inline in injectTable to satisfy generic constraints
-
 // ── Column Meta Extension ────────────────────────────────────────────────────
 
 declare module '@tanstack/angular-table' {
@@ -141,23 +116,6 @@ function formatCell(value: unknown, type: string): string {
       return value ? '\u2713' : '\u2717'; // fallback text; template uses SVG icons
     default:
       return String(value);
-  }
-}
-
-function formatFooter(spec: string, values: number[]): number {
-  switch (spec) {
-    case 'sum':
-      return values.reduce((a, b) => a + b, 0);
-    case 'avg':
-      return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
-    case 'count':
-      return values.length;
-    case 'min':
-      return values.length ? Math.min(...values) : 0;
-    case 'max':
-      return values.length ? Math.max(...values) : 0;
-    default:
-      return 0;
   }
 }
 
@@ -729,7 +687,7 @@ function slugify(text: string): string {
                     @for (col of input()!.columns; track col.key; let first = $first) {
                       <td [class]="getCellClassesForCol(col)">
                         @if (col.footer) {
-                          {{ computeFooter(col) }}
+                          {{ footerValues()[col.key] }}
                         } @else if (first) {
                           Totaal
                         }
@@ -742,7 +700,7 @@ function slugify(text: string): string {
           </div>
 
           <!-- Pagination (inside wrapper so it sticks to the table) -->
-          @if (input()!.features?.pagination !== false && table.getPageCount() > 1) {
+          @if (resolvedPagination().paginate && table.getPageCount() > 1) {
             <div
               class="flex items-center justify-between px-3 py-2
                    bg-wb-gray-600 text-white text-sm
@@ -751,7 +709,7 @@ function slugify(text: string): string {
               <span> Rij {{ paginationStart() }}–{{ paginationEnd() }} van {{ totalRowCount() }} </span>
               <div class="flex items-center gap-1">
                 <select
-                  [value]="pagination().pageSize"
+                  [value]="resolvedPagination().state.pageSize"
                   (change)="onPageSizeChange($event)"
                   class="rounded-[var(--radius-s)] border border-white/30 bg-white/10 px-2 py-1 text-xs text-white
                        dark:bg-dark-surface dark:border-dark-border"
@@ -800,7 +758,7 @@ export class TableComponent implements OnInit {
   readonly sorting = signal<SortingState>([]);
   readonly columnFilters = signal<ColumnFiltersState>([]);
   readonly globalFilter = signal<string>('');
-  readonly pagination = signal<PaginationState>({ pageIndex: 0, pageSize: 10 });
+  readonly pagination = signal<PaginationState>({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE });
   readonly rowSelection = signal<RowSelectionState>({});
   readonly columnVisibility = signal<ColumnVisibilityState>({});
 
@@ -879,11 +837,16 @@ export class TableComponent implements OnInit {
         },
       };
 
-      // Custom sortingFn + filterFn for types whose cell values aren't primitives.
+      const aggregationFn = resolveFooterAggregationFn(col.footer);
+      if (aggregationFn) {
+        columnDef.aggregationFn = aggregationFn;
+      }
+
+      // Custom sortFn + filterFn for types whose cell values aren't primitives.
       // Filter matches the RENDERED text, not JSON.stringify of the raw value.
       if (type === 'sparkline') {
         const agg = col.sparklineConfig?.sortBy ?? 'last';
-        columnDef.sortingFn = (
+        columnDef.sortFn = (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           rowA: any,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -892,7 +855,7 @@ export class TableComponent implements OnInit {
         ): number =>
           aggregateSparkline(rowA.getValue(columnId), agg) - aggregateSparkline(rowB.getValue(columnId), agg);
       } else if (type === 'trend') {
-        columnDef.sortingFn = (
+        columnDef.sortFn = (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           rowA: any,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -915,7 +878,7 @@ export class TableComponent implements OnInit {
           return text.includes(String(filterValue ?? '').toLowerCase());
         };
       } else if (type === 'multi_badge') {
-        columnDef.sortingFn = (
+        columnDef.sortFn = (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           rowA: any,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -945,7 +908,7 @@ export class TableComponent implements OnInit {
           return text.includes(String(filterValue ?? '').toLowerCase());
         };
       } else if (type === 'link') {
-        columnDef.sortingFn = (
+        columnDef.sortFn = (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           rowA: any,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -998,37 +961,83 @@ export class TableComponent implements OnInit {
 
   readonly totalRowCount = computed(() => this.table.getFilteredRowModel().rows.length);
 
+  /**
+   * Single source of truth for "are we paginating, and how" — the pager gate, the controlled
+   * pagination state and TanStack's `manualPagination` flag all read this one computed, so they
+   * cannot disagree the way they did before this rework.
+   */
+  readonly resolvedPagination = computed(() => resolvePagination(this.input()?.features, this.pagination()));
+
   readonly paginationStart = computed(() => {
-    const p = this.pagination();
+    const p = this.resolvedPagination().state;
     return this.totalRowCount() === 0 ? 0 : p.pageIndex * p.pageSize + 1;
   });
 
   readonly paginationEnd = computed(() => {
-    const p = this.pagination();
+    const p = this.resolvedPagination().state;
     return Math.min((p.pageIndex + 1) * p.pageSize, this.totalRowCount());
+  });
+
+  /**
+   * Footer cells, keyed by column key.
+   *
+   * One computed rather than a per-cell call from the template: upstream deliberately does NOT cache
+   * `getAggregationValue({ rows })` — array identity is caller-owned — and the template renders one
+   * footer cell per column on every change detection pass. The old hand-rolled version was uncached
+   * too, so this is parity plus a small win.
+   *
+   * Scope is the FILTERED row model, not the current page: the footer has always totalled everything
+   * the filters leave, and passing rows explicitly is the only way to keep that (the cached default
+   * scope uses the pre-grouped model).
+   */
+  readonly footerValues = computed<Record<string, string>>(() => {
+    const inp = this.input();
+    if (!inp) return {};
+
+    const rows = this.table.getFilteredRowModel().rows;
+    const values: Record<string, string> = {};
+
+    for (const col of inp.columns) {
+      if (!col.footer) continue;
+
+      // count is a row count, not a column total — it keeps its own wording.
+      if (col.footer === 'count') {
+        values[col.key] = `${rows.length} ${rows.length === 1 ? 'rij' : 'rijen'}`;
+        continue;
+      }
+
+      const column = this.table.getColumn(col.key);
+      const result = column?.getAggregationValue({ rows });
+      // The type guard the hand-rolled version had, kept: upstream returns undefined for min/max/mean
+      // over rows with no usable value, and an empty table must read 0 rather than "undefined".
+      values[col.key] = formatCell(typeof result === 'number' ? result : 0, col.type ?? 'number');
+    }
+
+    return values;
   });
 
   // ── TanStack Table ─────────────────────────────────────────────────────
 
   readonly table = injectTable(() => ({
-    features,
-    rowModels: {
-      sortedRowModel: createSortedRowModel(sortFns),
-      paginatedRowModel: createPaginatedRowModel(),
-      filteredRowModel: createFilteredRowModel(filterFns),
-    },
+    features: TABLE_FEATURES,
     data: this.data(),
     columns: this.columns(),
     state: {
       sorting: this.sorting(),
       columnFilters: this.columnFilters(),
       globalFilter: this.globalFilter(),
-      pagination: this.pagination(),
+      pagination: this.resolvedPagination().state,
       rowSelection: this.rowSelection(),
       columnVisibility: this.columnVisibility(),
     },
+    // pagination: false → TanStack skips the page slice, so `getRowModel()` returns every filtered
+    // row (sorting and filtering still apply). Read from the computed so the flag stays reactive.
+    manualPagination: !this.resolvedPagination().paginate,
     enableGlobalFilter: true,
-    globalFilterFn: 'includesString',
+    // `as const` matters: the options factory's return type is inferred, so a bare 'includesString'
+    // widens to `string` and stops satisfying `FilterFnOption` now that globalFilteringFeature is
+    // registered and the option is actually type-checked.
+    globalFilterFn: 'includesString' as const,
     enableRowSelection: true,
     onSortingChange: (u: Updater<SortingState>) => (isFunction(u) ? this.sorting.update(u) : this.sorting.set(u)),
     onPaginationChange: (u: Updater<PaginationState>) =>
@@ -1046,9 +1055,9 @@ export class TableComponent implements OnInit {
   constructor() {
     // Set initial page size from input when it arrives
     effect(() => {
-      const inp = this.input();
-      if (inp?.features?.pageSize) {
-        this.pagination.set({ pageIndex: 0, pageSize: inp.features.pageSize });
+      const pageSize = resolveInitialPageSize(this.input()?.features);
+      if (pageSize !== null) {
+        this.pagination.set({ pageIndex: 0, pageSize });
       }
     });
 
@@ -1391,21 +1400,6 @@ export class TableComponent implements OnInit {
       return { src: cached, alt, width, height, rounded, loading: false };
     }
     return { src: null, alt, width, height, rounded, loading: true };
-  }
-
-  computeFooter(col: ColumnConfig): string {
-    const rows = this.table.getFilteredRowModel().rows;
-
-    // count works on all rows regardless of type
-    if (col.footer === 'count') {
-      return `${rows.length} rijen`;
-    }
-
-    const values = rows
-      .map((r) => r.getValue<number>(col.key))
-      .filter((v): v is number => v != null && typeof v === 'number');
-    const result = formatFooter(col.footer!, values);
-    return formatCell(result, col.type ?? 'number');
   }
 
   toggleColumnVisibility(key: string): void {
