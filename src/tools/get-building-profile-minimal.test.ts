@@ -83,16 +83,28 @@ async function connectMinimal(
 }
 
 describe('get_building_profile — minimal variant (the ablation)', () => {
-  it('exposes only get_building_profile, with a one-sentence description and no output schema', async () => {
+  it('exposes the same tool set as rich, but every tool has minimal instructions', async () => {
     const client = await connectMinimal(HAPPY_BAG, HAPPY_EP);
 
     const { tools } = await client.listTools();
-    expect(tools).toHaveLength(1);
-    const tool = tools[0];
-    expect(tool.name).toBe('get_building_profile');
+    // Same tools as the rich tier (minus the app-internal fetch_image helper) — the
+    // only variable is the metadata, not the tool set.
+    expect(tools.map((t) => t.name).sort()).toEqual([
+      'get_building_profile',
+      'render_chart',
+      'render_map',
+      'render_table',
+    ]);
+
+    const bp = tools.find((t) => t.name === 'get_building_profile')!;
     // The whole point of the tier: no rich prose, no output schema.
-    expect(tool.description).toBe('Look up a Dutch building by postcode and house number.');
-    expect(tool.outputSchema).toBeUndefined();
+    expect(bp.description).toBe('Look up a Dutch building by postcode and house number.');
+    expect(bp.outputSchema).toBeUndefined();
+
+    // The render apps are present but stripped to one-sentence descriptions.
+    expect(tools.find((t) => t.name === 'render_chart')!.description).toBe('Render data as a chart.');
+    expect(tools.find((t) => t.name === 'render_table')!.description).toBe('Render data as a table.');
+    expect(tools.find((t) => t.name === 'render_map')!.description).toBe('Render data as a map with markers.');
 
     await client.close();
   });

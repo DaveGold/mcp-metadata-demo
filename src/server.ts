@@ -43,13 +43,18 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
   const variant = options.variant ?? 'rich';
 
   if (variant === 'minimal') {
-    // Deliberately bare: a one-line instruction and a single, metadata-stripped tool.
-    // No render tools, so the A/B stays focused on the one domain tool.
+    // Deliberately bare: the SAME tool set as the rich tier, but every tool stripped to
+    // minimal instructions (one-sentence descriptions, no rich guidance) and the domain
+    // tool also stripped of its schema + alerts. Same tools, no metadata layer — so the
+    // only variable versus the rich tier is the metadata itself.
     const server = new McpServer(
       { name: 'metadata-demo-minimal', version: VERSION },
-      { instructions: 'Building data lookup for the Netherlands.' }
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
     );
     registerGetBuildingProfileMinimalTool(server, bagClient, epOnlineClient);
+    registerRenderChartTool(server, { minimal: true });
+    registerRenderTableTool(server, { minimal: true });
+    registerRenderMapTool(server, { minimal: true });
     return server;
   }
 
