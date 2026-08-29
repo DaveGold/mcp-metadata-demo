@@ -106,8 +106,9 @@ The failure it prevents is concrete: a residential *Nader Voorschrift* label ret
 
 The metadata layer is just code — read the exact pieces the agent consumes, and the ablated twin that drops them:
 
-- **Rich tool description** — the `RETURNS` / `WHEN TO USE` / `QUERY STRATEGY` / `INTERPRETATION` / `ALERTS` prose the model reads before it ever calls the tool: [`get-building-profile.ts` L23–64](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L23-L64)
-- **Input + output schemas** — a `.describe()` on every field, ~45 output fields: [`get-building-profile.ts` L68–206](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L68-L206)
+- **Rich tool description** — the `RETURNS` / `WHEN TO USE` / `QUERY STRATEGY` / `INTERPRETATION` / `ALERTS` prose the model reads before it ever calls the tool: [`get-building-profile.ts` L23–71](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L23-L71)
+- **Input schema** — model-visible, a `.describe()` on every field: [`get-building-profile.ts` L75–83](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L75-L83)
+- **Output schema — deliberately shape-only** — the model never sees this (validation + `structuredContent` shape only); every field's `.describe()` is a short identity, not interpretation. That interpretation used to live here for several fields (`temperatuuroverschrijding`, `compactheid`, the `co2_emissie_kg_m2` unit caveat, and others) until it was moved into the description above, where the model actually reads it — the exact fix this repo's paper argues for, applied to itself: [`get-building-profile.ts` L88–201](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L88-L201)
 - **Server-side interpretation** — the `alerts[]` rules (regulation eras, Paris Proof thresholds, the Nader Voorschrift MJ-unit trap): [`generate-alerts.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/generate-alerts.ts)
 - **The minimal twin** — the whole ablated tool, ~60 lines, none of the above: [`get-building-profile-minimal.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-minimal.ts)
 - **Selective retrieval (Select)** — the field-projection mechanism itself, with its safety rails (never silently fall back to full records, alert on unknown fields): [`project-fields.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/project-fields.ts), used by [`get-weather-context.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context.ts)
@@ -134,7 +135,7 @@ The demo applies the same metadata principle in **two places at once**:
   because the schema's REFUSE rules say sankey requires flows (this data has none).
 ```
 
-Same principle powers `get_building_profile`'s output schema and `render_chart`'s input schema: in one the AI-generated output is domain data, in the other it's UI configuration.
+The two levels use the metadata layer differently, and the difference matters. `render_chart`'s **input** schema is model-visible — the agent reads its REFUSE rules before generating a call, which is why they work. `get_building_profile`'s **output** schema is *not* model-visible (see the "Output schema — deliberately shape-only" entry above): the interpretation the agent uses at Level 1 comes from the tool description and the returned `alerts[]` data, never from the output schema itself.
 
 ## What's inside
 
@@ -197,7 +198,7 @@ Single `createServer({ variant })` factory in [src/server.ts](src/server.ts), ex
 
 ### Layers
 
-- **Tools** (`src/tools/`) — each tool's `description` and Zod `inputSchema`/`outputSchema` (`.describe()` on every field) carry the metadata that drives agent reasoning. `get-building-profile.ts` encodes `RETURNS` / `WHEN TO USE` / `INTERPRETATION` / `ALERTS`; the render tools register a `ui://` resource + tool pair and return `structuredContent` for the iframe. `get-building-profile-minimal.ts` is the ablated twin — same data path (`resolveBuildingProfile`), none of the metadata.
+- **Tools** (`src/tools/`) — each tool's `description` and Zod `inputSchema` (`.describe()` on every field) carry the metadata that drives agent reasoning; `outputSchema` is deliberately **shape-only** — it validates `structuredContent` and drives UI rendering, but the model never reads a single `.describe()` on an output field, so all output-field interpretation lives in the description instead (see [Two levels, one strategy](#two-levels-one-strategy)). `get-building-profile.ts` encodes `RETURNS` / `WHEN TO USE` / `INTERPRETATION` / `ALERTS`; the render tools register a `ui://` resource + tool pair and return `structuredContent` for the iframe. `get-building-profile-minimal.ts` is the ablated twin — same data path (`resolveBuildingProfile`), none of the metadata.
 - **Clients** (`src/clients/`) — one class per upstream, each owning its URL, auth, timeout, and Zod-validated response parsing, so upstream wire-format drift surfaces here rather than silently downstream. `BagClient` is auth-free; `EpOnlineClient` needs an API key.
 - **Domain** (`src/domain/`) — pure functions: `buildProfile` (raw registers → `BuildingProfile`), `selectBestLabel`, and `generateAlerts` (regulation eras, Paris Proof 2040 thresholds, BENG, heat-pump suitability — knowledge moved server-side, to where the data lives).
 - **Logger** (`src/logger.ts`) — stderr-only structured JSON. **Never** writes to stdout, which stdio MCP framing owns; a stray `console.log` would corrupt the JSON-RPC stream.
@@ -218,7 +219,7 @@ A factual explainer of how a chart, table, or map actually appears in the chat.
 
 **The data bridge**: the tool handler returns `structuredContent` (the chart config, table rows, map markers) alongside `_meta.ui.resourceUri` pointing at the HTML. The MCP Apps SDK exposes that `structuredContent` to the iframe as `window.mcpAppData`. The Angular component reads it at bootstrap and renders. No follow-up fetch from iframe to server, no runtime API — one tool response is everything.
 
-The result: the same metadata principle that powers `get_building_profile`'s output schema also powers `render_chart`'s input schema. Both are AI-generated from the schema; in one the output is domain data, in the other it's UI configuration. The Angular-plus-Vite-single-file part is just how that UI configuration becomes pixels.
+The result: `render_chart`'s **input** schema is what the agent reads to generate this payload — schema-guided generation, model-visible. That's a different channel from `get_building_profile`'s **output** schema, which the model never reads at all (see [Two levels, one strategy](#two-levels-one-strategy)). The Angular-plus-Vite-single-file part is just how the generated UI configuration becomes pixels.
 
 ### External APIs
 
