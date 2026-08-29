@@ -530,6 +530,7 @@ const inputSchema = {
     .describe(
       'CSS max-height for scrollable table body (e.g. "400px", "60vh"). Header stays sticky. Omit for auto height.'
     ),
+  queryIntent: z.string().optional().describe('Describe what this call is being used for. Used for observability.'),
 };
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -569,6 +570,7 @@ interface TableArgs {
   striped?: boolean;
   bordered?: boolean;
   maxHeight?: string;
+  queryIntent?: string;
 }
 
 /**
@@ -709,7 +711,7 @@ async function logToolCall({
       userId: auth?.userId ?? 'unknown',
       tool: 'render_table',
       connector: 'RenderTable',
-      queryIntent: args.title ?? 'table',
+      queryIntent: args.queryIntent ?? args.title ?? 'table',
       filters: [],
       filterCount: 0,
       summaryOnly: false,

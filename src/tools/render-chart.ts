@@ -635,6 +635,7 @@ const inputSchema = {
     .number()
     .optional()
     .describe('Chart height in pixels. Default: 400. Use 300 for sparklines, 500 for complex charts with many labels.'),
+  queryIntent: z.string().optional().describe('Describe what this call is being used for. Used for observability.'),
 };
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -765,6 +766,7 @@ interface ChartArgs {
   };
   width?: number;
   height?: number;
+  queryIntent?: string;
 }
 
 /** Normalize a dataset entry (tuple or object) to the full keyed shape. */
@@ -1154,7 +1156,7 @@ async function logToolCall({
       userId: auth?.userId ?? 'unknown',
       tool: 'render_chart',
       connector: 'RenderChart',
-      queryIntent: args.title ?? args.type ?? 'chart',
+      queryIntent: args.queryIntent ?? args.title ?? args.type ?? 'chart',
       filters: [],
       filterCount: 0,
       summaryOnly: false,

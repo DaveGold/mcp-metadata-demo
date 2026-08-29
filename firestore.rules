@@ -1,0 +1,13 @@
+rules_version = '2';
+
+// The tool-call log is written and read exclusively via the Admin SDK from
+// the deployed Cloud Functions (see src/shared/log-store.ts), which bypasses
+// these rules entirely. This denies all direct client access as a formality —
+// there is no client-side Firestore SDK usage anywhere in this repo.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

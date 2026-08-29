@@ -80,6 +80,7 @@ const inputSchema = {
   huisnummer: z.number().int().positive().describe('Huisnummer (alleen getal)'),
   huisletter: z.string().optional().describe('Huisletter (bijv. A, B)'),
   toevoeging: z.string().optional().describe('Huisnummertoevoeging (bijv. bis, I, II)'),
+  queryIntent: z.string().optional().describe('Describe what this call is being used for. Used for observability.'),
 };
 
 // ── Output schema (single source of truth for the profile shape) ─────────────
@@ -278,7 +279,13 @@ export function registerGetBuildingProfileTool(
         openWorldHint: true,
       },
     },
-    async (args: { postcode: string; huisnummer: number; huisletter?: string; toevoeging?: string }) => {
+    async (args: {
+      postcode: string;
+      huisnummer: number;
+      huisletter?: string;
+      toevoeging?: string;
+      queryIntent?: string;
+    }) => {
       const start = Date.now();
       const ok = (profile: BuildingProfile) => ({
         structuredContent: profile,
@@ -323,7 +330,7 @@ async function logToolCall({
   status,
   rowCount,
 }: {
-  args: { postcode: string; huisnummer: number; huisletter?: string; toevoeging?: string };
+  args: { postcode: string; huisnummer: number; huisletter?: string; toevoeging?: string; queryIntent?: string };
   start: number;
   status: 'success' | 'error';
   rowCount: number;
@@ -339,7 +346,7 @@ async function logToolCall({
     userId: 'unknown',
     tool: 'get_building_profile',
     connector: 'GetBuildingProfile',
-    queryIntent: adres,
+    queryIntent: args.queryIntent ?? adres,
     filters: [],
     filterCount: 0,
     summaryOnly: false,

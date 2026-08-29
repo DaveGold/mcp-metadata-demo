@@ -219,6 +219,7 @@ export const inputSchema = {
     .number()
     .optional()
     .describe('Map height in pixels. Default: 500. Use 400 for compact views, 600 for detail-rich maps.'),
+  queryIntent: z.string().optional().describe('Describe what this call is being used for. Used for observability.'),
 };
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -238,6 +239,7 @@ interface MapArgs {
   center?: { lat: number; lng: number };
   zoom?: number;
   height?: number;
+  queryIntent?: string;
 }
 
 /**
@@ -427,7 +429,7 @@ async function logToolCall({
       userId: auth?.userId ?? 'unknown',
       tool: 'render_map',
       connector: 'RenderMap',
-      queryIntent: args.title ?? `map-${args.markers.length}-markers`,
+      queryIntent: args.queryIntent ?? args.title ?? `map-${args.markers.length}-markers`,
       filters: [],
       filterCount: 0,
       summaryOnly: false,
