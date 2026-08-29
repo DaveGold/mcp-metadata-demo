@@ -147,7 +147,7 @@ The two levels use the metadata layer differently, and the difference matters. `
 - `render_map` — Leaflet maps with markers (car, building, project, pin)
 - `fetch_image` — server-side image proxy with SSRF protection (used by `render_table` when the iframe CSP blocks `img-src`)
 
-Also included: [`.claude/skills/rich-domain-mcp-server/`](.claude/skills/rich-domain-mcp-server/SKILL.md) — a standalone Claude Code Skill teaching the method behind this repo (Scaffold → Examine → Flag → Validate → Encode → Iterate), generalized so it's useful for building *your own* rich-domain MCP server, not just for maintaining this one.
+Also included: standalone [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) and [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md) skills teaching the method behind this repo (Scaffold → Examine → Flag → Validate → Encode → Iterate), generalized so they're useful for building *your own* rich-domain MCP server, not just for maintaining this one.
 
 ## Run it locally
 
