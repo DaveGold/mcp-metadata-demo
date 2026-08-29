@@ -3,6 +3,9 @@
     "metadata-demo": {
       "command": "node",
       "args": ["--env-file=.env.local", "dist/stdio.js"]
+    },
+    "metadata-demo-cloud": {
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp"
     }
   }
 }
