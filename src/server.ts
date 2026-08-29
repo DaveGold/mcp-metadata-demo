@@ -6,6 +6,7 @@
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import packageJson from '../package.json' with { type: 'json' };
 import { BagClient } from './clients/bag-client.js';
 import { EpOnlineClient } from './clients/ep-online-client.js';
 import {
@@ -21,7 +22,7 @@ import { registerFetchImageTool } from './tools/fetch-image.js';
 import { registerGetWeatherContextTool } from './tools/get-weather-context.js';
 import { registerGetToolCallLogTool } from './tools/get-tool-call-log.js';
 
-const VERSION = '1.3.0';
+const VERSION = packageJson.version;
 
 /**
  * Which metadata tier to expose. See the paper "The Missing Layer":
