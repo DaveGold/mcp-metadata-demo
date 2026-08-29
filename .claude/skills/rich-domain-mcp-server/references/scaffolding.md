@@ -115,20 +115,22 @@ deploy abort, blocking every server's deploy, not just the one you changed.
 ## 4. Connecting for testing
 
 ```jsonc
-// .mcp.json at the repo root
+// An MCP client configuration file; Claude Code uses .mcp.json at the repo root.
 { "mcpServers": { "<name>": { "url": "https://<your-deployed-url>" } } }
 ```
 
-Or add it as a claude.ai connector. Either way: **a new or changed tool is not visible in a chat
-session that was already open** — clients cache the tool catalog. Start a fresh chat.
+Or add the server through the connector/configuration mechanism your target client supports. Test
+in a fresh context after a deploy: clients may cache the tool catalog, and the refresh behaviour is
+client-specific.
 
 For local, no-deploy iteration, the [MCP Inspector](https://github.com/modelcontextprotocol/inspector)
 works against a local stdio or HTTP server with no custom UI needed (this repo: `npm run inspect`).
 
 ## 5. Docs to keep updated
 
-- **`CLAUDE.md`** — server list, build & deploy commands, deployed URLs, code-organization tree,
-  key technical details (auth, secrets, timeout, quirks).
+- **A project agent guide** (`AGENTS.md`, `CLAUDE.md`, or equivalent) — server list, build & deploy
+  commands, deployed URLs, code-organization tree, and key technical details (auth, secrets,
+  timeout, quirks).
 - **`docs/<name>-api-findings.md`** — the discovery log (structure in `discovery.md`).
 - A raw-request collection (Bruno, Postman, `.http` files) in `api/<name>/` if you want reproducible
   raw calls outside the MCP layer — optional, but useful when debugging a vendor issue.

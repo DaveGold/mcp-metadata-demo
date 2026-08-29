@@ -3,15 +3,14 @@
 The fourth step of the EFVEI loop: everything Examine found and Validate confirmed becomes tool
 metadata here, or it may as well not exist.
 
-The agent reads **two** things, always, on every call: the **tool description** and the **input
-schema** annotations. The **output schema is NOT model-visible** — no host forwards it to the model
-(measured: Claude Code, claude.ai, OpenAI's Responses API). It does real work for *validation*
-(`outputValidator.safeParse`) and *UI rendering*, but the model never sees a single `.meta()`/
-`.describe()` on an output field. Server instructions land in some clients; Resources and meta-tools
-land nowhere. So everything the agent needs to CHOOSE the tool, CALL it, and READ its output must
-live in the **description** or the **input schema** — or, for output values, in the **returned data
-itself** (source-side joins + derived fields, §4). Output-field interpretation put only in an output
-annotation is dead weight: authored, validated, and never delivered.
+Tool descriptions and input-schema annotations are the primary model-facing channels for this
+method. In the clients measured for this project (Claude Code, claude.ai, and OpenAI's Responses
+API), output-schema annotations were not forwarded to the model, although they still did real work
+for *validation* (`outputValidator.safeParse`) and *UI rendering*. Server instructions, Resources,
+and meta-tools are client-dependent too. Therefore, put the guidance an agent must have to choose,
+call, and read a tool in its **description** or input schema — or, for output values, in the
+**returned data itself** (source-side joins + derived fields, §4). Do not rely on output annotations
+as the only source of interpretation unless you have verified delivery in the target client.
 
 ---
 
@@ -33,8 +32,8 @@ heading — a single line belongs as a bullet, not a block.
 RETURNS:
 <What comes back, in business terms. Name the key fields that drive tool selection, AND the
 field-value knowledge the agent needs to READ the output — glossaries, derivations, caveats.
-NEVER "see outputSchema": the model cannot read it. Include real, counted volumes; flag any
-vendor number known to be a lie.>
+Do not tell the agent to "see outputSchema" unless the target client demonstrably exposes it. Include
+real, counted volumes; flag any vendor number known to be a lie.>
 
 WHEN TO USE:
 - <The question this tool answers, phrased the way a user would ask it.>
@@ -50,7 +49,7 @@ QUERY STRATEGY:
 INTERPRETATION:
 - <Cross-field rules AND the field-value knowledge needed to read output: type→field-group
   mappings, conditional population, derivations, code meanings, multi-tool lookup chains. This is
-  where output-field interpretation lives now — it CANNOT live in output .meta() (invisible).>
+  where output-field interpretation has a reliable home when output annotations are not delivered.>
 
 RELATED TOOLS:
 - <tool_name>(<join key>) — <what it adds>. Fold routing / cross-reference / prerequisite in here.
@@ -96,16 +95,16 @@ Block-by-block, what breaks without it:
 
 **Hygiene rules**
 
-- **Output-field interpretation goes in the description, never only in output `.meta()`.** The model
-  never reads output annotations. A field's values, caveats, derivation and null-meaning that the
-  agent needs → RETURNS or INTERPRETATION; keep the output `.meta()` shape-only (§3).
+- **Put output-field interpretation in the description, not only in output `.meta()`.** In the
+  clients measured for this project, output annotations did not reach the model. A field's values,
+  caveats, derivation and null-meaning that the agent needs → RETURNS or INTERPRETATION; keep the
+  output `.meta()` shape-only (§3) unless the target client proves a different contract.
 - **No duplication WITHIN the description.** RETURNS is a terse field inventory; INTERPRETATION holds
   the knowledge — do not explain the same field in both. When a fact goes into INTERPRETATION, trim
   the RETURNS entry to a pointer.
-- **No duplication between INTERPRETATION and INPUT `.meta()`.** INPUT annotations ARE model-visible,
-  so an input param fully documented on itself does not also belong in INTERPRETATION. (This is the
-  one place the old "no duplication with field annotations" rule still holds — it never applied to
-  OUTPUT fields.)
+- **Avoid duplication between INTERPRETATION and INPUT `.meta()` when the target client exposes input
+  annotations.** An input param fully documented on itself does not also belong in INTERPRETATION.
+  This does not apply to OUTPUT fields unless their annotations have been verified as model-visible.
 - **No code tables inline.** If a code field has a companion description field, join it (§4 layer 1)
   and say so; if it doesn't, get one.
 - **Warnings belong where the mistake is made.** A misbehaving *input* parameter is documented on the
@@ -116,8 +115,8 @@ description is written or edited, read it end-to-end and check each fact appears
 - No field explained in both RETURNS and INTERPRETATION — RETURNS is the terse inventory,
   INTERPRETATION holds the knowledge; when a fact lands in INTERPRETATION, trim the RETURNS entry to
   a pointer.
-- No INPUT-parameter fact repeated in INTERPRETATION (input `.meta()` is already model-visible).
-- No content copied from the output schema, and no `/outputSchema/i` mention anywhere.
+- No INPUT-parameter fact repeated in INTERPRETATION when input `.meta()` reaches the target model.
+- Do not make the description depend on a model opening the output schema.
 - Fold overlapping bullets across blocks (e.g. pagination guidance scattered between QUERY STRATEGY
   and a stray block) into their single canonical home.
 Do this as a distinct final step — not while drafting — because duplication creeps in during editing
@@ -172,12 +171,13 @@ The `satisfies` clause is what makes field names compile-time-checked against th
 and even without a generator factory, hand-writing `inputSchema` still benefits from a `FIELDS`-style
 array as the single source of truth for filter/select/row-type field names.
 
-## 3. Output schema — shape-only (validation + UI, not the model)
+## 3. Output schema — shape-only by default (validation + UI; not a guaranteed model channel)
 
-The output schema validates the payload (`outputValidator.safeParse`) and drives UI rendering. It is
-**not** model-visible (intro), so its annotations are **shape-only**: type + `.optional()`/
-`.nullable()` + a short field identity. Do NOT encode domain knowledge here — it lands in the
-description (§1) and in the returned data (§4).
+The output schema validates the payload (`outputValidator.safeParse`) and drives UI rendering. In
+the clients measured for this project, its annotations were not model-visible, so keep them
+**shape-only** by default: type + `.optional()`/`.nullable()` + a short field identity. Put domain
+knowledge in the description (§1) and returned data (§4) unless the target client has a verified,
+different delivery contract.
 
 The standard envelope:
 
@@ -197,8 +197,8 @@ export const outputSchema = {
 naming the field, optionally a bare unit or format token. Optionality/nullability is already carried
 by `.optional()`/`.nullable()`, so do NOT explain WHEN or WHY a field is null. No value legends, no
 value *meanings*, no derivations, no glossaries, no "use this for…", and **no pointer to the
-description** — the fixed convention (output interpretation ALWAYS lives in the description) makes a
-pointer redundant noise:
+description** — the default convention is to put output interpretation in the description, where it
+is a more reliable delivery channel:
 
 ```ts
 // identity + type; the "null when cancelled" MEANING lives in the description, not here
@@ -211,8 +211,8 @@ FulfillmentStatus: z.string().optional().meta({ description: 'Derived fulfillmen
 ```
 
 The knowledge that USED to be crammed here — the null-*meaning*, the join key, the value *semantics*,
-the sentinel rule — now lives in the **description** (RETURNS / INTERPRETATION), where the model reads
-it, or in the **row itself** via §4. **Identify-before-removing:** before trimming a field's
+the sentinel rule — now lives in the **description** (RETURNS / INTERPRETATION), where the target
+model can rely on it, or in the **row itself** via §4. **Identify-before-removing:** before trimming a field's
 annotation, confirm every fact it carried is in the description; a mechanical strip loses knowledge.
 Keep the type + `.optional()`/`.nullable()` EXACTLY — validation stays byte-identical; only the
 describe text is trimmed.
@@ -311,7 +311,7 @@ omission labels a read-only tool as destructive and open-world.
 - [ ] WHEN NOT TO USE names the correct alternative tool, and the workaround for unsupported paths
 - [ ] Input: `queryIntent`, `summaryOnly`, `.meta()` on every param with format + working examples
 - [ ] Misbehaving/ignored parameters documented on the parameter itself
-- [ ] Output: SHAPE-ONLY `.meta()` (type/optional + short identity, no pointer); the null-meaning, join key, value semantics and sentinel rule live in the DESCRIPTION, not here
+- [ ] Output: SHAPE-ONLY `.meta()` by default (type/optional + short identity, no pointer); the null-meaning, join key, value semantics and sentinel rule live in the DESCRIPTION, not only here
 - [ ] `summary` covers the dimensions an agent would otherwise paginate for
 - [ ] `interpretation.alerts` present in the output schema
 - [ ] An empty-result hint distinguishes "wrong lookup" from "valid but empty"
@@ -341,13 +341,13 @@ UNITS: <distance, duration, currency conventions>
 | Anti-pattern | Why |
 |---|---|
 | A meta-tool (`get_query_guide`, `get_data_dictionary`) | Built and tested: agents rarely call them |
-| MCP Resources for reference content | Rarely requested by any Claude client |
+| MCP Resources for essential reference content | Client-dependent; do not make core guidance rely on them without testing |
 | Code tables inline in a description | Tokens + drift. Join the description field instead |
-| Output-field interpretation only in output `.meta()` | The model never reads output annotations — the knowledge is invisible. Put it in the description |
-| Pointing to `outputSchema` from a description | The model cannot open it. Inline the real content |
-| Verbose output `.meta()` prose | Dead weight — validation/UI only. Keep it shape-only |
+| Output-field interpretation only in output `.meta()` | In the measured clients the model did not receive output annotations. Put essential interpretation in the description |
+| Pointing to `outputSchema` from a description | Do not assume the model can open it. Inline the essential content |
+| Verbose output `.meta()` prose | Usually dead weight when annotations are validation/UI only. Keep it shape-only by default |
 | Same field explained in both RETURNS and INTERPRETATION | Duplication within the description that drifts apart |
-| Repeating an INPUT param's `.meta()` in INTERPRETATION | Input annotations are model-visible; duplication drifts |
+| Repeating an INPUT param's `.meta()` in INTERPRETATION | When input annotations are model-visible, duplication drifts |
 | `z.object({})` for a parameterless tool | SDK error — use `{}` or omit `inputSchema` |
 | "Nullable" without the condition | The agent still can't tell when to expect a value |
 | Volume claims that skip the 0 case | Agents retry forever on legitimately empty results |
