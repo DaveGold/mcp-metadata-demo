@@ -5,6 +5,7 @@
       "args": ["--env-file=.env.local", "dist/stdio.js"]
     },
     "metadata-demo-cloud": {
+      "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp"
     }
   }
