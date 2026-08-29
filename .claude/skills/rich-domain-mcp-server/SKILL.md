@@ -26,12 +26,13 @@ business, and encode it where the agent reads it.
 
 **Two rules drive everything:**
 
-- **The tool description + INPUT schema are the only reliable delivery channel to the model.** The
-  **OUTPUT schema is NOT model-visible** — no host forwards it (measured across Claude Code,
-  claude.ai, and OpenAI's Responses API); it does validation + UI rendering only. Server
-  instructions are client-dependent; MCP Resources and meta-tools are never read. So
-  output-reading knowledge must be in the **description** (or in the returned data itself); an
-  output `.meta()`/`.describe()` reaches no model. Output annotations are kept **shape-only**.
+- **Tool descriptions and INPUT schemas are the most portable model-facing channels.** In the
+  clients measured for this project (Claude Code, claude.ai, and OpenAI's Responses API), output
+  schema annotations were not forwarded to the model; use them for validation and UI, and do not
+  make essential interpretation depend on them unless you have verified the target client. Server
+  instructions, MCP Resources, and meta-tools are also client-dependent, so do not make them the
+  sole delivery path for essential guidance. Put output-reading knowledge in the **description**
+  or returned data; keep output annotations **shape-only** by default.
 - **Discovery beats documentation.** Vendor docs describe the happy path. Null patterns, silently
   ignored parameters, lying totals, and broken joins only show up when you interrogate real rows.
 
@@ -63,7 +64,7 @@ SCAFFOLD   ship something simple straight from the API docs
    │      │
    └──────┘
 
-HARDEN     tests, docs, CLAUDE.md — once the loop stabilises
+HARDEN     tests, docs, project agent guide — once the loop stabilises
 ```
 
 Copy this checklist into your response and tick it off:
@@ -75,7 +76,7 @@ Copy this checklist into your response and tick it off:
 - [ ] V. Validate: LOW/MEDIUM markers batched into one expert session; answers dated
 - [ ] E. Encode: description blocks (interpretation here), shape-only output .meta(), transform, summarize, alerts → redeploy
 - [ ] I. Iterate: back to Examine in a new context; then telemetry drives the next round
-- [ ] H. Harden: unit tests, docs/<name>-api-findings.md, CLAUDE.md
+- [ ] H. Harden: unit tests, docs/<name>-api-findings.md, project agent guide
 ```
 
 ## Scaffold — ship something simple
@@ -169,8 +170,8 @@ Discoveries go into the tool, not into a wiki. Five layers, all of them:
    cannot reach the model any other way.
 2. **Input schema** (model-visible) — `.meta({ description, examples })` per param: formats, working
    example values, operators, and explicit warnings about params that misbehave
-3. **Output schema** (NOT model-visible — validation + UI) — `.meta()` kept **shape-only**: type +
-   optional + short identity, no interpretation, no pointer
+3. **Output schema** (validation + UI; not a guaranteed model channel) — `.meta()` kept
+   **shape-only**: type + optional + short identity, no interpretation, no pointer
 4. **`transform`** (returned data — model-visible) — derived fields that collapse flag-combinations
    into one readable label
 5. **`summarize`** (returned data — model-visible) — domain aggregation + `interpretation.alerts`
@@ -292,9 +293,10 @@ Details in **`references/validation.md`**.
   works with any MCP server and needs no custom UI (this repo uses it: `npm run inspect`).
 - **`docs/<name>-api-findings.md`**: the discovery log — evidence, open markers, vendor bugs,
   re-check agenda. Structure in `references/discovery.md`.
-- **`CLAUDE.md`**: server list, deploy command, code-organization tree, key technical details (auth,
-  secrets, timeout, quirks).
-- **`.mcp.json`** (optional) for local Claude Code connection; a claude.ai connector otherwise.
+- **Project agent guide** (`AGENTS.md`, `CLAUDE.md`, or equivalent): server list, deploy command,
+  code-organization tree, and key technical details (auth, secrets, timeout, quirks).
+- **An MCP client configuration** (for example `.mcp.json` for Claude Code) for local connection;
+  use the equivalent connector/configuration supported by the client you are testing.
 
 ---
 
@@ -312,8 +314,10 @@ Details in **`references/validation.md`**.
   the spec, so an omission mislabels a read-only tool.
 - **Title in the source language if your domain has one, description in English** with domain terms
   glossed on first use — `Voorraadmutatie (stock mutation — inventory in/out events)`.
-- **No meta-tools, no Resources.** Build the real tool instead. (`z.object({})` also breaks
-  parameterless tools — use `{}` or omit `inputSchema`.)
+- **Do not make meta-tools or Resources required for core guidance.** Build the real tool and put
+  essential instructions on it; use other MCP primitives only after confirming the target client
+  surfaces and selects them. (`z.object({})` also breaks parameterless tools — use `{}` or omit
+  `inputSchema`.)
 - **Never silently sum a counter.** If aggregation semantics depend on metadata not present in the
   data response (unit, counter-vs-period), fetch it explicitly. A silent fallback is worse than a
   hard error because nobody sees it.
@@ -328,7 +332,7 @@ Details in **`references/validation.md`**.
 
 | You are doing… | Open |
 |---|---|
-| Scaffold: wiring files, secrets, deploy, CI, CLAUDE.md | `references/scaffolding.md` |
+| Scaffold: wiring files, secrets, deploy, CI, project agent guide | `references/scaffolding.md` |
 | Examine + Flag: interrogating an API, the probe matrix, findings doc | `references/discovery.md` |
 | Validate + Iterate: expert session, telemetry, feedback triage | `references/validation.md` |
 | Encode: writing/reviewing descriptions & schemas, per-tool checklist | `references/metadata.md` |
@@ -352,8 +356,9 @@ examples sitting right next to it:
 
 - **Zod 4 `.meta()` vs `.describe()`** — prefer `.meta({ description, examples })` in new code (it
   carries `examples`, which help on INPUT). `.describe()` remains equivalent for description-only
-  and is perfectly fine — just without `examples`. Whichever you pick, **only INPUT annotations
-  reach the model** — an OUTPUT annotation (either form) is validation/UI only.
+  and is perfectly fine — just without `examples`. In the clients measured for this project, INPUT
+  annotations reached the model and OUTPUT annotations did not; verify that behaviour for another
+  target client before relying on it.
 - **Discovery findings expire.** Pre-release and beta APIs change under you; every claim in a
   description is a maintenance liability. Put a re-check section in the findings doc.
 
