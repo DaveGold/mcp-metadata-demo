@@ -59,7 +59,14 @@ Which fields are populated depends on the berekeningstype:
 - vbo_status not "Verblijfsobject in gebruik": building may be vacant/demolished — verify analysis relevance
 - sbi_code: full-text sector description — NOT a numeric SBI code. Present for ISSO 75.3/NEN 7120 labels (SBI is an input to those methods). Usually null for NTA 8800 labels.
 - ep2_fossiel_emg_forfaitair_kwh_m2 vs ep2_fossiel_kwh_m2: delta shows how standardized forfaitaire area-bound factors compare to the actual calculation. Delta can go EITHER direction.
+- aandeel_hernieuwbaar_emg_forfaitair_pct (NTA 8800 utiliteitsbouw only) can be LOWER than aandeel_hernieuwbaar_pct when the building has on-site renewables not captured in the standardized forfaitaire measures.
 - ep_online_bouwjaar vs bouwjaar: discrepancy may indicate renovation or partial rebuild.
+- co2_emissie_kg_m2 unit depends on berekeningstype: NTA 8800 = kg CO₂/m²/year (comparable across buildings); Nader Voorschrift (residential) = kg CO₂/year TOTAL building, NOT per m² (values of 3,000–5,000 for a 79 m² house confirm this) — do not benchmark per m².
+- warmtebehoefte_kwh_m2 (net heat demand): the key input for heat pump sizing.
+- temperatuuroverschrijding (TOjuli/GTO overheating-risk indicator): 0 = no risk, 0–1.5 = minor risk, >1.5 = significant overheating. Relevant for cooling load and heat pump sizing.
+- compactheid (Als/Ag = loss surface area / usable floor area): lower = more compact = less heat loss per m².
+- soort_opname: "Basisopname" = standard site visit, "Detailopname" = detailed measurement (more accurate). Null = pre-NTA 8800 label or no label.
+- gebouwtype/gebouwsubtype refinements (e.g. hoek/boven) lose more heat than tussen/midden variants — refines the heat-loss estimate for residential buildings.
 
 ALERTS: Always check interpretation.alerts — they contain bouwjaar era warnings (suppressed for good labels A/A+/A++/A+++/A++++), multiple-VBO disambiguation, large pand oppervlakte warning (>10 VBOs), Paris Proof threshold breaches (differentiated by gebouwklasse), label expiry notices, BENG compliance violations, VBO status warnings, bouwjaar discrepancies, and district heating impact notes. For residential buildings alerts also include an estimated annual gas consumption (m³), total CO₂ emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.`;
 
@@ -120,29 +127,16 @@ export const outputSchema = z.object({
   co2_emissie_kg_m2: z
     .number()
     .nullable()
-    .describe(
-      'Calculated CO₂ emission. NTA 8800: kg CO₂/m²/year. Nader Voorschrift (residential): kg CO₂/year TOTAL building — do NOT use as per-m² benchmark.'
-    ),
+    .describe('Calculated CO₂ emission. Unit depends on berekeningstype (kg/m²/year or total kg/year).'),
   berekend_energieverbruik_kwh_m2: z
     .number()
     .nullable()
     .describe(
       'Theoretical total energy consumption (NOT measured). Unit depends on berekeningstype — see INTERPRETATION block.'
     ),
-  warmtebehoefte_kwh_m2: z
-    .number()
-    .nullable()
-    .describe('Net heat demand in kWh/m²/year — key metric for heat pump sizing'),
-  temperatuuroverschrijding: z
-    .number()
-    .nullable()
-    .describe('Overheating risk indicator (TOjuli/GTO). 0 = no risk, >1.5 = significant overheating risk.'),
-  compactheid: z
-    .number()
-    .nullable()
-    .describe(
-      'Thermal envelope compactness ratio (Als/Ag). Lower = more compact = less heat loss per m².'
-    ),
+  warmtebehoefte_kwh_m2: z.number().nullable().describe('Net heat demand (kWh/m²/year)'),
+  temperatuuroverschrijding: z.number().nullable().describe('Overheating-risk indicator (TOjuli/GTO)'),
+  compactheid: z.number().nullable().describe('Thermal envelope compactness ratio (Als/Ag)'),
   gebruiksoppervlakte_thermische_zone_m2: z
     .number()
     .nullable()
@@ -151,7 +145,7 @@ export const outputSchema = z.object({
     .string()
     .nullable()
     .describe("'Woningbouw' = residential, 'Utiliteitsbouw' = non-residential."),
-  soort_opname: z.string().nullable().describe('Assessment type (NTA 8800 only)'),
+  soort_opname: z.string().nullable().describe('Assessment type. Null = pre-NTA 8800 or no label.'),
   berekeningstype: z.string().nullable().describe('Calculation standard (NTA 8800:2024, NEN 7120, Nader Voorschrift, ...)'),
   label_status: z.string().nullable().describe("'Bestaand' (existing) or 'Nieuw' (new construction)"),
   op_basis_van_referentiegebouw: z
