@@ -12,7 +12,7 @@ A Rich Domain MCP Server layers *agent-facing capabilities* on top of the raw re
 
 **The progression:** the paper showed that production usage reveals what *metadata* is missing; the follow-up — and this repo — show it reveals what *capabilities* are missing. The feedback loop doesn't just yield better descriptions; it yields Select, Summaries, Alerts and Derived Values.
 
-> ⚠️ **This is a condensed public demo — not the full system.** It shows a *subset* of the capability set: rich **metadata**, curated **alerts**, **derived values** (the gas/CO₂/heat-pump estimates in `generate-alerts.ts`), and **self-describing UI** (the render apps). Selective retrieval, summaries, and the `queryIntent` iterate-loop live in the production system and the [articles](https://davidgolverdingen.nl/en/insights/mcp-server-smarter-every-week), not in this stripped example — and even the capabilities shown here are deliberately lighter than production.
+> ⚠️ **This is a condensed public demo — not the full system.** It shows a *subset* of the capability set: rich **metadata**, curated **alerts**, **derived values** (the gas/CO₂/heat-pump estimates in `generate-alerts.ts`), **self-describing UI** (the render apps), **selective retrieval** (`select` on `get_weather_context`), **summaries** (its `summary` block), and a real `queryIntent` input param. The production `queryIntent` *iterate-loop* — reading months of tool-call telemetry as a narrative to find the next metadata gap — lives in the system behind the [articles](https://davidgolverdingen.nl/en/insights/mcp-server-smarter-every-week), not in this stripped example, and even the capabilities shown here are deliberately lighter than production.
 
 ## Try it live (no install, no API key)
 
@@ -61,6 +61,12 @@ The tool's `INTERPRETATION` block and `alerts[]` carry the Paris Proof threshold
 
 On **rich**, the agent picks `render_table` and its cell formatters straight from the schema — no wrapper logic. On **minimal**, the same app exists but with a one-sentence description and no guidance, so the agent has to guess the payload shape and formatting unaided — the same ablation, applied to the app config.
 
+**4 — Selective retrieval, i.e. Select (rich):**
+
+> *"Get the weather for Utrecht for the whole of last year, and give me just the date, weather label, and max temperature for every day — I want to build a calendar view."*
+
+The tool's `QUERY STRATEGY` block tells the agent that a year-long range would normally call for `summaryOnly=true` (which drops daily rows entirely) — but points it at `select=['date','weatherLabel','tempMax']` instead when per-day detail is actually needed. The response is projected to just those three fields per day, `interpretation.alerts` confirms which fields were kept, and asking for a field that doesn't exist returns an alert naming the valid ones instead of an error or a silent full-record fallback.
+
 ## Talks
 
 This repo accompanies talks on embedding domain knowledge in MCP tool descriptions:
@@ -82,6 +88,7 @@ To *show* the capabilities pay off, you need the contrast. Both endpoints run th
 | Output schema | full Zod schema (~45 described fields) + `structuredContent` | none — text-only result |
 | Curated `alerts[]` | yes (`generateAlerts`) | none |
 | Render apps (`render_chart` / `render_table` / `render_map`) | full self-describing schemas + decision guidance | same apps, stripped to a one-sentence description each |
+| `get_weather_context` (Select) | full description explaining *when* to use `select` vs `summaryOnly` | same schema (including `select`), stripped to a one-sentence description |
 
 **The data returned is identical.** Only the capability layer — metadata, alerts, derived values, self-describing guidance — is removed, which isolates the paper's claim.
 
@@ -97,6 +104,7 @@ The metadata layer is just code — read the exact pieces the agent consumes, an
 - **Input + output schemas** — a `.describe()` on every field, ~45 output fields: [`get-building-profile.ts` L68–206](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L68-L206)
 - **Server-side interpretation** — the `alerts[]` rules (regulation eras, Paris Proof thresholds, the Nader Voorschrift MJ-unit trap): [`generate-alerts.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/generate-alerts.ts)
 - **The minimal twin** — the whole ablated tool, ~60 lines, none of the above: [`get-building-profile-minimal.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-minimal.ts)
+- **Selective retrieval (Select)** — the field-projection mechanism itself, with its safety rails (never silently fall back to full records, alert on unknown fields): [`project-fields.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/project-fields.ts), used by [`get-weather-context.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context.ts)
 
 ## Two levels, one strategy
 
@@ -124,10 +132,13 @@ Same principle powers `get_building_profile`'s output schema and `render_chart`'
 ## What's inside
 
 - `get_building_profile` — rich-domain tool combining BAG (Kadaster) + EP-Online (RVO)
+- `get_weather_context` — daily weather + degree-day/solar metrics (Open-Meteo, free & keyless); demonstrates the Select mechanism (`select`) and a real `queryIntent` param
 - `render_chart` — 14 chart types via Chart.js with annotations
 - `render_table` — TanStack Table with badge/icon/cell formatters
 - `render_map` — Leaflet maps with markers (car, building, project, pin)
 - `fetch_image` — server-side image proxy with SSRF protection (used by `render_table` when the iframe CSP blocks `img-src`)
+
+Also included: [`.claude/skills/rich-domain-mcp-server/`](.claude/skills/rich-domain-mcp-server/SKILL.md) — a standalone Claude Code Skill teaching the method behind this repo (Scaffold → Examine → Flag → Validate → Encode → Iterate), generalized so it's useful for building *your own* rich-domain MCP server, not just for maintaining this one.
 
 ## Run it locally
 
