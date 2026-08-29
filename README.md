@@ -12,7 +12,7 @@ A Rich Domain MCP Server layers *agent-facing capabilities* on top of the raw re
 
 **The progression:** the paper showed that production usage reveals what *metadata* is missing; the follow-up — and this repo — show it reveals what *capabilities* are missing. The feedback loop doesn't just yield better descriptions; it yields Select, Summaries, Alerts and Derived Values.
 
-> ⚠️ **This is a condensed public demo — not the full system.** It shows a *subset* of the capability set: rich **metadata**, curated **alerts**, **derived values** (the gas/CO₂/heat-pump estimates in `generate-alerts.ts`), **self-describing UI** (the render apps), **selective retrieval** (`select` on `get_weather_context`), **summaries** (its `summary` block), and a real `queryIntent` input param. The production `queryIntent` *iterate-loop* — reading months of tool-call telemetry as a narrative to find the next metadata gap — lives in the system behind the [articles](https://davidgolverdingen.nl/en/insights/mcp-server-smarter-every-week), not in this stripped example, and even the capabilities shown here are deliberately lighter than production.
+> ⚠️ **This is a condensed public demo — not the full system.** It shows a *subset* of the capability set: rich **metadata**, curated **alerts**, **derived values** (the gas/CO₂/heat-pump estimates in `generate-alerts.ts`), **self-describing UI** (the render apps), **selective retrieval** (`select` on `get_weather_context`), **summaries** (its `summary` block), a real `queryIntent` param on every tool, and a small, live version of the **Iterate** step — `get_tool_call_log` reads those queryIntent values back. What's still production-only: months of real telemetry across every caller, and the [articles](https://davidgolverdingen.nl/en/insights/mcp-server-smarter-every-week)' larger dashboards — even the capabilities shown here are deliberately lighter than production.
 
 ## Try it live (no install, no API key)
 
@@ -67,6 +67,12 @@ On **rich**, the agent picks `render_table` and its cell formatters straight fro
 
 The tool's `QUERY STRATEGY` block tells the agent that a year-long range would normally call for `summaryOnly=true` (which drops daily rows entirely) — but points it at `select=['date','weatherLabel','tempMax']` instead when per-day detail is actually needed. The response is projected to just those three fields per day, `interpretation.alerts` confirms which fields were kept, and asking for a field that doesn't exist returns an alert naming the valid ones instead of an error or a silent full-record fallback.
 
+**5 — Iterate, i.e. reading queryIntent back (rich):**
+
+> *"What have people actually been asking this server?"*
+
+Every tool accepts a `queryIntent` param describing the business question behind the call. `get_tool_call_log` reads recent calls back — tool, queryIntent, status, duration — the same signal production usage is read as a narrative to find the next metadata gap, at small scale and live. Locally it's an in-memory buffer for the current process; on the deployed endpoint it's a persisted Firestore log across every caller. See [`log-store.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/shared/log-store.ts) and [`get-tool-call-log.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-tool-call-log.ts).
+
 ## Talks
 
 This repo accompanies talks on embedding domain knowledge in MCP tool descriptions:
@@ -105,6 +111,7 @@ The metadata layer is just code — read the exact pieces the agent consumes, an
 - **Server-side interpretation** — the `alerts[]` rules (regulation eras, Paris Proof thresholds, the Nader Voorschrift MJ-unit trap): [`generate-alerts.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/generate-alerts.ts)
 - **The minimal twin** — the whole ablated tool, ~60 lines, none of the above: [`get-building-profile-minimal.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-minimal.ts)
 - **Selective retrieval (Select)** — the field-projection mechanism itself, with its safety rails (never silently fall back to full records, alert on unknown fields): [`project-fields.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/project-fields.ts), used by [`get-weather-context.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context.ts)
+- **queryIntent + Iterate** — the per-environment persisted log (Firestore when deployed, in-memory locally) and the tool that reads it back: [`log-store.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/shared/log-store.ts), [`get-tool-call-log.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-tool-call-log.ts)
 
 ## Two levels, one strategy
 
@@ -133,6 +140,7 @@ Same principle powers `get_building_profile`'s output schema and `render_chart`'
 
 - `get_building_profile` — rich-domain tool combining BAG (Kadaster) + EP-Online (RVO)
 - `get_weather_context` — daily weather + degree-day/solar metrics (Open-Meteo, free & keyless); demonstrates the Select mechanism (`select`) and a real `queryIntent` param
+- `get_tool_call_log` — reads back recent tool calls and their `queryIntent` values; a live, small-scale version of the production Iterate step
 - `render_chart` — 14 chart types via Chart.js with annotations
 - `render_table` — TanStack Table with badge/icon/cell formatters
 - `render_map` — Leaflet maps with markers (car, building, project, pin)
@@ -235,7 +243,8 @@ The hosted endpoints run as Firebase Cloud Functions. To deploy your own:
 1. Create a Firebase project + upgrade to Blaze (pay-as-you-go) — Cloud Functions v2 + Secret Manager require it
 2. `firebase login` and update [.firebaserc](.firebaserc) with your project ID
 3. `npm run deploy:setup-secret` — paste your EP-Online API key (get one at https://www.ep-online.nl)
-4. `npm run deploy` — ships **both** functions (`mcp` and `mcpMinimal`)
+4. Enable Firestore (native mode) once — console, or `firebase firestore:databases:create --location=<region>` — then `firebase deploy --only firestore` to push [`firestore.rules`](firestore.rules)/[`firestore.indexes.json`](firestore.indexes.json). This is what `get_tool_call_log` reads/writes to when deployed; no secret needed — Cloud Functions supplies credentials automatically.
+5. `npm run deploy` — ships **both** functions (`mcp` and `mcpMinimal`)
 
 ## Language policy
 
@@ -243,7 +252,9 @@ Code, docs, and agent-facing tool descriptions are English. Field names mirror t
 
 ## Logging
 
-The hosted endpoints log request metadata (IP, User-Agent, tool name, duration) to Cloud Logging for usage analytics and abuse prevention. Retention is 30 days (Cloud Logging default). Legal basis: legitimate interest. Contact via the GitHub issues tracker if you'd like your data scrubbed.
+The hosted endpoints log request metadata (IP, User-Agent, tool name, duration) to Cloud Logging for usage analytics and abuse prevention. Retention is 30 days (Cloud Logging default). Legal basis: legitimate interest.
+
+Separately, every tool call is logged with its `queryIntent` — the free-text description of what the call was for, which the caller supplies or which the server derives from other args (e.g. an address, a chart title). No filter values or response data are stored (see [`log-store.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/shared/log-store.ts)). On the hosted endpoints this persists to Firestore indefinitely and is readable back by anyone via `get_tool_call_log` — don't put anything in `queryIntent` you wouldn't want another user of this shared demo to see. Contact via the GitHub issues tracker if you'd like your data scrubbed.
 
 ## Author
 

@@ -19,8 +19,9 @@ import { registerRenderTableTool } from './tools/render-table.js';
 import { registerRenderMapTool } from './tools/render-map.js';
 import { registerFetchImageTool } from './tools/fetch-image.js';
 import { registerGetWeatherContextTool } from './tools/get-weather-context.js';
+import { registerGetToolCallLogTool } from './tools/get-tool-call-log.js';
 
-const VERSION = '1.2.0';
+const VERSION = '1.3.0';
 
 /**
  * Which metadata tier to expose. See the paper "The Missing Layer":
@@ -57,6 +58,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
     registerGetWeatherContextTool(server, { minimal: true });
+    registerGetToolCallLogTool(server, { minimal: true });
     return server;
   }
 
@@ -96,6 +98,9 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
         '- `get_weather_context` — daily weather + degree-day/solar metrics for a Dutch location ' +
         'and date range (Open-Meteo). Demonstrates the Select mechanism: pass `select` to project ' +
         'daily records down to only the fields you need instead of the full row set.\n\n' +
+        'OBSERVABILITY TOOL:\n' +
+        '- `get_tool_call_log` — reads back recent tool calls (queryIntent, status, duration). Every ' +
+        'other tool accepts a `queryIntent` param describing the business question it answers.\n\n' +
         'LIMITATIONS:\n' +
         '- This server returns a snapshot of public-register data and weather data only. It does ' +
         'not provide metered energy consumption or building automation data.\n' +
@@ -113,6 +118,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
   registerRenderMapTool(server);
   registerFetchImageTool(server);
   registerGetWeatherContextTool(server);
+  registerGetToolCallLogTool(server);
 
   return server;
 }

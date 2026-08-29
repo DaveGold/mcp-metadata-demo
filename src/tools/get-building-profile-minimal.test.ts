@@ -91,6 +91,7 @@ describe('get_building_profile — minimal variant (the ablation)', () => {
     // only variable is the metadata, not the tool set.
     expect(tools.map((t) => t.name).sort()).toEqual([
       'get_building_profile',
+      'get_tool_call_log',
       'get_weather_context',
       'render_chart',
       'render_map',
@@ -111,6 +112,9 @@ describe('get_building_profile — minimal variant (the ablation)', () => {
     // description is stripped — mirroring the render-tool ablation pattern.
     expect(tools.find((t) => t.name === 'get_weather_context')!.description).toBe(
       'Look up daily weather and degree-day/solar metrics for a Dutch location and date range.'
+    );
+    expect(tools.find((t) => t.name === 'get_tool_call_log')!.description).toBe(
+      'Look up recent tool calls and their queryIntent values.'
     );
 
     await client.close();

@@ -4,5 +4,9 @@
     "runtime": "nodejs22",
     "codebase": "default",
     "predeploy": ["npm run build"]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   }
 }
