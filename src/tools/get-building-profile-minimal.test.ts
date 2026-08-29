@@ -91,6 +91,7 @@ describe('get_building_profile — minimal variant (the ablation)', () => {
     // only variable is the metadata, not the tool set.
     expect(tools.map((t) => t.name).sort()).toEqual([
       'get_building_profile',
+      'get_weather_context',
       'render_chart',
       'render_map',
       'render_table',
@@ -105,6 +106,12 @@ describe('get_building_profile — minimal variant (the ablation)', () => {
     expect(tools.find((t) => t.name === 'render_chart')!.description).toBe('Render data as a chart.');
     expect(tools.find((t) => t.name === 'render_table')!.description).toBe('Render data as a table.');
     expect(tools.find((t) => t.name === 'render_map')!.description).toBe('Render data as a map with markers.');
+
+    // get_weather_context: same schema (including `select`) as rich, only the top-level
+    // description is stripped — mirroring the render-tool ablation pattern.
+    expect(tools.find((t) => t.name === 'get_weather_context')!.description).toBe(
+      'Look up daily weather and degree-day/solar metrics for a Dutch location and date range.'
+    );
 
     await client.close();
   });
