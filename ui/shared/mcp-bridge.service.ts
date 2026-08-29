@@ -81,6 +81,7 @@ import {
   type McpUiTheme,
   type McpUiHostContext,
 } from '@modelcontextprotocol/ext-apps';
+import packageJson from '../../package.json';
 import type {
   CreateMessageRequest,
   CreateMessageResult,
@@ -114,7 +115,7 @@ export class McpBridgeService {
   private app: App;
 
   constructor() {
-    this.app = new App({ name: 'mcp-metadata-demo', version: '1.0.0' }, {}, { autoResize: true });
+    this.app = new App({ name: 'mcp-metadata-demo', version: packageJson.version }, {}, { autoResize: true });
 
     // Register notification handlers before connect() to avoid missing events.
     //

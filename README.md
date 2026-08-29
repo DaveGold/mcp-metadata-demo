@@ -6,7 +6,7 @@
 
 A live, runnable companion to the paper. It makes one contrast concrete: the **same** Dutch building capability, served two ways — as a **Rich Domain MCP Server** and as the **thin API wrapper** most MCP servers ship today.
 
-A Rich Domain MCP Server layers *agent-facing capabilities* on top of the raw registers so the model can reason without external priming: rich **metadata** (descriptions + typed schemas), selective retrieval (**Select**), **summaries**, curated **alerts**, **derived values**, and **self-describing UI**. The thin wrapper — `get_building_profile` with a one-line description, no schema, no alerts — has none of it: same data, no help.
+A Rich Domain MCP Server layers *agent-facing capabilities* on top of the raw registers so the model can reason without external priming: rich **metadata** (descriptions + typed schemas), selective retrieval ([**Select**](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/project-fields.ts)), **summaries**, curated **alerts**, [**derived values**](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/generate-alerts.ts), and **self-describing UI**. The thin wrapper — `get_building_profile` with a one-line description, no schema, no alerts — has none of it: same data, no help.
 
 > When those capabilities are present, the AI doesn't need a wrapper agent telling it *how* to use the tool, or *what the data means* — the server carries that itself. That's the missing layer.
 
