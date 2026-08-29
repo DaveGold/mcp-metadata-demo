@@ -18,8 +18,9 @@ import { registerRenderChartTool } from './tools/render-chart.js';
 import { registerRenderTableTool } from './tools/render-table.js';
 import { registerRenderMapTool } from './tools/render-map.js';
 import { registerFetchImageTool } from './tools/fetch-image.js';
+import { registerGetWeatherContextTool } from './tools/get-weather-context.js';
 
-const VERSION = '1.1.1';
+const VERSION = '1.2.0';
 
 /**
  * Which metadata tier to expose. See the paper "The Missing Layer":
@@ -55,6 +56,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
+    registerGetWeatherContextTool(server, { minimal: true });
     return server;
   }
 
@@ -90,9 +92,13 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
         '- `render_map` — render geographic data on an interactive map with markers.\n' +
         '- `fetch_image` — server-side image proxy with SSRF protection (used by render_table ' +
         'for image cells when the host iframe CSP blocks external img-src).\n\n' +
+        'WEATHER TOOL:\n' +
+        '- `get_weather_context` — daily weather + degree-day/solar metrics for a Dutch location ' +
+        'and date range (Open-Meteo). Demonstrates the Select mechanism: pass `select` to project ' +
+        'daily records down to only the fields you need instead of the full row set.\n\n' +
         'LIMITATIONS:\n' +
-        '- This server returns a snapshot of public-register data only. It does not provide ' +
-        'metered energy consumption, weather data, or building automation data.\n' +
+        '- This server returns a snapshot of public-register data and weather data only. It does ' +
+        'not provide metered energy consumption or building automation data.\n' +
         '- EP-Online coverage is incomplete for older residential buildings — `energielabel: null` ' +
         'does not mean the building has no label, just that none is registered in EP-Online.\n\n' +
         'This server demonstrates the metadata strategy from the paper "The Missing Layer" ' +
@@ -106,6 +112,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
   registerRenderTableTool(server);
   registerRenderMapTool(server);
   registerFetchImageTool(server);
+  registerGetWeatherContextTool(server);
 
   return server;
 }
