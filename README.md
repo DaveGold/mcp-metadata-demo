@@ -20,7 +20,7 @@ Two hosted endpoints — a **Rich Domain MCP Server** and a **thin wrapper** ove
 
 | Endpoint | Capabilities | URL |
 |---|---|---|
-| **rich** | full description, input/output schemas, curated `alerts[]` + interpretation | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp` |
+| **rich** | full description + input schema (both model-visible), curated `alerts[]` + interpretation | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp` |
 | **minimal** | one sentence, no schema, no alerts | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal` |
 
 Same Firebase project, same code — only the function name (`/mcp` vs `/mcpMinimal`) and the metadata tier it serves differ.
@@ -89,10 +89,10 @@ To *show* the capabilities pay off, you need the contrast. Both endpoints run th
 
 | | **rich** (`/mcp`) | **minimal** (`/mcpMinimal`) |
 |---|---|---|
-| Tool description | ~5,100 chars (`RETURNS` / `WHEN TO USE` / `QUERY STRATEGY` / `INTERPRETATION` / `ALERTS`) | one sentence (~50 chars) |
-| Input schema | 4 fields, each `.describe()`d, format-validated | 2 bare fields, no descriptions, no validation |
-| Output schema | full Zod schema (~45 described fields) + `structuredContent` | none — text-only result |
-| Curated `alerts[]` | yes (`generateAlerts`) | none |
+| Tool description *(model-visible)* | ~5,100 chars (`RETURNS` / `WHEN TO USE` / `QUERY STRATEGY` / `INTERPRETATION` / `ALERTS`) | one sentence (~50 chars) |
+| Input schema *(model-visible)* | 4 fields, each `.describe()`d, format-validated | 2 bare fields, no descriptions, no validation |
+| Output schema *(validation/UI only — not model-visible; interpretation lives in the description row above instead)* | full Zod schema, ~45 shape-only fields, backs `structuredContent` | none — text-only result, no `structuredContent` |
+| Curated `alerts[]` *(model-visible — returned data)* | yes (`generateAlerts`) | none |
 | Render apps (`render_chart` / `render_table` / `render_map`) | full self-describing schemas + decision guidance | same apps, stripped to a one-sentence description each |
 | `get_weather_context` (Select) | full description explaining *when* to use `select` vs `summaryOnly` | same schema (including `select`), stripped to a one-sentence description |
 
