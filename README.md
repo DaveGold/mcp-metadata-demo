@@ -184,11 +184,13 @@ The stdio server honours `MCP_VARIANT=minimal` to serve the stripped tier locall
 
 ## Architecture
 
-Five tools, three external APIs, three transports, one MCP Apps UI pipeline — and two metadata tiers selected by a single `variant` flag on the `createServer()` factory.
+Seven tools, three external APIs, three transports, one MCP Apps UI pipeline — and two metadata tiers selected by a single `variant` flag on the `createServer()` factory.
 
 | Tool | Kind |
 |---|---|
 | `get_building_profile` | Rich-domain data tool |
+| `get_weather_context` | Rich-domain data tool |
+| `get_tool_call_log` | Introspection tool |
 | `render_chart` | MCP App |
 | `render_table` | MCP App |
 | `render_map` | MCP App |
