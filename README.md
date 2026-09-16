@@ -1,7 +1,5 @@
 # mcp-metadata-demo
 
-> 📄 **Read the paper**: [*The Missing Layer*](https://davidgolverdingen.nl/en/the-missing-layer) — introducing **Introspective Context Engineering for MCP (ICE)**, the pattern this repo demonstrates.
-
 From the talk *[Most MCP servers are empty](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)* (MCPCon Europe · Amsterdam · Sep 18 2026) — an extracted demo repo, showing part of this:
 
 1. A skill that runs the loop on **your** server — [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) / [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md)
