@@ -1,12 +1,18 @@
 # mcp-metadata-demo
 
 > 📄 **Read the paper**: [*The Missing Layer*](https://davidgolverdingen.nl/en/the-missing-layer) — introducing **Introspective Context Engineering for MCP (ICE)**, the pattern this repo demonstrates.
->
-> 🔁 **Follow-up**: [*Your MCP Server Should Get Smarter Every Week*](https://davidgolverdingen.nl/en/insights/mcp-server-smarter-every-week) — how production usage (a `queryIntent` on every call) keeps surfacing what's still missing.
 
-A live, runnable companion to the paper. It makes one contrast concrete: the **same** Dutch building capability, served two ways — as a **Rich Domain MCP Server** and as the **thin API wrapper** most MCP servers ship today.
+From the talk *[Most MCP servers are empty](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)* (MCPCon Europe · Amsterdam · Sep 18 2026) — an extracted demo repo, showing part of this:
 
-A Rich Domain MCP Server layers *agent-facing capabilities* on top of the raw registers so the model can reason without external priming: rich **metadata** (descriptions + typed schemas), selective retrieval ([**Select**](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/project-fields.ts)), **summaries**, curated **alerts**, [**derived values**](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/generate-alerts.ts), and **self-describing UI**. The thin wrapper — `get_building_profile` with a one-line description, no schema, no alerts — has none of it: same data, no help.
+1. A skill that runs the loop on **your** server — [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) / [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md)
+2. The practitioner paper — [*The Missing Layer*](https://davidgolverdingen.nl/en/the-missing-layer)
+3. Example code — [`src/`](src)
+4. A thin and a rich MCP server on the same public API — [Try it live](#try-it-live-no-install-no-api-key)
+5. These slides, as a PDF — [*Most MCP servers are empty*](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
+
+It makes one contrast concrete: the **same** Dutch building capability, served two ways — as a **Rich Domain MCP Server** and as the **thin API wrapper** most MCP servers ship today.
+
+A Rich Domain MCP Server layers *agent-facing capabilities* on top of the raw registers so the model can reason without external priming: rich **metadata** (descriptions + typed schemas), selective retrieval (**Select**), **summaries**, curated **alerts**, [**derived values**](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/generate-alerts.ts), and **self-describing UI**. The thin wrapper — `get_building_profile` with a one-line description, no schema, no alerts — has none of it: same data, no help.
 
 > When those capabilities are present, the AI doesn't need a wrapper agent telling it *how* to use the tool, or *what the data means* — the server carries that itself. That's the missing layer.
 
@@ -77,7 +83,7 @@ Every tool accepts a `queryIntent` param describing the business question behind
 
 This repo accompanies talks on embedding domain knowledge in MCP tool descriptions:
 
-- **Most MCP servers are empty** — [AGNTCon + MCPCon Europe 2026](https://agntconmcpconeu26.sched.com/event/2VmKE) · Amsterdam · Sep 17–18 2026
+- **Most MCP servers are empty** — [AGNTCon + MCPCon Europe 2026](https://agntconmcpconeu26.sched.com/event/2VmKE) · Amsterdam · Sep 17–18 2026 ([slides, PDF](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf))
 - **Domain knowledge belongs in the MCP server** — [VibeKode Netherlands 2026](https://vibekode.it/agentic-engineering/domain-knowledge-belongs-in-the-mcp-server/) · Utrecht · Oct 7 2026
 - **Adoption is the hard part: six months of MCP in production at an HVAC company** — [Update Conference Prague 2026](https://prague.updateconference.net/en/2026/schedule/adoption-is-the-hard-part-six-months-of-mcp-in-production-at-an-hvac-company) · Prague · Nov 12–13 2026
 
@@ -111,7 +117,7 @@ The metadata layer is just code — read the exact pieces the agent consumes, an
 - **Output schema — deliberately shape-only** — the model never sees this (validation + `structuredContent` shape only); every field's `.describe()` is a short identity, not interpretation. That interpretation used to live here for several fields (`temperatuuroverschrijding`, `compactheid`, the `co2_emissie_kg_m2` unit caveat, and others) until it was moved into the description above, where the model actually reads it — the exact fix this repo's paper argues for, applied to itself: [`get-building-profile.ts` L88–201](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L88-L201)
 - **Server-side interpretation** — the `alerts[]` rules (regulation eras, Paris Proof thresholds, the Nader Voorschrift MJ-unit trap): [`generate-alerts.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/generate-alerts.ts)
 - **The minimal twin** — the whole ablated tool, ~60 lines, none of the above: [`get-building-profile-minimal.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-minimal.ts)
-- **Selective retrieval (Select)** — the field-projection mechanism itself, with its safety rails (never silently fall back to full records, alert on unknown fields): [`project-fields.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/project-fields.ts), used by [`get-weather-context.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context.ts)
+- **Selective retrieval (Select)** — the field-projection mechanism itself, with its safety rails (never silently fall back to full records, alert on unknown fields): `project-fields.ts`, used by [`get-weather-context.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context.ts)
 - **queryIntent + Iterate** — the per-environment persisted log (Firestore when deployed, in-memory locally) and the tool that reads it back: [`log-store.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/shared/log-store.ts), [`get-tool-call-log.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-tool-call-log.ts)
 
 ## Two levels, one strategy
@@ -139,7 +145,7 @@ The two levels use the metadata layer differently, and the difference matters. `
 
 ## What's inside
 
-- `get_building_profile` — rich-domain tool combining BAG (Kadaster) + EP-Online (RVO)
+- `get_building_profile` — rich-domain tool combining BAG (Kadaster) + EP-Online (RVO); looks up a Dutch address and returns a structured profile with curated `alerts[]`
 - `get_weather_context` — daily weather + degree-day/solar metrics (Open-Meteo, free & keyless); demonstrates the Select mechanism (`select`) and a real `queryIntent` param
 - `get_tool_call_log` — reads back recent tool calls and their `queryIntent` values; a live, small-scale version of the production Iterate step
 - `render_chart` — 14 chart types via Chart.js with annotations
@@ -178,15 +184,19 @@ The stdio server honours `MCP_VARIANT=minimal` to serve the stripped tier locall
 
 ## Architecture
 
-Five tools, three external APIs, three transports, one MCP Apps UI pipeline — and two metadata tiers selected by a single `variant` flag on the `createServer()` factory.
+Seven tools, three external APIs, three transports, one MCP Apps UI pipeline — and two metadata tiers selected by a single `variant` flag on the `createServer()` factory.
 
-| Tool | Kind | What it does |
-|---|---|---|
-| `get_building_profile` | Rich-domain data tool | Looks up a Dutch address, fuses BAG + EP-Online, returns a structured profile with curated `alerts[]` |
-| `render_chart` | MCP App | Renders 14 chart types via Chart.js inline in the chat |
-| `render_table` | MCP App | Renders an interactive TanStack table with cell formatters |
-| `render_map` | MCP App | Renders a Leaflet map with markers |
-| `fetch_image` | App-internal helper | Server-side image proxy with SSRF protection; only called by the `render_table` UI |
+| Tool | Kind |
+|---|---|
+| `get_building_profile` | Rich-domain data tool |
+| `get_weather_context` | Rich-domain data tool |
+| `get_tool_call_log` | Introspection tool |
+| `render_chart` | MCP App |
+| `render_table` | MCP App |
+| `render_map` | MCP App |
+| `fetch_image` | App-internal helper |
+
+(Descriptions: see [What's inside](#whats-inside).)
 
 ### Transports & tiers
 
