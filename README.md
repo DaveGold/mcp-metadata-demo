@@ -6,7 +6,7 @@ From the talk *[Most MCP servers are empty](talks/most-mcp-servers-are-empty-mcp
 
 1. A skill that runs the loop on **your** server — [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) / [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md)
 2. The practitioner paper — [*The Missing Layer*](https://davidgolverdingen.nl/en/the-missing-layer)
-3. Example code — [`src/`](src)
+3. Example code — [`get-building-profile.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts)
 4. A thin and a rich MCP server on the same public API — [Try it live](#try-it-live-no-install-no-api-key)
 5. These slides, as a PDF — [*Most MCP servers are empty*](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
 
