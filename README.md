@@ -1,12 +1,10 @@
 # mcp-metadata-demo
 
-> 📄 **Read the paper**: [*The Missing Layer*](https://davidgolverdingen.nl/en/the-missing-layer) — introducing **Introspective Context Engineering for MCP (ICE)**, the pattern this repo demonstrates.
-
 From the talk *[Most MCP servers are empty](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)* (MCPCon Europe · Amsterdam · Sep 18 2026) — an extracted demo repo, showing part of this:
 
 1. A skill that runs the loop on **your** server — [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) / [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md)
 2. The practitioner paper — [*The Missing Layer*](https://davidgolverdingen.nl/en/the-missing-layer)
-3. Example code — [`src/`](src)
+3. Example code — [`get-building-profile.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts)
 4. A thin and a rich MCP server on the same public API — [Try it live](#try-it-live-no-install-no-api-key)
 5. These slides, as a PDF — [*Most MCP servers are empty*](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
 
@@ -16,7 +14,7 @@ A Rich Domain MCP Server layers *agent-facing capabilities* on top of the raw re
 
 > When those capabilities are present, the AI doesn't need a wrapper agent telling it *how* to use the tool, or *what the data means* — the server carries that itself. That's the missing layer.
 
-**The progression:** the paper showed that production usage reveals what *metadata* is missing; the follow-up — and this repo — show it reveals what *capabilities* are missing. The feedback loop doesn't just yield better descriptions; it yields Select, Summaries, Alerts and Derived Values.
+**The progression:** the paper showed that production usage reveals what *metadata* is missing; the follow-up — [*Your MCP Server Should Get Smarter Every Week*](https://davidgolverdingen.nl/en/insights/mcp-server-smarter-every-week) — and this repo — show it reveals what *capabilities* are missing. The feedback loop doesn't just yield better descriptions; it yields Select, Summaries, Alerts and Derived Values.
 
 > ⚠️ **This is a condensed public demo — not the full system.** It shows a *subset* of the capability set: rich **metadata**, curated **alerts**, **derived values** (the gas/CO₂/heat-pump estimates in `generate-alerts.ts`), **self-describing UI** (the render apps), **selective retrieval** (`select` on `get_weather_context`), **summaries** (its `summary` block), a real `queryIntent` param on every tool, and a small, live version of the **Iterate** step — `get_tool_call_log` reads those queryIntent values back. What's still production-only: months of real telemetry across every caller, and the [articles](https://davidgolverdingen.nl/en/insights/mcp-server-smarter-every-week)' larger dashboards — even the capabilities shown here are deliberately lighter than production.
 
@@ -78,16 +76,6 @@ The tool's `QUERY STRATEGY` block tells the agent that a year-long range would n
 > *"What have people actually been asking this server?"*
 
 Every tool accepts a `queryIntent` param describing the business question behind the call. `get_tool_call_log` reads recent calls back — tool, queryIntent, status, duration — the same signal production usage is read as a narrative to find the next metadata gap, at small scale and live. Locally it's an in-memory buffer for the current process; on the deployed endpoint it's a persisted Firestore log across every caller. See [`log-store.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/shared/log-store.ts) and [`get-tool-call-log.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-tool-call-log.ts).
-
-## Talks
-
-This repo accompanies talks on embedding domain knowledge in MCP tool descriptions:
-
-- **Most MCP servers are empty** — [AGNTCon + MCPCon Europe 2026](https://agntconmcpconeu26.sched.com/event/2VmKE) · Amsterdam · Sep 17–18 2026 ([slides, PDF](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf))
-- **Domain knowledge belongs in the MCP server** — [VibeKode Netherlands 2026](https://vibekode.it/agentic-engineering/domain-knowledge-belongs-in-the-mcp-server/) · Utrecht · Oct 7 2026
-- **Adoption is the hard part: six months of MCP in production at an HVAC company** — [Update Conference Prague 2026](https://prague.updateconference.net/en/2026/schedule/adoption-is-the-hard-part-six-months-of-mcp-in-production-at-an-hvac-company) · Prague · Nov 12–13 2026
-
-Full, up-to-date list: [davidgolverdingen.nl/en/talks](https://davidgolverdingen.nl/en/talks).
 
 ## Why two endpoints — the ablation
 
@@ -184,7 +172,7 @@ The stdio server honours `MCP_VARIANT=minimal` to serve the stripped tier locall
 
 ## Architecture
 
-Seven tools, three external APIs, three transports, one MCP Apps UI pipeline — and two metadata tiers selected by a single `variant` flag on the `createServer()` factory.
+Seven tools, four external APIs, three transports, one MCP Apps UI pipeline — and two metadata tiers selected by a single `variant` flag on the `createServer()` factory.
 
 | Tool | Kind |
 |---|---|
@@ -238,6 +226,7 @@ The result: `render_chart`'s **input** schema is what the agent reads to generat
 | PDOK Locatieserver | none | `BagClient.findAddress` |
 | BAG OGC v2 | none | `BagClient.getVerblijfsobject` / `getPand` |
 | EP-Online V5 | API key | `EpOnlineClient` (per-key rate limits apply) |
+| Open-Meteo | none | `get_weather_context` (daily weather + degree-day/solar metrics) |
 | OpenStreetMap tiles | none | `render_map` iframe, via CSP `resourceDomains` allow-list |
 | Arbitrary image URLs | none | user-supplied via `render_table`, validated through the `fetch_image` SSRF guard |
 
@@ -266,6 +255,16 @@ Code, docs, and agent-facing tool descriptions are English. Field names mirror t
 The hosted endpoints log request metadata (IP, User-Agent, tool name, duration) to Cloud Logging for usage analytics and abuse prevention. Retention is 30 days (Cloud Logging default). Legal basis: legitimate interest.
 
 Separately, every tool call is logged with its `queryIntent` — the free-text description of what the call was for, which the caller supplies or which the server derives from other args (e.g. an address, a chart title). No filter values or response data are stored (see [`log-store.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/shared/log-store.ts)). On the hosted endpoints this persists to Firestore indefinitely and is readable back by anyone via `get_tool_call_log` — don't put anything in `queryIntent` you wouldn't want another user of this shared demo to see. Contact via the GitHub issues tracker if you'd like your data scrubbed.
+
+## Talks
+
+This repo accompanies talks on embedding domain knowledge in MCP tool descriptions:
+
+- **Most MCP servers are empty** — [AGNTCon + MCPCon Europe 2026](https://agntconmcpconeu26.sched.com/event/2VmKE) · Amsterdam · Sep 17–18 2026 ([slides, PDF](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf))
+- **Domain knowledge belongs in the MCP server** — [VibeKode Netherlands 2026](https://vibekode.it/agentic-engineering/domain-knowledge-belongs-in-the-mcp-server/) · Utrecht · Oct 7 2026
+- **Adoption is the hard part: six months of MCP in production at an HVAC company** — [Update Conference Prague 2026](https://prague.updateconference.net/en/2026/schedule/adoption-is-the-hard-part-six-months-of-mcp-in-production-at-an-hvac-company) · Prague · Nov 12–13 2026
+
+Full, up-to-date list: [davidgolverdingen.nl/en/talks](https://davidgolverdingen.nl/en/talks).
 
 ## Author
 
