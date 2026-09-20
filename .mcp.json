@@ -2,9 +2,24 @@
   "mcpServers": {
     "metadata-demo": {
       "command": "node",
-      "args": ["--env-file=.env.local", "dist/stdio.js"]
+      "args": [
+        "--env-file=.env.local",
+        "dist/stdio.js"
+      ]
     },
     "metadata-demo-cloud": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp"
+    },
+    "eval-thin": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal"
+    },
+    "eval-words": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpWords"
+    },
+    "eval-rich": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp"
     }

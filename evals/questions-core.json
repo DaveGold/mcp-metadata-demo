@@ -1,0 +1,195 @@
+{
+  "_comment": "The demo set: 9 questions chosen so the failure is legible to someone who has never heard of BAG, EP-Online or NTA 8800. The full 21-question set lives in questions.json - that one is for the real numbers, this one is for showing people what the numbers mean.",
+  "version": 1,
+  "captured": "2026-09-20",
+  "arms": [
+    "A_thin",
+    "B_words",
+    "C_rich"
+  ],
+  "_model_hypothesis": "Registered before the run: on 'discipline' questions the thin arm should separate the models (Opus right, Haiku wrong) while the rich arm should lift Haiku to Opus's thin-arm level - i.e. the metadata layer buys roughly one model tier. On 'arcane' questions every model should fail the thin arm, because the knowledge is not in any model's pretraining - a floor, not a gradient. Reading these two groups separately is the whole point: pooling them hides both effects.",
+  "questions": [
+    {
+      "id": "invented-label",
+      "category": "correctly_refuse",
+      "separates": "A->B",
+      "question": "The building at Hoofdstraat 9 in Hoogeveen (7902EA) is from 1653. What energy label does something that old get?",
+      "address": "hoogeveen",
+      "correct_tool": "get_building_profile",
+      "required_params": {
+        "postcode": "7902EA",
+        "huisnummer": 9
+      },
+      "max_calls": 2,
+      "ground_truth": "No label is registered in EP-Online for it. Age does not determine a label, and the question's framing invites an inference the data does not support.",
+      "must_not_say": "Naming a letter, or reasoning that a 1653 building 'would be' G.",
+      "scoring": "judge",
+      "note": "Leading question on purpose. Tests whether the arm follows the user's framing off a cliff.",
+      "model_sensitivity": "discipline",
+      "full_set_id": "ref-02",
+      "why_this_lands": "It makes up a fact. Everyone recognises that failure instantly, and the building is from 1653, which sticks."
+    },
+    {
+      "id": "building-size",
+      "category": "ambiguity",
+      "separates": "A->B",
+      "question": "How large is the building at IJburglaan 433 in Amsterdam, 1086ZJ?",
+      "address": "ijburglaan",
+      "correct_tool": "get_building_profile",
+      "required_params": {
+        "postcode": "1086ZJ",
+        "huisnummer": 433
+      },
+      "max_calls": 2,
+      "ground_truth": "41 m2 is one verblijfsobject, not the building. The pand holds 106 verblijfsobjecten, so no building-level area is available from this tool. The answer must flag that 41 m2 is a single unit.",
+      "must_not_say": "The building is 41 m2.",
+      "scoring": "judge",
+      "model_sensitivity": "discipline",
+      "full_set_id": "amb-03",
+      "why_this_lands": "It calls a 106-apartment block '41 m2'. No expertise needed to see that is wrong."
+    },
+    {
+      "id": "metered-vs-model",
+      "category": "tool_choice",
+      "separates": "A->B",
+      "question": "Can you pull the metered gas consumption for Middenwetering 1 in Utrecht (3543AR)?",
+      "address": "middenwetering",
+      "correct_tool": "none",
+      "required_params": {},
+      "max_calls": 2,
+      "ground_truth": "This server does not provide metered consumption - only public-register data (BAG + EP-Online). The right answer says so. berekend_energieverbruik is a theoretical calculation, not a meter reading.",
+      "must_not_say": "Presenting berekend_energieverbruik_kwh_m2 (369.05) as metered or actual consumption.",
+      "scoring": "judge",
+      "note": "This is WHEN NOT TO USE earning its place. The most quotable confidently-wrong failure in the set.",
+      "model_sensitivity": "discipline",
+      "full_set_id": "tool-01",
+      "why_this_lands": "It hands you a theoretical calculation when you asked for a meter reading. The gap between 'estimated' and 'measured' is universal."
+    },
+    {
+      "id": "human-typing",
+      "category": "selection",
+      "separates": "A->B",
+      "question": "Look up Middenwetering 1, 3543 AR Utrecht.",
+      "address": "middenwetering",
+      "correct_tool": "get_building_profile",
+      "required_params": {
+        "postcode": "3543AR",
+        "huisnummer": 1
+      },
+      "max_calls": 3,
+      "ground_truth": "The postcode must be normalised to '3543AR' (no space, uppercase). The lookup then succeeds: Middenwetering 1, Utrecht, bouwjaar 2008, label A++.",
+      "must_not_say": "Reporting that the address could not be found, or that the postcode is invalid.",
+      "scoring": "judge",
+      "note": "Arm A has no regex and no format guidance; arms B and C have both. Count calls: the rich arms may burn one on a schema rejection and recover, which is the behaviour worth showing.",
+      "model_sensitivity": "discipline",
+      "full_set_id": "sel-03",
+      "why_this_lands": "Someone typed a postcode with a space, the way people do. The thin server says the address does not exist."
+    },
+    {
+      "id": "wrong-unit",
+      "category": "selection",
+      "separates": "A->B",
+      "question": "How many square metres is the unit at Rijnlaan 28A in Utrecht, 3522BN?",
+      "address": "rijnlaan28a",
+      "correct_tool": "get_building_profile",
+      "required_params": {
+        "postcode": "3522BN",
+        "huisnummer": 28,
+        "huisletter": "A"
+      },
+      "max_calls": 3,
+      "ground_truth": "92 m2, reached by passing huisletter 'A'. Even then matchStatus is multiple_vbos with 2 candidates, so the answer should carry that caveat.",
+      "must_not_say": "105 m2 (the huisnummer-28-only result, which is the winkelfunctie unit, not 28A).",
+      "scoring": "exact_value",
+      "expected_value": 92,
+      "note": "Arm A CANNOT pass huisletter - the minimal input schema omits it. This is a capability gap inside the 'words' arm boundary; say so when you present it rather than scoring it as a pure prose win.",
+      "model_sensitivity": "capability",
+      "full_set_id": "sel-01",
+      "why_this_lands": "Asked about flat 28A, it answers about the shop at 28 - because the thin server's schema has no field for the letter. A missing input field, visible in the answer.",
+      "tolerance": 0
+    },
+    {
+      "id": "total-vs-per-m2",
+      "category": "aggregation",
+      "separates": "B->C",
+      "question": "What are the total annual CO2 emissions of the flat at Van Beuningenstraat 1 in Rotterdam, 3039WB?",
+      "address": "vanbeuningen",
+      "correct_tool": "get_building_profile",
+      "required_params": {
+        "postcode": "3039WB",
+        "huisnummer": 1
+      },
+      "max_calls": 2,
+      "ground_truth": "~2,630 kg CO2/year: 28.59 kg/m2 x 92 m2, the EP-Online thermal-zone area. Under NTA 8800 co2_emissie_kg_m2 is per m2 per year, so it must be multiplied by the area the label is expressed against - not the 100 m2 BAG area.",
+      "must_not_say": "Reporting 28.59 kg as the total annual emission.",
+      "scoring": "exact_value",
+      "expected_value": 2630,
+      "tolerance": 60,
+      "model_sensitivity": "discipline",
+      "full_set_id": "agg-02",
+      "why_this_lands": "It reports 28.59 kg of CO2 per year for a whole home. Anyone can see that is too small to be a year's worth."
+    },
+    {
+      "id": "heat-pump",
+      "category": "aggregation",
+      "separates": "B->C",
+      "question": "Is the flat at IJburglaan 433 in Amsterdam (1086ZJ) a good candidate for a heat pump?",
+      "address": "ijburglaan",
+      "correct_tool": "get_building_profile",
+      "required_params": {
+        "postcode": "1086ZJ",
+        "huisnummer": 433
+      },
+      "max_calls": 2,
+      "ground_truth": "Yes - suitable. warmtebehoefte is 52.73 kWh/m2, which falls in the 50-70 band: suitable for a heat pump without insulation work first.",
+      "must_not_say": "Insulate first / not suitable, or answering without reference to warmtebehoefte.",
+      "scoring": "judge",
+      "note": "The suitability bands (<50, <70, <100, >=100) exist ONLY in generateAlerts. The rich description says warmtebehoefte is 'the key input for heat pump sizing' but never gives a threshold - so this is a clean B->C separator.",
+      "model_sensitivity": "arcane",
+      "full_set_id": "agg-03",
+      "why_this_lands": "A homeowner's actual question. The rule of thumb lives in the server, not in the model - this is what the third arm is for."
+    },
+    {
+      "id": "gas-estimate",
+      "category": "aggregation",
+      "separates": "B->C",
+      "question": "Roughly how much gas does the flat at IJburglaan 433 in Amsterdam (1086ZJ) use in a year?",
+      "address": "ijburglaan",
+      "correct_tool": "get_building_profile",
+      "required_params": {
+        "postcode": "1086ZJ",
+        "huisnummer": 433
+      },
+      "max_calls": 2,
+      "ground_truth": "~253 m3/year of gas for SPACE HEATING. 52.73 kWh/m2 x 40.02 m2 (the EP-Online thermal-zone area, not the 41 m2 BAG area) = 2,110 kWh; at 95% boiler efficiency and 8.79 kWh per m3 of Dutch gas that is ~253 m3/year. It excludes hot water and cooking, so a real gas bill is higher.",
+      "must_not_say": "Reporting the heat demand in kWh as a gas volume, presenting the figure as the household's total gas use rather than space heating, or declining to estimate.",
+      "scoring": "exact_value",
+      "expected_value": 253,
+      "tolerance": 20,
+      "note": "Two fixes landed here on 2026-09-20: the kWh/m3 conversion (was 3.6x low) and the denominator (BAG area -> EP-Online thermal zone). Both pinned by regression tests. Confirm end to end after deploy.",
+      "model_sensitivity": "arcane",
+      "full_set_id": "agg-01",
+      "why_this_lands": "'What will this cost me in gas?' The server does the conversion; the model has no reason to know the boiler efficiency or the calorific value."
+    },
+    {
+      "id": "overheating",
+      "category": "interpretation",
+      "separates": "A->B",
+      "question": "Is there an overheating risk at Van Beuningenstraat 1 in Rotterdam, 3039WB?",
+      "address": "vanbeuningen",
+      "correct_tool": "get_building_profile",
+      "required_params": {
+        "postcode": "3039WB",
+        "huisnummer": 1
+      },
+      "max_calls": 2,
+      "ground_truth": "Yes, significant. temperatuuroverschrijding is 3.59, well above the 1.5 threshold for significant overheating risk. Relevant to cooling load and heat pump sizing.",
+      "must_not_say": "No risk, or ignoring temperatuuroverschrijding entirely.",
+      "scoring": "judge",
+      "note": "Deliberate control. generateAlerts emits NOTHING about temperatuuroverschrijding, so arm C has no advantage here. If C beats B on this question, something other than the metadata is driving the result and the whole run needs a second look.",
+      "model_sensitivity": "arcane",
+      "full_set_id": "int-01",
+      "why_this_lands": "THE CONTROL. The rich server's alerts say nothing about overheating, so arms B and C should tie. If C wins here, something other than the metadata is driving the results and the whole run is suspect."
+    }
+  ]
+}

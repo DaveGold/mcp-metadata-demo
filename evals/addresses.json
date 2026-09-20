@@ -1,0 +1,200 @@
+{
+  "_comment": "Frozen reference profiles, captured from the live rich server on 2026-09-20. Re-capture with scripts/smoke.ts before a scoring run: BAG/EP-Online are live registers and values drift. Every ground_truth in questions.json is derived from these.",
+  "captured": "2026-09-20",
+  "addresses": {
+    "middenwetering": {
+      "postcode": "3543AR",
+      "huisnummer": 1,
+      "adres": "Middenwetering 1, 3543AR Utrecht",
+      "why": "NEN 7120 inflation trap. energielabel A++ / energie_index 0.91, yet berekend_energieverbruik_kwh_m2 = 369.05. The field name says kwh_m2; the value is not a benchmarkable per-m2 figure.",
+      "key_values": {
+        "energielabel": "A++",
+        "energie_index": 0.91,
+        "bouwjaar": 2008,
+        "berekend_energieverbruik_kwh_m2": 369.05,
+        "co2_emissie_kg_m2": 28.12,
+        "berekeningstype": "NEN 7120+C2:2012/C3:2013/C4,C5:2015, addendum 1 juli 2018",
+        "sbi_code": "Gespecialiseerde werkzaamheden in de bouw",
+        "gebruiksdoel": "industriefunctie, kantoorfunctie",
+        "oppervlakte_m2": 6356,
+        "alerts_count": 0,
+        "coordinaten": {
+          "lat": 52.1045361378436,
+          "lon": 5.055326520258422
+        }
+      }
+    },
+    "domplein": {
+      "postcode": "3512JC",
+      "huisnummer": 1,
+      "adres": "Domplein 1, 3512JC Utrecht",
+      "why": "Pre-war, zero EP-Online labels. The correctly-refuse case.",
+      "key_values": {
+        "bouwjaar": 1935,
+        "energielabel": null,
+        "labelCount": 0,
+        "oppervlakte_m2": 30,
+        "alerts_count": 2
+      }
+    },
+    "mahlerlaan": {
+      "postcode": "1082PP",
+      "huisnummer": 10,
+      "adres": "Gustav Mahlerlaan 10, 1082PP Amsterdam",
+      "why": "NTA 8800 kantoor above the Paris Proof 2040 office target (70 kWh/m2).",
+      "key_values": {
+        "energielabel": "A",
+        "ep1_energiebehoefte_kwh_m2": 81.68,
+        "ep2_fossiel_kwh_m2": 179.06,
+        "ep2_fossiel_emg_forfaitair_kwh_m2": 233.59,
+        "warmtebehoefte_kwh_m2": 16.46,
+        "temperatuuroverschrijding": 0,
+        "op_basis_van_referentiegebouw": false,
+        "oppervlakte_m2": 66581,
+        "gebruiksoppervlakte_thermische_zone_m2": 118174,
+        "bouwjaar": 1999,
+        "gebruiksdoel": "kantoorfunctie",
+        "alerts_count": 1,
+        "coordinaten": {
+          "lat": 52.33700994507378,
+          "lon": 4.874884945692271
+        }
+      }
+    },
+    "rijnlaan28": {
+      "postcode": "3522BN",
+      "huisnummer": 28,
+      "adres": "Rijnlaan 28, 3522BN Utrecht",
+      "why": "matchStatus multiple_vbos with 4 candidates. The disambiguation case.",
+      "key_values": {
+        "matchStatus": "multiple_vbos",
+        "candidateCount": 4,
+        "aantal_verblijfsobjecten": 3,
+        "oppervlakte_m2": 105,
+        "gebruiksoppervlakte_thermische_zone_m2": 64.04,
+        "energielabel": "B",
+        "ep1_energiebehoefte_kwh_m2": 151.21,
+        "bouwjaar": 1935,
+        "label_geldig_tot": "2034-12-06",
+        "gebruiksdoel": "winkelfunctie",
+        "alerts_count": 3,
+        "soort_opname": "Basisopname",
+        "op_basis_van_referentiegebouw": false
+      }
+    },
+    "rijnlaan28a": {
+      "postcode": "3522BN",
+      "huisnummer": 28,
+      "huisletter": "A",
+      "adres": "Rijnlaan 28A, 3522BN Utrecht",
+      "why": "The unit the thin arm cannot even ask for: its input schema has no huisletter.",
+      "key_values": {
+        "matchStatus": "multiple_vbos",
+        "candidateCount": 2,
+        "oppervlakte_m2": 92,
+        "energielabel": "A",
+        "ep1_energiebehoefte_kwh_m2": 199.31,
+        "bouwjaar": 1928
+      }
+    },
+    "ijburglaan": {
+      "postcode": "1086ZJ",
+      "huisnummer": 433,
+      "adres": "IJburglaan 433A, 1086ZJ Amsterdam",
+      "why": "Residential NTA 8800 carrying every computed alert, inside a 106-VBO pand.",
+      "key_values": {
+        "gebouwklasse": "Woningbouw",
+        "gebruiksdoel": "woonfunctie",
+        "energielabel": "A+",
+        "warmtebehoefte_kwh_m2": 52.73,
+        "oppervlakte_m2": 41,
+        "co2_emissie_kg_m2": 13.79,
+        "aantal_verblijfsobjecten": 106,
+        "temperatuuroverschrijding": 1.81,
+        "ep1_energiebehoefte_kwh_m2": 56.49,
+        "bouwjaar": 2009,
+        "alerts_count": 5,
+        "gebruiksoppervlakte_thermische_zone_m2": 40.02
+      },
+      "gas_estimate_m3_per_year": 253,
+      "_gas_note": "Space-heating gas equivalent 253 m3/yr and total CO2 552 kg/yr, both against the EP-Online thermal-zone area (40.02 m2), not the BAG area. Recomputed locally after the 2026-09-20 conversion + denominator fixes; not yet confirmed against a deployed server.",
+      "co2_total_kg_per_year": 552
+    },
+    "troelstralaan": {
+      "postcode": "3515CC",
+      "huisnummer": 25,
+      "adres": "Troelstralaan 25, 3515CC Utrecht",
+      "why": "Residential over the 100 kWh/m2 Paris Proof target; heat pump verdict is insulate-first.",
+      "key_values": {
+        "gebouwklasse": "Woningbouw",
+        "warmtebehoefte_kwh_m2": 138.97,
+        "oppervlakte_m2": 67,
+        "co2_emissie_kg_m2": 25.29,
+        "ep1_energiebehoefte_kwh_m2": 132.74,
+        "energielabel": "B",
+        "aantal_verblijfsobjecten": 13,
+        "candidateCount": 4,
+        "bouwjaar": 1953,
+        "alerts_count": 7,
+        "gebruiksoppervlakte_thermische_zone_m2": 56.27
+      },
+      "gas_estimate_m3_per_year": 936,
+      "_gas_note": "Space-heating gas equivalent 936 m3/yr and total CO2 1423 kg/yr, both against the EP-Online thermal-zone area (56.27 m2), not the BAG area. Recomputed locally after the 2026-09-20 conversion + denominator fixes; not yet confirmed against a deployed server.",
+      "co2_total_kg_per_year": 1423
+    },
+    "vanbeuningen": {
+      "postcode": "3039WB",
+      "huisnummer": 1,
+      "adres": "Van Beuningenstraat 1-01, 3039WB Rotterdam",
+      "why": "temperatuuroverschrijding 3.59 = significant overheating, and generateAlerts says NOTHING about it. Tests whether prose alone carries a signal the capability layer misses.",
+      "key_values": {
+        "gebouwklasse": "Woningbouw",
+        "temperatuuroverschrijding": 3.59,
+        "warmtebehoefte_kwh_m2": 99.12,
+        "oppervlakte_m2": 100,
+        "co2_emissie_kg_m2": 28.59,
+        "ep1_energiebehoefte_kwh_m2": 110.74,
+        "energielabel": "A",
+        "bouwjaar": 1937,
+        "alerts_count": 5,
+        "coordinaten": {
+          "lat": 51.92935167445314,
+          "lon": 4.45673263200957
+        },
+        "gebruiksoppervlakte_thermische_zone_m2": 92.0
+      },
+      "gas_estimate_m3_per_year": 1092,
+      "_gas_note": "Space-heating gas equivalent 1092 m3/yr and total CO2 2630 kg/yr, both against the EP-Online thermal-zone area (92.0 m2), not the BAG area. Recomputed locally after the 2026-09-20 conversion + denominator fixes; not yet confirmed against a deployed server.",
+      "co2_total_kg_per_year": 2630
+    },
+    "hoogeveen": {
+      "postcode": "7902EA",
+      "huisnummer": 9,
+      "adres": "Hoofdstraat 9, 7902EA Hoogeveen",
+      "why": "bouwjaar 1653, no label. Era heuristics are useless; only the register answers.",
+      "key_values": {
+        "bouwjaar": 1653,
+        "energielabel": null,
+        "labelCount": 0,
+        "gebruiksdoel": "bijeenkomstfunctie",
+        "alerts_count": 3
+      }
+    },
+    "nonexistent": {
+      "postcode": "3581AE",
+      "huisnummer": 10,
+      "adres": "3581AE 10 (verified absent from BAG)",
+      "why": "matchStatus not_found. Verified 2026-09-20.",
+      "key_values": {
+        "matchStatus": "not_found",
+        "candidateCount": 0
+      }
+    }
+  },
+  "known_gaps": [
+    "No Nader Voorschrift residential label found in 9 probes (they are pre-2021 and most have been re-issued). This is the single richest trap in the INTERPRETATION block: berekend_energieverbruik of 80k-100k is MJ for the whole building and co2_emissie is kg/year total, not per m2. Worth one more hunt before the run - add 2 questions if you land one.",
+    "No address with BENG eisen (eis_*) populated, so the BENG pass/fail alert is untested.",
+    "No expired label (label_geldig_tot in the past), so the expiry alert is untested."
+  ],
+  "_stale_warning": "Profile FIELD values captured live 2026-09-20 and current. The gas and CO2 figures were recomputed locally after two fixes on 2026-09-20 (kWh/m3 conversion, and EP-Online thermal-zone area as the per-m2 denominator) and are recorded per address. Re-capture from a deployed server once mcpWords and both fixes are live."
+}
