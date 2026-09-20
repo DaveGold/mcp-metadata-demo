@@ -95,7 +95,9 @@ const isMain = import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
   const PORT = Number(process.env.PORT ?? 3000);
   const HOST = process.env.HOST ?? '127.0.0.1';
-  const variant: ServerVariant = process.env.MCP_VARIANT === 'minimal' ? 'minimal' : 'rich';
+  const rawVariant = process.env.MCP_VARIANT;
+  const variant: ServerVariant =
+    rawVariant === 'minimal' ? 'minimal' : rawVariant === 'words' ? 'words' : 'rich';
 
   const app = createHttpApp({ hosted: false, variant });
   app.listen(PORT, HOST, () => {

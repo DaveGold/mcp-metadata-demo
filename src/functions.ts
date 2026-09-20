@@ -31,3 +31,10 @@ export const mcp = onRequest(functionOptions, createHttpApp({ hosted: true, vari
  * so the two endpoints can be compared directly.
  */
 export const mcpMinimal = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'minimal' }));
+
+/**
+ * Words tier — arm B of the ablation. Identical prose and schemas to `mcp`, but
+ * no computed alerts, so A→B measures what the words buy and B→C measures what
+ * the capability adds.
+ */
+export const mcpWords = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'words' }));

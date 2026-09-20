@@ -15,7 +15,9 @@ import { logger } from './logger.js';
 
 async function main(): Promise<void> {
   // MCP_VARIANT=minimal serves the metadata-stripped tier (for the ablation demo).
-  const variant: ServerVariant = process.env.MCP_VARIANT === 'minimal' ? 'minimal' : 'rich';
+  const rawVariant = process.env.MCP_VARIANT;
+  const variant: ServerVariant =
+    rawVariant === 'minimal' ? 'minimal' : rawVariant === 'words' ? 'words' : 'rich';
   const server = createServer({ variant });
   const transport = new StdioServerTransport();
   await server.connect(transport);
