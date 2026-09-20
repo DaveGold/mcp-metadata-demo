@@ -16,6 +16,43 @@
 
 import type { BuildingProfile } from '../tools/get-building-profile.js';
 
+/**
+ * Energy content of one m³ of Dutch natural gas, in kWh.
+ *
+ * The figure usually quoted is 31.65 MJ/m³ (onderwaarde / lower heating value).
+ * Heat demand arrives here in kWh, so the MJ figure must be converted before it
+ * can be used as a divisor: 31.65 / 3.6 = 8.79 kWh/m³. Dividing kWh by 31.65
+ * directly understates gas use by exactly 3.6x.
+ */
+const KWH_PER_M3_GAS = 31.65 / 3.6;
+
+/** Seasonal efficiency of an HR (high-efficiency) boiler. */
+const HR_BOILER_EFFICIENCY = 0.95;
+
+/**
+ * The floor area an NTA 8800 per-m² value is expressed against.
+ *
+ * warmtebehoefte, EP-1/EP-2 and co2_emissie are all per m² of the EP-Online
+ * thermal-zone area (gebruiksoppervlakte), NOT the BAG gross area of the
+ * verblijfsobject. The two differ — usually the EP-Online figure is lower, but
+ * for one VBO of a large pand it can be far higher — so multiplying an NTA
+ * per-m² value by the BAG area silently mixes two scopes.
+ *
+ * BAG area is the fallback only, for profiles EP-Online has no thermal zone for.
+ * The source is reported in the alert so the reader can see which was used.
+ */
+function benchmarkArea(
+  profile: ProfileCore
+): { m2: number; source: 'EP-Online thermische zone' | 'BAG' } | null {
+  if (profile.gebruiksoppervlakte_thermische_zone_m2 !== null) {
+    return { m2: profile.gebruiksoppervlakte_thermische_zone_m2, source: 'EP-Online thermische zone' };
+  }
+  if (profile.oppervlakte_m2 !== null) {
+    return { m2: profile.oppervlakte_m2, source: 'BAG' };
+  }
+  return null;
+}
+
 /** Profile shape without the alerts array it will be merged into. */
 export type ProfileCore = Omit<BuildingProfile, 'alerts'>;
 
@@ -164,14 +201,17 @@ export function generateAlerts(profile: ProfileCore): string[] {
   // Residential-specific consumer insights (only for woning use)
   const isWoning = profile.gebruiksdoel?.toLowerCase().includes('woonfunctie');
   if (isWoning) {
-    if (profile.warmtebehoefte_kwh_m2 !== null && profile.oppervlakte_m2 !== null) {
-      const gasM3 = Math.round((profile.warmtebehoefte_kwh_m2 * profile.oppervlakte_m2) / 31.65 / 0.95);
+    const area = benchmarkArea(profile);
+
+    if (profile.warmtebehoefte_kwh_m2 !== null && area !== null) {
+      const heatDemandKwh = profile.warmtebehoefte_kwh_m2 * area.m2;
+      const gasM3 = Math.round(heatDemandKwh / HR_BOILER_EFFICIENCY / KWH_PER_M3_GAS);
       alerts.push(
-        `Estimated gas use: ~${gasM3} m³/year (based on warmtebehoefte ${profile.warmtebehoefte_kwh_m2} kWh/m², area ${profile.oppervlakte_m2} m², HR boiler 95%).`
+        `Estimated space-heating gas equivalent: ~${gasM3} m³/year (warmtebehoefte ${profile.warmtebehoefte_kwh_m2} kWh/m² × ${area.m2} m² ${area.source}, HR boiler 95%). SPACE HEATING ONLY — excludes hot water and cooking, so an actual gas bill will be higher.`
       );
     }
 
-    if (profile.co2_emissie_kg_m2 !== null && profile.oppervlakte_m2 !== null) {
+    if (profile.co2_emissie_kg_m2 !== null) {
       const isNaderVoorschrift =
         profile.berekeningstype?.toLowerCase().includes('nader voorschrift') ?? false;
       if (isNaderVoorschrift) {
@@ -180,10 +220,10 @@ export function generateAlerts(profile: ProfileCore): string[] {
         alerts.push(
           `Total CO₂ emissions: ~${totalCo2} kg/year (Nader Voorschrift — value is whole-building total).`
         );
-      } else {
-        const totalCo2 = Math.round(profile.co2_emissie_kg_m2 * profile.oppervlakte_m2);
+      } else if (area !== null) {
+        const totalCo2 = Math.round(profile.co2_emissie_kg_m2 * area.m2);
         alerts.push(
-          `Total CO₂ emissions: ~${totalCo2} kg/year (${profile.co2_emissie_kg_m2} kg/m² × ${profile.oppervlakte_m2} m²).`
+          `Total CO₂ emissions: ~${totalCo2} kg/year (${profile.co2_emissie_kg_m2} kg/m² × ${area.m2} m² ${area.source}).`
         );
       }
     }

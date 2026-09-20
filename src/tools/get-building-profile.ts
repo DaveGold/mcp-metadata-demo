@@ -20,7 +20,7 @@ import { writeToolCallLog } from '../shared/log-store.js';
 
 // ── Description ──────────────────────────────────────────────────────────────
 
-const description = `\
+const descriptionCore = `\
 RETURNS:
 Building profile combining BAG data (bouwjaar, oppervlakte, gebruiksdoel, status, coordinates) and EP-Online energy label data (energieklasse, energie_index or EP-1/EP-2, CO₂ emissie, warmtebehoefte, BENG eisen, SBI sector description, gebouwtype, EMG forfaitair). All data from a single postcode + huisnummer lookup.
 
@@ -53,7 +53,7 @@ Which fields are populated depends on the berekeningstype:
 - energielabel null: no registered label in EP-Online (common for older or unlabeled buildings)
 - ep1_energiebehoefte_kwh_m2 (NTA 8800 only): Paris Proof 2040 targets — kantoor: 70 kWh/m², woningbouw: 100 kWh/m². No standardized target for onderwijs, gezondheidszorg, industrie.
 - energie_index (pre-NTA 8800): the main performance metric for most existing buildings. EI < 1.2 = A or better; 1.4–1.8 = C; >2.7 = G. No Paris Proof kWh/m² equivalent.
-- gebruiksoppervlakte_thermische_zone_m2 (NTA 8800 only) vs oppervlakte_m2 (BAG): BAG = gross floor area; EP-Online = thermal zone area (10–30% lower). Use EP-Online area for kWh/m² benchmarking against EP-1.
+- gebruiksoppervlakte_thermische_zone_m2 (NTA 8800 only) vs oppervlakte_m2 (BAG): two different scopes, not two measurements of the same thing. BAG = gross floor area of the verblijfsobject; EP-Online = usable floor area of the thermal zone the label covers. The EP-Online figure is often the lower of the two, but when the label covers a whole pand and the VBO is one unit of it, it can be far higher (Gustav Mahlerlaan 10: 118,174 m² EP-Online vs 66,581 m² BAG). Use the EP-Online area as the denominator for every per-m² NTA value (EP-1, EP-2, warmtebehoefte, co2_emissie), and never assume a fixed ratio between the two.
 - label_geldig_tot in the past: label expired, heropname may be needed for Label C obligation compliance
 - op_basis_van_referentiegebouw = true: label is based on a reference building calculation (less accurate)
 - vbo_status not "Verblijfsobject in gebruik": building may be vacant/demolished — verify analysis relevance
@@ -66,13 +66,25 @@ Which fields are populated depends on the berekeningstype:
 - temperatuuroverschrijding (TOjuli/GTO overheating-risk indicator): 0 = no risk, 0–1.5 = minor risk, >1.5 = significant overheating. Relevant for cooling load and heat pump sizing.
 - compactheid (Als/Ag = loss surface area / usable floor area): lower = more compact = less heat loss per m².
 - soort_opname: "Basisopname" = standard site visit, "Detailopname" = detailed measurement (more accurate). Null = pre-NTA 8800 label or no label.
-- gebouwtype/gebouwsubtype refinements (e.g. hoek/boven) lose more heat than tussen/midden variants — refines the heat-loss estimate for residential buildings.
+- gebouwtype/gebouwsubtype refinements (e.g. hoek/boven) lose more heat than tussen/midden variants — refines the heat-loss estimate for residential buildings.`;
 
-ALERTS: Always check interpretation.alerts — they contain bouwjaar era warnings (suppressed for good labels A/A+/A++/A+++/A++++), multiple-VBO disambiguation, large pand oppervlakte warning (>10 VBOs), Paris Proof threshold breaches (differentiated by gebouwklasse), label expiry notices, BENG compliance violations, VBO status warnings, bouwjaar discrepancies, and district heating impact notes. For residential buildings alerts also include an estimated annual gas consumption (m³), total CO₂ emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.`;
+/**
+ * The ALERTS paragraph, kept separate so the 'words' variant can omit it.
+ * That variant returns no `alerts` field, and a description promising one
+ * would be describing a field that is not there.
+ */
+const alertsParagraph = `ALERTS: Always check interpretation.alerts — they contain bouwjaar era warnings (suppressed for good labels A/A+/A++/A+++/A++++), multiple-VBO disambiguation, large pand oppervlakte warning (>10 VBOs), Paris Proof threshold breaches (differentiated by gebouwklasse), label expiry notices, BENG compliance violations, VBO status warnings, bouwjaar discrepancies, and district heating impact notes. For residential buildings alerts also include an estimated annual gas consumption (m³), total CO₂ emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.`;
+
+/** Full rich description: domain prose plus the alerts promise. */
+export const description = descriptionCore + '\n\n' + alertsParagraph;
+
+/** Arm B description: identical prose, minus the promise of a field it does not return. */
+export { descriptionCore };
+
 
 // ── Input schema ─────────────────────────────────────────────────────────────
 
-const inputSchema = {
+export const inputSchema = {
   postcode: z
     .string()
     .regex(/^\d{4}[A-Z]{2}$/)
@@ -324,7 +336,7 @@ export function registerGetBuildingProfileTool(
  * Emit a `tool.invoked` audit row. No-op when no request context is active
  * (stdio transport / local dev), mirroring the render-tool helpers.
  */
-async function logToolCall({
+export async function logToolCall({
   args,
   start,
   status,
