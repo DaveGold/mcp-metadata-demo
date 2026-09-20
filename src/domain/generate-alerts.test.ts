@@ -151,6 +151,89 @@ describe('generateAlerts', () => {
     expect(alerts.some((a) => a.includes('No registered energy label'))).toBe(true);
   });
 
+  it('converts kWh heat demand with kWh/m3, not MJ/m3', () => {
+    // Regression: the original formula divided a kWh numerator by 31.65 (MJ per m3)
+    // instead of 8.79 (kWh per m3), understating gas use by exactly 3.6x.
+    // 52.73 kWh/m2 over 41 m2 = 2162 kWh / 0.95 boiler / 8.79 kWh per m3 = ~259 m3.
+    const alerts = generateAlerts(
+      baseProfile({
+        gebruiksdoel: 'woonfunctie',
+        warmtebehoefte_kwh_m2: 52.73,
+        oppervlakte_m2: 41,
+      })
+    );
+    const gasAlert = alerts.find((a) => a.includes('space-heating gas equivalent'));
+    expect(gasAlert).toContain('~259 m³/year');
+    // The old, wrong figure must never come back.
+    expect(gasAlert).not.toContain('~72 m³/year');
+  });
+
+  it('measures per-m2 NTA values against the EP-Online thermal zone, not the BAG area', () => {
+    // IJburglaan 433A: BAG 41 m2, EP-Online thermal zone 40.02 m2. warmtebehoefte
+    // and co2_emissie are both per m2 of the thermal zone, so that is the
+    // denominator; using the BAG area mixes two different scopes.
+    const alerts = generateAlerts(
+      baseProfile({
+        gebruiksdoel: 'woonfunctie',
+        warmtebehoefte_kwh_m2: 52.73,
+        oppervlakte_m2: 41,
+        gebruiksoppervlakte_thermische_zone_m2: 40.02,
+        co2_emissie_kg_m2: 13.79,
+      })
+    );
+    const gasAlert = alerts.find((a) => a.includes('space-heating gas equivalent'));
+    expect(gasAlert).toContain('~253 m³/year');
+    expect(gasAlert).toContain('EP-Online thermische zone');
+    expect(gasAlert).not.toContain('~259 m³/year');
+
+    const co2Alert = alerts.find((a) => a.includes('Total CO₂ emissions'));
+    expect(co2Alert).toContain('40.02 m² EP-Online thermische zone');
+  });
+
+  it('falls back to the BAG area, and says so, when EP-Online has no thermal zone', () => {
+    const alerts = generateAlerts(
+      baseProfile({
+        gebruiksdoel: 'woonfunctie',
+        warmtebehoefte_kwh_m2: 52.73,
+        oppervlakte_m2: 41,
+        gebruiksoppervlakte_thermische_zone_m2: null,
+      })
+    );
+    const gasAlert = alerts.find((a) => a.includes('space-heating gas equivalent'));
+    expect(gasAlert).toContain('41 m² BAG');
+  });
+
+  it('says the gas figure is space heating only', () => {
+    // warmtebehoefte excludes hot water and cooking. Calling the result
+    // "estimated gas use" invited a homeowner to compare it with their bill.
+    const alerts = generateAlerts(
+      baseProfile({
+        gebruiksdoel: 'woonfunctie',
+        warmtebehoefte_kwh_m2: 100,
+        gebruiksoppervlakte_thermische_zone_m2: 120,
+      })
+    );
+    const gasAlert = alerts.find((a) => a.includes('space-heating gas equivalent'));
+    expect(gasAlert).toMatch(/SPACE HEATING ONLY/);
+    expect(gasAlert).toMatch(/excludes hot water and cooking/);
+  });
+
+  it('keeps the gas estimate in a physically plausible band for a typical dwelling', () => {
+    // A 120 m2 home at 100 kWh/m2 should land near 1400 m3/year — the range a
+    // Dutch household would recognise on its own energy bill.
+    const alerts = generateAlerts(
+      baseProfile({
+        gebruiksdoel: 'woonfunctie',
+        warmtebehoefte_kwh_m2: 100,
+        gebruiksoppervlakte_thermische_zone_m2: 120,
+      })
+    );
+    const gasAlert = alerts.find((a) => a.includes('space-heating gas equivalent'));
+    const m3 = Number(gasAlert?.match(/~(\d+) m³\/year/)?.[1]);
+    expect(m3).toBeGreaterThan(1200);
+    expect(m3).toBeLessThan(1600);
+  });
+
   it('does not flag a date-only Geldig_tot as expired on its own valid-through day', () => {
     // A date-only value compared lex against new Date().toISOString() would be
     // shorter than "today-T..." and therefore marked expired. The Date-parsed
