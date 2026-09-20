@@ -7,8 +7,20 @@ description: Run the thin/words/rich eval set (evals/questions-core.json, or the
 
 ## Before running
 
-1. All three arms must be connected in `.mcp.json` as `eval-thin`, `eval-words`,
-   `eval-rich`. If `eval-words` is missing, arm B has not been built — stop and say so.
+1. **Check the arms are CONNECTED, not merely configured.** Confirm the
+   `mcp__eval-thin__*`, `mcp__eval-words__*` and `mcp__eval-rich__*` tools are
+   actually available to this session, and that `eval-thin` / `eval-words` /
+   `eval-rich` appear in the agent list.
+
+   Their presence in `.mcp.json` and `.claude/agents/` proves nothing: skills
+   reload mid-session but **MCP connections and the agent registry are fixed when
+   the session starts**. A session that began before those files existed — for
+   example one where they arrived via a merge or a branch switch — will load this
+   skill and still have no arms. That is not a deploy problem and no amount of
+   retrying fixes it.
+
+   If either is missing, STOP and tell the user to start a fresh session in a
+   checkout where the files are already present. Do not attempt the run.
 2. Re-capture `evals/addresses.json` if it is more than a few weeks old. BAG and
    EP-Online are live.
 3. Confirm the `agg-01` gas formula question is resolved (see `evals/README.md`) —
