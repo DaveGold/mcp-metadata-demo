@@ -37,6 +37,7 @@ import {
   logToolCall,
   inputSchema,
   interpretationBlock,
+  derivedFiguresBlock,
   type BagClientLike,
   type EpOnlineClientLike,
 } from './get-building-profile.js';
@@ -62,11 +63,21 @@ export const outputSchemaWithInterpretation = outputSchemaWithoutAlerts.extend({
     ),
 });
 
+/**
+ * `withRecipe` appends the DERIVED FIGURES procedure to the RESPONSE prose — the
+ * `inline-recipe` arm of open-questions.md Q1b. `words-recipe` appends the SAME
+ * imported block to its DESCRIPTION, so the pair differs only in channel.
+ */
 export function registerGetBuildingProfileInlineTool(
   server: McpServer,
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
+  epOnlineClient: EpOnlineClientLike,
+  opts: { withRecipe?: boolean } = {}
 ): void {
+  const interpretationPayload = opts.withRecipe
+    ? interpretationBlock + '\n\n' + derivedFiguresBlock
+    : interpretationBlock;
+
   server.registerTool(
     'get_building_profile',
     {
@@ -97,7 +108,7 @@ export function registerGetBuildingProfileInlineTool(
         // words tier's description does. Sizing it to the record is a SEPARATE
         // experiment (open-questions.md Q2) and must not be smuggled in here —
         // it would change two variables at once.
-        const withInterpretation = { ...profile, interpretation: interpretationBlock };
+        const withInterpretation = { ...profile, interpretation: interpretationPayload };
 
         // Same call accounting as every other arm, so the only variable is the
         // delivery channel and not what the server records about itself.
@@ -114,7 +125,7 @@ export function registerGetBuildingProfileInlineTool(
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error('tool.error', { tool: 'get_building_profile', variant: 'inline', error: errorMessage });
+        logger.error('tool.error', { tool: 'get_building_profile', variant: opts.withRecipe ? 'inline-recipe' : 'inline', error: errorMessage });
         await logToolCall({ args, start, status: 'error', rowCount: 0 });
         return {
           content: [{ type: 'text' as const, text: `Error in get_building_profile: ${errorMessage}` }],

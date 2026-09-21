@@ -6,9 +6,17 @@ written down now precisely because this repo has already been burned once by a r
 chosen after seeing the answers (see `results/2026-09-21-shape-replication.json` and
 the two live runs that failed to replicate it).
 
-Q1 and Q2 need a new arm, so they cannot run in a session that predates the deploy:
-MCP connections and the agent registry are fixed when a session starts. Deploy first,
-then start fresh. **Q3 needs no new arm and no deploy** — only instrumentation.
+Q1's three arms (`inline`, `words-recipe`, `inline-recipe`) are **built and
+deployed as of 2026-09-21**. Q2's is not. Either way a session that predates a
+deploy cannot reach the arm: MCP connections are fixed when a session starts, and
+the agent list is NOT proof of a connection — on 2026-09-21 the `eval-inline`
+agent appeared mid-session while its MCP server stayed unconnected, which would
+have produced a subagent with zero tools declining every question. Check you can
+call `mcp__eval-<arm>__get_building_profile` before spending anything.
+
+**Q3 needs no new arm and no deploy** — only instrumentation, which now exists:
+every log row carries `variant`, `paramsPresent` and `rowCount`, and all eight
+arms were redeployed to stamp them.
 
 ---
 
@@ -65,10 +73,21 @@ overturn the headline)*
 > server-side computation from "the only thing that works" to "one of two things
 > that work", and the cheaper one would be in the response.
 
-**Authoring caveat on Q1b:** the readable prose contains **no** gas recipe — zero
-occurrences of `8.79`, `0.95`, `gas` or `boiler` in 6,099 characters. A recipe has
-to be written for this test. Write it **once** and ship it in both a description
-variant and the response variant, or the comparison smuggles in a second variable.
+**The recipe is written and both arms are deployed** (2026-09-21). It lives as
+`derivedFiguresBlock` in `get-building-profile.ts` and is a deliberate
+transliteration of the opaque axis's DERIVED FIGURES block — the text that scored
+0 of 13 — with the terse codes swapped for readable field names and nothing else
+changed. Reword it and the comparison with that result dies.
+
+| arm | endpoint | carries the recipe |
+| --- | --- | --- |
+| `eval-words-recipe` | `mcpWordsRecipe` | in the DESCRIPTION |
+| `eval-inline-recipe` | `mcpInlineRecipe` | in the RESPONSE |
+
+Verified on the wire: the 438-byte block is **byte-identical across both
+channels**, `inline-recipe`'s description is still `schema`'s one-liner, and the
+block states no answer — no `253`, no `2630`. Guarded by
+`get-building-profile-inline.test.ts`.
 
 ### Build notes
 

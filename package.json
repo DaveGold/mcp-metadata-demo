@@ -31,15 +31,17 @@
     "test:coverage": "vitest run --coverage",
     "test:live": "tsx scripts/smoke.ts 3543AR 1",
     "typecheck": "tsc --noEmit",
-    "deploy": "npm run build && firebase deploy --only functions:mcp,functions:mcpMinimal,functions:mcpSchema,functions:mcpInline,functions:mcpWords,functions:mcpOpaque,functions:mcpOpaqueWords",
+    "deploy": "npm run build && firebase deploy --only functions:mcp,functions:mcpMinimal,functions:mcpSchema,functions:mcpInline,functions:mcpInlineRecipe,functions:mcpWordsRecipe,functions:mcpWords,functions:mcpOpaque,functions:mcpOpaqueWords",
     "deploy:setup-secret": "firebase functions:secrets:set EP_ONLINE_API_KEY",
-    "logs": "firebase functions:log --only mcp,mcpMinimal,mcpSchema,mcpInline,mcpWords,mcpOpaque,mcpOpaqueWords",
+    "logs": "firebase functions:log --only mcp,mcpMinimal,mcpSchema,mcpInline,mcpInlineRecipe,mcpWordsRecipe,mcpWords,mcpOpaque,mcpOpaqueWords",
     "prepublishOnly": "npm run build",
     "dev:words": "MCP_VARIANT=words tsx watch src/stdio.ts",
     "inspect:words": "npm run build && MCP_VARIANT=words npx @modelcontextprotocol/inspector node --env-file=.env.local dist/stdio.js",
     "dev:opaque": "MCP_VARIANT=opaque tsx watch src/stdio.ts",
     "dev:opaque-words": "MCP_VARIANT=opaque-words tsx watch src/stdio.ts",
-    "dev:inline": "MCP_VARIANT=inline tsx watch src/stdio.ts"
+    "dev:inline": "MCP_VARIANT=inline tsx watch src/stdio.ts",
+    "dev:inline-recipe": "MCP_VARIANT=inline-recipe tsx watch src/stdio.ts",
+    "dev:words-recipe": "MCP_VARIANT=words-recipe tsx watch src/stdio.ts"
   },
   "keywords": [
     "mcp",

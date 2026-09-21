@@ -16,6 +16,8 @@ export {
   mcpMinimal,
   mcpSchema,
   mcpInline,
+  mcpInlineRecipe,
+  mcpWordsRecipe,
   mcpWords,
   mcpOpaque,
   mcpOpaqueWords,

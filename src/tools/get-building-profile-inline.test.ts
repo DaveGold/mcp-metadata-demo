@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer } from '../server.js';
-import { descriptionCore, interpretationBlock } from './get-building-profile.js';
+import { descriptionCore, interpretationBlock, derivedFiguresBlock } from './get-building-profile.js';
 import type { BagClientLike, EpOnlineClientLike } from './get-building-profile.js';
 import type { BagAddress, BagVerblijfsobject, BagPand } from '../clients/bag-client.js';
 import type { PandEnergielabelV5 } from '../clients/ep-online-client.js';
@@ -79,7 +79,9 @@ function stubEpOnline(): EpOnlineClientLike {
   return { getByBagVboId: async () => labels };
 }
 
-async function connectArm(variant: 'inline' | 'schema' | 'words'): Promise<Client> {
+type Arm = 'inline' | 'schema' | 'words' | 'inline-recipe' | 'words-recipe';
+
+async function connectArm(variant: Arm): Promise<Client> {
   const server = createServer({ variant, bagClient: stubBag(), epOnlineClient: stubEpOnline() });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: 'test-client', version: '0.0.0' });
@@ -87,7 +89,7 @@ async function connectArm(variant: 'inline' | 'schema' | 'words'): Promise<Clien
   return client;
 }
 
-async function describeGetBuildingProfile(variant: 'inline' | 'schema' | 'words'): Promise<string> {
+async function describeGetBuildingProfile(variant: Arm): Promise<string> {
   const client = await connectArm(variant);
   const { tools } = await client.listTools();
   const tool = tools.find((t) => t.name === 'get_building_profile');
@@ -158,5 +160,78 @@ describe('get_building_profile — inline variant (the channel arm)', () => {
 
     expect(inlineKeys.filter((k) => k !== 'interpretation')).toEqual(wordsKeys);
     expect(inlineKeys).toContain('interpretation');
+  });
+});
+
+describe('the Q1b recipe arms — same procedure, two channels', () => {
+  async function interpretationOf(variant: Arm): Promise<string> {
+    const client = await connectArm(variant);
+    const result = await client.callTool({
+      name: 'get_building_profile',
+      arguments: { postcode: '3543AR', huisnummer: 1 },
+    });
+    return (result.structuredContent as { interpretation?: string }).interpretation ?? '';
+  }
+
+  it('the recipe states no answer — it is a procedure, not an alert', () => {
+    // A block containing the figure would be the rich tier wearing a recipe's
+    // clothes, and Q1b would measure computation a second time instead of
+    // delivery. 253 is gas-estimate's answer; 2630 is total-vs-per-m2's.
+    expect(derivedFiguresBlock).not.toContain('253');
+    expect(derivedFiguresBlock).not.toContain('2630');
+  });
+
+  it('is a faithful transliteration of the opaque block it must be compared with', () => {
+    // Same constants, same caveat. If these drift the comparison with the
+    // 0-of-13 opaque result dies and the arm answers nothing.
+    expect(derivedFiguresBlock).toContain('DERIVED FIGURES YOU MUST COMPUTE YOURSELF');
+    expect(derivedFiguresBlock).toContain('0.95');
+    expect(derivedFiguresBlock).toContain('8.79');
+    expect(derivedFiguresBlock).toContain('SPACE HEATING ONLY');
+    // ...with the readable field names this axis uses, not the opaque codes.
+    expect(derivedFiguresBlock).toContain('warmtebehoefte_kwh_m2');
+    expect(derivedFiguresBlock).toContain('gebruiksoppervlakte_thermische_zone_m2');
+    expect(derivedFiguresBlock).not.toMatch(/\bwb\b|\bf_ga\b|\bopp\b/);
+  });
+
+  it('words-recipe appends it to the DESCRIPTION and changes nothing else', async () => {
+    const plain = await describeGetBuildingProfile('words');
+    const withRecipe = await describeGetBuildingProfile('words-recipe');
+
+    expect(plain).toBe(descriptionCore);
+    expect(withRecipe).toBe(descriptionCore + '\n\n' + derivedFiguresBlock);
+  });
+
+  it('inline-recipe appends it to the RESPONSE and changes nothing else', async () => {
+    const plain = await interpretationOf('inline');
+    const withRecipe = await interpretationOf('inline-recipe');
+
+    expect(plain).toBe(interpretationBlock);
+    expect(withRecipe).toBe(interpretationBlock + '\n\n' + derivedFiguresBlock);
+  });
+
+  it('ships BYTE-IDENTICAL recipe text on both channels', async () => {
+    // The whole comparison rests on this one assertion.
+    const description = await describeGetBuildingProfile('words-recipe');
+    const response = await interpretationOf('inline-recipe');
+
+    const fromDescription = description.slice(description.indexOf('DERIVED FIGURES'));
+    const fromResponse = response.slice(response.indexOf('DERIVED FIGURES'));
+
+    expect(fromDescription).toBe(fromResponse);
+    expect(fromDescription).toBe(derivedFiguresBlock);
+  });
+
+  it('keeps inline-recipe\'s description at the schema one-liner', async () => {
+    // Otherwise schema -> inline-recipe would move two things at once.
+    const d = await describeGetBuildingProfile('inline-recipe');
+    expect(d).toBe(SCHEMA_TIER_DESCRIPTION);
+    expect(d).not.toContain('DERIVED FIGURES');
+  });
+
+  it('leaves the non-recipe arms untouched', async () => {
+    // words and inline were measured before this existed; they must not move.
+    expect(await describeGetBuildingProfile('words')).not.toContain('DERIVED FIGURES');
+    expect(await interpretationOf('inline')).not.toContain('DERIVED FIGURES');
   });
 });
