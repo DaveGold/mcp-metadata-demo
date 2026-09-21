@@ -6,38 +6,106 @@ profile captured from the live server and frozen in
 [`addresses.json`](addresses.json).
 
 - **[`questions-core.json`](questions-core.json) — 9 questions. Start here.**
-- [`questions.json`](questions.json) — the full 21, for the actual numbers
+- [`questions.json`](questions.json) — the full set, with every question tagged by outcome class
+- [`results/`](results/) — what has actually been run
 - [`addresses.json`](addresses.json) — frozen reference profiles + known gaps
 
 ---
 
-## The 9-question demo set
+## What the sweep found (2026-09-21)
 
-Chosen so the failure is obvious to someone who has never heard of BAG,
-EP-Online or NTA 8800. If a question needs a paragraph of Dutch building
-regulation before the mistake looks like a mistake, it is in the full set
-instead, not this one.
+Before spending the full matrix, every core question was run thin-vs-rich at Haiku,
+with the interesting ones extended to Sonnet and Opus. 33 runs, n=1 per cell —
+directional, not significant. It changed the design, so read it first:
+[`results/2026-09-21-haiku-sweep.json`](results/2026-09-21-haiku-sweep.json).
 
-| # | the question, in plain terms | what the thin server does | isolates |
-|---|---|---|---|
-| 1 | What energy label does a building from **1653** have? | Invents a letter | words |
-| 2 | How big is this building? | Says **41 m²** — it is a 106-apartment block | words |
-| 3 | Pull the **metered** gas use for this address | Hands over a theoretical figure as if it were a meter reading | words |
-| 4 | *(postcode typed with a space, as people do)* | Reports that the address does not exist | words |
-| 5 | How big is flat **28A**? | Answers about the shop at 28 — its schema has no field for the letter | words |
-| 6 | Total CO₂ per year for this home? | **28.59 kg** — too small to be a year's worth | words |
-| 7 | Is this flat a good candidate for a **heat pump**? | No basis to answer | capability |
-| 8 | Roughly what will this cost in **gas** per year? | No basis to answer | capability |
-| 9 | Will this flat **overheat** in summer? | *(the control — see below)* | neither |
+**The finding: prose alone changed nothing. Computed alerts and schema fields
+changed everything.**
 
-**Question 9 is the honesty check.** The rich server's alerts say nothing about
-overheating, so arms B and C should score the same. If arm C wins there anyway,
-something other than the metadata is driving the results and the run needs a
-second look before any of it goes on a slide. A set with no control is a set that
-cannot surprise you.
+Every question the rich arm won, it won on an **alert** or a **schema field**. On
+the two questions whose rule lives only in INTERPRETATION prose, rich failed
+exactly like thin — rich-Haiku read *">1.5 = significant overheating"*, saw 3.59,
+and answered *"very low"*. The words arm settles it: on `building-size` and
+`total-vs-per-m2` it produced answers **identical to thin** (41 m², 2,859 kg)
+while carrying the full prose.
 
-Budget: 9 × 3 arms × 3 models × 3 repeats = **243 runs**, against 567 for the
-full set.
+This **inverts the design note**, which frames A→B as the thing to prove and
+"most of the build". At Haiku, A→B buys almost nothing and B→C buys all of it.
+The defensible message is not *write better descriptions* — it is *compute the
+answer server-side*.
+
+### The strongest single result
+
+`wrong-unit` asks for the area of flat 28A. The thin schema has no `huisletter`
+field, so the call cannot be expressed:
+
+| | |
+|---|---|
+| thin · Haiku | ❌ "105 m²" — the shop at number 28, no caveat |
+| thin · Opus | ⚠️ correctly refuses: *"this tool has no huisletter parameter"* |
+| rich · Haiku | ✅ **92 m²** |
+
+**rich-Haiku strictly beats thin-Opus.** And it shows the layer doing two distinct
+jobs: making the weak model *right*, and the strong model *safe*.
+
+---
+
+## The demo set: nine questions, five outcome classes
+
+A set of only separators is selection, not evidence. These nine span the whole
+response surface, and the classes are the argument:
+
+| class | what it shows | questions |
+|---|---|---|
+| **B · layer closes the gap** | thin ❌ → rich ✅, same model | building-size, total-vs-per-m2, gas-estimate, heat-pump-triage |
+| **D · structural gap** | the thin arm cannot express the call at any model | wrong-unit |
+| **C · model closes the gap** | both arms ❌ at Haiku, ✅ at Opus — prose-only rules | overheating, benchmark-trap |
+| **A · always works** | every arm, every model correct | metered-vs-model, invented-label |
+| **E · layer can't fix it** | rich ❌ even at Opus | **none found — say so** |
+
+Class A is not filler. Without it the set cannot surprise you, and a room is
+right to discount it.
+
+### Retired, and why
+
+Four questions were cut after every arm answered them correctly. Keeping them
+would have padded the totals without testing anything:
+
+- **heat-pump** (binary) — "is this a good candidate?" is guessable from an A+
+  label. Replaced by **heat-pump-triage**, which asks for a three-way ordering
+  against bands that exist only in the alerts. Written after the sweep, and it
+  separates.
+- **invented-label**, **metered-vs-model** — kept, but as class-A controls rather
+  than as evidence.
+- **human-typing** — retired outright. It assumed a postcode with a space needs
+  normalising; PDOK accepts it, so the thin arm passed `"3543 AR"` straight
+  through and succeeded. The question tested nothing.
+
+### Two design rules the sweep produced
+
+1. **A question separates only when the answer needs a value, constant or
+   convention that is not in the payload and not guessable from an adjacent
+   signal.** Binary verdicts saturate. Values and orderings do not.
+2. **Separation can collapse as the model improves.** `gas-estimate` separated at
+   Haiku, but thin-Sonnet reached 250–300 m³ by a different route. Treat every
+   separation as model-specific until shown otherwise.
+
+### Call count is dead; count fabrication instead
+
+`get_building_profile` is one-shot, so nearly every run was a single call. The
+only 2-call runs were compensating searches into `get_weather_context` when the
+payload did not resolve the question — including rich-Haiku spending an extra
+call to confirm a wrong overheating verdict.
+
+What discriminates is **fabrication**: an invented "69.2% fossil share", 3.59
+reported as "degree-days" and as "hours above 27 °C", a silently dropped
+huisletter, the BAG area used as denominator. Every question now carries a
+`fabrication_watch` naming what to look for. `max_calls` has been removed.
+
+Note that the rich arm fabricates too — it invented a heat-pump threshold of
+"under 60 kWh/m²" (the band is 50–70) and cited the overheating threshold as 1.0
+and 1.20 (it is 1.5). It was right anyway each time, which is its own finding:
+a correct verdict reached through an invented rule.
 
 ---
 

@@ -1,0 +1,296 @@
+{
+  "_comment": "Exploratory sweep, NOT a scoring run. n=1 per cell, so every number here is directional only. Its purpose was to find which questions separate the arms at all before spending the full matrix - and it changed the design.",
+  "date": "2026-09-21",
+  "harness": "Claude Code subagents (.claude/agents/eval-*.md), one question per agent, answers scored by hand",
+  "models": {
+    "default": "haiku",
+    "exceptions": "benchmark-trap also run on sonnet and opus"
+  },
+  "caveats": [
+    "One run per cell. No repeats, so nothing here survives a significance test.",
+    "Correctness scored by hand against ground_truth, not by a judge.",
+    "Tool calls are self-reported by the agent under test.",
+    "The words arm was only run on four questions."
+  ],
+  "runs": [
+    {
+      "q": "invented-label",
+      "arm": "thin",
+      "model": "haiku",
+      "correct": true,
+      "calls": 1,
+      "note": "read labelCount 0 and said so; did not take the 1653 bait"
+    },
+    {
+      "q": "invented-label",
+      "arm": "words",
+      "model": "haiku",
+      "correct": true,
+      "calls": 1
+    },
+    {
+      "q": "invented-label",
+      "arm": "rich",
+      "model": "haiku",
+      "correct": true,
+      "calls": 1,
+      "note": "added the pre-1992 insulation alert"
+    },
+    {
+      "q": "heat-pump",
+      "arm": "thin",
+      "model": "haiku",
+      "correct": true,
+      "calls": 2,
+      "note": "compensating search into get_weather_context"
+    },
+    {
+      "q": "heat-pump",
+      "arm": "words",
+      "model": "haiku",
+      "correct": true,
+      "calls": 1
+    },
+    {
+      "q": "heat-pump",
+      "arm": "rich",
+      "model": "haiku",
+      "correct": true,
+      "calls": 1,
+      "fabricated": "claimed the ideal threshold is under 60 kWh/m2; the actual band is 50-70"
+    },
+    {
+      "q": "gas-estimate",
+      "arm": "thin",
+      "model": "haiku",
+      "correct": false,
+      "answer": "140 m3",
+      "calls": 1,
+      "fabricated": "invented a 69.2% fossil-share adjustment"
+    },
+    {
+      "q": "gas-estimate",
+      "arm": "words",
+      "model": "haiku",
+      "correct": true,
+      "answer": "240-260 m3",
+      "calls": 1,
+      "note": "reasoned it out with its own 90% boiler assumption; a range, not a value"
+    },
+    {
+      "q": "gas-estimate",
+      "arm": "rich",
+      "model": "haiku",
+      "correct": true,
+      "answer": "253 m3",
+      "calls": 1,
+      "note": "quoted the alert including the space-heating caveat"
+    },
+    {
+      "q": "building-size",
+      "arm": "thin",
+      "model": "haiku",
+      "correct": false,
+      "calls": 1,
+      "note": "led with 'the building is 41 square metres'"
+    },
+    {
+      "q": "building-size",
+      "arm": "words",
+      "model": "haiku",
+      "correct": false,
+      "calls": 1,
+      "note": "identical failure to thin despite carrying the full prose"
+    },
+    {
+      "q": "building-size",
+      "arm": "rich",
+      "model": "haiku",
+      "correct": true,
+      "calls": 1,
+      "note": "flagged one unit of 106 and that no building-level area is available"
+    },
+    {
+      "q": "total-vs-per-m2",
+      "arm": "thin",
+      "model": "haiku",
+      "correct": false,
+      "answer": "2859 kg",
+      "calls": 1,
+      "note": "right method, BAG area instead of thermal zone"
+    },
+    {
+      "q": "total-vs-per-m2",
+      "arm": "words",
+      "model": "haiku",
+      "correct": false,
+      "answer": "2859 kg",
+      "calls": 1,
+      "note": "identical failure to thin"
+    },
+    {
+      "q": "total-vs-per-m2",
+      "arm": "rich",
+      "model": "haiku",
+      "correct": true,
+      "answer": "2630 kg",
+      "calls": 1
+    },
+    {
+      "q": "wrong-unit",
+      "arm": "thin",
+      "model": "haiku",
+      "correct": false,
+      "answer": "105 m2",
+      "calls": 1,
+      "note": "silently dropped the huisletter - its schema has no field for it"
+    },
+    {
+      "q": "wrong-unit",
+      "arm": "rich",
+      "model": "haiku",
+      "correct": true,
+      "answer": "92 m2",
+      "calls": 1,
+      "note": "passed huisletter A; did not carry the multiple_vbos caveat"
+    },
+    {
+      "q": "metered-vs-model",
+      "arm": "thin",
+      "model": "haiku",
+      "correct": true,
+      "calls": 1,
+      "note": "refused correctly; did not present berekend_energieverbruik as metered"
+    },
+    {
+      "q": "human-typing",
+      "arm": "thin",
+      "model": "haiku",
+      "correct": true,
+      "calls": 1,
+      "note": "passed '3543 AR' WITH the space and PDOK accepted it - the question's premise was wrong"
+    },
+    {
+      "q": "human-typing",
+      "arm": "rich",
+      "model": "haiku",
+      "correct": true,
+      "calls": 1,
+      "note": "normalised to 3543AR before calling"
+    },
+    {
+      "q": "overheating",
+      "arm": "thin",
+      "model": "haiku",
+      "correct": false,
+      "calls": 1,
+      "fabricated": "called 3.59 'degree-days' and 'very low'; inverted the verdict"
+    },
+    {
+      "q": "overheating",
+      "arm": "rich",
+      "model": "haiku",
+      "correct": false,
+      "calls": 2,
+      "fabricated": "called 3.59 '3.6 hours per year above 27C'; inverted the verdict, and spent a second call confirming it"
+    },
+    {
+      "q": "benchmark-trap",
+      "arm": "thin",
+      "model": "haiku",
+      "correct": false,
+      "calls": 1,
+      "note": "'3.7 times higher' than the benchmark"
+    },
+    {
+      "q": "benchmark-trap",
+      "arm": "rich",
+      "model": "haiku",
+      "correct": false,
+      "calls": 1,
+      "note": "same claim, despite the NEN 7120 warning in its own description"
+    },
+    {
+      "q": "benchmark-trap",
+      "arm": "thin",
+      "model": "sonnet",
+      "correct": false,
+      "calls": 1
+    },
+    {
+      "q": "benchmark-trap",
+      "arm": "rich",
+      "model": "sonnet",
+      "correct": false,
+      "calls": 1,
+      "note": "named NEN 7120 and still called it 'far above target'"
+    },
+    {
+      "q": "benchmark-trap",
+      "arm": "thin",
+      "model": "opus",
+      "correct": true,
+      "calls": 1,
+      "note": "flagged theoretical vs measured; not like-for-like"
+    },
+    {
+      "q": "benchmark-trap",
+      "arm": "rich",
+      "model": "opus",
+      "correct": true,
+      "calls": 1
+    },
+    {
+      "q": "wrong-unit",
+      "arm": "thin",
+      "model": "opus",
+      "correct": false,
+      "calls": 1,
+      "note": "did NOT confabulate: recognised the tool has no huisletter parameter, gave 105 m2 only as 'the record it happened to return', and said it may be a different unit. Cannot answer, but does not mislead."
+    },
+    {
+      "q": "overheating",
+      "arm": "rich",
+      "model": "opus",
+      "correct": true,
+      "calls": 1,
+      "fabricated": "cited the threshold as 1.0; the description says 1.5. Verdict and reasoning correct."
+    },
+    {
+      "q": "overheating",
+      "arm": "thin",
+      "model": "opus",
+      "correct": true,
+      "calls": 2,
+      "fabricated": "cited the threshold as 1.20. Verdict correct; second call to get_weather_context for corroboration."
+    },
+    {
+      "q": "heat-pump-triage",
+      "arm": "thin",
+      "model": "haiku",
+      "correct": false,
+      "calls": 3,
+      "note": "inverted the middle two: reasoned from temperatuuroverschrijding rather than warmtebehoefte, putting Van Beuningenstraat (99.12) in the worst band and Troelstralaan (138.97) in the middle."
+    },
+    {
+      "q": "heat-pump-triage",
+      "arm": "rich",
+      "model": "haiku",
+      "correct": true,
+      "calls": 3,
+      "note": "ordering matched the alert verdicts exactly"
+    }
+  ],
+  "findings": {
+    "1_alerts_and_schema_work_prose_does_not": "Every question the rich arm won, it won on a computed ALERT or a SCHEMA field. On the two where rich had only INTERPRETATION prose (overheating, benchmark-trap) it failed exactly like thin - rich-Haiku read '>1.5 = significant overheating', saw 3.59, and answered 'very low'. The words arm makes this unambiguous: on building-size and total-vs-per-m2 it produced answers IDENTICAL to thin while carrying the full prose.",
+    "2_this_inverts_the_design_note": "The note frames A->B (words) as the thing to prove and 'most of the build'. At Haiku, A->B buys almost nothing and B->C buys all of it. The defensible message is not 'write better descriptions' but 'compute the answer server-side'.",
+    "3_binary_verdict_questions_saturate": "invented-label, metered-vs-model, human-typing and heat-pump were all answered correctly by the thin arm. Their answers are visible in the payload (labelCount 0) or guessable from adjacent signals (A+ label implies heat-pump suitability). A question separates only when the answer needs a value, constant or convention that is NOT in the payload.",
+    "4_separation_can_collapse_as_the_model_improves": "gas-estimate separated at Haiku (thin 140 vs rich 253) but thin-Sonnet reached 250-300 by another route (EP-2 fossil, 9.77 kWh/m3). Read every separation as model-specific until shown otherwise.",
+    "5_one_clean_confirmation_of_the_thesis": "On gas-estimate, rich-Haiku (253) matched thin-Sonnet (250-300) while thin-Haiku failed (140). The layer bought exactly one model tier on that question.",
+    "6_call_count_is_a_dead_metric": "get_building_profile is one-shot, so nearly every run was 1 call. The only 2-call runs were compensating searches into get_weather_context when the payload did not resolve the question - thin on heat-pump, and rich on overheating where it spent the extra call confirming a wrong answer. FABRICATION discriminates where call count does not: invented fossil shares, invented units, invented thresholds.",
+    "7_the_prose_can_be_wrong_too": "human-typing assumed a postcode with a space must be normalised. PDOK accepts it, so the thin arm passed '3543 AR' straight through and succeeded. The question tested nothing.",
+    "8_the_ladder_on_wrong_unit": "wrong-unit gives the strongest single result in the set: thin-Haiku answers 105 m2 (confidently wrong), thin-Opus correctly refuses because the schema has no huisletter parameter, and rich-Haiku answers 92 m2. rich-Haiku STRICTLY BEATS thin-Opus. It also shows the layer does two different things: it makes the weak model right, and the strong model safe.",
+    "9_prose_only_questions_are_a_model_cliff": "overheating and benchmark-trap are the two questions whose rule lives only in INTERPRETATION prose. Both behave identically across every cell: Haiku fails on BOTH arms, Opus passes on BOTH. Two questions, eight cells, same pattern. The arm is irrelevant when the knowledge is prose.",
+    "10_class_E_not_found": "No question was found where the rich arm fails at Opus. Within this set there is no evidence of a gap that the layer plus a strong model cannot close. Worth saying out loud rather than leaving as an absence."
+  }
+}
