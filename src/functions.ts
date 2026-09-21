@@ -33,6 +33,14 @@ export const mcp = onRequest(functionOptions, createHttpApp({ hosted: true, vari
 export const mcpMinimal = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'minimal' }));
 
 /**
+ * Schema tier — the rung between minimal and words. Minimal's one-sentence
+ * description, but the full typed and `.describe()`d input/output schemas. It
+ * exists so `minimal → schema → words` attributes the schema and the prose
+ * separately; before it, the two moved together and neither could be measured.
+ */
+export const mcpSchema = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'schema' }));
+
+/**
  * Words tier — arm B of the ablation. Identical prose and schemas to `mcp`, but
  * no computed alerts, so A→B measures what the words buy and B→C measures what
  * the capability adds.

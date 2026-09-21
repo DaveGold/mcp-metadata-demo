@@ -1,0 +1,72 @@
+{
+  "_comment": "Confirmation pass for 2026-09-21-opaque-live.json: same three questions, same two arms, same live-tool-call protocol, but sonnet instead of haiku and n=10 instead of n=3. 60 runs. It confirms the central negative result and overturns most of the rest, because two of the three questions stop discriminating entirely on sonnet.",
+  "date": "2026-09-21",
+  "model": "sonnet",
+  "protocol": "LIVE TOOL CALLS. Fresh eval-<arm> subagent per run, given only the question string. Directly comparable with 2026-09-21-opaque-live.json (same protocol, different model and n); NOT comparable with the payload-in-prompt files.",
+  "arms": {
+    "eval-opaque": "mcpOpaque. Opaque codes, one-sentence tool description.",
+    "eval-opaque-words": "mcpOpaqueWords. Same payload, full field guide INCLUDING the DERIVED FIGURES gas recipe."
+  },
+  "n": 10,
+  "total_runs": 60,
+  "scoring_rule_adopted": "Sonnet answers in ranges far more than haiku did. Rule applied uniformly: for exact_value scoring, take the MIDPOINT of a stated range and test it against the tolerance; a vague quantifier ('a few hundred') scores as no value. The rule is recorded because it is load-bearing on gas-estimate and was chosen before scoring, not after.",
+  "results": {
+    "gas-estimate": {
+      "shape": "derived_number",
+      "accept_range": "233-273",
+      "eval-opaque": {
+        "answers": ["declined", "300-320", "300-450", "200-300", "150-170", "200-250", "a few hundred", "300-450", "declined", "under 500"],
+        "correct": "1 of 10",
+        "confidently_wrong": "9 of 10",
+        "fabricated": "4 of 10",
+        "note": "The single hit (200-300, midpoint 250) came from wb 52.73 x 41 m2 and a loose kWh-to-m3 step. Fabricated constants include 1.79 kg CO2 per m3 and an unsourced calorific conversion."
+      },
+      "eval-opaque-words": {
+        "answers": ["~300", "200-250", "250-300", "declined", "declined", "roughly zero", "a few hundred", "declined", "declined", "a few hundred"],
+        "correct": "0 of 10",
+        "confidently_wrong": "10 of 10",
+        "fabricated": "2 of 10",
+        "note": "Two near misses bracket the answer without hitting it: 200-250 (midpoint 225, eight short) and 250-300 (midpoint 275, two over). One run read ahef = 0 as proof the flat is all-electric and answered 'roughly zero m3'."
+      },
+      "recipe_usage": "ZERO of 10 opaque-words runs applied the documented formula. No run in either arm used 0.95 boiler efficiency or 8.79 kWh per m3. Combined with the haiku pass, that is 0 of 13 opaque-words runs invoking a formula sitting in their own tool description.",
+      "verdict": "CONFIRMS THE HAIKU RESULT, HARDER. Across both models and both arms, 2 of 46 live runs landed in tolerance, and neither did so by the documented route. Payload-in-prompt scored 3 of 3."
+    },
+    "heat-pump-triage": {
+      "shape": "classification",
+      "eval-opaque": {"correct": "10 of 10", "confidently_wrong": "0 of 10", "fields_used": "wb in 10 of 10"},
+      "eval-opaque-words": {"correct": "10 of 10", "confidently_wrong": "0 of 10", "fields_used": "wb in 10 of 10"},
+      "verdict": "TOTAL SATURATION, NO SEPARATION. Every run in both arms produced the exact correct ordering (IJburglaan ready / Van Beuningenstraat some insulation / Troelstralaan last) and every run reasoned from warmtebehoefte, quoting 52.7, 99.1 and 139.0. The unguided arm inferred wb = warmtebehoefte from Dutch domain knowledge without any glossary. The question does not discriminate on sonnet.",
+      "contrast_with_haiku": "On haiku this question separated sharply and BOTH arms failed: 0 of 3 and 1 of 3, with 6 of 6 runs anchoring on ahe. On sonnet, 20 of 20 use wb. The ahe magnet effect is a haiku phenomenon, not a property of the payload."
+    },
+    "benchmark-trap": {
+      "shape": "prevention",
+      "eval-opaque": {
+        "correct": "10 of 10",
+        "confidently_wrong": "0 of 10",
+        "note": "Declined every time. Six of ten declined on the partly false premise that no energy figure exists; two explicitly spotted bev 369.05 and refused to equate it with metered use, which is the right reasoning."
+      },
+      "eval-opaque-words": {
+        "correct": "9 of 10",
+        "confidently_wrong": "1 of 10",
+        "note": "The miss stated the building is 'roughly 3.7x the 100 kWh/m2 benchmark' before caveating - that phrase is verbatim the question's must_not_say. Two further runs named 3.7x explicitly in order to reject it; both are scored correct because the action is prevented, but they are flagged: the guide makes the forbidden comparison easy to articulate."
+      },
+      "verdict": "THE GUIDED ARM IS VERY SLIGHTLY WORSE, AND THE MECHANISM IS INTERESTING. The unguided arm cannot misuse bev because it cannot identify bev. The glossary names the field, gives it a unit, and thereby creates the opportunity for the comparison it is trying to prevent - then prevents it 9 times out of 10. Net effect on this question at this n: a wash to slightly negative."
+    }
+  },
+  "headline": "The derived-number failure replicates and hardens: 0 of 10 opaque-words runs used the recipe from their own tool description, matching 0 of 3 on haiku. The other two findings do not survive the model change - both questions saturate on sonnet and the arms stop separating entirely.",
+  "what_changed_from_haiku": {
+    "confirmed": "Guidance delivered as a tool description goes unused for derived numbers. 0 of 13 opaque-words runs across both models applied the gas formula. This is now the robust result of the live regime.",
+    "overturned_by_model": "The ahe magnet effect and the classification separation are haiku-specific. Sonnet used wb in 20 of 20 runs in BOTH arms, including the arm with no glossary at all.",
+    "new": "On prevention, the glossary is marginally NET NEGATIVE on sonnet (9 of 10 vs 10 of 10). Naming a dangerous field is what makes misusing it possible. Not significant at n=10 - one run - but it is the opposite sign from the prediction and worth another look."
+  },
+  "implication_for_the_rule": "_the_rule in 2026-09-21-shape-replication.json says semantics handle classification and prevention while recipes are needed for derived numbers. Live, on sonnet: semantics were NOT NEEDED for classification or prevention (the unguided arm matched or beat the guided one), and the recipe DID NOT WORK for the derived number. Both halves fail, in opposite directions. The rule is not merely unreplicated - on this evidence the question set cannot distinguish metadata value from model capability, because a capable model reconstructs the semantics from the field codes unaided.",
+  "design_advice_that_survives": "Return the derived figure from the server. It is the only intervention neither model could ignore, and both models ignored the documented recipe completely.",
+  "caveats": [
+    "n=10 per cell, 60 runs, single sitting, sonnet only. The haiku pass it is compared against is n=3.",
+    "Range-midpoint scoring is load-bearing on gas-estimate. Under a stricter 'the whole stated range must sit inside tolerance' rule, opaque scores 0 of 10 rather than 1 of 10 and nothing else changes.",
+    "Three benchmark-trap runs in the guided arm name the 3.7x figure while rejecting it. Scored correct; a stricter judge would score them wrong and make the guided arm 7 of 10.",
+    "heat-pump-triage saturating at 10/10 in both arms means the question has no headroom on sonnet and cannot support any claim about metadata in this regime.",
+    "CALLS/TOOLS/PARAMS remain self-reported and unaudited against get_tool_call_log.",
+    "The guide, the obfuscation and the questions remain authored by the same party."
+  ]
+}

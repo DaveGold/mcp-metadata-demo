@@ -41,7 +41,7 @@
       "postcode": "1082PP",
       "huisnummer": 10,
       "adres": "Gustav Mahlerlaan 10, 1082PP Amsterdam",
-      "why": "NTA 8800 kantoor above the Paris Proof 2040 office target (70 kWh/m2).",
+      "why": "NTA 8800 kantoor, every field populated. Carries the hardened benchmark-trap: ep2 179.06 is PRIMARY FOSSIL energy and the Paris Proof 70 kWh/m2 office target is MEASURED FINAL energy - same unit, different quantity, and nothing is null to hint at it. Also f_ga 118174 is 1.8x the BAG oppervlakte 66581, so the per-m2 denominator is itself a choice.",
       "key_values": {
         "energielabel": "A",
         "ep1_energiebehoefte_kwh_m2": 81.68,
@@ -58,7 +58,11 @@
         "coordinaten": {
           "lat": 52.33700994507378,
           "lon": 4.874884945692271
-        }
+        },
+        "berekend_energieverbruik_kwh_m2": 229.17,
+        "gebouwklasse": "Utiliteitsbouw",
+        "berekeningstype": "NTA 8800:2022 (basisopname utiliteitsbouw)",
+        "co2_emissie_kg_m2": 53.47
       }
     },
     "rijnlaan28": {
