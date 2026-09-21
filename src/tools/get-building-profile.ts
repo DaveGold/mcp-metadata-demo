@@ -80,6 +80,38 @@ Which fields are populated depends on the berekeningstype:
 const descriptionCore = descriptionPreamble + '\n\n' + interpretationBlock;
 
 /**
+ * The DERIVED FIGURES recipe — a PROCEDURE, deliberately, as opposed to the facts
+ * that fill `interpretationBlock`.
+ *
+ * Authored for open-questions.md Q1b, which asks whether a procedure works in the
+ * tool RESPONSE when it demonstrably does not work in the tool DESCRIPTION: the
+ * equivalent block on the OPAQUE axis was applied by 0 of 13 runs across two
+ * models while sitting verbatim in the description those runs had just read.
+ *
+ * It is a deliberate transliteration of that opaque block — same header, same two
+ * bullets, same constants, same caveat, in the same order — with the terse codes
+ * replaced by the readable field names this axis uses:
+ *
+ *     wb    → warmtebehoefte_kwh_m2
+ *     f_ga  → gebruiksoppervlakte_thermische_zone_m2
+ *     opp   → oppervlakte_m2
+ *
+ * Nothing else changed. If it is reworded to read better, the comparison with the
+ * 0-of-13 result dies and Q1b answers nothing.
+ *
+ * It must NOT state the answer. The whole question is whether the model will
+ * EXECUTE this; a block containing "~253 m³" would be an alert wearing a recipe's
+ * clothes, and would measure the rich tier a second time.
+ *
+ * Shipped in exactly two places, from this one constant, so the channels cannot
+ * drift: the `words-recipe` description and the `inline-recipe` response.
+ */
+const derivedFiguresBlock = `\
+DERIVED FIGURES YOU MUST COMPUTE YOURSELF (nothing below is returned):
+- Whole-building or whole-unit totals: multiply a per-m\u00b2 figure by gebruiksoppervlakte_thermische_zone_m2, not by oppervlakte_m2.
+- Annual gas for space heating: (warmtebehoefte_kwh_m2 \u00d7 gebruiksoppervlakte_thermische_zone_m2) \u00f7 0.95 boiler efficiency \u00f7 8.79 kWh per m\u00b3 of Dutch gas (31.65 MJ \u00f7 3.6). This covers SPACE HEATING ONLY and excludes hot water and cooking.`;
+
+/**
  * The ALERTS paragraph, kept separate so the 'words' variant can omit it.
  * That variant returns no `alerts` field, and a description promising one
  * would be describing a field that is not there.
@@ -90,7 +122,7 @@ const alertsParagraph = `ALERTS: Always check interpretation.alerts — they con
 export const description = descriptionCore + '\n\n' + alertsParagraph;
 
 /** Arm B description: identical prose, minus the promise of a field it does not return. */
-export { descriptionCore, interpretationBlock };
+export { descriptionCore, interpretationBlock, derivedFiguresBlock };
 
 
 // ── Input schema ─────────────────────────────────────────────────────────────
@@ -380,5 +412,10 @@ export async function logToolCall({
     hasMore: false,
     durationMs: Date.now() - start,
     errorType: status === 'error' ? 'ToolError' : null,
+    paramsPresent: [
+      args.huisletter ? 'huisletter' : null,
+      args.toevoeging ? 'toevoeging' : null,
+      args.queryIntent ? 'queryIntent' : null,
+    ].filter((v): v is string => v !== null),
   });
 }

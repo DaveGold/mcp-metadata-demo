@@ -141,11 +141,36 @@ for every one of them because it lived in prose. It does not any more.
 The harness returns the first three with every subagent result; copy them, do not
 reconstruct them from a transcript afterwards.
 
-**Audit the call counts.** After each batch, call `get_tool_call_log` on the arms
-in it and reconcile against what the subagents reported. That is a server-side
-count that does not depend on the system under test describing its own behaviour.
-Record the reconciliation — including "they matched" — and only then may a
-results file say anything about call counts.
+**Audit against the server-side log.** After each batch, call `get_tool_call_log`
+and reconcile. It is the only account of what happened that does not come from
+the system under test. As of 2026-09-21 every row carries:
+
+| field | what it is for |
+|---|---|
+| `variant` | **the only field that attributes a row to an arm.** Every arm writes to one log; without this the rows are indistinguishable. Filter on it. |
+| `paramsPresent` | which OPTIONAL parameters were supplied, by NAME (never values): `huisletter`, `toevoeging`, `queryIntent`. |
+| `rowCount` | how many rows the call resolved to. 0 on a miss. |
+| `errorType`, `status`, `durationMs` | outcome and latency, server-side. |
+| `sessionId` | per-REQUEST, **not** per-run — see below. |
+
+**How to correlate.** This server is stateless: one `McpServer` per HTTP request,
+so a subagent that made three calls produced three different `sessionId`s. You
+cannot reconstruct an individual run from the log. What you CAN do, and what the
+audit needs, is **count calls per arm per batch**: filter by `variant`, bound by
+the batch's timestamp window, and compare the total against the `tool_uses` the
+subagents reported. Pass a large `limit` — the variant filter narrows the fetched
+page rather than searching deeper.
+
+**The check that was impossible before.** `wrong-unit`'s own `fabrication_watch`
+reads *"an answer for 28A from a call that never carried the huisletter"* — and
+until now nothing could score it. The subagent's self-reported `PARAMS` line is
+the system under test describing itself, and an answer's text never reveals which
+arguments were sent. `paramsPresent` answers it directly and independently. Score
+that question's `fabricated` column from the log, not from the transcript.
+
+Record the reconciliation in the results file — including "they matched", which
+is the outcome that lets the next reader trust the counts. Only then may the file
+say anything about call counts.
 
 This exists because `open-questions.md` Q3 turns on it: `rich` costs FEWER tokens
 per run than `words` despite carrying strictly more, and the two candidate

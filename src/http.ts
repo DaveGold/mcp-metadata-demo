@@ -56,7 +56,7 @@ export function createHttpApp(options: CreateHttpAppOptions = {}): Express {
     const sessionId = req.requestId ?? randomUUID();
     const environment = process.env.K_SERVICE ? 'cloud' : 'local';
 
-    await requestContext.run({ sessionId, environment }, async () => {
+    await requestContext.run({ sessionId, environment, variant: options.variant ?? 'rich' }, async () => {
       try {
         // Stateless: one fresh McpServer + transport pair per request.
         const server = createServer({ variant: options.variant ?? 'rich' });

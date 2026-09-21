@@ -18,6 +18,7 @@
  */
 
 import { logger } from '../logger.js';
+import { requestContext } from './log-context.js';
 
 export interface ToolCallLogEntry {
   sessionId: string;
@@ -38,6 +39,14 @@ export interface ToolCallLogEntry {
   hasMore: boolean;
   durationMs: number;
   errorType: string | null;
+  /**
+   * Which OPTIONAL parameters the caller actually supplied, by name only —
+   * never their values. Shape, not data, per the doctrine at the top of this
+   * file. For the eval this is the highest-value field on the whole row: the
+   * `wrong-unit` question turns entirely on whether `huisletter` was passed,
+   * and nothing else in the log could answer that.
+   */
+  paramsPresent?: string[];
 }
 
 export interface ToolCallRecord {
@@ -46,6 +55,16 @@ export interface ToolCallRecord {
   status: 'success' | 'error';
   durationMs: number;
   timestamp: string;
+  /** Which arm served the call. 'unknown' for stdio, which opens no context. */
+  variant: string;
+  /** Names of the optional parameters supplied — never their values. */
+  paramsPresent: string[];
+  /** Rows the call resolved to. 0 on a miss or an error. */
+  rowCount: number;
+  /** Null on success. */
+  errorType: string | null;
+  /** Per-REQUEST id. This server is stateless, so it does NOT group a run. */
+  sessionId: string;
 }
 
 const FIRESTORE_COLLECTION = 'toolCalls';
@@ -80,12 +99,20 @@ async function getFirestoreDb(): Promise<import('firebase-admin/firestore').Fire
 // ── Write ────────────────────────────────────────────────────────────────────
 
 export async function writeToolCallLog(entry: ToolCallLogEntry): Promise<void> {
+  // Resolved here rather than passed by every caller: seven tools write to this
+  // log and none of them need to know which variant is serving them.
+  const variant = requestContext.getStore()?.variant ?? 'unknown';
+  const paramsPresent = entry.paramsPresent ?? [];
+
   logger.info('tool.invoked', {
     tool: entry.tool,
     queryIntent: entry.queryIntent,
     status: entry.status,
     durationMs: entry.durationMs,
     errorType: entry.errorType,
+    variant,
+    paramsPresent,
+    rowCount: entry.rowCount,
   });
 
   if (entry.environment === 'cloud') {
@@ -100,6 +127,9 @@ export async function writeToolCallLog(entry: ToolCallLogEntry): Promise<void> {
       sessionId: entry.sessionId,
       environment: entry.environment,
       server: entry.server,
+      variant,
+      paramsPresent,
+      rowCount: entry.rowCount,
       createdAt: FieldValue.serverTimestamp(),
     });
     return;
@@ -111,6 +141,11 @@ export async function writeToolCallLog(entry: ToolCallLogEntry): Promise<void> {
     status: entry.status,
     durationMs: entry.durationMs,
     timestamp: new Date().toISOString(),
+    variant,
+    paramsPresent,
+    rowCount: entry.rowCount,
+    errorType: entry.errorType,
+    sessionId: entry.sessionId,
   });
 }
 
@@ -118,14 +153,14 @@ export async function writeToolCallLog(entry: ToolCallLogEntry): Promise<void> {
 
 export async function readRecentToolCalls(
   environment: string,
-  opts: { tool?: string; limit: number }
+  opts: { tool?: string; limit: number; variant?: string }
 ): Promise<ToolCallRecord[]> {
   if (environment === 'cloud') {
     const db = await getFirestoreDb();
     let query = db.collection(FIRESTORE_COLLECTION).orderBy('createdAt', 'desc').limit(opts.limit);
     if (opts.tool) query = db.collection(FIRESTORE_COLLECTION).where('tool', '==', opts.tool).orderBy('createdAt', 'desc').limit(opts.limit);
     const snapshot = await query.get();
-    return snapshot.docs.map((doc) => {
+    const rows = snapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         tool: data.tool as string,
@@ -133,11 +168,24 @@ export async function readRecentToolCalls(
         status: data.status as 'success' | 'error',
         durationMs: data.durationMs as number,
         timestamp: (data.createdAt as import('firebase-admin/firestore').Timestamp | undefined)?.toDate().toISOString() ?? '',
+        // Rows written before these fields existed carry none of them.
+        variant: (data.variant as string | undefined) ?? 'unknown',
+        paramsPresent: (data.paramsPresent as string[] | undefined) ?? [],
+        rowCount: (data.rowCount as number | undefined) ?? 0,
+        errorType: (data.errorType as string | null | undefined) ?? null,
+        sessionId: (data.sessionId as string | undefined) ?? '',
       };
     });
+    // Applied in-process, not in the query: a composite index on
+    // (tool, variant, createdAt) would be needed otherwise, and the page is at
+    // most 100 rows. It therefore NARROWS the returned page rather than
+    // searching deeper — pass a large `limit` when filtering by variant.
+    return opts.variant ? rows.filter((r) => r.variant === opts.variant) : rows;
   }
 
-  const filtered = opts.tool ? ringBuffer.filter((r) => r.tool === opts.tool) : ringBuffer;
+  const filtered = ringBuffer
+    .filter((r) => (opts.tool ? r.tool === opts.tool : true))
+    .filter((r) => (opts.variant ? r.variant === opts.variant : true));
   return filtered.slice(-opts.limit).reverse();
 }
 
