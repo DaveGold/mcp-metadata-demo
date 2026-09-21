@@ -457,8 +457,30 @@ call repeatedly, and the claim has to be narrowed accordingly.
 
 ## Q4 — Is the operative ingredient the FACT or the INSTRUCTION?
 
-> **REGISTERED 2026-09-21, NOT RUN.** Arms not built. Prediction below is written
-> before any run, as with Q1–Q3.
+> **REGISTERED 2026-09-21. ARMS BUILT AND DEPLOYED; NOT YET RUN.** The prediction
+> below was written before the arms existed and is left exactly as registered.
+>
+> `mcpInlineFact` / `eval-inline-fact` and `mcpInlineInstruction` /
+> `eval-inline-instruction`, deployed 2026-09-21 and **verified on the wire** (over a
+> direct MCP client, since a session cannot reach a server added to `.mcp.json` after
+> it started):
+>
+> | arm | interpretation chars | FACT present | INSTRUCTION present | label present |
+> |---|---|---|---|---|
+> | `inline` (both) | 5,020 | yes | yes | yes |
+> | `inline-fact` | 4,856 | yes | **no** | yes |
+> | `inline-instruction` | 4,504 | **no** | yes | **no** |
+>
+> All three return a byte-identical one-sentence description. The label
+> "CALCULATED vs MEASURED" is withheld from `inline-instruction` on purpose — it is
+> itself a two-word statement of the distinction, so leaving it would leak the fact
+> that arm exists to withhold.
+>
+> The prose is SLICED from `interpretationBlock` and `both` is COMPOSED from the two
+> halves, so `both` is by construction exactly fact + instruction and no arm can
+> drift. `get-building-profile-inline-ablation.test.ts` pins that the arms differ from
+> `inline` in EXACTLY ONE LINE, that instruction-only leaks neither the semantics nor
+> the label, and that instruction-only is the shortest of the three.
 
 ### Why it matters
 

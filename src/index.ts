@@ -18,6 +18,8 @@ export {
   mcpInline,
   mcpInlineRecipe,
   mcpInlineConditional,
+  mcpInlineFact,
+  mcpInlineInstruction,
   mcpWordsRecipe,
   mcpWords,
   mcpOpaque,
