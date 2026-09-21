@@ -140,6 +140,41 @@ the guide stated the formula and the model merely followed it. Here the guide
 never says to refuse the comparison. Haiku had to chain `calc_t` → NEN 7120 →
 `ep1` is null → `ei` has no kWh/m² equivalent. Comprehension, not transcription.
 
+### Which half of the guidance does the work (n=3)
+
+The guide has two distinct parts, and they turn out to buy different things.
+Same model, same payload, same question, only the guide varies
+([`results/2026-09-21-guide-ablation.json`](results/2026-09-21-guide-ablation.json)):
+
+| arm | guide | answers | correct |
+|---|---|---|---|
+| **A′** none | one sentence | `40.02` · `40.02` · `40.02` | 0/3 |
+| **B″** glossary only | field meanings + units + `calc_t` rules, **formula removed** | `UNKNOWN` · `UNKNOWN` · `295` | 0/3 |
+| **B′** full | glossary **+ the two-line conversion** | `253` · `253` · `253` | 3/3 |
+
+**Field semantics stop the error. Derived-figure recipes produce the answer.**
+Neither is sufficient alone, and they are not the same intervention:
+
+- Without any guide, every run read `f_ga` as the gas figure and returned it raw
+  — the letters "ga" were enough. Perfectly stable, perfectly wrong.
+- Add only the glossary and the fabrication mostly stops: two runs named exactly
+  the right fields and honestly declined. Knowing what a field *means* is enough
+  to prevent a confident error and not enough to answer.
+- Add the two-line formula and it is 3/3 with zero variance.
+
+**This is "something is better than nothing", measured.** The glossary never
+reached the right number, but it moved the model from a confident wrong answer
+to mostly-honest uncertainty — and for a system feeding customer advice that is
+the more valuable half. A wrong number gets acted on; an "I can't tell you" gets
+escalated.
+
+Two honest qualifications. The glossary arm is **unstable** — `UNKNOWN, UNKNOWN,
+295` — so the accurate claim is that it *reduces* fabrication, not that it makes
+the model honest. And note what never happened in any unguided run: no model
+treated an unrecognised code as unknown. It reached for the nearest plausible
+meaning and committed. **The failure mode of a badly named field is not
+confusion, it is confident misreading.**
+
 ### What is and is not proven
 
 | claim | status |
