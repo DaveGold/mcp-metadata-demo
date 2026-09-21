@@ -13,11 +13,14 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-21-first-harness-run.json`](2026-09-21-first-harness-run.json) | The first end-to-end run of the run-eval skill. Found the skill out of sync with the set, confirmed the overheating control does not separate, and records a retracted n=1 interpretation. |
 | [`2026-09-21-per-question.json`](2026-09-21-per-question.json) | Per-question outcomes and per-regime results, kept out of `questions.json` so the set reads as a spec. |
 | [`2026-09-21-opaque-live.json`](2026-09-21-opaque-live.json) | Does the shape replication survive live tool calls? It does not — five of six cells disagree, and the derived-figures recipe scores 0 of 3. |
+| [`2026-09-21-opaque-live-sonnet-n10.json`](2026-09-21-opaque-live-sonnet-n10.json) | The confirmation pass for that run — sonnet, n=10, 60 runs. Confirms the recipe failure and shows the other two questions saturate on a stronger model. |
 
 Read the sweep first — it is the one that changed the design, and it is a useful
 record of how easily a single run misleads. Then read `2026-09-21-opaque-live.json`:
 it is the first live-tool-call run of the opaque regime, and it does not reproduce
-the payload-in-prompt result the rest of these files rest on.
+the payload-in-prompt result the rest of these files rest on. Its sonnet n=10
+confirmation pass sharpens the point: the one finding that survives both models is
+that a recipe in a tool description goes unused.
 
 ## Format for a new run
 
