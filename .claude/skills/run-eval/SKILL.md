@@ -116,6 +116,19 @@ says it should WIN on single-record questions and LOSE on `benchmark-trap` — r
 that question even though its ceiling is unmeasured, because it is the one that can
 show the cost of conditional guidance.
 
+**`inline-fact` and `inline-instruction` are Q4's arms**, deployed 2026-09-21. They
+hang off `inline` and differ from it in EXACTLY ONE LINE of the response prose: the
+CALCULATED vs MEASURED line reduced to its FACT half (what the quantities are) or its
+INSTRUCTION half (what to output, with no reason). `inline` itself is the third arm —
+both halves — and is already measured at 59 of 60 on `benchmark-trap`. So the
+comparison that means anything is the THREE-WAY `inline-fact` vs `inline-instruction`
+vs `inline`, on the same question. Read `evals/open-questions.md` Q4 for the
+prediction registered before they were built; it says `instruction-only` should match
+`both` and both should beat `fact-only`, and it has a real failure mode attached —
+run `metered-vs-model` as well as `benchmark-trap`, because an instruction without its
+reason should be brittle on a case it does not name. That second question is also
+where Q2's untested cross-record half can finally be run.
+
 Before scoring, read `results/2026-09-21-shape-replication.json` for `_the_rule`
 (semantics handle interpretation, classification, prevention and refusal; recipes
 are needed only for derived numbers) AND the two live runs that failed to

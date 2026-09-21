@@ -47,6 +47,43 @@ QUERY STRATEGY:
  * description; the comparison only means anything if the text is identical, so it
  * is composed here rather than copied. See evals/open-questions.md, Q1.
  */
+/**
+ * open-questions.md Q4 — the CALCULATED vs MEASURED line, split into its two halves.
+ *
+ * The line added on 2026-09-21 took `benchmark-trap` from 0 of 60 to 59 of 60. It
+ * bundles two different kinds of content, and Q4 asks which one did the work:
+ *
+ *   FACT        — what the quantities ARE, and the inference that they are therefore
+ *                 not rankable against a metered target. Pure semantics.
+ *   INSTRUCTION — what to OUTPUT when asked. Says nothing about why.
+ *
+ * Before the line existed, `opus`/`inline` NAMED the mismatch in 7 of 10 runs and
+ * still returned the forbidden verdict in 10 of 10 — it had the fact and lacked the
+ * instruction. Hence the ablation.
+ *
+ * These are exported so the two Q4 arms SLICE them rather than retyping them, and
+ * `interpretationBlock` below is COMPOSED from them, so `both` is by construction
+ * exactly fact + instruction. `get-building-profile-calculated-vs-measured.test.ts`
+ * pins that equality; nothing can drift.
+ *
+ * NOTE the label lives with the FACT, not the instruction: "CALCULATED vs MEASURED"
+ * is itself a two-word statement of the distinction, so leaving it on the
+ * instruction-only arm would leak the fact that arm is supposed to withhold.
+ */
+export const calcVsMeasuredLabel = '- CALCULATED vs MEASURED — ';
+export const calcVsMeasuredFact = 'ep1_energiebehoefte, ep2_fossiel and berekend_energieverbruik are all CALCULATED NTA 8800 figures, not meter readings: ep1 is net energy DEMAND, ep2 is PRIMARY FOSSIL energy, berekend is modelled total use. Paris Proof and other metered benchmarks are defined on MEASURED FINAL energy at the meter, and this server holds NO metered data, so none of these three can be ranked against such a target as though it were measured consumption — the unit (kWh/m²) matches and the quantity does not.';
+export const calcVsMeasuredInstruction = 'Where a question asks how a building compares to a metered benchmark, say that the comparison cannot be made from this data and why, rather than producing a ratio.';
+
+/** `both` — the line as deployed 2026-09-21. Composed, never retyped. */
+export const calcVsMeasuredLine =
+  calcVsMeasuredLabel + calcVsMeasuredFact + ' ' + calcVsMeasuredInstruction;
+
+/** Q4 arm `inline-fact`: the semantics, with no guidance on what to output. */
+export const calcVsMeasuredFactOnly = calcVsMeasuredLabel + calcVsMeasuredFact;
+
+/** Q4 arm `inline-instruction`: the directive alone, with no reason and no label. */
+export const calcVsMeasuredInstructionOnly = '- ' + calcVsMeasuredInstruction;
+
 const interpretationBlock = `\
 INTERPRETATION:
 Which fields are populated depends on the berekeningstype:
@@ -60,6 +97,7 @@ Which fields are populated depends on the berekeningstype:
 - matchStatus 'not_found': no BAG match — check postcode format (4 digits + 2 uppercase letters) and huisnummer
 - energielabel null: no registered label in EP-Online (common for older or unlabeled buildings)
 - ep1_energiebehoefte_kwh_m2 (NTA 8800 only): Paris Proof 2040 targets — kantoor: 70 kWh/m², woningbouw: 100 kWh/m². No standardized target for onderwijs, gezondheidszorg, industrie.
+${calcVsMeasuredLine}
 - energie_index (pre-NTA 8800): the main performance metric for most existing buildings. EI < 1.2 = A or better; 1.4–1.8 = C; >2.7 = G. No Paris Proof kWh/m² equivalent.
 - gebruiksoppervlakte_thermische_zone_m2 (NTA 8800 only) vs oppervlakte_m2 (BAG): two different scopes, not two measurements of the same thing. BAG = gross floor area of the verblijfsobject; EP-Online = usable floor area of the thermal zone the label covers. The EP-Online figure is often the lower of the two, but when the label covers a whole pand and the VBO is one unit of it, it can be far higher (Gustav Mahlerlaan 10: 118,174 m² EP-Online vs 66,581 m² BAG). Use the EP-Online area as the denominator for every per-m² NTA value (EP-1, EP-2, warmtebehoefte, co2_emissie), and never assume a fixed ratio between the two.
 - label_geldig_tot in the past: label expired, heropname may be needed for Label C obligation compliance

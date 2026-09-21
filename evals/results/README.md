@@ -17,8 +17,57 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-21-readable-ladder-gas.json`](2026-09-21-readable-ladder-gas.json) | The readable ladder on the one question with headroom, and the first measurement of the `schema` rung. 80 runs, two models. Server-computed beats everything at either tolerance; the ladder looked non-monotonic at tolerance 20 and that wobble does not survive the retightening to 8. |
 | [`2026-09-21-readable-ladder-co2.json`](2026-09-21-readable-ladder-co2.json) | Is the gas result a property of the SHAPE? 120 runs, three models incl. opus. rich replicates at 30/30; the prose rung reverses sign and the reason is legible; opus needs no metadata here. |
 | [`2026-09-21-readable-ladder-wrong-unit.json`](2026-09-21-readable-ladder-wrong-unit.json) | The question the `schema` rung exists for: `thin` has no `huisletter` parameter, so the call cannot be expressed. 72 runs, three models. thin 0/18, schema 18/18 — and the two ways thin fails are not the same. |
-| [`2026-09-21-q1-response-channel.json`](2026-09-21-q1-response-channel.json) | **Q1 from `open-questions.md`, and both registered predictions are wrong.** Same guidance, description vs response. 210 runs, three models. The recipe in the RESPONSE scores 29/30 where the same 438 bytes in the DESCRIPTION score 4/30. Also the first run to complete the `get_tool_call_log` audit — which found that the `inline` arm does not stamp its own log rows. |
+| [`2026-09-21-q1-response-channel.json`](2026-09-21-q1-response-channel.json) | **Q1 from `open-questions.md`, and both registered predictions are wrong.** Same guidance, description vs response. 210 runs, three models. The recipe in the RESPONSE scores 29/30 where the same 438 bytes in the DESCRIPTION score 4/30. **Its "+8 on sonnet" figure is a within-batch direction, not a stable size — see the variance warning below.** Also the first run to complete the `get_tool_call_log` audit — which found that the `inline` arm does not stamp its own log rows. |
 | [`2026-09-21-q2-conditional-interpretation.json`](2026-09-21-q2-conditional-interpretation.json) | **Q2 from `open-questions.md`. Pruning the interpretation to the record is free, and saves almost nothing.** `inline` vs `inline-conditional`, 180 runs, three models. Accuracy 39/90 vs 39/90; tokens −1.84%, cheaper in all nine cells but never by more than ~1k. The question picked to show the cost, `benchmark-trap`, scored **0 of 10 in all six cells** — because the sentence the prediction feared the pruner would delete is not in the block at all, while the `ep1`↔70 line that causes the error survives pruning in both arms. First run whose call counts are fully reconciled against `get_tool_call_log` rather than caveated. |
+| [`2026-09-21-benchmark-trap-calculated-vs-measured.json`](2026-09-21-benchmark-trap-calculated-vs-measured.json) | **The repair, and the biggest single effect in this directory.** The Q2 run found `benchmark-trap` scoring 0/60 because `interpretationBlock` never said the NTA 8800 figures are CALCULATED while Paris Proof is MEASURED. One sentence added, arms redeployed, same 60 runs: **0/60 → 59/60**, fabrications 22 → 0, confidently-wrong 1 → 0, `named_mismatch` 13/60 → 60/60, at a cost of ~260 tokens a call. Also records that the LIVE Warmtebouw Duurzaam server has the same defect and **server-computes the wrong verdict as an alert**. |
+
+> ### ⚠️ SITTING-TO-SITTING VARIANCE — read before comparing any two files
+>
+> Found 2026-09-22 while assembling a model-by-mechanism summary. **The same cell,
+> measured twice on 2026-09-21, gave two very different answers:**
+>
+> | cell | file | score |
+> |---|---|---|
+> | `words` / sonnet / `total-vs-per-m2` | [`readable-ladder-co2`](2026-09-21-readable-ladder-co2.json) | **8 of 10** |
+> | `words` / sonnet / `total-vs-per-m2` | [`q1-response-channel`](2026-09-21-q1-response-channel.json) | **2 of 10** |
+>
+> Same question, same arm, same model, same n, same day, same live-tool-call protocol.
+> A six-run swing.
+>
+> **What this does NOT invalidate.** Both of those runs spawn every arm/model cell of a
+> repeat in ONE batch, precisely so transient API weather hits all arms alike. A
+> difference measured *inside* one batch is therefore still a controlled comparison.
+> Q1's `words` 2/10 vs `inline` 10/10 is such a comparison and its DIRECTION stands.
+>
+> **What it does invalidate.** The absolute level of any single cell, and therefore the
+> MAGNITUDE of any gap quoted from it. Q1's headline "+8 on sonnet from moving the same
+> bytes into the response" is computed against that 2; against the 8 the same gap is
+> +2. The effect is a property of that sitting, not a constant. Quote the direction,
+> not the size, and never subtract a number in one file from a number in another.
+>
+> **The bar this implies at n=10:** treat a per-cell difference of fewer than ~4 runs as
+> noise unless the two cells were run in the same batch.
+>
+> Results that clear the bar comfortably, and can be quoted as sizes:
+> - recipe in the RESPONSE vs the same 438 bytes in the DESCRIPTION — 29/30 vs 4/30
+> - `rich` on `gas-estimate` — 30/30 against ~2/30 for every other arm combined
+> - `thin` → `schema` on `wrong-unit` — 0/18 → 18/18
+> - the CALCULATED vs MEASURED sentence on `benchmark-trap` — 0/60 → 59/60
+> - the Q2 pruning NULL — 39/90 vs 39/90, both arms interleaved in one batch
+>
+> Results that do NOT clear it, and should be quoted as direction only: every
+> single-cell gap under ~4 runs, including the exact size of the channel effect on any
+> one cell, and anything computed by comparing two of the files in the table above.
+
+> **2026-09-21, `interpretationBlock` CHANGED** — a `CALCULATED vs MEASURED` line was
+> added (4,338 → 5,020 chars); see
+> [`2026-09-21-benchmark-trap-calculated-vs-measured.json`](2026-09-21-benchmark-trap-calculated-vs-measured.json).
+> The block feeds `descriptionCore`, so this moved the DESCRIPTION of `words`, `rich`
+> and `words-recipe` and the RESPONSE of `inline`, `inline-recipe` and
+> `inline-conditional` — **six arms, not two**. Every file above predates it and is
+> **not comparable** with anything scored afterwards on a question touching `ep1`,
+> `ep2` or `berekend_energieverbruik`: that is `benchmark-trap`, `gas-estimate` and
+> `heat-pump-triage`. The ep1↔70 Paris Proof line was deliberately left in place.
 
 > **gas-estimate tolerance changed on 2026-09-21**, from 20 to 8 (accept range
 > 233–273 → 245–261). Files above that record `accept_range: 233-273` —
@@ -48,11 +97,18 @@ cleanly on sonnet and opus.
 
 Across the three, the `rich` rung is 78 of 78.
 
-Two experiments these runs make obvious but do not answer — guidance in the
-response rather than the tool description, and conditional interpretation sized to
-the record — are written up in [`../open-questions.md`](../open-questions.md), each
-with a prediction registered in advance and the result that would falsify it. The
-token figures from these runs live there too.
+**Start with `What the runs support so far` in
+[`../open-questions.md`](../open-questions.md).** It is the synthesis across every run
+in this directory, added 2026-09-21: volume of metadata is close to irrelevant, while
+placement and precision are nearly everything (half the prose cut changed 0 answers;
+one sentence added changed 59), the leverage runs in BOTH directions, and there is a
+per-model rule set — capability substitutes for metadata only where the payload already
+carries the quantity. It also lists what the runs do NOT establish. Q1 and Q2 are
+answered there with their predictions left as registered; **Q3 and Q4 are open**, Q4
+being the fact-vs-instruction ablation this directory's newest result raises. The token
+figures live there too. The *Design guidance* section that follows the synthesis turns
+it into what to build — including why per-model tailoring is not worth doing, and the
+one assumption that conclusion rests on.
 
 **Q1 has since been run and both its predictions were falsified** — see
 [`2026-09-21-q1-response-channel.json`](2026-09-21-q1-response-channel.json). A fact

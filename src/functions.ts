@@ -78,6 +78,20 @@ export const mcpInlineConditional = onRequest(
 );
 
 /**
+ * Q4 arms — the FACT / INSTRUCTION ablation of the CALCULATED vs MEASURED line.
+ * `mcpInline` is the third arm (both halves) and needs no new function. See
+ * evals/open-questions.md Q4.
+ */
+export const mcpInlineFact = onRequest(
+  functionOptions,
+  createHttpApp({ hosted: true, variant: 'inline-fact' })
+);
+export const mcpInlineInstruction = onRequest(
+  functionOptions,
+  createHttpApp({ hosted: true, variant: 'inline-instruction' })
+);
+
+/**
  * Words tier — arm B of the ablation. Identical prose and schemas to `mcp`, but
  * no computed alerts, so A→B measures what the words buy and B→C measures what
  * the capability adds.

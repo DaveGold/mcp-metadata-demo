@@ -1,14 +1,19 @@
 # Open questions
 
-Three experiments the 2026-09-21 runs make obvious but do not answer. Each carries a
-**prediction registered before the run** and the result that would **falsify** it —
-written down now precisely because this repo has already been burned once by a rule
-chosen after seeing the answers (see `results/2026-09-21-shape-replication.json` and
-the two live runs that failed to replicate it).
+Four experiments the 2026-09-21 runs make obvious. Each carries a **prediction
+registered before the run** and the result that would **falsify** it — written down
+in advance precisely because this repo has already been burned once by a rule chosen
+after seeing the answers (see `results/2026-09-21-shape-replication.json` and the two
+live runs that failed to replicate it).
 
-Q1's three arms (`inline`, `words-recipe`, `inline-recipe`) are **built and
-deployed as of 2026-09-21**. Q2's is not. Either way a session that predates a
-deploy cannot reach the arm: MCP connections are fixed when a session starts, and
+**Q1 and Q2 are ANSWERED** (banners in their sections; predictions left as registered).
+**Q3 and Q4 are open.** Read *What the runs support so far* next — it is the synthesis,
+and it is a narrower claim than "richer metadata is better" — then *Design guidance*,
+which turns it into what to build.
+
+Every arm Q1 and Q2 needed is **built and deployed as of 2026-09-21** — `inline`,
+`words-recipe`, `inline-recipe` and `inline-conditional`. **Q4's two arms are not
+built.** Either way a session that predates a deploy cannot reach a NEW arm: MCP connections are fixed when a session starts, and
 the agent list is NOT proof of a connection — on 2026-09-21 the `eval-inline`
 agent appeared mid-session while its MCP server stayed unconnected, which would
 have produced a subagent with zero tools declining every question. Check you can
@@ -30,6 +35,183 @@ every log row carries `variant`, `paramsPresent` and `rowCount`.
 > `get_tool_call_log`'s `summary.countByVariant` now shows this in one unfiltered call.
 
 ---
+
+## What the runs support so far — read this first
+
+Added 2026-09-21, after Q1, Q2 and the Q2 follow-up re-run. This is the claim the repo
+can actually defend. It is narrower, and more useful, than "richer metadata is better".
+
+### Volume is not the variable. Placement and precision are.
+
+| change | size of the change | effect |
+| --- | --- | --- |
+| Prune 37–50% of the INTERPRETATION to the record (Q2) | −1,600 to −2,200 chars | **no change.** 39/90 vs 39/90 |
+| Move the same 438 bytes DESCRIPTION → RESPONSE (Q1b) | 0 chars | **4/30 → 29/30** |
+| Add ONE sentence that was missing (Q2 follow-up) | +682 chars | **0/60 → 59/60** |
+
+Cutting half the prose changed no answer. Adding one *right* sentence changed 59. The
+amount of metadata is close to irrelevant; *which* sentence, and *which channel*, is
+nearly everything.
+
+This also retires the cost framing. The INTERPRETATION block is ~1,100 tokens of a
+~38,000-token subagent run — about 2%. No pruning of it can be "substantial", and the
+measured saving (−1.84% over 180 runs) is exactly the text removed, no more.
+**Conditional interpretation is FREE, not cheap.** Its justification stays the
+structural one: a description is written before the data, a response can be conditional
+on it. Q2 shows that mechanism costs nothing to adopt — not that it saves much.
+
+### Metadata is high-leverage in BOTH directions
+
+- One sentence **added**: +59 correct answers out of 60.
+- One sentence **missing**, plus one plausible-looking line **present**
+  (`ep1 … Paris Proof 2040 targets — kantoor: 70 kWh/m²`): **59 of 60 WRONG**, across
+  two arms and three models, with 22 fabrications and one confidently-wrong.
+
+That second number is the strongest single result in `results/`, and it is a **warning,
+not a sales pitch**. The line was well-intentioned and accurate-looking, and it produced
+near-total failure — and the same defect is live in the production Duurzaam server,
+where it is worse because the verdict is *server-computed as an alert* (MCPSER-81).
+A surface that can fix 59 answers can break 59.
+
+Keep the documented counterexample too: on `total-vs-per-m2` with opus **every arm
+scores 10/10**, so there the metadata is cost with no benefit.
+
+### Per-model, what the numbers say
+
+| | haiku | sonnet | opus |
+| --- | --- | --- | --- |
+| Fact needed and **present** in payload (co2 total) | words 0/10 → inline 9/10 | words 2/10 → inline 10/10 | **10/10 on every arm** |
+| Derivation needs a constant **absent** from payload (gas) | 1–2/10 | 6–8/10 value, wrong road | 1–3/10 |
+| Spontaneously named the calc-vs-measured trap (before the fix) | **0 of 20** | 1–3/10 | **7/10** |
+| After one explicit sentence | 10/10 | 9–10/10 | 10/10 |
+| Broke the agent's output contract | every case | 0 | 0 |
+
+Three rules follow:
+
+1. **Capability substitutes for metadata only when the needed quantity is already in the
+   payload.** Opus is 40/40 unaided on the CO₂ total — metadata there is pure overhead.
+   On `gas-estimate` it is 1–3/10, no better than haiku, because no amount of reasoning
+   invents a calorific value. *Ship the fact the payload lacks; for facts it already
+   carries, a strong model needs nothing.*
+2. **The weaker the model, the more the response channel and explicitness earn.** Haiku
+   went 0/10 → 9/10 on the same bytes moved into the response, and never once reached
+   the calculated-vs-measured trap unaided. Quote the DIRECTION of these channel gaps,
+   not their size: `words`/sonnet on `total-vs-per-m2` measured 8/10 in one sitting and
+   2/10 in another on the same day, so any single-cell magnitude is a property of its
+   sitting. See the variance warning in `results/README.md`.
+3. **Noticing is not acting.** Opus named the mismatch 7 times in 10 and *still returned
+   the forbidden verdict 10 times out of 10.* It had the fact and lacked the
+   instruction. Writing what a field *means* is not enough for a strong model — Q4.
+
+### The claim the repo can defend
+
+> Tool metadata determines behaviour more than model capability does, for anything the
+> payload does not already state. The leverage is in **precision and placement, not
+> volume** — and the same surface that fixes 59 answers can break 59.
+
+### What this does NOT establish
+
+- **Self-authorship.** The same party wrote the metadata, the questions, the ground
+  truth and the scoring. That is the standing caveat on everything in `results/`.
+- **Teaching to the test.** The Q2-follow-up sentence and that question's `ground_truth`
+  state the same distinction in nearly the same words. The run shows the arms can USE a
+  correct sentence, not that they would infer it.
+- n=10, one sitting per run; Q2 covered 2 of the 6 question shapes.
+- Three of five Q2 scoring rules were fixed mid-run (the follow-up's were pre-registered).
+- The block change moved SIX prose arms, so the readable-ladder files are no longer
+  comparable on any `ep1`/`ep2`/`berekend` question.
+
+---
+
+## Design guidance — what to actually do
+
+> **PROVISIONAL, 2026-09-22.** This is the "so what" of the synthesis above: the
+> section before it says what the runs support, this one says what to build. It rests
+> on three questions and two of six shapes, every per-cell number carries the ~4-run
+> noise bar in `results/README.md`, and item 4 below is a Q4 hypothesis whose arms are
+> built but unrun. Revise it when Q4 lands.
+
+### When you do not know which model will call your tool
+
+Which is the normal case, and the one MCP puts you in — the protocol hands a server
+`clientInfo` (name and version), **not the model**. There is no field for it.
+
+The answer is not "write for the weakest model". It is this ordering, because the
+mechanisms differ in how model-dependent they are:
+
+**1. Ship the facts the payload cannot contain.** The most model-agnostic need there
+is. Opus scores 0–1/10 on `gas-estimate`, *no better than haiku*, because no amount of
+reasoning invents a calorific value. Capability substitutes for metadata only where the
+quantity is already present. If the tool returns kWh and a caller will want m³, ship
+the conversion.
+
+**2. Put guidance in the RESPONSE, not the description.** 29/30 against 4/30 for the
+same 438 bytes. Free, and it helped all three models. If you change one thing, change
+this one.
+
+**3. Compute it server-side where the computation is determinate.** 78 of 78 across
+three questions, and the only mechanism that performs IDENTICALLY on all three models —
+which is exactly the property you want when you cannot know the model. But see the
+warning below: a wrong computed value is the worst failure mode in this repo.
+
+**4. Write the BEHAVIOUR, not only the semantics.** Opus named the calculated-vs-measured
+trap 7 times in 10 and returned the forbidden verdict 10 times in 10. It had the fact
+and lacked "say X rather than producing a ratio". *(Q4 hypothesis — arms built, unrun.)*
+
+**5. Typed schemas, but only for expressibility.** `thin` 0/18 → `schema` 18/18 on the
+one question where the correct call cannot be EXPRESSED without the parameter, and ≈0
+everywhere else. Cheap, so do it — but do not expect a schema to carry meaning.
+
+**6. Do not spend effort on volume.** Cutting 37–50% of the prose changed zero answers
+in 180.
+
+### The rule that outranks all six
+
+> **Volume does not hurt. Wrongness does.**
+
+The largest single effect measured anywhere in `results/` is a DEFECT: one
+plausible-looking line (`ep1 … Paris Proof kantoor: 70 kWh/m²`) produced 59 of 60 wrong
+answers, across two arms and three models, with 22 fabrications. Auditing the guidance
+you already ship beats adding more of it. The same defect is live in the production
+Duurzaam server, where it is worse because the verdict is server-COMPUTED as an alert
+(MCPSER-81) — and per item 3, computed values are the most readily believed thing a tool
+can emit. That cuts both ways, and this is the cutting edge.
+
+### If you COULD target the model — you cannot, and it would buy little
+
+The counterfactual, because it is the obvious next thought and the evidence answers it.
+
+| | haiku | sonnet | opus |
+| --- | --- | --- | --- |
+| bottom rung (`thin`) | 0–1/10 | 0–3/10 | 0–10/10 |
+| top rung (`rich`) | **10/10** | **10/10** | **10/10** |
+
+The models differ enormously at the bottom and **converge completely at the top**. So
+once the best mechanism ships, per-model tailoring buys no accuracy — there is none left
+to buy. It buys only tokens, and Q2 measured what prose-trimming is worth: about 2%.
+
+**Per-model tailoring is therefore a cost optimisation with a ~2% ceiling, not a quality
+one. Do not build it.**
+
+Three things tailoring WOULD legitimately change, if the signal existed:
+
+- **Opus — skip the prose, keep the procedures.** 10/10 unaided on facts already in the
+  payload, and prose does not help it where it fails: on `gas-estimate` it is 0–1/10 on
+  `thin` AND on `words`, and only the recipe and the computed value move it. The
+  glossary is dead weight for opus; the constants and the directives are not.
+- **Sonnet — pin the derivation, not the answer.** It reaches the right number by the
+  wrong road more than the others: 5–8/10 by value against 0/10 by derivation on
+  `gas-estimate`. Tailoring for sonnet means specifying HOW, because it will otherwise
+  find a road that lands inside the band.
+- **Haiku — reinforce the output contract.** All 29 format violations across 240 runs
+  were haiku; sonnet and opus were 0 of 120. That is the one genuine per-model defect
+  that more DOMAIN metadata does not fix.
+
+### The load-bearing assumption
+
+"Tailoring buys nothing" holds only because a top rung exists that saturates every
+model. If a domain has no determinate computation to precompute, the models do NOT
+converge and this section's conclusion changes. Check that before reusing it.
 
 ## Q1 — Does guidance work better in the RESPONSE than in the tool description?
 
@@ -158,7 +340,36 @@ field — the ladder's attributability depends on both.
 >
 > **Still open:** the cross-record half, and the ~77% pruning case. All three
 > questions run used NTA 8800 records, so only the 37–50% band was exercised.
-
+>
+> **FOLLOW-UP, 2026-09-21: the missing sentence has been ADDED and the question
+> RE-RUN.** `interpretationBlock` now carries a `CALCULATED vs MEASURED` line stating
+> that ep1/ep2/berekend are calculated NTA 8800 figures, that Paris Proof is defined
+> on measured final energy, and that this server holds no metered data. The
+> `ep1 … 70 kWh/m²` line was left in place — this change adds, it does not remove, per
+> the "do not do both in one change" note above. Pinned by
+> `get-building-profile-calculated-vs-measured.test.ts`.
+>
+> Measured locally: the block grows 4,338 → 5,020 chars. The pruner gates the new line
+> on its own three fields, like every other field note, which means:
+> - on the `benchmark-trap` record (NTA 8800, all three populated) the line SURVIVES
+>   pruning, so **both arms ship it** and the re-run measures whether the sentence
+>   fixes the question, NOT whether pruning deletes it;
+> - on a NEN 7120 record (all three null) the line IS pruned — which for the first time
+>   creates a genuine test of Q2's cross-record half, on `metered-vs-model`, not here.
+>
+> **DONE AND RE-RUN, 2026-09-21** — deployed (the IAM error was the wrong firebase
+> account, not a missing role: `mcp-metadata-demo` is invisible to the warmtebouw
+> account) and verified on the wire in both arms before spawning. 60 runs:
+> **benchmark-trap went from 0 of 60 to 59 of 60.** Fabrications 22 → 0,
+> confidently-wrong 1 → 0, `named_mismatch` 13/60 → 60/60. Cost ~260 tokens a call.
+> See `results/2026-09-21-benchmark-trap-calculated-vs-measured.json`.
+>
+> So the registered expectation below HELD, decisively. The question was never
+> measuring conditional guidance; it was measuring a hole in the metadata. Both arms
+> remain at ceiling against each other (inline 29/30, conditional 30/30, tokens
+> −2.27%), so Q2's own prediction is untouched and its cross-record half is STILL
+> untested — though it is now testable on `metered-vs-model`, where the new sentence
+> IS pruned.
 
 ### Why it matters
 
@@ -338,21 +549,129 @@ call repeatedly, and the claim has to be narrowed accordingly.
 
 ---
 
+---
+
+## Q4 — Is the operative ingredient the FACT or the INSTRUCTION?
+
+> **REGISTERED 2026-09-21. ARMS BUILT AND DEPLOYED; NOT YET RUN.** The prediction
+> below was written before the arms existed and is left exactly as registered.
+>
+> `mcpInlineFact` / `eval-inline-fact` and `mcpInlineInstruction` /
+> `eval-inline-instruction`, deployed 2026-09-21 and **verified on the wire** (over a
+> direct MCP client, since a session cannot reach a server added to `.mcp.json` after
+> it started):
+>
+> | arm | interpretation chars | FACT present | INSTRUCTION present | label present |
+> |---|---|---|---|---|
+> | `inline` (both) | 5,020 | yes | yes | yes |
+> | `inline-fact` | 4,856 | yes | **no** | yes |
+> | `inline-instruction` | 4,504 | **no** | yes | **no** |
+>
+> All three return a byte-identical one-sentence description. The label
+> "CALCULATED vs MEASURED" is withheld from `inline-instruction` on purpose — it is
+> itself a two-word statement of the distinction, so leaving it would leak the fact
+> that arm exists to withhold.
+>
+> The prose is SLICED from `interpretationBlock` and `both` is COMPOSED from the two
+> halves, so `both` is by construction exactly fact + instruction and no arm can
+> drift. `get-building-profile-inline-ablation.test.ts` pins that the arms differ from
+> `inline` in EXACTLY ONE LINE, that instruction-only leaks neither the semantics nor
+> the label, and that instruction-only is the shortest of the three.
+
+### Why it matters
+
+The sentence that took `benchmark-trap` from 0 of 60 to 59 of 60 bundles two different
+kinds of content:
+
+- a **FACT** — `ep1`/`ep2`/`berekend_energieverbruik` are calculated NTA 8800 figures,
+  Paris Proof is defined on measured final energy at the meter, and this server holds no
+  metered data;
+- an **INSTRUCTION** — "Where a question asks how a building compares to a metered
+  benchmark, say that the comparison cannot be made from this data and why, rather than
+  producing a ratio."
+
+Before the change, `opus`/`inline` **named the mismatch in 7 of 10 runs and returned the
+forbidden verdict in 10 of 10.** It had the fact. What it lacked was the instruction.
+
+If that generalises, the finding is much larger than "write better field descriptions":
+it is that tool metadata must specify **behaviour**, not only **semantics** — and
+essentially all the metadata on the `words`/`rich` ladder, and in the wild, is semantics.
+That would reframe the whole argument.
+
+### The arms
+
+Three response-channel variants of the same line, off `inline`. Same description, same
+schemas, same render tools, same question. Nothing else changes.
+
+| arm | ships |
+| --- | --- |
+| `fact-only` | the two clauses naming what the quantities are and that no metered data exists. No guidance on what to do. |
+| `instruction-only` | the behavioural clause alone — say the comparison cannot be made and why, rather than producing a ratio. Does NOT say why the quantities differ. |
+| `both` | the line as deployed 2026-09-21. **Already measured: 59 of 60.** |
+
+Cheapest possible build: two new endpoints; `both` already exists as the current
+`inline`. No new question and no new address needed for the first half.
+
+### Prediction
+
+> `instruction-only` ≈ `both`, and both beat `fact-only` by a wide margin.
+>
+> The reasoning: opus already had the fact 7 times in 10 and acted wrongly all 10 times,
+> so on the strongest model the fact alone demonstrably does not change behaviour. Haiku
+> never had the fact at all (0 of 20) and should therefore gain more from `fact-only`
+> than opus does — but still less than from `instruction-only`, because an instruction is
+> executable without understanding the reason for it.
+>
+> **Falsified if** `fact-only` comes within 3 runs of `both` on any model, or if
+> `instruction-only` scores below `fact-only` on any model.
+
+### The failure mode that makes it a real experiment
+
+An instruction without its reason should be **brittle**: it ought to fix the case it
+names and do nothing for a case it does not. So the run needs a SECOND question the
+instruction does not mention — `metered-vs-model` (Middenwetering 1), which asks the same
+class of thing about a different record and a different berekeningstype.
+
+> **Prediction:** `instruction-only` wins on `benchmark-trap` and **LOSES to `both` on
+> `metered-vs-model`**, because there the model must recognise an unnamed case from the
+> principle rather than follow a named rule. If `instruction-only` wins there too,
+> instructions generalise better than I expect and the "specify behaviour" reading gets
+> considerably stronger.
+
+### Also measure in the same run
+
+**Tokens.** `instruction-only` is the shortest of the three variants. If it matches
+`both`, then the best-performing metadata is also the cheapest — which would be the first
+time in this repo that quality and cost point the same way. Every prior result has them
+in tension or unrelated.
+
+### Cost
+
+2 questions × 3 arms × 3 models × n=10 = **180 runs**, two new arms to build and deploy.
+`metered-vs-model` is also where Q2's untested cross-record half can finally be run,
+since the calculated-vs-measured line IS pruned on a NEN 7120 record — so one build
+serves two open questions.
+
 ## Suggested order
 
 ~~1. **Q1b first.**~~ ~~2. **Q1a** next.~~ **Both run on 2026-09-21 and both
 predictions falsified — see the banner under Q1.**
 
-1. **Redeploy every arm and verify stamping.** Blocking, and cheap. `mcpInline` is
-   currently serving pre-stamping code, so no run involving it can be audited. Run
-   `npm run deploy`, then call each arm once and check `summary.countByVariant`
-   accounts for all of them with no `unknown` bucket.
-2. **Q2** is now worth running: it depended on Q1 finding the response channel usable
-   at all, and Q1 found it is not merely usable but decisive. Note its registered
-   prediction has a real failure mode attached — run `benchmark-trap` in it.
-3. **Harder questions before bigger n.** Both `derived_number` questions are now at or
-   near ceiling for the arms that matter (see `_measured_ceilings`). More repeats on
-   them measure nothing; the set needs questions the top arms can still fail.
+~~1. Redeploy and verify stamping.~~ ~~2. **Q2.**~~ **Both done on 2026-09-21** — the
+redeploy is verified and Q2 is answered, along with the `benchmark-trap` repair its
+failure mode uncovered.
+
+1. **Q4 first.** It is the highest-value open question, the cheapest build in the file
+   (two response variants of one line), and it is the only one that could reframe the
+   argument rather than refine it. Build it with `metered-vs-model` in scope so the same
+   deploy also closes Q2's untested cross-record half.
+2. **Harder questions before bigger n.** Both `derived_number` questions and now
+   `benchmark-trap` are at or near ceiling for the arms that matter (see
+   `_measured_ceilings`). More repeats on them measure nothing; the set needs questions
+   the top arms can still fail.
+3. **Re-baseline the ladder.** The 2026-09-21 block change moved six prose arms, so the
+   readable-ladder files are stale on any `ep1`/`ep2`/`berekend` question. Anything that
+   quotes those numbers needs re-running before it can be quoted again.
 
 **Q3 is free to run alongside any of them** — it needs no new arm and no deploy, only
 instrumentation of the harness and an audit against `get_tool_call_log`. Do it on the

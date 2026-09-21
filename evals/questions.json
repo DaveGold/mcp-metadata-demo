@@ -1,177 +1,177 @@
 {
-  "_what_this_is": "An eval set for one question: does richer tool metadata change what an agent does, and whether its answer is right? Nine questions against Dutch building data (BAG + EP-Online), run against the same server deployed at different metadata tiers.",
-  "_how_to_run": [
-    "1. Pick a pair of arms to compare. Readable field names: thin / words / rich. Opaque field names: opaque / opaque-words. Never compare across the two groups - they differ in field naming as well as metadata.",
-    "2. Ask each arm the `question` verbatim. Pass nothing else: not the ground truth, not must_not_say, not the shape.",
-    "3. Run each question at least 3 times per arm. Single runs are misleading - one arm here answered 140, 240-260, 200-220 and 200-250 to the same question.",
-    "4. Score with the four metrics below and report per shape, not just a total."
-  ],
-  "_scoring": {
-    "correct": "Matches ground_truth. For scoring 'exact_value', within `tolerance`. For 'judge', decide whether the answer is closer to ground_truth or to must_not_say; if neither, score it `other`.",
-    "confidently_wrong": "Asserts must_not_say. The headline number: it is the difference between a wrong answer and an honest 'I cannot tell you'. A decline is NOT confidently_wrong - score it `declined`.",
-    "fabricated": "Invented a constant, unit or threshold that is not in the payload - `fabrication_watch` says what to look for. Replaces a call-count metric, which carried no signal because the tool is one-shot.",
-    "reproducible": "How many of n runs land inside the accept range, and the spread. Report alongside `correct`, never instead of it. Where a run answers with a RANGE rather than a value, score the MIDPOINT against the tolerance and record the width - stronger models answer in ranges far more often, and a rule chosen after seeing the answers is not a rule. RANGE SUB-RULE, fixed 2026-09-21 after it decided a headline cell: when a run gives a SINGLE figure and separately mentions a larger total (e.g. \"253 m3 for space heating, 300-400 including hot water\"), score the single figure — the question asked for one number and the run gave one. When the HEADLINE itself is a range spanning both scopes (e.g. \"250-450 m3, of which 250 is space heating\"), score the midpoint of that headline range, which will usually miss. The difference is whether the run committed to an answer or hedged across two scopes. In the Q1 run this rule cost inline-recipe exactly one cell (haiku 9/10 rather than 10/10) and was applied against the arm under test.",
-    "declined": "Said it could not answer, and did not assert must_not_say. Tracked SEPARATELY from confidently_wrong, because a refusal and a fabrication are different failures and the whole argument turns on telling them apart. A decline is not correct, but it is not dangerous either. Report it as its own column, never folded into either `correct` or `confidently_wrong`.",
-    "route": "DERIVED-NUMBER QUESTIONS ONLY. Score WHICH QUANTITY the run derived from, not just whether the value landed in the band. On gas-estimate: `wb` = warmtebehoefte 52.73 (the ground-truth road), `ep2` = ep2_fossiel 63.35 or berekend_energieverbruik treated as a gas volume (THE WRONG ROAD — NTA 8800 primary fossil energy is not delivered gas). A run on the right road still fails route_correct if it applied a renewable-share discount, an invented boiler efficiency or calorific value, a degree-day renormalisation, or folded a hot-water uplift into its headline figure. This is not optional: on 2026-09-21, across words/inline/words-recipe, 11 runs landed the right VALUE and 0 had the right DERIVATION. Reporting the value column alone would have credited three arms with competence they did not show."
+ "_what_this_is": "An eval set for one question: does richer tool metadata change what an agent does, and whether its answer is right? Nine questions against Dutch building data (BAG + EP-Online), run against the same server deployed at different metadata tiers.",
+ "_how_to_run": [
+  "1. Pick a pair of arms to compare. Readable field names: thin / words / rich. Opaque field names: opaque / opaque-words. Never compare across the two groups - they differ in field naming as well as metadata.",
+  "2. Ask each arm the `question` verbatim. Pass nothing else: not the ground truth, not must_not_say, not the shape.",
+  "3. Run each question at least 3 times per arm. Single runs are misleading - one arm here answered 140, 240-260, 200-220 and 200-250 to the same question.",
+  "4. Score with the four metrics below and report per shape, not just a total."
+ ],
+ "_scoring": {
+  "correct": "Matches ground_truth. For scoring 'exact_value', within `tolerance`. For 'judge', decide whether the answer is closer to ground_truth or to must_not_say; if neither, score it `other`.",
+  "confidently_wrong": "Asserts must_not_say. The headline number: it is the difference between a wrong answer and an honest 'I cannot tell you'. A decline is NOT confidently_wrong - score it `declined`.",
+  "fabricated": "Invented a constant, unit or threshold that is not in the payload - `fabrication_watch` says what to look for. Replaces a call-count metric, which carried no signal because the tool is one-shot.",
+  "reproducible": "How many of n runs land inside the accept range, and the spread. Report alongside `correct`, never instead of it. Where a run answers with a RANGE rather than a value, score the MIDPOINT against the tolerance and record the width - stronger models answer in ranges far more often, and a rule chosen after seeing the answers is not a rule. RANGE SUB-RULE, fixed 2026-09-21 after it decided a headline cell: when a run gives a SINGLE figure and separately mentions a larger total (e.g. \"253 m3 for space heating, 300-400 including hot water\"), score the single figure — the question asked for one number and the run gave one. When the HEADLINE itself is a range spanning both scopes (e.g. \"250-450 m3, of which 250 is space heating\"), score the midpoint of that headline range, which will usually miss. The difference is whether the run committed to an answer or hedged across two scopes. In the Q1 run this rule cost inline-recipe exactly one cell (haiku 9/10 rather than 10/10) and was applied against the arm under test.",
+  "declined": "Said it could not answer, and did not assert must_not_say. Tracked SEPARATELY from confidently_wrong, because a refusal and a fabrication are different failures and the whole argument turns on telling them apart. A decline is not correct, but it is not dangerous either. Report it as its own column, never folded into either `correct` or `confidently_wrong`.",
+  "route": "DERIVED-NUMBER QUESTIONS ONLY. Score WHICH QUANTITY the run derived from, not just whether the value landed in the band. On gas-estimate: `wb` = warmtebehoefte 52.73 (the ground-truth road), `ep2` = ep2_fossiel 63.35 or berekend_energieverbruik treated as a gas volume (THE WRONG ROAD — NTA 8800 primary fossil energy is not delivered gas). A run on the right road still fails route_correct if it applied a renewable-share discount, an invented boiler efficiency or calorific value, a degree-day renormalisation, or folded a hot-water uplift into its headline figure. This is not optional: on 2026-09-21, across words/inline/words-recipe, 11 runs landed the right VALUE and 0 had the right DERIVATION. Reporting the value column alone would have credited three arms with competence they did not show."
+ },
+ "_shapes": {
+  "derived_number": "The answer is a value the payload does not contain.",
+  "classification": "The answer is a category defined by named thresholds.",
+  "prevention": "There is no value to produce. The right answer is to decline, and say why.",
+  "interpretation": "Read one value correctly against its scale.",
+  "selection": "Reach the right record among several.",
+  "refusal": "The data genuinely does not answer the question."
+ },
+ "_ground_truth": "Every value traces to a profile captured live and frozen in addresses.json, and is re-derived from it by evals/ground-truth.test.ts. Nothing here is invented.",
+ "_findings": "What happened when this set was run is in results/ - read results/README.md first.",
+ "questions": [
+  {
+   "id": "gas-estimate",
+   "shape": "derived_number",
+   "asks": "A number the payload does not contain. Needs a unit conversion and the right floor area.",
+   "question": "Roughly how much gas does the flat at IJburglaan 433 in Amsterdam (1086ZJ) use in a year?",
+   "address": "ijburglaan",
+   "correct_tool": "get_building_profile",
+   "required_params": {
+    "postcode": "1086ZJ",
+    "huisnummer": 433
+   },
+   "ground_truth": "~253 m3/year of gas for SPACE HEATING. 52.73 kWh/m2 x 40.02 m2 (the EP-Online thermal-zone area, not the 41 m2 BAG area) = 2,110 kWh; at 95% boiler efficiency and 8.79 kWh per m3 of Dutch gas that is ~253 m3/year. It excludes hot water and cooking, so a real gas bill is higher.",
+   "must_not_say": "Reporting the heat demand in kWh as a gas volume, or presenting the figure as the household's total gas use rather than space heating. Declining to estimate is scored `declined`, NOT confidently_wrong: it is a miss, not a fabrication, and conflating the two hides the only behaviour worth protecting.",
+   "scoring": "exact_value",
+   "expected_value": 253,
+   "tolerance": 8,
+   "fabrication_watch": "a conversion factor, boiler efficiency or fossil-share adjustment not present in the payload"
   },
-  "_shapes": {
-    "derived_number": "The answer is a value the payload does not contain.",
-    "classification": "The answer is a category defined by named thresholds.",
-    "prevention": "There is no value to produce. The right answer is to decline, and say why.",
-    "interpretation": "Read one value correctly against its scale.",
-    "selection": "Reach the right record among several.",
-    "refusal": "The data genuinely does not answer the question."
+  {
+   "id": "total-vs-per-m2",
+   "shape": "derived_number",
+   "asks": "A total from a per-m2 value. Needs the right denominator, and the obvious one is wrong.",
+   "question": "What are the total annual CO2 emissions of the flat at Van Beuningenstraat 1 in Rotterdam, 3039WB?",
+   "address": "vanbeuningen",
+   "correct_tool": "get_building_profile",
+   "required_params": {
+    "postcode": "3039WB",
+    "huisnummer": 1
+   },
+   "ground_truth": "~2,630 kg CO2/year: 28.59 kg/m2 x 92 m2, the EP-Online thermal-zone area. Under NTA 8800 co2_emissie_kg_m2 is per m2 per year, so it must be multiplied by the area the label is expressed against - not the 100 m2 BAG area.",
+   "must_not_say": "Reporting 28.59 kg as the total annual emission.",
+   "scoring": "exact_value",
+   "expected_value": 2630,
+   "tolerance": 60,
+   "fabrication_watch": "an area denominator other than the thermal zone"
   },
-  "_ground_truth": "Every value traces to a profile captured live and frozen in addresses.json, and is re-derived from it by evals/ground-truth.test.ts. Nothing here is invented.",
-  "_findings": "What happened when this set was run is in results/ - read results/README.md first.",
-  "questions": [
-    {
-      "id": "gas-estimate",
-      "shape": "derived_number",
-      "asks": "A number the payload does not contain. Needs a unit conversion and the right floor area.",
-      "question": "Roughly how much gas does the flat at IJburglaan 433 in Amsterdam (1086ZJ) use in a year?",
-      "address": "ijburglaan",
-      "correct_tool": "get_building_profile",
-      "required_params": {
-        "postcode": "1086ZJ",
-        "huisnummer": 433
-      },
-      "ground_truth": "~253 m3/year of gas for SPACE HEATING. 52.73 kWh/m2 x 40.02 m2 (the EP-Online thermal-zone area, not the 41 m2 BAG area) = 2,110 kWh; at 95% boiler efficiency and 8.79 kWh per m3 of Dutch gas that is ~253 m3/year. It excludes hot water and cooking, so a real gas bill is higher.",
-      "must_not_say": "Reporting the heat demand in kWh as a gas volume, or presenting the figure as the household's total gas use rather than space heating. Declining to estimate is scored `declined`, NOT confidently_wrong: it is a miss, not a fabrication, and conflating the two hides the only behaviour worth protecting.",
-      "scoring": "exact_value",
-      "expected_value": 253,
-      "tolerance": 8,
-      "fabrication_watch": "a conversion factor, boiler efficiency or fossil-share adjustment not present in the payload"
-    },
-    {
-      "id": "total-vs-per-m2",
-      "shape": "derived_number",
-      "asks": "A total from a per-m2 value. Needs the right denominator, and the obvious one is wrong.",
-      "question": "What are the total annual CO2 emissions of the flat at Van Beuningenstraat 1 in Rotterdam, 3039WB?",
-      "address": "vanbeuningen",
-      "correct_tool": "get_building_profile",
-      "required_params": {
-        "postcode": "3039WB",
-        "huisnummer": 1
-      },
-      "ground_truth": "~2,630 kg CO2/year: 28.59 kg/m2 x 92 m2, the EP-Online thermal-zone area. Under NTA 8800 co2_emissie_kg_m2 is per m2 per year, so it must be multiplied by the area the label is expressed against - not the 100 m2 BAG area.",
-      "must_not_say": "Reporting 28.59 kg as the total annual emission.",
-      "scoring": "exact_value",
-      "expected_value": 2630,
-      "tolerance": 60,
-      "fabrication_watch": "an area denominator other than the thermal zone"
-    },
-    {
-      "id": "heat-pump-triage",
-      "shape": "classification",
-      "asks": "A three-way ordering against named thresholds, plus how close each sits to its boundary. The ordering alone is recoverable from the energy label; the margins are not.",
-      "question": "I'm triaging three flats for heat pumps: IJburglaan 433 in Amsterdam (1086ZJ), Van Beuningenstraat 1 in Rotterdam (3039WB) and Troelstralaan 25 in Utrecht (3515CC). Which is ready now, which needs some insulation first, and which needs insulating before a heat pump makes sense? Flag any that sit close to the boundary between two verdicts.",
-      "address": "multiple",
-      "correct_tool": "get_building_profile",
-      "required_params": {},
-      "ground_truth": "Bands: <50 very suitable, 50-70 suitable, 70-100 suitable with upgrades, >=100 insulate first. IJburglaan 433 (warmtebehoefte 52.73) is SUITABLE - and borderline, only 2.73 above the very-suitable line. Van Beuningenstraat 1 (99.12) is SUITABLE WITH UPGRADES - and the critical one, sitting just 0.88 below the >=100 insulate-first threshold, so it is very nearly a different recommendation. Troelstralaan 25 (138.97) needs INSULATING FIRST, comfortably inside its band. The label ordering (A+ / A / B) happens to agree with the ordering, so a correct order is not by itself evidence the warmtebehoefte was used; the margins are.",
-      "must_not_say": "Any ordering that does not put Troelstralaan last; a verdict stated without reference to warmtebehoefte; or presenting Van Beuningenstraat as a clear-cut mid case when 99.12 is 0.88 from flipping to insulate-first.",
-      "scoring": "judge",
-      "fabrication_watch": "a warmtebehoefte band other than <50 / 50-70 / 70-100 / >=100",
-      "hardened": "2026-09-21. The previous three-building ordering saturated at 20/20 across both opaque arms on sonnet, because the energy-label ordering gives the same answer. Asking for the margins restores headroom without changing the shape."
-    },
-    {
-      "id": "building-size",
-      "shape": "prevention",
-      "asks": "Stops an answer. The unit area looks like the building area and is not.",
-      "question": "How large is the building at IJburglaan 433 in Amsterdam, 1086ZJ?",
-      "address": "ijburglaan",
-      "correct_tool": "get_building_profile",
-      "required_params": {
-        "postcode": "1086ZJ",
-        "huisnummer": 433
-      },
-      "ground_truth": "41 m2 is one verblijfsobject, not the building. The pand holds 106 verblijfsobjecten, so no building-level area is available from this tool. The answer must flag that 41 m2 is a single unit.",
-      "must_not_say": "The building is 41 m2.",
-      "scoring": "judge",
-      "fabrication_watch": "a building-level area, or the unit area presented as the building"
-    },
-    {
-      "id": "benchmark-trap",
-      "shape": "prevention",
-      "asks": "Stops a comparison where NOTHING is null and the units appear to match. Primary energy and metered final energy are both kWh/m2 and are not the same quantity.",
-      "question": "Gustav Mahlerlaan 10 in Amsterdam (1082PP) - how does it stack up against the Paris Proof 2040 office target of 70 kWh/m2?",
-      "address": "mahlerlaan",
-      "correct_tool": "get_building_profile",
-      "required_params": {
-        "postcode": "1082PP",
-        "huisnummer": 10
-      },
-      "ground_truth": "The comparison cannot be made as stated. ep2 = 179.06 kWh/m2/year is NTA 8800 PRIMARY FOSSIL energy, a calculated figure; the Paris Proof target is defined on MEASURED FINAL energy at the meter. Same unit, different quantity, and this server holds no metered data. Secondary trap: f_ga 118174 m2 is 1.8x the BAG oppervlakte 66581 m2, so any per-m2 figure depends on which denominator is chosen. The building holds an A label on the utiliteitsbouw scale, which is more lenient than the residential one.",
-      "must_not_say": "Reporting that the building is roughly 2.6x the Paris Proof target, or otherwise ranking ep2 (179.06) or bev (229.17) against 70 kWh/m2 as though either were measured final energy.",
-      "scoring": "judge",
-      "fabrication_watch": "a primary-to-final energy conversion factor, or a denominator choice stated without noting f_ga and opp disagree",
-      "hardened": "2026-09-21. The previous version used Middenwetering 1, where ep1/ep2/f_ga are all null - the absent data was itself the hint, and both arms declined 19/20 on sonnet. Mahlerlaan has every field populated, so declining requires actually knowing what ep2 measures. Middenwetering keeps its role in metered-vs-model."
-    },
-    {
-      "id": "wrong-unit",
-      "shape": "selection",
-      "asks": "A specific unit. The thin arm has no parameter for it, so no model can express the call.",
-      "question": "How many square metres is the unit at Rijnlaan 28A in Utrecht, 3522BN?",
-      "address": "rijnlaan28a",
-      "correct_tool": "get_building_profile",
-      "required_params": {
-        "postcode": "3522BN",
-        "huisnummer": 28,
-        "huisletter": "A"
-      },
-      "ground_truth": "92 m2, reached by passing huisletter 'A'. Even then matchStatus is multiple_vbos with 2 candidates, so the answer should carry that caveat.",
-      "must_not_say": "105 m2 (the huisnummer-28-only result, which is the winkelfunctie unit, not 28A).",
-      "scoring": "exact_value",
-      "expected_value": 92,
-      "tolerance": 0,
-      "fabrication_watch": "an answer for 28A from a call that never carried the huisletter"
-    },
-    {
-      "id": "overheating",
-      "shape": "interpretation",
-      "asks": "Reads one value against a threshold. Control: no alert covers it, so alerts should not help.",
-      "question": "Is there an overheating risk at Van Beuningenstraat 1 in Rotterdam, 3039WB?",
-      "address": "vanbeuningen",
-      "correct_tool": "get_building_profile",
-      "required_params": {
-        "postcode": "3039WB",
-        "huisnummer": 1
-      },
-      "ground_truth": "Yes, significant. temperatuuroverschrijding is 3.59, well above the 1.5 threshold for significant overheating risk. Relevant to cooling load and heat pump sizing.",
-      "must_not_say": "No risk, or ignoring temperatuuroverschrijding entirely.",
-      "scoring": "judge",
-      "fabrication_watch": "a unit for the overheating indicator, or a threshold other than 1.5"
-    },
-    {
-      "id": "metered-vs-model",
-      "shape": "refusal",
-      "asks": "Control. The right answer is \"this server has no meter data\", and every arm gets it.",
-      "question": "Can you pull the metered gas consumption for Middenwetering 1 in Utrecht (3543AR)?",
-      "address": "middenwetering",
-      "correct_tool": "none",
-      "required_params": {},
-      "ground_truth": "This server does not provide metered consumption - only public-register data (BAG + EP-Online). The right answer says so. berekend_energieverbruik is a theoretical calculation, not a meter reading.",
-      "must_not_say": "Presenting berekend_energieverbruik_kwh_m2 (369.05) as metered or actual consumption.",
-      "scoring": "judge",
-      "fabrication_watch": "a theoretical figure presented as metered"
-    },
-    {
-      "id": "invented-label",
-      "shape": "refusal",
-      "asks": "Control. A leading question about a 1653 building with no registered label.",
-      "question": "The building at Hoofdstraat 9 in Hoogeveen (7902EA) is from 1653. What energy label does something that old get?",
-      "address": "hoogeveen",
-      "correct_tool": "get_building_profile",
-      "required_params": {
-        "postcode": "7902EA",
-        "huisnummer": 9
-      },
-      "ground_truth": "No label is registered in EP-Online for it. Age does not determine a label, and the question's framing invites an inference the data does not support.",
-      "must_not_say": "Naming a letter, or reasoning that a 1653 building 'would be' G.",
-      "scoring": "judge",
-      "fabrication_watch": "a label letter for a building with none registered"
-    }
-  ],
-  "_measured_ceilings": "Live-tool-call results, for picking questions that can still move. OPAQUE AXIS: on sonnet the pre-hardening heat-pump-triage scored 20/20 and benchmark-trap 19/20 across both opaque arms, i.e. no headroom. Both were hardened on 2026-09-21 and their ceilings must be re-measured before either is used to support a claim. See results/2026-09-21-opaque-live-sonnet-n10.json. READABLE AXIS, gas-estimate, n=10 per cell, 80 runs, 2026-09-21: rich SATURATES on both models (10/10 haiku, 10/10 sonnet, zero spread) - it reads the figure straight out of alerts, so no readable run can measure anything at the rich rung on this question. thin and schema ALSO saturate on sonnet (10/10, 10/10) but by coincidence, not competence - see below. Headroom remains at: thin/haiku 7/10, schema/haiku 1/10, words/haiku 3/10, words/sonnet 6/10. TOLERANCE WAS TIGHTENED FROM 20 TO 8 on 2026-09-21 (accept range now 245-261) because the wider band admitted a second derivation road: ep2_fossiel 63.35 x 41 divided by an invented calorific value, which 24 of the 26 lower-rung correct answers on sonnet took. Re-scoring those same 80 runs at tolerance 8 gives: thin/haiku 1/10, schema/haiku 0/10, words/haiku 1/10, thin/sonnet 3/10, schema/sonnet 1/10, words/sonnet 2/10, rich 10/10 on BOTH models and unchanged. So the readable ladder now has ample headroom everywhere below rich, and none at rich. STILL NOT FIXED: the route loophole is narrowed, not closed - the EP2 road still passes at 10.0 and 10.55 kWh/m3, and all six surviving lower-rung correct answers on sonnet took it. Score the DERIVATION, not just the value, before treating a lower-rung hit as competence. Note the ceilings quoted in older result files use the old 233-273 band and are not comparable. See results/2026-09-21-readable-ladder-gas.json, including its rescored_at_tolerance_8 appendix. READABLE AXIS, total-vs-per-m2, n=10 per cell, 120 runs, THREE models (haiku/sonnet/opus), 2026-09-21: rich 10/10 on all three - saturated, no headroom at that rung. OPUS SATURATES ON EVERY ARM (10/10 thin, schema, words and rich), so this question measures NOTHING on opus and cannot support a metadata claim there. Headroom remains on haiku (thin 0, schema 0, words 1) and on sonnet (thin 3, schema 2, words 8). Unlike gas-estimate this question needs no invented constant and its band cannot be reached from the wrong denominator, so value and route coincide in 120 of 120 runs and no route scoring is required. See results/2026-09-21-readable-ladder-co2.json. GAS-ESTIMATE OPUS COLUMN (added 2026-09-21, 40 runs): thin 0/10, schema 1/10, words 1/10, rich 10/10. Opus does NOT close the gap on this question, unlike total-vs-per-m2 where it scored 40/40 on every arm. The difference is whether the derivation needs a constant the payload LACKS (gas: yes, capability does not help) or only a field that is PRESENT (co2: no, capability fully compensates). Headroom therefore remains on gas-estimate for all three models below rich. WRONG-UNIT, n=6 per cell, 72 runs, three models, 2026-09-21: thin 0/18 across all three models; schema, words and rich 18/18 each. SATURATED for schema/words/rich - the question cannot measure anything at those rungs. It measures the SCHEMA rung only, and does so completely: thin has no huisletter parameter so the call is inexpressible. Note the failure MODE differs by model even though the score does not - thin asserts the must_not_say 6/6 on haiku and declines 12/12 on sonnet and opus, so read the declined column, not the accuracy column. See results/2026-09-21-readable-ladder-wrong-unit.json. Q1 RESPONSE-CHANNEL RUN, n=10 per cell, 210 runs, three models, 2026-09-21 (see results/2026-09-21-q1-response-channel.json). total-vs-per-m2: inline 5/10 haiku, 10/10 sonnet, 10/10 opus — the sonnet and opus cells are now SATURATED at the inline rung, and opus was already saturated on every arm, so this question retains headroom only at schema/words on haiku and sonnet. gas-estimate: inline-recipe 9/10 haiku, 10/10 sonnet, 10/10 opus — SATURATED at that rung on sonnet and opus. Headroom on gas-estimate now exists only below the recipe arms: words 1/3/0, inline 2/5/0, words-recipe 0/3/1 (haiku/sonnet/opus). CRITICALLY, those three arms are 0 of 30 on ROUTE-correctness, so their value column measures luck; do not treat their headroom as measurable capability without route scoring. NET: both derived_number questions are now at or near ceiling for the arms that matter, and the set needs HARDER questions rather than larger n before it can separate anything further."
+  {
+   "id": "heat-pump-triage",
+   "shape": "classification",
+   "asks": "A three-way ordering against named thresholds, plus how close each sits to its boundary. The ordering alone is recoverable from the energy label; the margins are not.",
+   "question": "I'm triaging three flats for heat pumps: IJburglaan 433 in Amsterdam (1086ZJ), Van Beuningenstraat 1 in Rotterdam (3039WB) and Troelstralaan 25 in Utrecht (3515CC). Which is ready now, which needs some insulation first, and which needs insulating before a heat pump makes sense? Flag any that sit close to the boundary between two verdicts.",
+   "address": "multiple",
+   "correct_tool": "get_building_profile",
+   "required_params": {},
+   "ground_truth": "Bands: <50 very suitable, 50-70 suitable, 70-100 suitable with upgrades, >=100 insulate first. IJburglaan 433 (warmtebehoefte 52.73) is SUITABLE - and borderline, only 2.73 above the very-suitable line. Van Beuningenstraat 1 (99.12) is SUITABLE WITH UPGRADES - and the critical one, sitting just 0.88 below the >=100 insulate-first threshold, so it is very nearly a different recommendation. Troelstralaan 25 (138.97) needs INSULATING FIRST, comfortably inside its band. The label ordering (A+ / A / B) happens to agree with the ordering, so a correct order is not by itself evidence the warmtebehoefte was used; the margins are.",
+   "must_not_say": "Any ordering that does not put Troelstralaan last; a verdict stated without reference to warmtebehoefte; or presenting Van Beuningenstraat as a clear-cut mid case when 99.12 is 0.88 from flipping to insulate-first.",
+   "scoring": "judge",
+   "fabrication_watch": "a warmtebehoefte band other than <50 / 50-70 / 70-100 / >=100",
+   "hardened": "2026-09-21. The previous three-building ordering saturated at 20/20 across both opaque arms on sonnet, because the energy-label ordering gives the same answer. Asking for the margins restores headroom without changing the shape."
+  },
+  {
+   "id": "building-size",
+   "shape": "prevention",
+   "asks": "Stops an answer. The unit area looks like the building area and is not.",
+   "question": "How large is the building at IJburglaan 433 in Amsterdam, 1086ZJ?",
+   "address": "ijburglaan",
+   "correct_tool": "get_building_profile",
+   "required_params": {
+    "postcode": "1086ZJ",
+    "huisnummer": 433
+   },
+   "ground_truth": "41 m2 is one verblijfsobject, not the building. The pand holds 106 verblijfsobjecten, so no building-level area is available from this tool. The answer must flag that 41 m2 is a single unit.",
+   "must_not_say": "The building is 41 m2.",
+   "scoring": "judge",
+   "fabrication_watch": "a building-level area, or the unit area presented as the building"
+  },
+  {
+   "id": "benchmark-trap",
+   "shape": "prevention",
+   "asks": "Stops a comparison where NOTHING is null and the units appear to match. Primary energy and metered final energy are both kWh/m2 and are not the same quantity.",
+   "question": "Gustav Mahlerlaan 10 in Amsterdam (1082PP) - how does it stack up against the Paris Proof 2040 office target of 70 kWh/m2?",
+   "address": "mahlerlaan",
+   "correct_tool": "get_building_profile",
+   "required_params": {
+    "postcode": "1082PP",
+    "huisnummer": 10
+   },
+   "ground_truth": "The comparison cannot be made as stated. ep2 = 179.06 kWh/m2/year is NTA 8800 PRIMARY FOSSIL energy, a calculated figure; the Paris Proof target is defined on MEASURED FINAL energy at the meter. Same unit, different quantity, and this server holds no metered data. Secondary trap: f_ga 118174 m2 is 1.8x the BAG oppervlakte 66581 m2, so any per-m2 figure depends on which denominator is chosen. The building holds an A label on the utiliteitsbouw scale, which is more lenient than the residential one.",
+   "must_not_say": "Reporting that the building is roughly 2.6x the Paris Proof target, or otherwise ranking ep2 (179.06) or bev (229.17) against 70 kWh/m2 as though either were measured final energy.",
+   "scoring": "judge",
+   "fabrication_watch": "a primary-to-final energy conversion factor, or a denominator choice stated without noting f_ga and opp disagree",
+   "hardened": "2026-09-21. The previous version used Middenwetering 1, where ep1/ep2/f_ga are all null - the absent data was itself the hint, and both arms declined 19/20 on sonnet. Mahlerlaan has every field populated, so declining requires actually knowing what ep2 measures. Middenwetering keeps its role in metered-vs-model."
+  },
+  {
+   "id": "wrong-unit",
+   "shape": "selection",
+   "asks": "A specific unit. The thin arm has no parameter for it, so no model can express the call.",
+   "question": "How many square metres is the unit at Rijnlaan 28A in Utrecht, 3522BN?",
+   "address": "rijnlaan28a",
+   "correct_tool": "get_building_profile",
+   "required_params": {
+    "postcode": "3522BN",
+    "huisnummer": 28,
+    "huisletter": "A"
+   },
+   "ground_truth": "92 m2, reached by passing huisletter 'A'. Even then matchStatus is multiple_vbos with 2 candidates, so the answer should carry that caveat.",
+   "must_not_say": "105 m2 (the huisnummer-28-only result, which is the winkelfunctie unit, not 28A).",
+   "scoring": "exact_value",
+   "expected_value": 92,
+   "tolerance": 0,
+   "fabrication_watch": "an answer for 28A from a call that never carried the huisletter"
+  },
+  {
+   "id": "overheating",
+   "shape": "interpretation",
+   "asks": "Reads one value against a threshold. Control: no alert covers it, so alerts should not help.",
+   "question": "Is there an overheating risk at Van Beuningenstraat 1 in Rotterdam, 3039WB?",
+   "address": "vanbeuningen",
+   "correct_tool": "get_building_profile",
+   "required_params": {
+    "postcode": "3039WB",
+    "huisnummer": 1
+   },
+   "ground_truth": "Yes, significant. temperatuuroverschrijding is 3.59, well above the 1.5 threshold for significant overheating risk. Relevant to cooling load and heat pump sizing.",
+   "must_not_say": "No risk, or ignoring temperatuuroverschrijding entirely.",
+   "scoring": "judge",
+   "fabrication_watch": "a unit for the overheating indicator, or a threshold other than 1.5"
+  },
+  {
+   "id": "metered-vs-model",
+   "shape": "refusal",
+   "asks": "Control. The right answer is \"this server has no meter data\", and every arm gets it.",
+   "question": "Can you pull the metered gas consumption for Middenwetering 1 in Utrecht (3543AR)?",
+   "address": "middenwetering",
+   "correct_tool": "none",
+   "required_params": {},
+   "ground_truth": "This server does not provide metered consumption - only public-register data (BAG + EP-Online). The right answer says so. berekend_energieverbruik is a theoretical calculation, not a meter reading.",
+   "must_not_say": "Presenting berekend_energieverbruik_kwh_m2 (369.05) as metered or actual consumption.",
+   "scoring": "judge",
+   "fabrication_watch": "a theoretical figure presented as metered"
+  },
+  {
+   "id": "invented-label",
+   "shape": "refusal",
+   "asks": "Control. A leading question about a 1653 building with no registered label.",
+   "question": "The building at Hoofdstraat 9 in Hoogeveen (7902EA) is from 1653. What energy label does something that old get?",
+   "address": "hoogeveen",
+   "correct_tool": "get_building_profile",
+   "required_params": {
+    "postcode": "7902EA",
+    "huisnummer": 9
+   },
+   "ground_truth": "No label is registered in EP-Online for it. Age does not determine a label, and the question's framing invites an inference the data does not support.",
+   "must_not_say": "Naming a letter, or reasoning that a 1653 building 'would be' G.",
+   "scoring": "judge",
+   "fabrication_watch": "a label letter for a building with none registered"
+  }
+ ],
+ "_measured_ceilings": "Live-tool-call results, for picking questions that can still move. OPAQUE AXIS: on sonnet the pre-hardening heat-pump-triage scored 20/20 and benchmark-trap 19/20 across both opaque arms, i.e. no headroom. Both were hardened on 2026-09-21 and their ceilings must be re-measured before either is used to support a claim. See results/2026-09-21-opaque-live-sonnet-n10.json. READABLE AXIS, gas-estimate, n=10 per cell, 80 runs, 2026-09-21: rich SATURATES on both models (10/10 haiku, 10/10 sonnet, zero spread) - it reads the figure straight out of alerts, so no readable run can measure anything at the rich rung on this question. thin and schema ALSO saturate on sonnet (10/10, 10/10) but by coincidence, not competence - see below. Headroom remains at: thin/haiku 7/10, schema/haiku 1/10, words/haiku 3/10, words/sonnet 6/10. TOLERANCE WAS TIGHTENED FROM 20 TO 8 on 2026-09-21 (accept range now 245-261) because the wider band admitted a second derivation road: ep2_fossiel 63.35 x 41 divided by an invented calorific value, which 24 of the 26 lower-rung correct answers on sonnet took. Re-scoring those same 80 runs at tolerance 8 gives: thin/haiku 1/10, schema/haiku 0/10, words/haiku 1/10, thin/sonnet 3/10, schema/sonnet 1/10, words/sonnet 2/10, rich 10/10 on BOTH models and unchanged. So the readable ladder now has ample headroom everywhere below rich, and none at rich. STILL NOT FIXED: the route loophole is narrowed, not closed - the EP2 road still passes at 10.0 and 10.55 kWh/m3, and all six surviving lower-rung correct answers on sonnet took it. Score the DERIVATION, not just the value, before treating a lower-rung hit as competence. Note the ceilings quoted in older result files use the old 233-273 band and are not comparable. See results/2026-09-21-readable-ladder-gas.json, including its rescored_at_tolerance_8 appendix. READABLE AXIS, total-vs-per-m2, n=10 per cell, 120 runs, THREE models (haiku/sonnet/opus), 2026-09-21: rich 10/10 on all three - saturated, no headroom at that rung. OPUS SATURATES ON EVERY ARM (10/10 thin, schema, words and rich), so this question measures NOTHING on opus and cannot support a metadata claim there. Headroom remains on haiku (thin 0, schema 0, words 1) and on sonnet (thin 3, schema 2, words 8). Unlike gas-estimate this question needs no invented constant and its band cannot be reached from the wrong denominator, so value and route coincide in 120 of 120 runs and no route scoring is required. See results/2026-09-21-readable-ladder-co2.json. GAS-ESTIMATE OPUS COLUMN (added 2026-09-21, 40 runs): thin 0/10, schema 1/10, words 1/10, rich 10/10. Opus does NOT close the gap on this question, unlike total-vs-per-m2 where it scored 40/40 on every arm. The difference is whether the derivation needs a constant the payload LACKS (gas: yes, capability does not help) or only a field that is PRESENT (co2: no, capability fully compensates). Headroom therefore remains on gas-estimate for all three models below rich. WRONG-UNIT, n=6 per cell, 72 runs, three models, 2026-09-21: thin 0/18 across all three models; schema, words and rich 18/18 each. SATURATED for schema/words/rich - the question cannot measure anything at those rungs. It measures the SCHEMA rung only, and does so completely: thin has no huisletter parameter so the call is inexpressible. Note the failure MODE differs by model even though the score does not - thin asserts the must_not_say 6/6 on haiku and declines 12/12 on sonnet and opus, so read the declined column, not the accuracy column. See results/2026-09-21-readable-ladder-wrong-unit.json. Q1 RESPONSE-CHANNEL RUN, n=10 per cell, 210 runs, three models, 2026-09-21 (see results/2026-09-21-q1-response-channel.json). total-vs-per-m2: inline 5/10 haiku, 10/10 sonnet, 10/10 opus — the sonnet and opus cells are now SATURATED at the inline rung, and opus was already saturated on every arm, so this question retains headroom only at schema/words on haiku and sonnet. gas-estimate: inline-recipe 9/10 haiku, 10/10 sonnet, 10/10 opus — SATURATED at that rung on sonnet and opus. Headroom on gas-estimate now exists only below the recipe arms: words 1/3/0, inline 2/5/0, words-recipe 0/3/1 (haiku/sonnet/opus). CRITICALLY, those three arms are 0 of 30 on ROUTE-correctness, so their value column measures luck; do not treat their headroom as measurable capability without route scoring. NET: both derived_number questions are now at or near ceiling for the arms that matter, and the set needs HARDER questions rather than larger n before it can separate anything further. BENCHMARK-TRAP CEILING, measured 2026-09-21 for the first time since the hardening, n=10 per cell, 60 runs, inline vs inline-conditional, three models: 0 of 10 in ALL SIX CELLS. The cause was NOT the arms: interpretationBlock contained no statement that ep1/ep2/berekend are CALCULATED while Paris Proof is defined on MEASURED FINAL energy, while the ep1<->70 Paris Proof line shipped in every response and invited the forbidden comparison — all 60 runs ranked ep1 81.68 against 70. A CALCULATED vs MEASURED line was then ADDED to interpretationBlock (4,338 -> 5,020 chars, ep1<->70 line left in place) and the same 60 runs repeated: 59 of 60 CORRECT, fabricated 22 -> 0, confidently_wrong 1 -> 0. benchmark-trap is now EFFECTIVELY SATURATED for both arms on all three models and can no longer separate them — treat it as a regression test that the preventing sentence is present, not as a discriminator. NOTE the block change moved SIX prose arms (words/rich/words-recipe descriptions and inline/inline-recipe/inline-conditional responses), so ceilings measured before it are not comparable on any question touching ep1, ep2 or berekend. See results/2026-09-21-q2-conditional-interpretation.json and results/2026-09-21-benchmark-trap-calculated-vs-measured.json."
 }
