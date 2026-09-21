@@ -54,8 +54,10 @@ Compare adjacent rungs. `thin` vs `rich` measures four changes at once and tells
 you nothing about which one mattered; that conflation is what the `schema` rung
 was added to break.
 
-NOTE: `eval-schema` is configured but the `mcpSchema` function may not be
-deployed yet. Check the arm actually answers before you spend a run on it.
+`mcpSchema` is deployed and the `eval-schema` arm answers; it was first measured
+on 2026-09-21 over 20 runs. Its description is byte-identical to `thin`'s, so if
+the two arms ever return different prose, the deploy is stale — check that rather
+than assuming the schema layer did it.
 
 Before scoring, read `results/2026-09-21-shape-replication.json` for `_the_rule`
 (semantics handle interpretation, classification, prevention and refusal; recipes
