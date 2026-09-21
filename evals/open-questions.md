@@ -8,7 +8,8 @@ live runs that failed to replicate it).
 
 **Q1 and Q2 are ANSWERED** (banners in their sections; predictions left as registered).
 **Q3 and Q4 are open.** Read *What the runs support so far* next — it is the synthesis,
-and it is a narrower claim than "richer metadata is better".
+and it is a narrower claim than "richer metadata is better" — then *Design guidance*,
+which turns it into what to build.
 
 Every arm Q1 and Q2 needed is **built and deployed as of 2026-09-21** — `inline`,
 `words-recipe`, `inline-recipe` and `inline-conditional`. **Q4's two arms are not
@@ -119,6 +120,98 @@ Three rules follow:
 - Three of five Q2 scoring rules were fixed mid-run (the follow-up's were pre-registered).
 - The block change moved SIX prose arms, so the readable-ladder files are no longer
   comparable on any `ep1`/`ep2`/`berekend` question.
+
+---
+
+## Design guidance — what to actually do
+
+> **PROVISIONAL, 2026-09-22.** This is the "so what" of the synthesis above: the
+> section before it says what the runs support, this one says what to build. It rests
+> on three questions and two of six shapes, every per-cell number carries the ~4-run
+> noise bar in `results/README.md`, and item 4 below is a Q4 hypothesis whose arms are
+> built but unrun. Revise it when Q4 lands.
+
+### When you do not know which model will call your tool
+
+Which is the normal case, and the one MCP puts you in — the protocol hands a server
+`clientInfo` (name and version), **not the model**. There is no field for it.
+
+The answer is not "write for the weakest model". It is this ordering, because the
+mechanisms differ in how model-dependent they are:
+
+**1. Ship the facts the payload cannot contain.** The most model-agnostic need there
+is. Opus scores 0–1/10 on `gas-estimate`, *no better than haiku*, because no amount of
+reasoning invents a calorific value. Capability substitutes for metadata only where the
+quantity is already present. If the tool returns kWh and a caller will want m³, ship
+the conversion.
+
+**2. Put guidance in the RESPONSE, not the description.** 29/30 against 4/30 for the
+same 438 bytes. Free, and it helped all three models. If you change one thing, change
+this one.
+
+**3. Compute it server-side where the computation is determinate.** 78 of 78 across
+three questions, and the only mechanism that performs IDENTICALLY on all three models —
+which is exactly the property you want when you cannot know the model. But see the
+warning below: a wrong computed value is the worst failure mode in this repo.
+
+**4. Write the BEHAVIOUR, not only the semantics.** Opus named the calculated-vs-measured
+trap 7 times in 10 and returned the forbidden verdict 10 times in 10. It had the fact
+and lacked "say X rather than producing a ratio". *(Q4 hypothesis — arms built, unrun.)*
+
+**5. Typed schemas, but only for expressibility.** `thin` 0/18 → `schema` 18/18 on the
+one question where the correct call cannot be EXPRESSED without the parameter, and ≈0
+everywhere else. Cheap, so do it — but do not expect a schema to carry meaning.
+
+**6. Do not spend effort on volume.** Cutting 37–50% of the prose changed zero answers
+in 180.
+
+### The rule that outranks all six
+
+> **Volume does not hurt. Wrongness does.**
+
+The largest single effect measured anywhere in `results/` is a DEFECT: one
+plausible-looking line (`ep1 … Paris Proof kantoor: 70 kWh/m²`) produced 59 of 60 wrong
+answers, across two arms and three models, with 22 fabrications. Auditing the guidance
+you already ship beats adding more of it. The same defect is live in the production
+Duurzaam server, where it is worse because the verdict is server-COMPUTED as an alert
+(MCPSER-81) — and per item 3, computed values are the most readily believed thing a tool
+can emit. That cuts both ways, and this is the cutting edge.
+
+### If you COULD target the model — you cannot, and it would buy little
+
+The counterfactual, because it is the obvious next thought and the evidence answers it.
+
+| | haiku | sonnet | opus |
+| --- | --- | --- | --- |
+| bottom rung (`thin`) | 0–1/10 | 0–3/10 | 0–10/10 |
+| top rung (`rich`) | **10/10** | **10/10** | **10/10** |
+
+The models differ enormously at the bottom and **converge completely at the top**. So
+once the best mechanism ships, per-model tailoring buys no accuracy — there is none left
+to buy. It buys only tokens, and Q2 measured what prose-trimming is worth: about 2%.
+
+**Per-model tailoring is therefore a cost optimisation with a ~2% ceiling, not a quality
+one. Do not build it.**
+
+Three things tailoring WOULD legitimately change, if the signal existed:
+
+- **Opus — skip the prose, keep the procedures.** 10/10 unaided on facts already in the
+  payload, and prose does not help it where it fails: on `gas-estimate` it is 0–1/10 on
+  `thin` AND on `words`, and only the recipe and the computed value move it. The
+  glossary is dead weight for opus; the constants and the directives are not.
+- **Sonnet — pin the derivation, not the answer.** It reaches the right number by the
+  wrong road more than the others: 5–8/10 by value against 0/10 by derivation on
+  `gas-estimate`. Tailoring for sonnet means specifying HOW, because it will otherwise
+  find a road that lands inside the band.
+- **Haiku — reinforce the output contract.** All 29 format violations across 240 runs
+  were haiku; sonnet and opus were 0 of 120. That is the one genuine per-model defect
+  that more DOMAIN metadata does not fix.
+
+### The load-bearing assumption
+
+"Tailoring buys nothing" holds only because a top rung exists that saturates every
+model. If a domain has no determinate computation to precompute, the models do NOT
+converge and this section's conclusion changes. Check that before reusing it.
 
 ## Q1 — Does guidance work better in the RESPONSE than in the tool description?
 
