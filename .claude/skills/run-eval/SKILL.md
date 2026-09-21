@@ -54,38 +54,46 @@ asked for a smaller slice, say which slice you ran.
 
 ## Scoring
 
-Score each returned ANSWER against the question's record, in the parent session:
+Score each returned ANSWER against the question's record, in the parent session.
+The four metrics are defined in `_scoring` in questions.json:
 
-- **correct** — matches `ground_truth`. For `scoring: "exact_value"`, the number
-  must be within `tolerance`. For `scoring: "judge"`, decide which of
-  `ground_truth` and `must_not_say` the answer is closer to; if neither, mark
-  `other`.
-- **confidently_wrong** — the answer asserts `must_not_say`. An answer can be
-  incorrect without being confidently wrong; that distinction is the point.
-- **calls** — from CALLS, against `max_calls`.
-- **right_tool_first** — first entry in TOOLS equals `correct_tool`. When
-  `correct_tool` is `none`, correct means no tool call, or a call followed by an
-  explicit statement that the server cannot answer it.
+- **correct** — matches `ground_truth`. For `scoring: "exact_value"`, within
+  `tolerance`. For `"judge"`, decide whether the answer is closer to
+  `ground_truth` or to `must_not_say`; if neither, score it `other`.
+- **confidently_wrong** — asserts `must_not_say`. The headline number: an answer
+  can be incorrect without being confidently wrong, and that distinction is the
+  whole point.
+- **fabricated** — invented a constant, unit or threshold not in the payload.
+  Each question's `fabrication_watch` says what to look for. This replaced a
+  call-count metric, which carried no signal: `get_building_profile` is one-shot,
+  so almost every run is a single call.
+- **reproducible** — how many of n runs land in range, and the SPREAD of the
+  answers. Report it alongside `correct`, never instead: one arm scored 1-of-4
+  at a 44% spread where the other scored 3-of-3 at 0%, and neither number alone
+  says that.
 
-Treat CALLS/TOOLS/PARAMS as self-reported by the system under test — usable, but
-weaker evidence than the correctness scores. Say so when reporting them.
+CALLS/TOOLS/PARAMS are self-reported by the system under test. Usable for
+spotting thrashing, too weak to headline — say so when reporting them.
 
 ## Reporting
 
-Write results to `evals/results/<date>-<slice>.json`, one row per run.
+Write results to `evals/results/<date>-<slice>.json`, one row per run, with an
+explicit caveats list and the protocol used (live tool calls, or
+payload-in-prompt — the two are not comparable). See `evals/results/README.md`.
 
-Report **three tables, never one pooled number**:
+Report **by `shape`, never as one pooled number.** The shapes are where the
+argument lives:
 
-1. arm × model, `model_sensitivity: "discipline"` questions only
-2. arm × model, `model_sensitivity: "arcane"` questions only
-3. confidently-wrong counts, arm × model
+1. arm × model on `derived_number` questions
+2. arm × model on everything else, split by shape
+3. confidently-wrong and fabricated counts, arm × model
 
-Then the per-category split. Read the split before the headline: the total is just
-the headline, the categories are where the argument lives.
+**Check the controls first.** `overheating` is covered by no alert, so rich
+should hold no advantage over words; `metered-vs-model` and `invented-label`
+should be answered correctly by every arm. If a control separates, report that
+before anything else — it undermines every other number in the run.
 
-State plainly whether thin-Opus, rich-Haiku and thin-Haiku fell in the predicted
-order, including when they did not.
-
-When running the core set, check the control (`overheating`) first: arms B and C
-should score the same on it. If they do not, report that before anything else —
-it undermines every other number in the run.
+Then state plainly whether the result matches `_the_rule` in questions.json:
+semantics handle interpretation, classification, prevention and refusal; recipes
+are needed only for derived numbers. **A result that contradicts the rule is the
+interesting one** — report it, do not smooth it.
