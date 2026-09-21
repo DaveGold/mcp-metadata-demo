@@ -16,6 +16,7 @@ import {
 } from './tools/get-building-profile.js';
 import { registerGetBuildingProfileMinimalTool } from './tools/get-building-profile-minimal.js';
 import { registerGetBuildingProfileWordsTool } from './tools/get-building-profile-words.js';
+import { registerGetBuildingProfileOpaqueTool } from './tools/get-building-profile-opaque.js';
 import { registerRenderChartTool } from './tools/render-chart.js';
 import { registerRenderTableTool } from './tools/render-table.js';
 import { registerRenderMapTool } from './tools/render-map.js';
@@ -31,9 +32,15 @@ const VERSION = packageJson.version;
  * - 'words'   — the middle arm: identical prose and schemas to 'rich', but no computed
  *               alerts. Isolates what the WORDS buy from what the CAPABILITY adds.
  * - 'minimal' — the ablation: one-sentence description, no schema, no alerts. Same data,
- *               no layer. Deployed side-by-side so the three can be compared.
+ *               no layer.
+ * - 'opaque'  — 'minimal' PLUS obfuscated field names. The minimal arm still ships the
+ *               self-describing field names, which a model reads straight through, so it
+ *               cannot measure what prose buys. This one removes that confound.
+ * - 'opaque-words' — 'opaque' plus the interpretation guidance, keyed to the opaque codes.
+ *               Identical in every other respect, so opaque → opaque-words isolates the
+ *               guidance itself.
  */
-export type ServerVariant = 'rich' | 'words' | 'minimal';
+export type ServerVariant = 'rich' | 'words' | 'minimal' | 'opaque' | 'opaque-words';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -118,6 +125,22 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
       { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
     );
     registerGetBuildingProfileMinimalTool(server, bagClient, epOnlineClient);
+    registerRenderChartTool(server, { minimal: true });
+    registerRenderTableTool(server, { minimal: true });
+    registerRenderMapTool(server, { minimal: true });
+    registerGetWeatherContextTool(server, { minimal: true });
+    registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
+  if (variant === 'opaque' || variant === 'opaque-words') {
+    // A' and B'. Identical but for the tool description — see get-building-profile-opaque.ts.
+    const withProse = variant === 'opaque-words';
+    const server = new McpServer(
+      { name: `metadata-demo-${variant}`, version: VERSION },
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+    );
+    registerGetBuildingProfileOpaqueTool(server, bagClient, epOnlineClient, { withProse });
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });

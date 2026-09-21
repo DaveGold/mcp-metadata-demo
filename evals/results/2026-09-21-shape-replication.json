@@ -1,0 +1,125 @@
+{
+  "_comment": "Replication of the guide ablation across three QUESTION SHAPES. The decomposition previously rested on one derived-number question; this tests whether it generalises. It does, and it sharpens into a rule.",
+  "date": "2026-09-21",
+  "model": "haiku",
+  "arms": {
+    "A_prime": "opaque field codes, one-sentence description",
+    "B_double_prime": "opaque codes + field glossary (meanings, units, calc_t rules). NO formulas.",
+    "B_prime": "glossary + the DERIVED FIGURES block"
+  },
+  "shapes": {
+    "derived_number": {
+      "question": "Roughly how much gas does this flat use in a year? (ground truth ~253 m3)",
+      "A_prime": {
+        "answers": [
+          "40.02",
+          "40.02",
+          "40.02"
+        ],
+        "correct": "0 of 3",
+        "failure": "stable fabrication - read f_ga as the gas figure every run"
+      },
+      "B_double_prime": {
+        "answers": [
+          "UNKNOWN",
+          "UNKNOWN",
+          "295"
+        ],
+        "correct": "0 of 3",
+        "behaviour": "mostly honest; names the right fields and declines"
+      },
+      "B_prime": {
+        "answers": [
+          "253",
+          "253",
+          "253"
+        ],
+        "correct": "3 of 3"
+      },
+      "verdict": "RECIPE REQUIRED. The glossary stops the error but cannot produce the number."
+    },
+    "classification": {
+      "question": "Is this flat a good candidate for a heat pump, or does it need insulating first? (ground truth SUITABLE, wb 52.73 in the 50-70 band)",
+      "A_prime": {
+        "answers": [
+          "VERY SUITABLE",
+          "VERY SUITABLE"
+        ],
+        "correct": "0 of 2",
+        "fields_used": [
+          [
+            "lbl",
+            "ahe",
+            "bj",
+            "ep2"
+          ],
+          [
+            "lbl",
+            "bj",
+            "wb",
+            "ahe",
+            "co2"
+          ]
+        ],
+        "failure": "reasoned from the A+ label and overshot the band; never treated wb as decisive"
+      },
+      "B_double_prime": {
+        "answers": [
+          "SUITABLE",
+          "SUITABLE"
+        ],
+        "correct": "2 of 2",
+        "fields_used": [
+          [
+            "wb"
+          ],
+          [
+            "wb"
+          ]
+        ]
+      },
+      "verdict": "GLOSSARY SUFFICIENT. The answer is semantic, not computed - the bands live in the glossary and no arithmetic is needed."
+    },
+    "prevention": {
+      "question": "What is this building's energy use per m2? I want to compare it against 100 kWh/m2. (ground truth: CANNOT-COMPARE - NEN 7120 bev is inflated and not benchmarkable)",
+      "A_prime": {
+        "answers": [
+          "58.1",
+          "102.5"
+        ],
+        "correct": "0 of 2",
+        "failure": "UNSTABLE fabrication - one run divided bev by opp, the other guessed bev was MJ and divided by 3.6. Two runs, two different inventions."
+      },
+      "B_double_prime": {
+        "answers": [
+          "CANNOT-COMPARE",
+          "CANNOT-COMPARE"
+        ],
+        "correct": "2 of 2",
+        "fields_used": [
+          [
+            "calc_t",
+            "ep1",
+            "ep2",
+            "wb",
+            "ei",
+            "bev",
+            "f_ga"
+          ],
+          [
+            "calc_t",
+            "ep1"
+          ]
+        ]
+      },
+      "verdict": "GLOSSARY SUFFICIENT. There is no value to produce; the guide's job is to stop an action, and the calc_t conditional does it."
+    }
+  },
+  "the_rule": "SEMANTICS HANDLE INTERPRETATION, CLASSIFICATION AND PREVENTION. RECIPES ARE NEEDED ONLY FOR DERIVED NUMBERS. Across three shapes the field glossary alone was sufficient twice and insufficient once, and the once was the only shape requiring a value the payload does not contain. This is directly actionable when designing a tool: a threshold, a unit caveat or a field's meaning belongs in the description; an arithmetic conversion has to be computed - either documented as a recipe or, better, returned by the server.",
+  "secondary_finding": "The unguided failure MODE varies by shape, and the variation matters. Derived number: stable fabrication (40.02 three times) from misreading a field name. Classification: stable wrong answer from reasoning off the wrong field - it used the label, which is plausible and incorrect. Prevention: UNSTABLE fabrication (58.1, then 102.5) because there is no plausible field to anchor on, so each run invents a different conversion. A stable wrong answer is the most dangerous of the three: it survives a spot check.",
+  "caveats": [
+    "n=2-3 per cell. Haiku only. Payload-in-prompt rather than live tool calls.",
+    "B_prime was not re-run on the classification and prevention shapes: the glossary already succeeded, so the formula block cannot change the outcome.",
+    "The guide, the obfuscation and the questions are all authored by the same party."
+  ]
+}

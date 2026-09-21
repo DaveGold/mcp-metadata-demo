@@ -1,5 +1,5 @@
 {
-  "_comment": "20 questions, 6 categories. Every ground_truth traces to a frozen profile in addresses.json. 'separates' is the PREDICTION registered before the run - if the results disagree with it, that is the finding, not a bug.",
+  "_comment": "The full set. `status` records what the 2026-09-21 sweep showed: separator, saturated, control-prose, retired or untested. `mechanism` records WHAT the rich arm had that the thin arm did not - alert, schema or prose - which turned out to be the variable that predicts separation.",
   "version": 1,
   "captured": "2026-09-20",
   "arms": [
@@ -19,12 +19,15 @@
         "postcode": "3543AR",
         "huisnummer": 1
       },
-      "max_calls": 2,
       "ground_truth": "It cannot be read off as a per-m2 figure. berekend_energieverbruik_kwh_m2 is 369.05, but this is a NEN 7120 theoretical value that is inflated by that method and is not benchmarkable. The building's actual performance is energie_index 0.91, i.e. label A++.",
       "must_not_say": "Reporting 369.05 kWh/m2 as this building's energy use, or concluding from it that the building performs poorly.",
       "scoring": "judge",
       "note": "The flagship trap: the field NAME contains the unit, and the unit is wrong for this berekeningstype. Only the INTERPRETATION block says so.",
-      "model_sensitivity": "arcane"
+      "model_sensitivity": "arcane",
+      "status": "untested",
+      "mechanism": "unknown",
+      "outcome_class": "?",
+      "outcome_class_name": "untested"
     },
     {
       "id": "amb-02",
@@ -37,11 +40,14 @@
         "postcode": "3543AR",
         "huisnummer": 1
       },
-      "max_calls": 2,
       "ground_truth": "There is no numeric code. sbi_code holds a full-text sector description: 'Gespecialiseerde werkzaamheden in de bouw'. It is present because this is a NEN 7120 label.",
       "must_not_say": "Producing a numeric SBI code (e.g. 43.x), or claiming the field holds one that was not returned.",
       "scoring": "judge",
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "untested",
+      "mechanism": "unknown",
+      "outcome_class": "?",
+      "outcome_class_name": "untested"
     },
     {
       "id": "amb-03",
@@ -54,11 +60,16 @@
         "postcode": "1086ZJ",
         "huisnummer": 433
       },
-      "max_calls": 2,
       "ground_truth": "41 m2 is one verblijfsobject, not the building. The pand holds 106 verblijfsobjecten, so no building-level area is available from this tool. The answer must flag that 41 m2 is a single unit.",
       "must_not_say": "The building is 41 m2.",
       "scoring": "judge",
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "separator",
+      "mechanism": "alert",
+      "sweep_2026_09_21": "thin 41 / words 41 / rich flags one unit of 106 (Haiku)",
+      "fabrication_watch": "a building-level area, or 41 m2 presented as the building",
+      "outcome_class": "B",
+      "outcome_class_name": "layer closes the gap"
     },
     {
       "id": "amb-04",
@@ -71,12 +82,15 @@
         "postcode": "1082PP",
         "huisnummer": 10
       },
-      "max_calls": 2,
       "ground_truth": "gebruiksoppervlakte_thermische_zone_m2 (118,174 m2) is the EP-Online thermal-zone area and is the one EP-1 is expressed against. oppervlakte_m2 (66,581 m2) is the BAG gross area of the verblijfsobject and is the wrong denominator.",
       "must_not_say": "Using oppervlakte_m2 / 66,581 as the EP-1 denominator.",
       "scoring": "judge",
       "note": "The description used to claim the EP-Online area runs 10-30% LOWER than BAG, which Gustav Mahlerlaan contradicts at +77%. That sentence was corrected on 2026-09-20 in both this repo and the production Warmtebouw server: it now says the two cover different scopes and names this address as the counter-example. Score the choice of field, not any directional claim.",
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "untested",
+      "mechanism": "unknown",
+      "outcome_class": "?",
+      "outcome_class_name": "untested"
     },
     {
       "id": "sel-01",
@@ -90,14 +104,19 @@
         "huisnummer": 28,
         "huisletter": "A"
       },
-      "max_calls": 3,
       "ground_truth": "92 m2, reached by passing huisletter 'A'. Even then matchStatus is multiple_vbos with 2 candidates, so the answer should carry that caveat.",
       "must_not_say": "105 m2 (the huisnummer-28-only result, which is the winkelfunctie unit, not 28A).",
       "scoring": "exact_value",
       "expected_value": 92,
       "note": "Arm A CANNOT pass huisletter - the minimal input schema omits it. This is a capability gap inside the 'words' arm boundary; say so when you present it rather than scoring it as a pure prose win.",
       "model_sensitivity": "capability",
-      "tolerance": 0
+      "tolerance": 0,
+      "status": "separator",
+      "mechanism": "schema",
+      "sweep_2026_09_21": "thin-Haiku 105 (wrong) / thin-Opus correctly refuses / rich-Haiku 92. rich-Haiku beats thin-Opus.",
+      "fabrication_watch": "an answer for 28A derived from a call that never carried the huisletter",
+      "outcome_class": "D",
+      "outcome_class_name": "structural gap"
     },
     {
       "id": "sel-02",
@@ -110,11 +129,14 @@
         "postcode": "3522BN",
         "huisnummer": 28
       },
-      "max_calls": 2,
       "ground_truth": "It is the first of 4 matching verblijfsobjecten (matchStatus multiple_vbos), a 105 m2 winkelfunctie unit. It is not determinate which physical unit a user means; huisletter or toevoeging is needed.",
       "must_not_say": "Presenting the returned profile as 'the building at Rijnlaan 28' with no ambiguity flagged.",
       "scoring": "judge",
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "untested",
+      "mechanism": "unknown",
+      "outcome_class": "?",
+      "outcome_class_name": "untested"
     },
     {
       "id": "sel-03",
@@ -127,12 +149,16 @@
         "postcode": "3543AR",
         "huisnummer": 1
       },
-      "max_calls": 3,
       "ground_truth": "The postcode must be normalised to '3543AR' (no space, uppercase). The lookup then succeeds: Middenwetering 1, Utrecht, bouwjaar 2008, label A++.",
       "must_not_say": "Reporting that the address could not be found, or that the postcode is invalid.",
       "scoring": "judge",
       "note": "Arm A has no regex and no format guidance; arms B and C have both. Count calls: the rich arms may burn one on a schema rejection and recover, which is the behaviour worth showing.",
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "retired",
+      "mechanism": "none",
+      "sweep_2026_09_21": "premise wrong: PDOK accepts a postcode with a space",
+      "outcome_class": "X",
+      "outcome_class_name": "retired"
     },
     {
       "id": "agg-01",
@@ -145,14 +171,20 @@
         "postcode": "1086ZJ",
         "huisnummer": 433
       },
-      "max_calls": 2,
       "ground_truth": "~253 m3/year of gas for SPACE HEATING. 52.73 kWh/m2 x 40.02 m2 (the EP-Online thermal-zone area, not the 41 m2 BAG area) = 2,110 kWh; at 95% boiler efficiency and 8.79 kWh per m3 of Dutch gas that is ~253 m3/year. It excludes hot water and cooking, so a real gas bill is higher.",
       "must_not_say": "Reporting the heat demand in kWh as a gas volume, presenting the figure as the household's total gas use rather than space heating, or declining to estimate.",
       "scoring": "exact_value",
       "expected_value": 253,
       "tolerance": 20,
       "note": "Two fixes landed here on 2026-09-20: the kWh/m3 conversion (was 3.6x low) and the denominator (BAG area -> EP-Online thermal zone). Both pinned by regression tests. Confirm end to end after deploy.",
-      "model_sensitivity": "arcane"
+      "model_sensitivity": "arcane",
+      "status": "separator",
+      "mechanism": "alert",
+      "sweep_2026_09_21": "Separator, but noisier than n=1 suggested: the thin arm improvises a different conversion each run.",
+      "fabrication_watch": "a conversion factor or an efficiency/fossil-share adjustment that the payload does not contain",
+      "outcome_class": "B",
+      "outcome_class_name": "layer closes the gap",
+      "n3_2026_09_21": "thin 140 / 240-260 / 200-220 / 200-250 (1 of 4, 44% spread). rich 253 / 253 / 253 (3 of 3, 0% spread)."
     },
     {
       "id": "agg-02",
@@ -165,13 +197,19 @@
         "postcode": "3039WB",
         "huisnummer": 1
       },
-      "max_calls": 2,
       "ground_truth": "~2,630 kg CO2/year: 28.59 kg/m2 x 92 m2, the EP-Online thermal-zone area. Under NTA 8800 co2_emissie_kg_m2 is per m2 per year, so it must be multiplied by the area the label is expressed against - not the 100 m2 BAG area.",
       "must_not_say": "Reporting 28.59 kg as the total annual emission.",
       "scoring": "exact_value",
       "expected_value": 2630,
       "tolerance": 60,
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "separator",
+      "mechanism": "alert",
+      "sweep_2026_09_21": "Separator. The thin arm is CONSISTENTLY wrong here - the payload offers an obvious-but-incorrect path (multiply by the visible BAG area).",
+      "fabrication_watch": "an area denominator other than gebruiksoppervlakte_thermische_zone_m2",
+      "outcome_class": "B",
+      "outcome_class_name": "layer closes the gap",
+      "n3_2026_09_21": "thin 2859 x3 (0 of 3, stable and wrong). rich 2630 x3 (3 of 3)."
     },
     {
       "id": "agg-03",
@@ -184,12 +222,16 @@
         "postcode": "1086ZJ",
         "huisnummer": 433
       },
-      "max_calls": 2,
       "ground_truth": "Yes - suitable. warmtebehoefte is 52.73 kWh/m2, which falls in the 50-70 band: suitable for a heat pump without insulation work first.",
       "must_not_say": "Insulate first / not suitable, or answering without reference to warmtebehoefte.",
       "scoring": "judge",
       "note": "The suitability bands (<50, <70, <100, >=100) exist ONLY in generateAlerts. The rich description says warmtebehoefte is 'the key input for heat pump sizing' but never gives a threshold - so this is a clean B->C separator.",
-      "model_sensitivity": "arcane"
+      "model_sensitivity": "arcane",
+      "status": "saturated",
+      "mechanism": "none",
+      "sweep_2026_09_21": "binary verdict guessable from the A+ label",
+      "outcome_class": "A",
+      "outcome_class_name": "always works"
     },
     {
       "id": "agg-04",
@@ -202,11 +244,14 @@
         "postcode": "3515CC",
         "huisnummer": 25
       },
-      "max_calls": 2,
       "ground_truth": "Not yet - insulate first. warmtebehoefte is 138.97 kWh/m2, above the 100 kWh/m2 band, so insulation work should precede a heat pump.",
       "must_not_say": "Suitable / good candidate for a heat pump as it stands.",
       "scoring": "judge",
-      "model_sensitivity": "arcane"
+      "model_sensitivity": "arcane",
+      "status": "untested",
+      "mechanism": "unknown",
+      "outcome_class": "?",
+      "outcome_class_name": "untested"
     },
     {
       "id": "agg-05",
@@ -219,12 +264,15 @@
         "postcode": "1082PP",
         "huisnummer": 10
       },
-      "max_calls": 2,
       "ground_truth": "No. EP-1 is 81.68 kWh/m2 against the 70 kWh/m2 Paris Proof 2040 target for offices, so it is roughly 12 kWh/m2 over despite holding label A.",
       "must_not_say": "Yes / on track, or treating label A as sufficient evidence of Paris Proof compliance.",
       "scoring": "judge",
       "note": "Predicted A->B, not B->C: the 70 kWh/m2 office threshold is stated in the rich description as well as in the alert. If C beats B here anyway, that is evidence that an alert lands harder than the same fact in prose - which is a genuinely interesting result.",
-      "model_sensitivity": "arcane"
+      "model_sensitivity": "arcane",
+      "status": "untested",
+      "mechanism": "unknown",
+      "outcome_class": "?",
+      "outcome_class_name": "untested"
     },
     {
       "id": "tool-01",
@@ -234,12 +282,16 @@
       "address": "middenwetering",
       "correct_tool": "none",
       "required_params": {},
-      "max_calls": 2,
       "ground_truth": "This server does not provide metered consumption - only public-register data (BAG + EP-Online). The right answer says so. berekend_energieverbruik is a theoretical calculation, not a meter reading.",
       "must_not_say": "Presenting berekend_energieverbruik_kwh_m2 (369.05) as metered or actual consumption.",
       "scoring": "judge",
       "note": "This is WHEN NOT TO USE earning its place. The most quotable confidently-wrong failure in the set.",
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "saturated",
+      "mechanism": "none",
+      "sweep_2026_09_21": "thin refused correctly",
+      "outcome_class": "A",
+      "outcome_class_name": "always works"
     },
     {
       "id": "tool-02",
@@ -249,11 +301,14 @@
       "address": "middenwetering",
       "correct_tool": "get_weather_context",
       "required_params": {},
-      "max_calls": 3,
       "ground_truth": "Answering needs get_weather_context (degree-days for Utrecht over last week). get_building_profile cannot answer it; calling it alone is the wrong tool.",
       "must_not_say": "Answering from the building profile alone, or claiming the server has no weather data.",
       "scoring": "judge",
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "untested",
+      "mechanism": "unknown",
+      "outcome_class": "?",
+      "outcome_class_name": "untested"
     },
     {
       "id": "tool-03",
@@ -263,11 +318,14 @@
       "address": "multiple",
       "correct_tool": "render_map",
       "required_params": {},
-      "max_calls": 5,
       "ground_truth": "Three get_building_profile calls to collect coordinaten, then one render_map call with the three markers. Utrecht 52.1045/5.0553, Amsterdam 52.3370/4.8749, Rotterdam 51.9294/4.4567.",
       "must_not_say": "Describing the locations in text only, or using render_chart / render_table for geographic points.",
       "scoring": "judge",
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "untested",
+      "mechanism": "unknown",
+      "outcome_class": "?",
+      "outcome_class_name": "untested"
     },
     {
       "id": "ref-01",
@@ -280,11 +338,14 @@
         "postcode": "3512JC",
         "huisnummer": 1
       },
-      "max_calls": 2,
       "ground_truth": "There is no label registered in EP-Online for this address (labelCount 0). That is not the same as the building having no label - it means none is registered.",
       "must_not_say": "Naming any letter (F, G, etc.) as this building's label, or inferring one from bouwjaar 1935.",
       "scoring": "judge",
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "untested",
+      "mechanism": "unknown",
+      "outcome_class": "?",
+      "outcome_class_name": "untested"
     },
     {
       "id": "ref-02",
@@ -297,12 +358,16 @@
         "postcode": "7902EA",
         "huisnummer": 9
       },
-      "max_calls": 2,
       "ground_truth": "No label is registered in EP-Online for it. Age does not determine a label, and the question's framing invites an inference the data does not support.",
       "must_not_say": "Naming a letter, or reasoning that a 1653 building 'would be' G.",
       "scoring": "judge",
       "note": "Leading question on purpose. Tests whether the arm follows the user's framing off a cliff.",
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "saturated",
+      "mechanism": "none",
+      "sweep_2026_09_21": "all arms, all models correct",
+      "outcome_class": "A",
+      "outcome_class_name": "always works"
     },
     {
       "id": "ref-03",
@@ -315,11 +380,14 @@
         "postcode": "3581AE",
         "huisnummer": 10
       },
-      "max_calls": 3,
       "ground_truth": "No BAG match (matchStatus not_found). The answer should report that and suggest checking postcode and huisnummer - not describe a building.",
       "must_not_say": "Any concrete building attribute (bouwjaar, area, label) for this address.",
       "scoring": "judge",
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "untested",
+      "mechanism": "unknown",
+      "outcome_class": "?",
+      "outcome_class_name": "untested"
     },
     {
       "id": "int-01",
@@ -332,12 +400,17 @@
         "postcode": "3039WB",
         "huisnummer": 1
       },
-      "max_calls": 2,
       "ground_truth": "Yes, significant. temperatuuroverschrijding is 3.59, well above the 1.5 threshold for significant overheating risk. Relevant to cooling load and heat pump sizing.",
       "must_not_say": "No risk, or ignoring temperatuuroverschrijding entirely.",
       "scoring": "judge",
       "note": "Deliberate control. generateAlerts emits NOTHING about temperatuuroverschrijding, so arm C has no advantage here. If C beats B on this question, something other than the metadata is driving the result and the whole run needs a second look.",
-      "model_sensitivity": "arcane"
+      "model_sensitivity": "arcane",
+      "status": "control-prose",
+      "mechanism": "prose",
+      "sweep_2026_09_21": "Haiku fails both arms / Opus passes both. Prose-only rule.",
+      "fabrication_watch": "a unit for temperatuuroverschrijding (degree-days, hours above 27C) or a threshold other than 1.5",
+      "outcome_class": "C",
+      "outcome_class_name": "model closes the gap"
     },
     {
       "id": "int-02",
@@ -350,11 +423,14 @@
         "postcode": "3522BN",
         "huisnummer": 28
       },
-      "max_calls": 2,
       "ground_truth": "Still valid - label_geldig_tot is 2034-12-06. It is a Basisopname (standard site visit, not a Detailopname) and op_basis_van_referentiegebouw is false, so it is an actual calculation rather than a reference-building estimate.",
       "must_not_say": "Reporting the label as expired, or as based on a reference building.",
       "scoring": "judge",
-      "model_sensitivity": "discipline"
+      "model_sensitivity": "discipline",
+      "status": "untested",
+      "mechanism": "unknown",
+      "outcome_class": "?",
+      "outcome_class_name": "untested"
     },
     {
       "id": "int-03",
@@ -367,12 +443,58 @@
         "postcode": "3543AR",
         "huisnummer": 1
       },
-      "max_calls": 2,
       "ground_truth": "Yes, good. EI below 1.2 corresponds to label A or better, and this building holds A++. Energie_index is the pre-NTA 8800 performance metric; there is no Paris Proof kWh/m2 equivalent for it.",
       "must_not_say": "Treating a low energie_index as poor (lower is better), or converting it to a kWh/m2 Paris Proof comparison.",
       "scoring": "judge",
-      "model_sensitivity": "arcane"
+      "model_sensitivity": "arcane",
+      "status": "untested",
+      "mechanism": "unknown",
+      "outcome_class": "?",
+      "outcome_class_name": "untested"
+    },
+    {
+      "id": "benchmark-trap",
+      "category": "ambiguity",
+      "separates": "neither",
+      "model_sensitivity": "discipline",
+      "mechanism": "prose",
+      "status": "control-prose",
+      "question": "What is the energy use per square metre of Middenwetering 1 in Utrecht, 3543AR? I want to compare it against a benchmark of 100 kWh/m2.",
+      "address": "middenwetering",
+      "correct_tool": "get_building_profile",
+      "required_params": {
+        "postcode": "3543AR",
+        "huisnummer": 1
+      },
+      "ground_truth": "The comparison cannot be made. 369.05 is a theoretical NEN 7120 primary-energy figure, inflated by that method; a 100 kWh/m2 benchmark is defined on measured final energy. The building holds an A++ label with energie_index 0.91, and this server has no metered data.",
+      "must_not_say": "Reporting that the building is roughly 3.7x the benchmark, or otherwise ranking it against 100 kWh/m2.",
+      "scoring": "judge",
+      "fabrication_watch": "a benchmark comparison for a NEN 7120 berekend_energieverbruik figure",
+      "why_this_lands": "The payload actively misleads: the field is NAMED kwh_m2 and reads 369 on a building labelled A++. The warning exists only in INTERPRETATION prose, and the sweep showed that changes nothing - Haiku and Sonnet fail on BOTH arms, Opus passes on both. Keep it as the demonstration that prose alone does not move behaviour, and that some gaps are a model cliff.",
+      "note": "Reworded from amb-01 to invite the comparison explicitly. Mapped across all three models on 2026-09-21.",
+      "outcome_class": "C",
+      "outcome_class_name": "model closes the gap",
+      "sweep_2026_09_21": "Haiku and Sonnet fail both arms / Opus passes both. Prose-only rule."
     }
   ],
-  "_model_hypothesis": "Registered before the run: on 'discipline' questions the thin arm should separate the models (Opus right, Haiku wrong) while the rich arm should lift Haiku to Opus's thin-arm level - i.e. the metadata layer buys roughly one model tier. On 'arcane' questions every model should fail the thin arm, because the knowledge is not in any model's pretraining - a floor, not a gradient. Reading these two groups separately is the whole point: pooling them hides both effects."
+  "_model_hypothesis": "Registered before the run: on 'discipline' questions the thin arm should separate the models (Opus right, Haiku wrong) while the rich arm should lift Haiku to Opus's thin-arm level - i.e. the metadata layer buys roughly one model tier. On 'arcane' questions every model should fail the thin arm, because the knowledge is not in any model's pretraining - a floor, not a gradient. Reading these two groups separately is the whole point: pooling them hides both effects.",
+  "_metrics": {
+    "correct": "matches ground_truth.",
+    "confidently_wrong": "asserts must_not_say. The headline number.",
+    "fabricated": "invented a constant, unit or threshold not present in the payload - see fabrication_watch. This REPLACES max_calls, which carried no signal: get_building_profile is one-shot, so almost every run is a single call.",
+    "right_tool_first": "first tool called equals correct_tool.",
+    "reproducible": "how many of n runs land inside the accept range, plus the SPREAD of the answers. Run alongside `correct`, never instead of it: on gas-estimate rich is 3/3 at 0% spread and thin is 1/4 at 44% spread, and neither number alone says that."
+  },
+  "_sweep": "evals/results/2026-09-21-haiku-sweep.json",
+  "_outcome_classes": {
+    "A_always_works": "Every arm, every model correct. Proves the set is not rigged and fixes the floor. Keep two.",
+    "B_layer_closes_the_gap": "thin fails, rich succeeds, SAME model. The headline. Every one found so far is carried by an ALERT or a SCHEMA field.",
+    "C_model_closes_the_gap": "Both arms fail at the small model, both pass at Opus. Every one found so far has its rule ONLY in INTERPRETATION prose. Shows the limit of the layer.",
+    "D_structural_gap": "The thin arm cannot express the call at all, at any model. The strongest result: rich-Haiku beats thin-Opus.",
+    "E_layer_cannot_fix_it": "rich fails even at Opus. NOT FOUND in this set - state that rather than implying coverage."
+  },
+  "_results": [
+    "results/2026-09-21-haiku-sweep.json",
+    "results/2026-09-21-n3-separators.json"
+  ]
 }

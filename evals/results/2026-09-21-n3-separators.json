@@ -1,0 +1,44 @@
+{
+  "_comment": "n=3 stability check on the two NUMERIC separators, thin vs rich, Haiku. Run because the first sweep was n=1 and the headline rested on it. It found something the n=1 sweep could not see.",
+  "date": "2026-09-21",
+  "model": "haiku",
+  "question": "Does the separation reproduce, and how variable is each arm?",
+  "cells": {
+    "gas-estimate": {
+      "ground_truth": 253, "tolerance": 20, "accept_range": [233, 273],
+      "thin": {
+        "answers": ["140", "240-260", "200-220", "200-250"],
+        "midpoints": [140, 250, 210, 225],
+        "correct": "1 of 4",
+        "spread_pct": 44,
+        "note": "Four different conversions on identical input. Each run invented its own factor: a 69.2% fossil share, '~10 kWh per m3 at 85-90%', '85-90% boiler', a degree-day cross-check. The payload offers NO path to a gas volume, so the model improvises a different one each time."
+      },
+      "rich": {
+        "answers": ["253", "253", "253"],
+        "correct": "3 of 3",
+        "spread_pct": 0,
+        "note": "Quotes the server-computed alert. Identical every run. One run usefully extrapolated beyond it (300-400 m3 including hot water) without altering the figure."
+      }
+    },
+    "total-vs-per-m2": {
+      "ground_truth": 2630, "tolerance": 60, "accept_range": [2570, 2690],
+      "thin": {
+        "answers": ["2859", "2859", "2859"],
+        "correct": "0 of 3",
+        "spread_pct": 0,
+        "note": "Stable and WRONG. The payload offers an obvious-but-incorrect path -- multiply the visible oppervlakte_m2 (100) -- so every run takes it and lands on the same wrong number."
+      },
+      "rich": {
+        "answers": ["2630", "2630", "2630"],
+        "correct": "3 of 3",
+        "spread_pct": 0
+      }
+    }
+  },
+  "findings": {
+    "1_the_layer_collapses_variance": "On gas-estimate the rich arm returned 253 three times out of three. The thin arm returned 140, 240-260, 200-220 and 200-250 on identical input -- a 44% spread. Accuracy is only half of it: the layer makes the answer REPRODUCIBLE. For anyone building on the output, an answer that changes every call is worse than one that is consistently wrong, because it cannot be caught by a spot check.",
+    "2_two_distinct_thin_failure_modes": "Where the payload offers NO path to the answer (gas-estimate), the thin arm improvises and scatters. Where it offers an OBVIOUS BUT WRONG path (total-vs-per-m2: multiply by the visible BAG area), the thin arm is perfectly stable and perfectly wrong. The second is the more dangerous: it looks reliable.",
+    "3_n1_was_misleading": "The first sweep recorded thin-Haiku at 140 m3 for gas-estimate and classified the question a clean separator. At n=4 the thin arm is right once. The separation is real but weaker and noisier than n=1 suggested -- which is exactly why the design note insists on repeats.",
+    "4_implication_for_scoring": "Report a REPRODUCIBILITY figure alongside correctness: how many of n runs fall inside the accept range, and the spread of the answers. On gas-estimate that is rich 3/3 spread 0% versus thin 1/4 spread 44%, which states the case better than either number alone."
+  }
+}

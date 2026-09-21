@@ -96,8 +96,11 @@ if (isMain) {
   const PORT = Number(process.env.PORT ?? 3000);
   const HOST = process.env.HOST ?? '127.0.0.1';
   const rawVariant = process.env.MCP_VARIANT;
-  const variant: ServerVariant =
-    rawVariant === 'minimal' ? 'minimal' : rawVariant === 'words' ? 'words' : 'rich';
+  const variant: ServerVariant = (
+    ['minimal', 'words', 'opaque', 'opaque-words'] as const
+  ).includes(rawVariant as never)
+    ? (rawVariant as ServerVariant)
+    : 'rich';
 
   const app = createHttpApp({ hosted: false, variant });
   app.listen(PORT, HOST, () => {

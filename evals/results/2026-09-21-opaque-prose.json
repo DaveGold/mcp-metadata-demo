@@ -1,0 +1,88 @@
+{
+  "_comment": "The test that the original three arms could not run. Isolates interpretation guidance by removing the confound that was hiding it: the self-describing field names the thin arm shipped all along.",
+  "date": "2026-09-21",
+  "model": "haiku",
+  "why": [
+    "The thin arm was never metadata-free. It strips descriptions, schemas and alerts, but still returns gebruiksoppervlakte_thermische_zone_m2, berekeningstype, aantal_verblijfsobjecten and matchStatus. Those names ARE metadata, and Haiku reads straight through them.",
+    "Three prose-shaped questions were put to the thin arm and it answered all three correctly - inferring from berekeningstype: 'NEN 7120' that the method does not populate warmtebehoefte, and picking gebruiksoppervlakte_thermische_zone_m2 as the right denominator unprompted.",
+    "So A->B could never measure what guidance buys: the naming had already done the job. A real legacy register emits EP1, VBO_OPP, BER_TYPE and a numeric status. The opaque arms restore that."
+  ],
+  "method": "Payload-in-prompt proxy, not the full MCP loop: the same obfuscated payload and the same question were given to Haiku twice, once with the interpretation guide and once with a one-sentence description. The deployed mcpOpaque / mcpOpaqueWords endpoints run the same comparison end to end.",
+  "question": "Roughly how much gas does this flat use in a year? (IJburglaan 433A, ground truth ~253 m3 space heating)",
+  "runs": [
+    {
+      "arm": "opaque (A', no guidance)",
+      "answer": "164 m3",
+      "correct": false,
+      "failure": "Read `f_ga` as gas consumption - the two letters 'ga' were enough. It is the thermal-zone floor area (40.02 m2). It then multiplied by opp (41) and applied an invented '~10 kWh per m3' factor.",
+      "quote": "I used the `f_ga` field (40.02, appearing to represent annual gas consumption in kWh per square meter)"
+    },
+    {
+      "arm": "opaque-words (B', guidance only)",
+      "answer": "252 m3",
+      "correct": true,
+      "note": "Used wb and f_ga correctly, applied the stated formula, and carried the space-heating-only caveat unprompted."
+    },
+    {
+      "arm": "opaque (A', no guidance)",
+      "model": "opus",
+      "answer": "declined to give a figure",
+      "correct": false,
+      "failure": "Not a wrong answer - an honest one. It could not recover the meaning of the fields, and said so.",
+      "quote": "no field is labelled as an annual gas volume, and the only candidate, `f_ga: 40.02`, comes with no unit, so it could be m3/m2.yr (~1,640 m3/yr) or kWh/m2.yr (~170 m3/yr), a tenfold difference ... To answer this properly you'd need the field's definition and unit",
+      "note": "It also inferred from ahef: 0 alongside ep2f: 96.55 that an external heat supply was likely, so the flat might use almost no gas at all. Sophisticated reasoning, and still not enough."
+    }
+  ],
+  "finding": "Interpretation guidance turned a fabricated 164 m3 into a correct 252 m3 with no change to the model, the data, the tool surface or the question. Opus without the guidance could not answer at all and said so explicitly. So the claim is not 'guidance helps small models' - it is that WITHOUT GUIDANCE THE DATA IS NOT USABLE, and no model fixes that. The weak model invents; the strong model declines. Guidance is what makes the payload mean anything. This was invisible in the thin/words/rich comparison because the thin arm's readable field names were already supplying the meaning.",
+  "implication": "Two claims, and they are different. (1) Against a realistically opaque API, interpretation guidance alone is decisive. (2) Against an API whose fields are already well named, guidance adds little and the remaining value sits in computed alerts and schema fields. Both are true, and the second is why the first is easy to under-measure in a demo built on good naming.",
+  "caveats": [
+    "n=1 per arm. Directional.",
+    "A payload-in-prompt proxy rather than a live tool call. Re-run against mcpOpaque and mcpOpaqueWords once deployed.",
+    "One question. The other core questions have not been run against the opaque arms."
+  ],
+  "ladder": {
+    "A_prime_opus_no_guidance": "refuses - the information is not recoverable",
+    "A_prime_haiku_no_guidance": "164 m3 - fabricates, reading f_ga as 'gas'",
+    "B_prime_haiku_with_guidance": "252 m3 - correct",
+    "reading": "B'-Haiku beats A'-Opus. Not because Haiku is the better model, but because the guidance carries information that is ABSENT from the payload at any level of capability."
+  },
+  "also_a_safety_result": "The gap between Haiku and Opus on the unguided payload is not accuracy, it is fabrication versus honest refusal. Guidance closes the accuracy gap; model capability closes the honesty gap. A deployment on a small model with a poorly described API gets the worst of both.",
+  "comprehension_test": {
+    "why": "The first result could be dismissed as instruction-following: the guide stated the gas formula and the question applied it. This test scores a question whose answer is NOWHERE in the guide - the model must chain calc_t -> NEN 7120 -> bev is not benchmarkable / ei has no kWh equivalent, and decline.",
+    "question": "What is this building's energy use per square metre? I want to compare it against a benchmark of 100 kWh/m2. (Middenwetering 1, NEN 7120, bev 369.05, ei 0.91, label A++)",
+    "runs": [
+      {
+        "arm": "rich (readable names + prose + alerts)",
+        "model": "haiku",
+        "correct": false,
+        "answer": "3.7 times higher than the benchmark"
+      },
+      {
+        "arm": "rich (readable names + prose + alerts)",
+        "model": "sonnet",
+        "correct": false,
+        "answer": "3.7 times your benchmark, far above target"
+      },
+      {
+        "arm": "rich (readable names + prose + alerts)",
+        "model": "opus",
+        "correct": true,
+        "answer": "flagged theoretical vs measured, not like-for-like"
+      },
+      {
+        "arm": "opaque-words (opaque names + guide)",
+        "model": "haiku",
+        "correct": true,
+        "answer": "cannot be compared; NEN 7120 gives no ep1, ei 0.91 has no kWh/m2 equivalent",
+        "note": "Never even proposed bev as a candidate. Comprehension, not transcription: the guide does not say to refuse this comparison."
+      }
+    ],
+    "finding": "A MISLEADING READABLE NAME IS WORSE THAN NO NAME. berekend_energieverbruik_kwh_m2 reads as 'calculated energy use in kWh/m2', so Haiku and Sonnet trusted the name and benchmarked it, skipping the prose that says not to. Renamed to `bev`, the same model on the same data had to consult the guide - and got it right. Good naming is metadata; WRONG naming is anti-metadata, and it defeats the guidance sitting next to it.",
+    "caveat": "n=1 per cell. The comparison across arms also varies the naming and the payload keys, not the guidance alone."
+  },
+  "what_is_and_is_not_proven": {
+    "interpretation_guidance": "PROVEN, twice, mechanistically. Gas: 164 (fabricated) -> 252 (correct) with only the guide changing. Benchmark trap: opaque+guide Haiku succeeds where rich Haiku and Sonnet fail. Model, data, tool surface and question held constant in each case.",
+    "input_schema_field_presence": "PROVEN. wrong-unit: the thin schema has no huisletter, so the call cannot be expressed. thin-Haiku answers 105 m2 (the wrong unit), thin-Opus refuses, rich-Haiku answers 92 m2. No model closes a gap in the schema.",
+    "input_schema_description_text": "NOT PROVEN. The only observation is human-typing: rich normalised '3543 AR' to '3543AR' because its schema says 'zonder spatie', while thin passed the space through - and PDOK accepted both, so behaviour differed and correctness did not. The two opaque arms deliberately share an identical input schema, so they test nothing here. A sixth arm would be needed: huisletter present but UNDESCRIBED versus present and described, or a strict-format case such as a lowercase postcode where the regex forces a correction the bare schema does not."
+  }
+}

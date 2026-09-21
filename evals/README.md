@@ -6,38 +6,310 @@ profile captured from the live server and frozen in
 [`addresses.json`](addresses.json).
 
 - **[`questions-core.json`](questions-core.json) — 9 questions. Start here.**
-- [`questions.json`](questions.json) — the full 21, for the actual numbers
+- [`questions.json`](questions.json) — the full set, with every question tagged by outcome class
+- [`results/`](results/) — what has actually been run
 - [`addresses.json`](addresses.json) — frozen reference profiles + known gaps
 
 ---
 
-## The 9-question demo set
+## What the sweep found (2026-09-21)
 
-Chosen so the failure is obvious to someone who has never heard of BAG,
-EP-Online or NTA 8800. If a question needs a paragraph of Dutch building
-regulation before the mistake looks like a mistake, it is in the full set
-instead, not this one.
+Before spending the full matrix, every core question was run thin-vs-rich at Haiku,
+with the interesting ones extended to Sonnet and Opus. 33 runs, n=1 per cell —
+directional, not significant. It changed the design, so read it first:
+[`results/2026-09-21-haiku-sweep.json`](results/2026-09-21-haiku-sweep.json).
 
-| # | the question, in plain terms | what the thin server does | isolates |
+**The finding: prose alone changed nothing. Computed alerts and schema fields
+changed everything.**
+
+Every question the rich arm won, it won on an **alert** or a **schema field**. On
+the two questions whose rule lives only in INTERPRETATION prose, rich failed
+exactly like thin — rich-Haiku read *">1.5 = significant overheating"*, saw 3.59,
+and answered *"very low"*. The words arm settles it: on `building-size` and
+`total-vs-per-m2` it produced answers **identical to thin** (41 m², 2,859 kg)
+while carrying the full prose.
+
+This **inverts the design note**, which frames A→B as the thing to prove and
+"most of the build". At Haiku, A→B buys almost nothing and B→C buys all of it.
+The defensible message is not *write better descriptions* — it is *compute the
+answer server-side*.
+
+### The strongest single result
+
+`wrong-unit` asks for the area of flat 28A. The thin schema has no `huisletter`
+field, so the call cannot be expressed:
+
+| | |
+|---|---|
+| thin · Haiku | ❌ "105 m²" — the shop at number 28, no caveat |
+| thin · Opus | ⚠️ correctly refuses: *"this tool has no huisletter parameter"* |
+| rich · Haiku | ✅ **92 m²** |
+
+**rich-Haiku strictly beats thin-Opus.** And it shows the layer doing two distinct
+jobs: making the weak model *right*, and the strong model *safe*.
+
+---
+
+## The demo set: nine questions, five outcome classes
+
+A set of only separators is selection, not evidence. These nine span the whole
+response surface, and the classes are the argument:
+
+| class | what it shows | questions |
+|---|---|---|
+| **B · layer closes the gap** | thin ❌ → rich ✅, same model | building-size, total-vs-per-m2, gas-estimate, heat-pump-triage |
+| **D · structural gap** | the thin arm cannot express the call at any model | wrong-unit |
+| **C · model closes the gap** | both arms ❌ at Haiku, ✅ at Opus — prose-only rules | overheating, benchmark-trap |
+| **A · always works** | every arm, every model correct | metered-vs-model, invented-label |
+| **E · layer can't fix it** | rich ❌ even at Opus | **none found — say so** |
+
+Class A is not filler. Without it the set cannot surprise you, and a room is
+right to discount it.
+
+### Retired, and why
+
+Four questions were cut after every arm answered them correctly. Keeping them
+would have padded the totals without testing anything:
+
+- **heat-pump** (binary) — "is this a good candidate?" is guessable from an A+
+  label. Replaced by **heat-pump-triage**, which asks for a three-way ordering
+  against bands that exist only in the alerts. Written after the sweep, and it
+  separates.
+- **invented-label**, **metered-vs-model** — kept, but as class-A controls rather
+  than as evidence.
+- **human-typing** — retired outright. It assumed a postcode with a space needs
+  normalising; PDOK accepts it, so the thin arm passed `"3543 AR"` straight
+  through and succeeded. The question tested nothing.
+
+### Two design rules the sweep produced
+
+1. **A question separates only when the answer needs a value, constant or
+   convention that is not in the payload and not guessable from an adjacent
+   signal.** Binary verdicts saturate. Values and orderings do not.
+2. **Separation can collapse as the model improves.** `gas-estimate` separated at
+   Haiku, but thin-Sonnet reached 250–300 m³ by a different route. Treat every
+   separation as model-specific until shown otherwise.
+
+### Interpretation guidance: the test the three arms could not run
+
+The thin arm was never metadata-free. It strips descriptions, schemas and alerts,
+but still returns `gebruiksoppervlakte_thermische_zone_m2`, `berekeningstype`,
+`aantal_verblijfsobjecten` and `matchStatus`. **Those names are metadata**, and
+Haiku reads straight through them — put three prose-shaped questions to the thin
+arm and it answers all three, inferring from `berekeningstype: "NEN 7120"` that
+the method does not populate warmtebehoefte, and picking the thermal-zone area as
+the right denominator unprompted.
+
+So A→B could never measure what guidance buys: the naming had already done the
+job. A real legacy register emits `EP1`, `VBO_OPP`, `BER_TYPE` and a numeric
+status. Two further arms restore that —
+[`get-building-profile-opaque.ts`](../src/tools/get-building-profile-opaque.ts):
+
+| arm | field names | description |
+|---|---|---|
+| **A′ · opaque** | `f_ga`, `calc_t`, `wb`, `n_vbo`, `st: 2` | one sentence |
+| **B′ · opaque-words** | identical | the guidance, keyed to those codes |
+
+Same input schema, no output schema, no alerts, identical payloads. **Only the
+description differs**, and a test asserts it.
+
+Asked how much gas the IJburglaan flat uses (ground truth ~253 m³):
+
+| | answer | |
+|---|---|---|
+| A′ · **Opus** | ⚠️ *"you'd need the field's definition and unit"* | information not recoverable |
+| A′ · **Haiku** | ❌ **164 m³** — read `f_ga` as *"gas"* | fabricates |
+| B′ · **Haiku** | ✅ **252 m³** | correct, with the space-heating caveat |
+
+**B′-Haiku beats A′-Opus** — not because Haiku is the better model, but because
+the guidance carries information absent from the payload at any level of
+capability. Opus does not fail by being wrong; it fails by correctly reporting
+that the question cannot be answered. Haiku fails by inventing.
+
+**A misleading name is worse than no name.** The benchmark-trap question asks
+whether a NEN 7120 `berekend_energieverbruik` of 369 can be compared against a
+100 kWh/m² target. It cannot. With readable names, prose *and* alerts, Haiku and
+Sonnet both answered "3.7 times higher" — the field name says *calculated energy
+use in kWh/m²*, so they trusted it and skipped the prose beside it. Rename it to
+`bev` and the same model, on the same data, consults the guide and declines
+correctly. Good naming is metadata; **wrong naming is anti-metadata**, and it
+defeats the guidance sitting next to it.
+
+That run is also the answer to the obvious objection about the gas result — that
+the guide stated the formula and the model merely followed it. Here the guide
+never says to refuse the comparison. Haiku had to chain `calc_t` → NEN 7120 →
+`ep1` is null → `ei` has no kWh/m² equivalent. Comprehension, not transcription.
+
+### Which half of the guidance does the work (n=3)
+
+The guide has two distinct parts, and they turn out to buy different things.
+Same model, same payload, same question, only the guide varies
+([`results/2026-09-21-guide-ablation.json`](results/2026-09-21-guide-ablation.json)):
+
+| arm | guide | answers | correct |
 |---|---|---|---|
-| 1 | What energy label does a building from **1653** have? | Invents a letter | words |
-| 2 | How big is this building? | Says **41 m²** — it is a 106-apartment block | words |
-| 3 | Pull the **metered** gas use for this address | Hands over a theoretical figure as if it were a meter reading | words |
-| 4 | *(postcode typed with a space, as people do)* | Reports that the address does not exist | words |
-| 5 | How big is flat **28A**? | Answers about the shop at 28 — its schema has no field for the letter | words |
-| 6 | Total CO₂ per year for this home? | **28.59 kg** — too small to be a year's worth | words |
-| 7 | Is this flat a good candidate for a **heat pump**? | No basis to answer | capability |
-| 8 | Roughly what will this cost in **gas** per year? | No basis to answer | capability |
-| 9 | Will this flat **overheat** in summer? | *(the control — see below)* | neither |
+| **A′** none | one sentence | `40.02` · `40.02` · `40.02` | 0/3 |
+| **B″** glossary only | field meanings + units + `calc_t` rules, **formula removed** | `UNKNOWN` · `UNKNOWN` · `295` | 0/3 |
+| **B′** full | glossary **+ the two-line conversion** | `253` · `253` · `253` | 3/3 |
 
-**Question 9 is the honesty check.** The rich server's alerts say nothing about
-overheating, so arms B and C should score the same. If arm C wins there anyway,
-something other than the metadata is driving the results and the run needs a
-second look before any of it goes on a slide. A set with no control is a set that
-cannot surprise you.
+**Field semantics stop the error. Derived-figure recipes produce the answer.**
+Neither is sufficient alone, and they are not the same intervention:
 
-Budget: 9 × 3 arms × 3 models × 3 repeats = **243 runs**, against 567 for the
-full set.
+- Without any guide, every run read `f_ga` as the gas figure and returned it raw
+  — the letters "ga" were enough. Perfectly stable, perfectly wrong.
+- Add only the glossary and the fabrication mostly stops: two runs named exactly
+  the right fields and honestly declined. Knowing what a field *means* is enough
+  to prevent a confident error and not enough to answer.
+- Add the two-line formula and it is 3/3 with zero variance.
+
+The same ablation at **Opus** shows the two halves scale differently:
+
+| arm | Haiku | Opus |
+|---|---|---|
+| A′ none | `40.02` ×3 — fabricates | declined |
+| B″ glossary only | `UNKNOWN` ·`UNKNOWN` · `295` | `UNKNOWN` · `UNKNOWN` |
+| B′ full guide | `253` ×3 | `253` |
+
+**The glossary is a small-model safety intervention.** At Haiku it converts
+confident fabrication into mostly-honest uncertainty. At Opus there is nothing
+left to convert — it already refuses unaided.
+
+**The recipe is model-independent.** Neither model produced the number without
+it, including Opus, which demonstrably knows the 8.79 kWh/m³ conversion as
+general knowledge. It declined anyway — and its reasoning shows why: it cited
+`ahe: 30.8` and `st: 2` and doubted the flat burns gas at all. **Haiku refuses
+because it cannot compute; Opus refuses because it suspects the question is
+ill-posed.** The stronger model is not merely safer, it is sceptical of the
+premise.
+
+So three layers, doing three jobs:
+
+| layer | buys | scales with model? |
+|---|---|---|
+| **naming / semantics** | stops confident misreading | inversely — biggest on the weakest model |
+| **derived-figure recipes** | the answer itself | no — every model needed it |
+| **model capability** | honest refusal as a floor | yes — only Opus had it |
+
+**This is "something is better than nothing", measured.** The glossary never
+reached the right number, but it moved the model from a confident wrong answer
+to mostly-honest uncertainty — and for a system feeding customer advice that is
+the more valuable half. A wrong number gets acted on; an "I can't tell you" gets
+escalated.
+
+Two honest qualifications. The glossary arm is **unstable** — `UNKNOWN, UNKNOWN,
+295` — so the accurate claim is that it *reduces* fabrication, not that it makes
+the model honest. And note what never happened in any unguided run: no model
+treated an unrecognised code as unknown. It reached for the nearest plausible
+meaning and committed. **The failure mode of a badly named field is not
+confusion, it is confident misreading.**
+
+### The rule, replicated across three question shapes
+
+The decomposition above rested on one derived-number question. Running the same
+ablation on two other shapes turns it into a rule
+([`results/2026-09-21-shape-replication.json`](results/2026-09-21-shape-replication.json)):
+
+| shape | A′ none | B″ glossary only | B′ + recipe |
+|---|---|---|---|
+| **derived number** — how much gas? | `40.02` ×3 | `UNKNOWN` ·`UNKNOWN` · `295` | **`253` ×3** ✅ |
+| **classification** — heat-pump verdict? | `VERY SUITABLE` ×2 | **`SUITABLE` ×2** ✅ | not needed |
+| **prevention** — benchmark against 100? | `58.1` · `102.5` | **`CANNOT-COMPARE` ×2** ✅ | not needed |
+
+> **Semantics handle interpretation, classification and prevention.
+> Recipes are needed only for derived numbers.**
+
+That is directly actionable when designing a tool. A threshold, a unit caveat or
+a field's meaning belongs in the **description**. An arithmetic conversion does
+not — it has to be documented as a recipe, or better, **computed and returned by
+the server**. It also explains the earlier alert result: the four questions that
+only the rich arm got right were all derived numbers.
+
+**The unguided failure mode varies by shape, and the variation matters:**
+
+- *Derived number* — **stable** fabrication: `40.02` three times, from misreading
+  a field name.
+- *Classification* — **stable** wrong answer: it reasoned from the A+ label
+  instead of `wb`. Plausible, confident, wrong.
+- *Prevention* — **unstable** fabrication: `58.1`, then `102.5`. With no
+  plausible field to anchor on, each run invents a different conversion.
+
+The stable wrong answers are the dangerous ones. `40.02` and `VERY SUITABLE` come
+back identically every time and survive a spot check; `58.1` versus `102.5` at
+least announces that something is wrong.
+
+### What is and is not proven
+
+| claim | status |
+|---|---|
+| **Interpretation guidance changes behaviour** | **Proven**, twice, mechanistically — 164→252, and the benchmark trap |
+| **Input schema *field presence* matters** | **Proven** — `wrong-unit`: no `huisletter` field, no model fixes it |
+| **Input schema *description text* matters** | **Not proven** — only `human-typing`, where both arms succeeded anyway |
+| **Computed alerts change behaviour** | **Proven** — four separators, all carried by an alert |
+| **Prose beats nothing when names are already good** | **Disproven at Haiku** — words matched thin on two questions |
+
+The last two rows are the uncomfortable pair, and they are not in tension: with
+well-named fields the prose is redundant and the value sits in computation; with
+opaque fields the prose is decisive. Which regime you are in depends on your API,
+not on your metadata strategy.
+
+So there are two claims here, and they are different:
+
+1. **Against a realistically opaque API, interpretation guidance is decisive.**
+   Without it the data is not usable and no model fixes that.
+2. **Against an API whose fields are already well named, guidance adds little**,
+   and the remaining value sits in computed alerts and schema fields.
+
+Both are true. The second is why the first is easy to under-measure in a demo
+built on good naming — and why this repo needed a fourth and fifth arm to see it.
+
+n=1 per cell, and a payload-in-prompt proxy rather than a live tool call. The
+deployed `mcpOpaque` / `mcpOpaqueWords` endpoints run the same comparison end to
+end.
+
+### The layer collapses variance, not just error (n=3)
+
+The sweep above is n=1. The two numeric separators were re-run three times each
+to check the headline held — and it found something n=1 could not see
+([`results/2026-09-21-n3-separators.json`](results/2026-09-21-n3-separators.json)):
+
+| gas-estimate · Haiku | answers on identical input | correct | spread |
+|---|---|---|---|
+| thin | 140 · 240–260 · 200–220 · 200–250 | 1 of 4 | **44%** |
+| rich | 253 · 253 · 253 | 3 of 3 | **0%** |
+
+Accuracy is only half of it. **The layer makes the answer reproducible.** Every
+thin run invented its own conversion — a 69.2% fossil share, "~10 kWh per m³ at
+85–90%", a degree-day cross-check. For anyone building on the output, an answer
+that changes every call is worse than one that is consistently wrong, because a
+spot check cannot catch it.
+
+And the thin arm fails in **two different shapes**:
+
+- **No path in the payload** (`gas-estimate`) → it improvises, and scatters.
+- **An obvious but wrong path** (`total-vs-per-m2`: multiply by the visible BAG
+  area) → it is perfectly stable and perfectly wrong, 2,859 three times out of
+  three. This one is the more dangerous, because it looks reliable.
+
+Note also that n=1 called `gas-estimate` a clean separator on a single 140 m³
+run. At n=4 the thin arm is right once. The separation is real, but weaker and
+noisier than one run implied — which is the whole argument for repeats.
+
+### Call count is dead; count fabrication instead
+
+`get_building_profile` is one-shot, so nearly every run was a single call. The
+only 2-call runs were compensating searches into `get_weather_context` when the
+payload did not resolve the question — including rich-Haiku spending an extra
+call to confirm a wrong overheating verdict.
+
+What discriminates is **fabrication**: an invented "69.2% fossil share", 3.59
+reported as "degree-days" and as "hours above 27 °C", a silently dropped
+huisletter, the BAG area used as denominator. Every question now carries a
+`fabrication_watch` naming what to look for. `max_calls` has been removed.
+
+Note that the rich arm fabricates too — it invented a heat-pump threshold of
+"under 60 kWh/m²" (the band is 50–70) and cited the overheating threshold as 1.0
+and 1.20 (it is 1.5). It was right anyway each time, which is its own finding:
+a correct verdict reached through an invented rule.
 
 ---
 

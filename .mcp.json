@@ -22,6 +22,14 @@
     "eval-rich": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp"
+    },
+    "eval-opaque": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpOpaque"
+    },
+    "eval-opaque-words": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpOpaqueWords"
     }
   }
 }
