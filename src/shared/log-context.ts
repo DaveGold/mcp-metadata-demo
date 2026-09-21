@@ -1,10 +1,11 @@
 /**
  * AsyncLocalStorage request-context for tool-call audit logging.
  *
- * wb-mcp-server uses this to propagate session/environment through tool
- * handlers so writeToolCallLog can stamp audit rows. The demo wires the
- * same mechanism: http.ts opens a context per request, and the tool
- * handlers read it to emit `tool.invoked` to stderr / Cloud Logging.
+ * The private server this demo was extracted from uses this to propagate
+ * session/environment through tool handlers so writeToolCallLog can stamp
+ * audit rows. The demo wires the same mechanism: http.ts opens a context
+ * per request, and the tool handlers read it to emit `tool.invoked` to
+ * stderr / Cloud Logging.
  *
  * getStore() returns null when no context is active (e.g. the stdio
  * transport, which does not run inside requestContext.run) — callers
