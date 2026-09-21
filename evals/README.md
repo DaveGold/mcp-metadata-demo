@@ -126,6 +126,35 @@ the guidance carries information absent from the payload at any level of
 capability. Opus does not fail by being wrong; it fails by correctly reporting
 that the question cannot be answered. Haiku fails by inventing.
 
+**A misleading name is worse than no name.** The benchmark-trap question asks
+whether a NEN 7120 `berekend_energieverbruik` of 369 can be compared against a
+100 kWh/m² target. It cannot. With readable names, prose *and* alerts, Haiku and
+Sonnet both answered "3.7 times higher" — the field name says *calculated energy
+use in kWh/m²*, so they trusted it and skipped the prose beside it. Rename it to
+`bev` and the same model, on the same data, consults the guide and declines
+correctly. Good naming is metadata; **wrong naming is anti-metadata**, and it
+defeats the guidance sitting next to it.
+
+That run is also the answer to the obvious objection about the gas result — that
+the guide stated the formula and the model merely followed it. Here the guide
+never says to refuse the comparison. Haiku had to chain `calc_t` → NEN 7120 →
+`ep1` is null → `ei` has no kWh/m² equivalent. Comprehension, not transcription.
+
+### What is and is not proven
+
+| claim | status |
+|---|---|
+| **Interpretation guidance changes behaviour** | **Proven**, twice, mechanistically — 164→252, and the benchmark trap |
+| **Input schema *field presence* matters** | **Proven** — `wrong-unit`: no `huisletter` field, no model fixes it |
+| **Input schema *description text* matters** | **Not proven** — only `human-typing`, where both arms succeeded anyway |
+| **Computed alerts change behaviour** | **Proven** — four separators, all carried by an alert |
+| **Prose beats nothing when names are already good** | **Disproven at Haiku** — words matched thin on two questions |
+
+The last two rows are the uncomfortable pair, and they are not in tension: with
+well-named fields the prose is redundant and the value sits in computation; with
+opaque fields the prose is decisive. Which regime you are in depends on your API,
+not on your metadata strategy.
+
 So there are two claims here, and they are different:
 
 1. **Against a realistically opaque API, interpretation guidance is decisive.**

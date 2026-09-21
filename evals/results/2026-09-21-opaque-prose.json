@@ -46,5 +46,43 @@
     "B_prime_haiku_with_guidance": "252 m3 - correct",
     "reading": "B'-Haiku beats A'-Opus. Not because Haiku is the better model, but because the guidance carries information that is ABSENT from the payload at any level of capability."
   },
-  "also_a_safety_result": "The gap between Haiku and Opus on the unguided payload is not accuracy, it is fabrication versus honest refusal. Guidance closes the accuracy gap; model capability closes the honesty gap. A deployment on a small model with a poorly described API gets the worst of both."
+  "also_a_safety_result": "The gap between Haiku and Opus on the unguided payload is not accuracy, it is fabrication versus honest refusal. Guidance closes the accuracy gap; model capability closes the honesty gap. A deployment on a small model with a poorly described API gets the worst of both.",
+  "comprehension_test": {
+    "why": "The first result could be dismissed as instruction-following: the guide stated the gas formula and the question applied it. This test scores a question whose answer is NOWHERE in the guide - the model must chain calc_t -> NEN 7120 -> bev is not benchmarkable / ei has no kWh equivalent, and decline.",
+    "question": "What is this building's energy use per square metre? I want to compare it against a benchmark of 100 kWh/m2. (Middenwetering 1, NEN 7120, bev 369.05, ei 0.91, label A++)",
+    "runs": [
+      {
+        "arm": "rich (readable names + prose + alerts)",
+        "model": "haiku",
+        "correct": false,
+        "answer": "3.7 times higher than the benchmark"
+      },
+      {
+        "arm": "rich (readable names + prose + alerts)",
+        "model": "sonnet",
+        "correct": false,
+        "answer": "3.7 times your benchmark, far above target"
+      },
+      {
+        "arm": "rich (readable names + prose + alerts)",
+        "model": "opus",
+        "correct": true,
+        "answer": "flagged theoretical vs measured, not like-for-like"
+      },
+      {
+        "arm": "opaque-words (opaque names + guide)",
+        "model": "haiku",
+        "correct": true,
+        "answer": "cannot be compared; NEN 7120 gives no ep1, ei 0.91 has no kWh/m2 equivalent",
+        "note": "Never even proposed bev as a candidate. Comprehension, not transcription: the guide does not say to refuse this comparison."
+      }
+    ],
+    "finding": "A MISLEADING READABLE NAME IS WORSE THAN NO NAME. berekend_energieverbruik_kwh_m2 reads as 'calculated energy use in kWh/m2', so Haiku and Sonnet trusted the name and benchmarked it, skipping the prose that says not to. Renamed to `bev`, the same model on the same data had to consult the guide - and got it right. Good naming is metadata; WRONG naming is anti-metadata, and it defeats the guidance sitting next to it.",
+    "caveat": "n=1 per cell. The comparison across arms also varies the naming and the payload keys, not the guidance alone."
+  },
+  "what_is_and_is_not_proven": {
+    "interpretation_guidance": "PROVEN, twice, mechanistically. Gas: 164 (fabricated) -> 252 (correct) with only the guide changing. Benchmark trap: opaque+guide Haiku succeeds where rich Haiku and Sonnet fail. Model, data, tool surface and question held constant in each case.",
+    "input_schema_field_presence": "PROVEN. wrong-unit: the thin schema has no huisletter, so the call cannot be expressed. thin-Haiku answers 105 m2 (the wrong unit), thin-Opus refuses, rich-Haiku answers 92 m2. No model closes a gap in the schema.",
+    "input_schema_description_text": "NOT PROVEN. The only observation is human-typing: rich normalised '3543 AR' to '3543AR' because its schema says 'zonder spatie', while thin passed the space through - and PDOK accepted both, so behaviour differed and correctness did not. The two opaque arms deliberately share an identical input schema, so they test nothing here. A sixth arm would be needed: huisletter present but UNDESCRIBED versus present and described, or a strict-format case such as a lowercase postcode where the regex forces a correction the bare schema does not."
+  }
 }
