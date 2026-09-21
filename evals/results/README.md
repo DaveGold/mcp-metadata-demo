@@ -59,11 +59,16 @@ cleanly on sonnet and opus.
 
 Across the three, the `rich` rung is 78 of 78.
 
-Two experiments these runs make obvious but do not answer — guidance in the
-response rather than the tool description, and conditional interpretation sized to
-the record — are written up in [`../open-questions.md`](../open-questions.md), each
-with a prediction registered in advance and the result that would falsify it. The
-token figures from these runs live there too.
+**Start with `What the runs support so far` in
+[`../open-questions.md`](../open-questions.md).** It is the synthesis across every run
+in this directory, added 2026-09-21: volume of metadata is close to irrelevant, while
+placement and precision are nearly everything (half the prose cut changed 0 answers;
+one sentence added changed 59), the leverage runs in BOTH directions, and there is a
+per-model rule set — capability substitutes for metadata only where the payload already
+carries the quantity. It also lists what the runs do NOT establish. Q1 and Q2 are
+answered there with their predictions left as registered; **Q3 and Q4 are open**, Q4
+being the fact-vs-instruction ablation this directory's newest result raises. The token
+figures live there too.
 
 **Q1 has since been run and both its predictions were falsified** — see
 [`2026-09-21-q1-response-channel.json`](2026-09-21-q1-response-channel.json). A fact
