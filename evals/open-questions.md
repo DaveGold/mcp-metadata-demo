@@ -94,7 +94,10 @@ Three rules follow:
    carries, a strong model needs nothing.*
 2. **The weaker the model, the more the response channel and explicitness earn.** Haiku
    went 0/10 → 9/10 on the same bytes moved into the response, and never once reached
-   the calculated-vs-measured trap unaided.
+   the calculated-vs-measured trap unaided. Quote the DIRECTION of these channel gaps,
+   not their size: `words`/sonnet on `total-vs-per-m2` measured 8/10 in one sitting and
+   2/10 in another on the same day, so any single-cell magnitude is a property of its
+   sitting. See the variance warning in `results/README.md`.
 3. **Noticing is not acting.** Opus named the mismatch 7 times in 10 and *still returned
    the forbidden verdict 10 times out of 10.* It had the fact and lacked the
    instruction. Writing what a field *means* is not enough for a strong model — Q4.
