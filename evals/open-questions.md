@@ -1,13 +1,14 @@
 # Open questions
 
-Two experiments the 2026-09-21 runs make obvious but do not answer. Each carries a
+Three experiments the 2026-09-21 runs make obvious but do not answer. Each carries a
 **prediction registered before the run** and the result that would **falsify** it —
 written down now precisely because this repo has already been burned once by a rule
 chosen after seeing the answers (see `results/2026-09-21-shape-replication.json` and
 the two live runs that failed to replicate it).
 
-Neither can be run in a session that predates the deploy: MCP connections and the
-agent registry are fixed when a session starts. Deploy first, then start fresh.
+Q1 and Q2 need a new arm, so they cannot run in a session that predates the deploy:
+MCP connections and the agent registry are fixed when a session starts. Deploy first,
+then start fresh. **Q3 needs no new arm and no deploy** — only instrumentation.
 
 ---
 
