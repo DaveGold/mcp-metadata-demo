@@ -64,8 +64,13 @@ three non-recipe arms took the wrong derivation road.
 That file is also the first to carry out the `get_tool_call_log` audit the skill now
 mandates, and the audit earned its keep immediately: the `inline` arm writes every row
 with `variant: "unknown"`, `paramsPresent: []` and `rowCount: 0`, so it is invisible to
-any server-side count — and the log's own alert tells the reader to discard exactly
-those rows. See `the_instrumentation_defect`. Fix that before running Q2.
+any server-side count — and the log's own alert told the reader to discard exactly
+those rows. The cause is a **stale deploy, not a code fault**: `mcpInline` shipped at
+15:42, variant stamping landed at 16:23, and it was never redeployed, while the repo
+source and all 182 tests stayed green. **Redeploy before running Q2** — until then no
+run involving `inline` can be audited. The log tool, the set and the skill have since
+been changed so the same miss cannot happen quietly again; see
+`fixes_applied_after_this_run` in that file.
 
 Read the sweep first — it is the one that changed the design, and it is a useful
 record of how easily a single run misleads. Then read `2026-09-21-opaque-live.json`:

@@ -44,9 +44,18 @@ INTERPRETATION:
   drifts from a broad question to a narrower one usually names an exact gap in the tool's description.
 
 USING THIS TO AUDIT AN EVAL RUN:
+- START UNFILTERED and read \`summary.countByVariant\`. That is the only view that shows an arm going
+  missing. A \`variant\` filter returning zero looks identical whether the arm was never called or is
+  failing to stamp its rows — on 2026-09-21 it was the latter, and the filter alone reported clean.
 - Every arm writes to ONE log. \`variant\` is the only field that attributes a row to an arm — filter
   on it, and pass a large \`limit\`, since the filter narrows the fetched page rather than searching
   deeper.
+- A persistent bucket of \`variant: "unknown"\` in environment "cloud" means AN ARM IS RUNNING A STALE
+  DEPLOY, not that the log is broken. Code deployed before variant stamping writes "unknown", an
+  empty \`paramsPresent\` and \`rowCount\` 0 on every call, forever, while the repo source looks correct.
+  Redeploy that arm before trusting any count from it.
+- Size \`limit\` to the whole batch. The default of 20 and the old cap of 100 are both smaller than a
+  single eval run, which is why the 2026-09-21 audit could only cover its last third.
 - \`sessionId\` is per-REQUEST, not per-run: this server is stateless, so a subagent that made three
   calls produced three different sessionIds. Correlate a run by (variant + timestamp window), and
   count calls per arm per batch rather than trying to reconstruct individual runs.
@@ -67,16 +76,18 @@ const inputSchema = {
     .string()
     .optional()
     .describe(
-      'Filter to calls served by one arm ("rich" | "words" | "inline" | "schema" | "minimal" | "opaque" | "opaque-words"). Applied AFTER the page is fetched, so pass a large `limit` alongside it.'
+      'Filter to calls served by one arm ("rich" | "words" | "words-recipe" | "inline" | "inline-recipe" | "schema" | "minimal" | "opaque" | "opaque-words"). Applied AFTER the page is fetched, so pass a large `limit` alongside it. Read `summary.countByVariant` from an UNFILTERED call first: a filter returning zero cannot tell "never called" from "not stamping".'
     ),
   limit: z
     .number()
     .int()
     .min(1)
-    .max(100)
+    .max(500)
     .optional()
     .default(20)
-    .describe('Maximum number of calls to return, most recent first. Default 20, max 100.'),
+    .describe(
+      'Maximum number of calls to return, most recent first. Default 20, max 500. One eval batch does not fit in 100 rows — size this to the whole window you are auditing.'
+    ),
 };
 
 const outputSchema = {
@@ -107,6 +118,11 @@ const outputSchema = {
   summary: z.object({
     environment: z.string().describe('"local" (in-memory, this process only) or "cloud" (persisted Firestore)'),
     countByTool: z.record(z.string(), z.number()).describe('Number of returned records per tool'),
+    countByVariant: z
+      .record(z.string(), z.number())
+      .describe(
+        'Number of returned records per ARM. Read this before filtering: an arm missing here, or a large "unknown" bucket, is an attribution problem rather than an absence of calls.'
+      ),
     oldestTimestamp: z.string().nullable().describe('Timestamp of the oldest returned record'),
     newestTimestamp: z.string().nullable().describe('Timestamp of the newest returned record'),
   }),
@@ -143,6 +159,9 @@ export function registerGetToolCallLogTool(server: McpServer, opts: { minimal?: 
         const countByTool: Record<string, number> = {};
         for (const r of records) countByTool[r.tool] = (countByTool[r.tool] ?? 0) + 1;
 
+        const countByVariant: Record<string, number> = {};
+        for (const r of records) countByVariant[r.variant] = (countByVariant[r.variant] ?? 0) + 1;
+
         const alerts: string[] = [];
         if (environment === 'local') {
           alerts.push(
@@ -157,10 +176,16 @@ export function registerGetToolCallLogTool(server: McpServer, opts: { minimal?: 
             `No calls found for variant "${args.variant}" in the last ${limit} rows. The variant filter narrows the fetched page rather than searching deeper — retry with a larger limit before concluding the arm was not called.`
           );
         }
-        if (records.some((r) => r.variant === 'unknown')) {
+        const unknownRows = records.filter((r) => r.variant === 'unknown');
+        if (unknownRows.length > 0) {
           alerts.push(
-            'Some rows have variant "unknown": they were written either over stdio (which opens no request context) or before variant stamping existed. Do not count them against any arm.'
+            `${unknownRows.length} of ${records.length} rows have variant "unknown". THREE causes, not equally harmless: (1) stdio, which opens no request context; (2) rows written before variant stamping existed; (3) A DEPLOYED ARM RUNNING A STALE REVISION, which predates the stamping and will keep writing "unknown" forever while the repo source looks correct. Cause 3 silently deletes a whole arm from every count — it is what happened to the inline arm on 2026-09-21. DO NOT discard these rows: match their queryIntent values against the arm you expected, and if they line up, redeploy that arm and re-run the audit.`
           );
+          if (environment === 'cloud' && unknownRows.every((r) => r.rowCount === 0 && r.paramsPresent.length === 0)) {
+            alerts.push(
+              'Every "unknown" row also has rowCount 0 and an empty paramsPresent — the signature of pre-stamping code, not of genuine empty results. In environment "cloud" stdio is impossible, so read this as a STALE DEPLOY of whichever arm those queryIntent values belong to.'
+            );
+          }
         }
 
         const output = {
@@ -168,6 +193,7 @@ export function registerGetToolCallLogTool(server: McpServer, opts: { minimal?: 
           summary: {
             environment,
             countByTool,
+            countByVariant,
             oldestTimestamp: records.length > 0 ? records[records.length - 1].timestamp : null,
             newestTimestamp: records.length > 0 ? records[0].timestamp : null,
           },

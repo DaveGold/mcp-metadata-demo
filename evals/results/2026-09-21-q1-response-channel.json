@@ -4113,15 +4113,16 @@
   "the_instrumentation_defect": {
     "severity": "HIGH - it silently deletes an arm from every server-side count, and the log tells you to do exactly that.",
     "finding": "The `inline` arm (endpoint mcpInline) does not stamp its own log rows. Every one of its calls is written with variant \"unknown\", paramsPresent [] and rowCount 0, for get_building_profile AND get_weather_context alike. A variant:\"inline\" filter over the last 100 rows returns ZERO records while the arm demonstrably made 63 calls in that window.",
-    "not_a_channel_problem": "inline-recipe (mcpInlineRecipe) stamps correctly - variant, paramsPresent and rowCount are all populated, including on its render_table and get_weather_context calls. So this is a defect in the mcpInline deployment specifically, not in the inline response channel or in the logging design.",
     "why_it_matters": [
       "Q3 asked for a server-side call count that does not depend on the system under test describing its own behaviour. For the inline arm that number does not currently exist.",
       "The wrong-unit fabrication check specified in questions.json - \"an answer for 28A from a call that never carried the huisletter\" - is scored from paramsPresent. On the inline arm paramsPresent is always empty, so that check silently passes everything and cannot be run at all.",
       "rowCount 0 on successful calls that returned 2 or 3 candidates makes the inline arm look like it matched nothing."
     ],
     "the_log_misexplains_it": "get_tool_call_log emits the alert: \"Some rows have variant unknown: they were written either over stdio (which opens no request context) or before variant stamping existed. Do not count them against any arm.\" Neither explanation fits. These are live HTTP rows from a currently deployed arm, written during this run, minutes old. Following that alert literally would have dropped the entire inline arm from the audit and reported the run as clean. The alert text should be corrected, and the audit should have to account for unknown rows rather than discard them.",
-    "what_to_fix": "Stamp variant/paramsPresent/rowCount in the mcpInline request path the way mcpInlineRecipe already does, then re-run any audit that needs inline attribution. Until then, treat every inline row in the cloud log as unattributed.",
-    "defect_is_localized_to_the_deployment": "The logging layer itself is fine: the unit suite contains cases that write variant \"inline\" and populate paramsPresent, and all 182 tests pass. So the logger CAN stamp inline - the deployed mcpInline request path is not giving it the context to stamp. That narrows the fix to how mcpInline opens its per-request context in src/functions.ts, not to the logger or the schema."
+    "what_to_fix": "Run `npm run deploy` (it already lists all nine functions), then verify: make one live call per arm and read summary.countByVariant from an UNFILTERED get_tool_call_log. Every arm must appear under its own name with no unknown bucket. No code change is required.",
+    "root_cause": "STALE DEPLOY of the mcpInline Cloud Function. Established from git history, not inferred: a8c461d built and deployed the inline arm at 15:42; f9f25ae added variant/paramsPresent/rowCount stamping at 16:23, touching http.ts, log-store.ts and get-building-profile.ts; 020cc5c deployed the two recipe arms at 16:34, AFTER the stamping, which is exactly why they stamp correctly. mcpInline was never redeployed and has been serving pre-stamping code ever since. Cloud Functions deploy per function, so nothing forced it forward.",
+    "correction_to_an_earlier_reading": "An earlier pass of this file said the fault was \"in how mcpInline opens its per-request context, not in the logger\". THAT WAS WRONG and would have sent someone editing correct code. functions.ts passes variant:\"inline\", http.ts stamps it into requestContext, log-store.ts resolves it - the whole path is right in this repo. The deployed artefact is simply older than the code. The observable signature (variant \"unknown\" + empty paramsPresent + rowCount 0) is precisely what readRecentToolCalls documents for rows written before those fields existed.",
+    "why_the_repo_looked_healthy": "inline-recipe stamps correctly, the unit suite writes variant \"inline\" fine, tsc is clean and all 182 tests pass. None of that can see a deployed artefact. This is the class of defect that only a live server-side audit catches, which is the argument for the audit being mandatory."
   },
   "log_audit": {
     "_comment": "Required by the run-eval skill. Reconciles self-reported tool_uses against get_tool_call_log, the only account that does not come from the system under test.",
@@ -4174,5 +4175,21 @@
     "The rule in 2026-09-21-shape-replication.json - \"recipes are needed only for derived numbers\" - survives, but its companion claim that recipes do not travel is now false for the response channel. Recipes travel fine; descriptions do not carry them.",
     "Section 6 of the talk write-up needs rewriting: \"return the computed figure\" weakens to \"ship the guidance in the response\", which is materially cheaper to build.",
     "Q2 (conditional interpretation) is now worth running: it depends on the response channel being read at all, and this run shows it is read."
+  ],
+  "fixes_applied_after_this_run": [
+    "get_tool_call_log: summary.countByVariant added, so an arm going missing is visible in one unfiltered call rather than only through a filter that returns zero.",
+    "get_tool_call_log: the unknown-rows alert now names STALE DEPLOY as a third cause and says DO NOT discard the rows. The previous text (\"Do not count them against any arm\") would have deleted the inline arm from this audit and reported the run clean.",
+    "get_tool_call_log: limit cap raised 100 -> 500. At 100 a 210-run batch could not be audited in one page, which is why this run is only audited over its last third.",
+    "get_tool_call_log: the variant filter description now lists words-recipe and inline-recipe, which it previously omitted.",
+    "Three regression tests pin countByVariant, the stale-deploy alert wording, and a 500-row limit.",
+    "questions.json _scoring.reproducible: the range sub-rule that decided a headline cell is now pinned in the set, stated as it was applied.",
+    "questions.json _scoring.route: route scoring promoted from a results-file appendix to a mandatory rule for derived_number questions.",
+    "questions.json _measured_ceilings: updated with the new ceilings, and with the finding that both derived_number questions now need harder questions rather than larger n.",
+    "run-eval SKILL.md: new preflight step 2 requiring a deploy-freshness check before any auditable run; audit section rewritten to start unfiltered and to size the limit to the batch; route scoring added to the metrics.",
+    "open-questions.md: Q1 marked ANSWERED with both predictions falsified, predictions left as registered, and the stale-deploy failure mode added to the preamble."
+  ],
+  "still_outstanding": [
+    "mcpInline HAS NOT BEEN REDEPLOYED. Until it is, no run involving the inline arm can be audited server-side. This is the one blocking item and it needs a deploy, which was not run unprompted.",
+    "The earlier repeats of this run remain permanently unauditable - the rows have aged out of a 100-row page and the cap was only raised afterwards."
   ]
 }
