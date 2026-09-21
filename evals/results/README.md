@@ -46,6 +46,12 @@ cleanly on sonnet and opus.
 
 Across the three, the `rich` rung is 78 of 78.
 
+Two experiments these runs make obvious but do not answer — guidance in the
+response rather than the tool description, and conditional interpretation sized to
+the record — are written up in [`../open-questions.md`](../open-questions.md), each
+with a prediction registered in advance and the result that would falsify it. The
+token figures from these runs live there too.
+
 Read the sweep first — it is the one that changed the design, and it is a useful
 record of how easily a single run misleads. Then read `2026-09-21-opaque-live.json`:
 it is the first live-tool-call run of the opaque regime, and it does not reproduce
