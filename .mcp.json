@@ -46,6 +46,10 @@
     "eval-opaque-words": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpOpaqueWords"
+    },
+    "eval-inline-conditional": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpInlineConditional"
     }
   }
 }

@@ -107,6 +107,15 @@ byte-identical to `schema`'s, enforced by `get-building-profile-inline.test.ts`.
 Read `evals/open-questions.md` Q1 for the predictions registered BEFORE it runs —
 they are there so the result can contradict them.
 
+**`inline-conditional` is Q2's arm**, deployed 2026-09-21. It hangs off `inline`,
+not off `schema`: same description, same schemas, same response channel, and the
+ONLY difference is how much of the interpretation prose ships. So the comparison
+that means anything is `inline` vs `inline-conditional`, head to head on the same
+question. Read `evals/open-questions.md` Q2 for its registered prediction, which
+says it should WIN on single-record questions and LOSE on `benchmark-trap` — run
+that question even though its ceiling is unmeasured, because it is the one that can
+show the cost of conditional guidance.
+
 Before scoring, read `results/2026-09-21-shape-replication.json` for `_the_rule`
 (semantics handle interpretation, classification, prevention and refusal; recipes
 are needed only for derived numbers) AND the two live runs that failed to
