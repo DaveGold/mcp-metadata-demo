@@ -14,7 +14,14 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-21-per-question.json`](2026-09-21-per-question.json) | Per-question outcomes and per-regime results, kept out of `questions.json` so the set reads as a spec. |
 | [`2026-09-21-opaque-live.json`](2026-09-21-opaque-live.json) | Does the shape replication survive live tool calls? It does not — five of six cells disagree, and the derived-figures recipe scores 0 of 3. |
 | [`2026-09-21-opaque-live-sonnet-n10.json`](2026-09-21-opaque-live-sonnet-n10.json) | The confirmation pass for that run — sonnet, n=10, 60 runs. Confirms the recipe failure and shows the other two questions saturate on a stronger model. |
-| [`2026-09-21-readable-ladder-gas.json`](2026-09-21-readable-ladder-gas.json) | The readable ladder on the one question with headroom, and the first measurement of the `schema` rung. 80 runs, two models. Server-computed beats everything; the ladder is not monotonic. |
+| [`2026-09-21-readable-ladder-gas.json`](2026-09-21-readable-ladder-gas.json) | The readable ladder on the one question with headroom, and the first measurement of the `schema` rung. 80 runs, two models. Server-computed beats everything at either tolerance; the ladder looked non-monotonic at tolerance 20 and that wobble does not survive the retightening to 8. |
+
+> **gas-estimate tolerance changed on 2026-09-21**, from 20 to 8 (accept range
+> 233–273 → 245–261). Files above that record `accept_range: 233-273` —
+> `2026-09-21-opaque-live.json`, `2026-09-21-opaque-live-sonnet-n10.json`,
+> `2026-09-21-n3-separators.json` — were scored under the old tolerance and are
+> left as they were. Do not compare their gas-estimate counts against anything
+> scored afterwards. `2026-09-21-readable-ladder-gas.json` carries both scorings.
 
 The readable-ladder file is the one to read for the design question, because it is
 the only run where an arm is correct by the ground-truth route rather than by

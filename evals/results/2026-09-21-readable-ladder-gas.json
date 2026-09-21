@@ -1138,5 +1138,22 @@
     "rich fabricated 3 of 10 on haiku: the value was right every time, but three runs invented an uplift for hot water and cooking (350-450 m3, 300-350 m3, '20-30% more') that the alert deliberately leaves unquantified. Zero such inventions on sonnet.",
     "No cross-axis comparison was made. The opaque and opaque-words arms were not run and their numbers are not referenced as a baseline.",
     "The guide, the schemas, the alerts and the questions remain authored by the same party."
-  ]
+  ],
+  "rescored_at_tolerance_8": {
+    "_comment": "APPENDIX, added after the run in the same session. No new runs: these are the SAME 80 rows re-scored after questions.json's gas-estimate tolerance was tightened from 20 to 8 on the recommendation in the_tolerance_problem above. The per-run `correct` flags in `results` are the ORIGINAL tolerance-20 scoring and were left untouched; this block is the tolerance-8 view of the same data.",
+    "accept_range": "245-261 (expected_value 253, tolerance 8)",
+    "correct_by_cell": {
+      "thin / haiku": "1 of 10 (was 7)",
+      "schema / haiku": "0 of 10 (was 1)",
+      "words / haiku": "1 of 10 (was 3)",
+      "rich / haiku": "10 of 10 (unchanged)",
+      "thin / sonnet": "3 of 10 (was 10)",
+      "schema / sonnet": "1 of 10 (was 10)",
+      "words / sonnet": "2 of 10 (was 6)",
+      "rich / sonnet": "10 of 10 (unchanged)"
+    },
+    "effect_on_the_headline": "words -> rich SHARPENS: haiku 1/10 -> 10/10 (p=0.0001), sonnet 2/10 -> 10/10 (p=0.0004). rich is untouched by the change because every one of its 20 runs answered 253 or 250.",
+    "effect_on_the_non_monotonicity": "THE LADDER WOBBLE DOES NOT SURVIVE. haiku thin -> schema falls to 1/10 -> 0/10 (p=1.00) and sonnet schema -> words to 1/10 -> 2/10 (p=1.00). Everything below rich floors out, so the two net-negative gaps are no longer distinguishable from each other or from zero. This is the honest cost of the tightening: the non-monotonicity finding recorded in adjacent_rung_gaps was measured in a band wide enough for the lower rungs to score at all, and it is NOT independently supported at tolerance 8. Treat it as an observation about tolerance-20 scoring, not as a standing result.",
+    "the_route_loophole_is_NARROWED_NOT_CLOSED": "The EP2 road still passes at two plausible calorific values: 63.35 x 41 / 10.0 = 259.7 and / 10.55 = 246.2, both inside 245-261. It now fails at 9.77 (265.8), 10.7 (242.7) and 9.0 (288.6). All six surviving lower-rung correct answers on sonnet are still EP2-road. Tightening the tolerance removes most of the luck but cannot distinguish the roads - only scoring the DERIVATION can. The recommendation to score the route stands."
+  }
 }
