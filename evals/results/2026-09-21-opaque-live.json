@@ -1,0 +1,120 @@
+{
+  "_comment": "LIVE replication of the opaque regime. The three shapes in 2026-09-21-shape-replication.json were run payload-in-prompt: the payload and the guide were pasted into the prompt. Here the same three questions arrive through real MCP tool calls against the deployed mcpOpaque and mcpOpaqueWords endpoints, so the guide is a TOOL DESCRIPTION and the payload is a TOOL RESULT. The finding does not survive the move. Five of six cells disagree with the prediction, and the strongest claim in the repo - that the derived-figures recipe produces 253 - fails live 0 of 3.",
+  "date": "2026-09-21",
+  "model": "haiku",
+  "protocol": "LIVE TOOL CALLS. Each run is a fresh eval-<arm> subagent given only the question string from questions.json. Not comparable with the payload-in-prompt runs it is being checked against.",
+  "arms": {
+    "eval-opaque": "mcpOpaque. Opaque field codes. Tool description is one sentence: 'Look up a Dutch building by postcode and house number.' No glossary, no recipe. Corresponds to A_prime.",
+    "eval-opaque-words": "mcpOpaqueWords. Same opaque codes, same payload, full FIELD GUIDE in the tool description INCLUDING the DERIVED FIGURES block with the gas formula. Corresponds to B_prime, not B_double_prime - verified by reading the live tool description off the wire."
+  },
+  "n": 3,
+  "questions": ["gas-estimate", "heat-pump-triage", "benchmark-trap"],
+  "payload_verification": {
+    "_comment": "Called both arms directly from the parent session to confirm the arms serve IDENTICAL data and differ only in metadata. They do.",
+    "1086ZJ-433": {"wb": 52.73, "f_ga": 40.02, "opp": 41, "ahe": 30.8, "ep2": 63.35, "lbl": "A+"},
+    "3543AR-1": {"bev": 369.05, "ei": 0.91, "f_ga": null, "wb": null, "calc_t": "NEN 7120", "lbl": "A++"},
+    "ground_truth_gas": "52.73 x 40.02 / 0.95 / 8.79 = 252.7, so the 253 target is reachable from the live payload using the recipe the live opaque-words description carries."
+  },
+  "results": {
+    "gas-estimate": {
+      "shape": "derived_number",
+      "scoring": "exact_value",
+      "expected_value": 253,
+      "tolerance": 20,
+      "accept_range": "233-273",
+      "prediction": "opaque fails; opaque-words succeeds (253)",
+      "eval-opaque": {
+        "runs": [
+          {"answer": "~40 m3", "correct": false, "confidently_wrong": true, "fabricated": false, "note": "read f_ga (40.02, the thermal-zone AREA) as the gas figure - the exact stable fabrication the payload-in-prompt run recorded"},
+          {"answer": "250-260 m3", "correct": true, "confidently_wrong": false, "fabricated": true, "note": "RIGHT ANSWER, WRONG ROAD. Found wb 52.73, multiplied by opp 41 (not f_ga 40.02), invented 85% boiler efficiency and an implicit ~10 kWh/m3, and landed inside tolerance by cancelling errors. Not a reproduction of the recipe."},
+          {"answer": "~40 m3", "correct": false, "confidently_wrong": true, "fabricated": false, "note": "f_ga again"}
+        ],
+        "correct": "1 of 3",
+        "confidently_wrong": "2 of 3",
+        "fabricated": "1 of 3",
+        "spread": "40 / 255 / 40 - bimodal, 538% spread"
+      },
+      "eval-opaque-words": {
+        "runs": [
+          {"answer": "130-140 m3", "correct": false, "confidently_wrong": true, "fabricated": true, "note": "read ahe 30.8 (RENEWABLE SHARE, %) as a heat demand in kWh/m2, x 40 m2, invented 92% boiler efficiency. The description defines ahe as 'renewable share, %' one line above the formula it ignored."},
+          {"answer": "UNKNOWN - declined", "correct": false, "confidently_wrong": true, "fabricated": false, "note": "honest decline, but must_not_say explicitly includes 'declining to estimate'. Claimed the alerts array should have carried the figure - the opaque arms return no alerts."},
+          {"answer": "35-40 m3", "correct": false, "confidently_wrong": true, "fabricated": true, "note": "read ahe 30.8 as '30.8 MJ/m2/year' - invented the unit outright"}
+        ],
+        "correct": "0 of 3",
+        "confidently_wrong": "3 of 3",
+        "fabricated": "2 of 3",
+        "spread": "135 / none / 37.5"
+      },
+      "verdict": "PREDICTION FAILS ON BOTH CELLS. Payload-in-prompt B_prime answered 253 three times out of three. Live, with the same recipe in the tool description and the same payload on the wire, opaque-words answered it zero times out of three and never once invoked the formula. The opaque arm's 1-of-3 is an arithmetic accident, not a success."
+    },
+    "heat-pump-triage": {
+      "shape": "classification",
+      "scoring": "judge",
+      "ground_truth_order": "IJburglaan (wb 52.73) ready now; Van Beuningenstraat (99.12) suitable with upgrades; Troelstralaan (138.97) insulate first - LAST",
+      "prediction": "opaque says VERY SUITABLE; opaque-words says SUITABLE",
+      "prediction_mismatch": "The prediction was made against a SINGLE-FLAT variant ('is this flat a good candidate'). questions.json now carries a THREE-BUILDING ordering question. The cells are only loosely comparable and this is a caveat on the comparison, not on the run.",
+      "eval-opaque": {
+        "runs": [
+          {"answer": "Amsterdam ready / Utrecht some insulation / Rotterdam last", "correct": false, "confidently_wrong": true, "fabricated": false, "fields_used": ["ahe", "ep2", "bj", "lbl"]},
+          {"answer": "Amsterdam ready / Utrecht some / Rotterdam last", "correct": false, "confidently_wrong": true, "fabricated": false, "fields_used": ["ahe", "ep2", "bj", "lbl"]},
+          {"answer": "Amsterdam ready / Utrecht some / Rotterdam last", "correct": false, "confidently_wrong": true, "fabricated": false, "fields_used": ["ahe", "ep2", "bj"]}
+        ],
+        "correct": "0 of 3",
+        "confidently_wrong": "3 of 3",
+        "note": "STABLE wrong ordering. All three called IJburglaan 'ready now' - closer to the predicted VERY SUITABLE than to the correct SUITABLE - and all three put Troelstralaan mid rather than last, which is the must_not_say clause. Every run cited ahe 30.8 as a heat demand."
+      },
+      "eval-opaque-words": {
+        "runs": [
+          {"answer": "Amsterdam ready / Utrecht some / Rotterdam last", "correct": false, "confidently_wrong": true, "fabricated": false, "fields_used": ["ahe", "ep2", "lbl"]},
+          {"answer": "Amsterdam ready / Rotterdam some / Troelstralaan LAST", "correct": true, "confidently_wrong": false, "fabricated": false, "fields_used": ["ahe", "co2"], "note": "RIGHT ORDERING FROM THE WRONG FIELD. Reached the correct answer by treating ahe (renewable %) as the decisive heat demand - 30.8 vs 45.6 happens to order Amsterdam before Utrecht. It also asserted Rotterdam had 'zero additional heat demand'. must_not_say's second clause - a verdict without reference to warmtebehoefte - is met, so this is scored correct on ordering only and should not be counted as evidence the glossary worked."},
+          {"answer": "Amsterdam ready / Utrecht some / Rotterdam last", "correct": false, "confidently_wrong": true, "fabricated": false, "fields_used": ["ahe", "ep2", "bj"]}
+        ],
+        "correct": "1 of 3",
+        "confidently_wrong": "2 of 3"
+      },
+      "verdict": "PREDICTION FAILS. The payload-in-prompt claim was GLOSSARY SUFFICIENT - B_double_prime used wb, and only wb, in 2 of 2 runs. Live, NO RUN IN EITHER ARM used wb. Six runs out of six anchored on ahe. The glossary defines both fields and was not consulted."
+    },
+    "benchmark-trap": {
+      "shape": "prevention",
+      "scoring": "judge",
+      "ground_truth": "CANNOT-COMPARE - bev 369.05 is an inflated NEN 7120 primary-energy figure, not benchmarkable against a 100 kWh/m2 measured-energy benchmark",
+      "prediction": "opaque fabricates a number; opaque-words declines",
+      "eval-opaque": {
+        "runs": [
+          {"answer": "CANNOT-COMPARE", "correct": true, "confidently_wrong": false, "fabricated": false, "note": "declined on the FALSE PREMISE that the data is absent - bev 369.05 is in the payload it received"},
+          {"answer": "CANNOT-COMPARE", "correct": true, "confidently_wrong": false, "fabricated": false, "note": "same false premise: 'does not include absolute annual energy consumption'"},
+          {"answer": "CANNOT-COMPARE", "correct": true, "confidently_wrong": false, "fabricated": false, "note": "same - claimed the kWh/m2 fields are 'all null'. bev is not null."}
+        ],
+        "correct": "3 of 3",
+        "confidently_wrong": "0 of 3",
+        "fabricated": "0 of 3"
+      },
+      "eval-opaque-words": {
+        "runs": [
+          {"answer": "CANNOT-COMPARE", "correct": true, "confidently_wrong": false, "fabricated": false, "note": "declined for the RIGHT reason - named NEN 7120, cited ei 0.91, explained the standard mismatch. This is the only run in the whole slice where the guide visibly did its job."},
+          {"answer": "369.05, 'significantly higher than your 100 kWh/m2 benchmark'", "correct": false, "confidently_wrong": true, "fabricated": false, "note": "ranked it against the benchmark, which is the must_not_say, then hedged afterwards that NEN 7120 inflates. The hedge does not undo the ranking."},
+          {"answer": "CANNOT-COMPARE", "correct": true, "confidently_wrong": false, "fabricated": false, "note": "right reason - noted f_ga null and the pre-2021 standard"}
+        ],
+        "correct": "2 of 3",
+        "confidently_wrong": "1 of 3",
+        "fabricated": "0 of 3"
+      },
+      "verdict": "PREDICTION FAILS ON THE OPAQUE CELL AND WEAKENS ON THE OTHER. Payload-in-prompt A_prime produced UNSTABLE fabrication (58.1, then 102.5). Live, opaque fabricated nothing and declined 3 of 3 - but for the wrong reason, having failed to recognise bev at all. opaque-words, which was predicted to decline cleanly, ranked the building once."
+    }
+  },
+  "headline": "THE PAYLOAD-IN-PROMPT RESULT DOES NOT REPLICATE LIVE. Of six predicted cells, one holds (opaque's f_ga misread on gas-estimate, 2 of 3), and five do not.",
+  "two_mechanisms": {
+    "1_metadata_in_a_tool_description_is_read_more_weakly_than_metadata_in_a_prompt": "This is the whole caveat, and it lands badly. The gas recipe is present verbatim in the live opaque-words tool description and was applied by 0 of 3 runs; pasted into the prompt it produced 253 in 3 of 3. Same text, same payload, same model. The only variable is whether the guidance arrives as a tool description read before the call or as prompt text sitting beside the data. On this evidence the delivery channel is doing more work than the content.",
+    "2_ahe_is_a_magnet_field": "ahe (aandeel hernieuwbaar, renewable share, %) was read as a heat demand in kWh/m2 by 8 of the 12 runs that touched a residential address, in BOTH arms. In opaque-words this happens despite the description stating 'ahe: renewable share, %'. It is the most attractive-looking small number in the payload and it sits where a heat demand would sit. The unguided failure mode is no longer 'invents a conversion' - it is 'anchors on the wrong field, confidently'."
+  },
+  "what_this_does_not_overturn": "The obfuscation itself still bites: no arm answered the gas question correctly by a legitimate route, and no arm used wb on the classification question. The claim that survives is the narrow one - opaque field codes degrade performance. The claim that does not survive is the decomposition built on top of it, that a glossary is sufficient for classification and prevention while a recipe is needed for derived numbers. Live, the glossary was not sufficient for classification, and the recipe did not work for the derived number.",
+  "recommended_action": "Treat _the_rule in 2026-09-21-shape-replication.json as UNREPLICATED pending a live re-run at higher n and on a second model. Its three caveats already flagged the protocol; this run converts that flag into a result. The design advice the rule generates - return the derived figure from the server rather than documenting it as a recipe - is if anything strengthened, because a documented recipe in a tool description went unused 3 times out of 3.",
+  "caveats": [
+    "n=3 per cell, 18 runs total. Haiku only. Single sitting, so a bad hour is not excluded.",
+    "The heat-pump-triage prediction was made on a single-flat variant of the question; the live set asks a three-building ordering. Loosely comparable only.",
+    "gas-estimate's must_not_say counts an honest decline as a miss, so opaque-words run 2 scores confidently_wrong for refusing to guess. Worth revisiting in the set - the metric conflates a fabrication with a refusal.",
+    "One opaque-words heat-pump run and one opaque gas run reached a correct output through incorrect reasoning. Both are scored correct because the set scores answers, not reasoning. Both are flagged in the rows and neither should be read as arm evidence.",
+    "CALLS/TOOLS/PARAMS are self-reported by the subagents and were not independently audited against get_tool_call_log.",
+    "The guide, the obfuscation and the questions remain authored by the same party."
+  ]
+}
