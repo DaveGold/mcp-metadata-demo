@@ -158,6 +158,37 @@ field — the ladder's attributability depends on both.
 >
 > **Still open:** the cross-record half, and the ~77% pruning case. All three
 > questions run used NTA 8800 records, so only the 37–50% band was exercised.
+>
+> **FOLLOW-UP, 2026-09-21: the missing sentence has been ADDED, the re-run is NOT
+> done.** `interpretationBlock` now carries a `CALCULATED vs MEASURED` line stating
+> that ep1/ep2/berekend are calculated NTA 8800 figures, that Paris Proof is defined
+> on measured final energy, and that this server holds no metered data. The
+> `ep1 … 70 kWh/m²` line was left in place — this change adds, it does not remove, per
+> the "do not do both in one change" note above. Pinned by
+> `get-building-profile-calculated-vs-measured.test.ts`.
+>
+> Measured locally: the block grows 4,338 → 5,020 chars. The pruner gates the new line
+> on its own three fields, like every other field note, which means:
+> - on the `benchmark-trap` record (NTA 8800, all three populated) the line SURVIVES
+>   pruning, so **both arms ship it** and the re-run measures whether the sentence
+>   fixes the question, NOT whether pruning deletes it;
+> - on a NEN 7120 record (all three null) the line IS pruned — which for the first time
+>   creates a genuine test of Q2's cross-record half, on `metered-vs-model`, not here.
+>
+> **BLOCKED ON DEPLOY.** `npm run deploy` fails with `Missing permissions required for
+> functions deploy … iam.serviceAccounts.ActAs on mcp-metadata-demo@appspot.gserviceaccount.com`.
+> Verified on the wire after the edit: the live `inline` arm still returns the OLD
+> 4,338-char block with no `CALCULATED vs MEASURED` line. Running benchmark-trap now
+> would score the old metadata and produce a file that looks like a result — the exact
+> artefact this repo has already been burned by twice. Deploy first, confirm the line on
+> the wire, then re-run.
+>
+> **Expected ceiling if the sentence works:** benchmark-trap should move off 0/10 toward
+> `correct` (a principled refusal naming the quantity mismatch) and/or toward
+> `named_mismatch`. If it stays at 0/10 with the sentence present in both arms, the
+> conclusion changes materially: prose in the response would not be enough to prevent a
+> comparison the same prose elsewhere invites, and the `ep1 … 70` line becomes the next
+> thing to change.
 
 
 ### Why it matters
