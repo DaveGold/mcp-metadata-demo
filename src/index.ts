@@ -11,5 +11,5 @@
  * For the stdio binary, see src/stdio.ts (mapped via `bin`).
  */
 
-export { mcp, mcpMinimal, mcpWords, mcpOpaque, mcpOpaqueWords } from './functions.js';
+export { mcp, mcpMinimal, mcpSchema, mcpWords, mcpOpaque, mcpOpaqueWords } from './functions.js';
 export { createServer } from './server.js';
