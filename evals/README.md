@@ -162,6 +162,34 @@ Neither is sufficient alone, and they are not the same intervention:
   to prevent a confident error and not enough to answer.
 - Add the two-line formula and it is 3/3 with zero variance.
 
+The same ablation at **Opus** shows the two halves scale differently:
+
+| arm | Haiku | Opus |
+|---|---|---|
+| A′ none | `40.02` ×3 — fabricates | declined |
+| B″ glossary only | `UNKNOWN` ·`UNKNOWN` · `295` | `UNKNOWN` · `UNKNOWN` |
+| B′ full guide | `253` ×3 | `253` |
+
+**The glossary is a small-model safety intervention.** At Haiku it converts
+confident fabrication into mostly-honest uncertainty. At Opus there is nothing
+left to convert — it already refuses unaided.
+
+**The recipe is model-independent.** Neither model produced the number without
+it, including Opus, which demonstrably knows the 8.79 kWh/m³ conversion as
+general knowledge. It declined anyway — and its reasoning shows why: it cited
+`ahe: 30.8` and `st: 2` and doubted the flat burns gas at all. **Haiku refuses
+because it cannot compute; Opus refuses because it suspects the question is
+ill-posed.** The stronger model is not merely safer, it is sceptical of the
+premise.
+
+So three layers, doing three jobs:
+
+| layer | buys | scales with model? |
+|---|---|---|
+| **naming / semantics** | stops confident misreading | inversely — biggest on the weakest model |
+| **derived-figure recipes** | the answer itself | no — every model needed it |
+| **model capability** | honest refusal as a floor | yes — only Opus had it |
+
 **This is "something is better than nothing", measured.** The glossary never
 reached the right number, but it moved the model from a confident wrong answer
 to mostly-honest uncertainty — and for a system feeding customer advice that is
