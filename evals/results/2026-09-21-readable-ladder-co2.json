@@ -1,0 +1,1044 @@
+{
+  "_comment": "The readable ladder on total-vs-per-m2, the SECOND derived_number question, run to test whether the gas-estimate result is a property of the SHAPE or of that one question. 4 arms x 3 models x n=10 = 120 live runs. It replicates the headline and adds two findings the gas run could not produce: opus answers correctly from EVERY arm including thin, and on sonnet the PROSE rung is the carrier - the exact opposite sign from gas-estimate, for a reason that is legible in the description text.",
+  "date": "2026-09-21",
+  "models": [
+    "haiku",
+    "sonnet",
+    "opus"
+  ],
+  "protocol": "LIVE TOOL CALLS. Fresh eval-<arm> subagent per run, given only the `question` string. Every arm/model for a repeat was spawned in the same batch. Directly comparable with 2026-09-21-readable-ladder-gas.json (same protocol, same arms, same session); NOT comparable with payload-in-prompt files or the opaque axis.",
+  "n": 10,
+  "total_runs": 120,
+  "question": "total-vs-per-m2",
+  "why_this_question": "Chosen over wrong-unit and the two hardened questions because it is the only other derived_number question, so it tests whether 'return the derived figure' is a shape-level claim or a gas-estimate-level one. It is also a CLEANER INSTRUMENT: the answer needs no constant that the payload lacks - both 28.59 and the two candidate areas (92 thermal zone, 100 BAG) are in the response. The only decision is which denominator.",
+  "ladder_verification": {
+    "payloads": "Verified identical on the wire before spending runs: thin and rich return the same 40 fields for 3039WB/1, rich adding only `alerts`.",
+    "rich_alert_verbatim": "Total CO₂ emissions: ~2630 kg/year (28.59 kg/m² × 92 m² EP-Online thermische zone).",
+    "wrong_road_is_excluded_by_the_band": "28.59 x 100 (BAG) = 2859, outside the 2570-2690 accept range. Unlike gas-estimate at tolerance 20, this question's band cannot be passed from the wrong denominator."
+  },
+  "results": {
+    "thin / haiku": {
+      "correct": "0 of 10",
+      "confidently_wrong": "10 of 10",
+      "declined": "0 of 10",
+      "denominator_used": {
+        "bag": 9,
+        "wrong_building": 1
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 2,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 3,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 4,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 5,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 6,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 7,
+          "answer": "6852 kg/year",
+          "correct": false,
+          "denominator": "wrong_building",
+          "note": "MALFORMED POSTCODE '3039 WB' accepted by thin (no pattern); returned unit 1-BG, label D, 114 m2, co2 60.11. Reported confidently as 6,852 kg."
+        },
+        {
+          "rep": 8,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 9,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 10,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        }
+      ]
+    },
+    "schema / haiku": {
+      "correct": "0 of 10",
+      "confidently_wrong": "10 of 10",
+      "declined": "0 of 10",
+      "denominator_used": {
+        "bag": 10
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 2,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 3,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 4,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 5,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 6,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 7,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 8,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 9,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 10,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        }
+      ]
+    },
+    "words / haiku": {
+      "correct": "1 of 10",
+      "confidently_wrong": "9 of 10",
+      "declined": "0 of 10",
+      "denominator_used": {
+        "bag": 9,
+        "thermal_zone": 1
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 2,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 3,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 4,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 5,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 6,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "the one haiku run below rich that read gebruiksoppervlakte_thermische_zone"
+        },
+        {
+          "rep": 7,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 8,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 9,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 10,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        }
+      ]
+    },
+    "rich / haiku": {
+      "correct": "10 of 10",
+      "confidently_wrong": "0 of 10",
+      "declined": "0 of 10",
+      "denominator_used": {
+        "thermal_zone": 10
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 2,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 3,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 4,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 5,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 6,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 7,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 8,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 9,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 10,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        }
+      ]
+    },
+    "thin / sonnet": {
+      "correct": "3 of 10",
+      "confidently_wrong": "7 of 10",
+      "declined": "0 of 10",
+      "denominator_used": {
+        "thermal_zone": 3,
+        "bag": 7
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 2,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "hedged: named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 3,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 4,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "hedged"
+        },
+        {
+          "rep": 5,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 6,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 7,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 8,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 9,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 10,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        }
+      ]
+    },
+    "schema / sonnet": {
+      "correct": "2 of 10",
+      "confidently_wrong": "8 of 10",
+      "declined": "0 of 10",
+      "denominator_used": {
+        "bag": 8,
+        "thermal_zone": 2
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 2,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "hedged"
+        },
+        {
+          "rep": 3,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 4,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "hedged"
+        },
+        {
+          "rep": 5,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 6,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 7,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": "named 2630 as the alternative but led with 2859"
+        },
+        {
+          "rep": 8,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 9,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 10,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        }
+      ]
+    },
+    "words / sonnet": {
+      "correct": "8 of 10",
+      "confidently_wrong": "2 of 10",
+      "declined": "0 of 10",
+      "denominator_used": {
+        "thermal_zone": 8,
+        "bag": 2
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 2,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 3,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "hedged"
+        },
+        {
+          "rep": 4,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 5,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 6,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "hedged"
+        },
+        {
+          "rep": 7,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 8,
+          "answer": "2859 kg/year",
+          "correct": false,
+          "denominator": "bag",
+          "note": ""
+        },
+        {
+          "rep": 9,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 10,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        }
+      ]
+    },
+    "rich / sonnet": {
+      "correct": "10 of 10",
+      "confidently_wrong": "0 of 10",
+      "declined": "0 of 10",
+      "denominator_used": {
+        "thermal_zone": 10
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 2,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 3,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 4,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 5,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 6,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 7,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 8,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 9,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        },
+        {
+          "rep": 10,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": ""
+        }
+      ]
+    },
+    "thin / opus": {
+      "correct": "10 of 10",
+      "confidently_wrong": "0 of 10",
+      "declined": "0 of 10",
+      "denominator_used": {
+        "thermal_zone": 10
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 2,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 3,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 4,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 5,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 6,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 7,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 8,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 9,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 10,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        }
+      ]
+    },
+    "schema / opus": {
+      "correct": "10 of 10",
+      "confidently_wrong": "0 of 10",
+      "declined": "0 of 10",
+      "denominator_used": {
+        "thermal_zone": 10
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 2,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 3,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 4,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 5,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 6,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 7,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 8,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 9,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 10,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        }
+      ]
+    },
+    "words / opus": {
+      "correct": "10 of 10",
+      "confidently_wrong": "0 of 10",
+      "declined": "0 of 10",
+      "denominator_used": {
+        "thermal_zone": 10
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 2,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 3,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 4,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 5,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 6,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 7,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 8,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 9,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 10,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        }
+      ]
+    },
+    "rich / opus": {
+      "correct": "10 of 10",
+      "confidently_wrong": "0 of 10",
+      "declined": "0 of 10",
+      "denominator_used": {
+        "thermal_zone": 10
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 2,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 3,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 4,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 5,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 6,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 7,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 8,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 9,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        },
+        {
+          "rep": 10,
+          "answer": "2630 kg/year",
+          "correct": true,
+          "denominator": "thermal_zone",
+          "note": "led with 2630; most also named 2859 as the BAG alternative"
+        }
+      ]
+    }
+  },
+  "summary_table": {
+    "_note": "correct out of 10. Accept range 2570-2690.",
+    "thin": {
+      "haiku": "0",
+      "sonnet": "3",
+      "opus": "10"
+    },
+    "schema": {
+      "haiku": "0",
+      "sonnet": "2",
+      "opus": "10"
+    },
+    "words": {
+      "haiku": "1",
+      "sonnet": "8",
+      "opus": "10"
+    },
+    "rich": {
+      "haiku": "10",
+      "sonnet": "10",
+      "opus": "10"
+    }
+  },
+  "adjacent_rung_gaps": {
+    "haiku thin -> schema": "0/10 -> 0/10, p=1.00",
+    "haiku schema -> words": "0/10 -> 1/10, p=1.00",
+    "haiku words -> rich": "1/10 -> 10/10, p=0.0001",
+    "sonnet thin -> schema": "3/10 -> 2/10, p=1.00",
+    "sonnet schema -> words": "2/10 -> 8/10, p=0.0115  <-- THE PROSE IS THE CARRIER HERE",
+    "sonnet words -> rich": "8/10 -> 10/10, p=0.24",
+    "opus, every gap": "10/10 -> 10/10, p=1.00 throughout"
+  },
+  "headline": "REPLICATES THE GAS RESULT AND SHARPENS IT. rich is 30 of 30 across three models, as it was 20 of 20 on gas-estimate - 50 of 50 for the rich rung across two derived_number questions and three models. But the rungs below it behave COMPLETELY DIFFERENTLY on the two questions, and the difference is explainable.",
+  "the_prose_reverses_sign": {
+    "observation": "On gas-estimate, schema -> words was NET NEGATIVE on sonnet (10/10 -> 6/10). Here it is strongly NET POSITIVE (2/10 -> 8/10, p=0.0115). Same prose, same arm, same model, opposite sign.",
+    "mechanism": "descriptionCore contains the exact discriminating fact this question turns on: 'gebruiksoppervlakte_thermische_zone_m2 (NTA 8800 only) vs oppervlakte_m2 (BAG): two different scopes, not two measurements of the same thing.' It contains NOTHING about converting heat demand to gas volume - no formula, no efficiency, no calorific value (verified: zero occurrences of 8.79, 0.95, 'gas' or 'boiler' in 6099 chars).",
+    "the_rule_this_suggests": "PROSE PAYS WHEN IT CARRIES THE SPECIFIC FACT THE QUESTION TURNS ON, AND NOT OTHERWISE. It is not a general uplift. On gas-estimate the prose had nothing to say about the actual difficulty, and its effect was to induce hedging about district heating and metered data, which cost accuracy. This is a sharper and more useful claim than _the_rule's 'semantics handle interpretation, classification and prevention', and it is testable: read the description, find the sentence that resolves the question, and predict the sign."
+  },
+  "opus_needs_no_metadata_here": {
+    "finding": "40 of 40 opus runs correct, across ALL FOUR ARMS including thin. Every opus run led with 2630 and named the 92 m2 thermal zone; most also volunteered 2859 as the BAG alternative and explained why it is the wrong basis.",
+    "outcome_class": "This is outcome class C, 'model closes the gap', at n=10 - the class the per-question record assigned to benchmark-trap and overheating on n=1 evidence.",
+    "what_it_does_NOT_show": "There is NO opus data on gas-estimate. Opus closing the gap on a question whose difficulty is 'pick the right field that is present' says nothing about a question whose difficulty is 'supply a constant that is absent'. On gas-estimate, sonnet - the stronger of the two models tested - was the one that reasoned its way to the WRONG quantity and did it consistently. Do not generalise this row to derived numbers in general without running opus on gas-estimate."
+  },
+  "schema_rung_status": {
+    "accuracy": "Null again, for the second question running. haiku 0 vs 0, sonnet 2 vs 3 (slightly BELOW thin), opus 10 vs 10. Across both questions and five arm/model cells with headroom, the schema rung has never once improved accuracy.",
+    "but_it_prevented_a_wrong_building": "thin/haiku rep 7 passed postcode '3039 WB' - with a space. thin has no pattern on that parameter and accepted it; PDOK resolved it differently and returned a DIFFERENT UNIT: Van Beuningenstraat 1-BG, energy label D, 114 m2, co2_emissie 60.11 kg/m2, candidateCount 10 instead of 3. Nothing in the response flagged the substitution and the model reported 6,852 kg CO2 confidently. Reproduced by hand from the parent session. The schema arm REJECTS the same input at the boundary with a regex error, as do words and rich.",
+    "conclusion": "The schema rung's value on this evidence is INPUT VALIDATION, not comprehension. It does not help a model understand the domain; it stops a malformed call from silently answering about the wrong building. That is a safety property, it is invisible to an accuracy metric, and it fired once in 120 runs. wrong-unit is the question designed to measure it and remains the right next run for this rung."
+  },
+  "route_scoring_was_unnecessary_here": "Predicted in advance and confirmed: value-correct and route-correct disagree in 0 of 120 runs, because 2630 is reachable only from the 92 m2 thermal zone and 2859 only from the 100 m2 BAG area. The route metric that gas-estimate needed carries no information on this question. That is a property of the question, not a retraction - it is why this question is the better instrument of the two.",
+  "caveats": [
+    "n=10 per cell, 120 runs, ONE question, single sitting.",
+    "Per-run values were classified by reading the run transcripts back in one pass by one rater, not parsed mechanically. A handful of sonnet runs led with 2630 while naming 2859 as an alternative (or the reverse); those were scored on the figure the run LED WITH, which is a judgement call. The cells where this matters are sonnet/thin and sonnet/schema; rich, opus and haiku are unambiguous.",
+    "`fabricated` is not reported per cell because it carries no signal here: the question needs no constant the payload lacks, so essentially nothing was invented. Note that this question's `fabrication_watch` - 'an area denominator other than the thermal zone' - duplicates the correctness criterion rather than measuring something independent. Worth fixing in the set.",
+    "No opus runs exist for gas-estimate, so the opus row cannot be generalised across the shape. See opus_needs_no_metadata_here.",
+    "The malformed-postcode event is a single occurrence. Its consequence is verified and reproducible, but its FREQUENCY is estimated from one observation in 120 runs.",
+    "CALLS/TOOLS/PARAMS remain self-reported and unaudited against get_tool_call_log - though in this run PARAMS is what exposed the malformed postcode.",
+    "The guide, the schemas, the alerts and the questions remain authored by the same party."
+  ]
+}

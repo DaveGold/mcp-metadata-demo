@@ -15,6 +15,7 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-21-opaque-live.json`](2026-09-21-opaque-live.json) | Does the shape replication survive live tool calls? It does not — five of six cells disagree, and the derived-figures recipe scores 0 of 3. |
 | [`2026-09-21-opaque-live-sonnet-n10.json`](2026-09-21-opaque-live-sonnet-n10.json) | The confirmation pass for that run — sonnet, n=10, 60 runs. Confirms the recipe failure and shows the other two questions saturate on a stronger model. |
 | [`2026-09-21-readable-ladder-gas.json`](2026-09-21-readable-ladder-gas.json) | The readable ladder on the one question with headroom, and the first measurement of the `schema` rung. 80 runs, two models. Server-computed beats everything at either tolerance; the ladder looked non-monotonic at tolerance 20 and that wobble does not survive the retightening to 8. |
+| [`2026-09-21-readable-ladder-co2.json`](2026-09-21-readable-ladder-co2.json) | Is the gas result a property of the SHAPE? 120 runs, three models incl. opus. rich replicates at 30/30; the prose rung reverses sign and the reason is legible; opus needs no metadata here. |
 
 > **gas-estimate tolerance changed on 2026-09-21**, from 20 to 8 (accept range
 > 233–273 → 245–261). Files above that record `accept_range: 233-273` —
@@ -23,12 +24,18 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 > left as they were. Do not compare their gas-estimate counts against anything
 > scored afterwards. `2026-09-21-readable-ladder-gas.json` carries both scorings.
 
-The readable-ladder file is the one to read for the design question. It is the only
-run scored on the DERIVATION as well as the value, and that is where its result
-lives: requiring both, `rich` is 20 of 20 and every other arm combined is 2 of 60.
-Read `the_tolerance_problem` and `route_scoring` before quoting any number from the
-three lower rungs — six of their apparent wins on sonnet are the wrong derivation
-landing in the band by coincidence.
+The two readable-ladder files are the ones to read for the design question. Start
+with the gas file: it is the only run scored on the DERIVATION as well as the value,
+and that is where its result lives — requiring both, `rich` is 20 of 20 and every
+other arm combined is 2 of 60. Read its `the_tolerance_problem` and `route_scoring`
+before quoting any number from the three lower rungs; six of their apparent wins on
+sonnet are the wrong derivation landing in the band by coincidence.
+
+Then read the co2 file: it is the same ladder on the other `derived_number`
+question, and it is the better instrument — its accept range cannot be reached from
+the wrong denominator, so no route metric is needed. Together the two give the rich
+rung 50 of 50 across two questions and three models, and they disagree about what
+the PROSE rung is worth, which the co2 file explains.
 
 Read the sweep first — it is the one that changed the design, and it is a useful
 record of how easily a single run misleads. Then read `2026-09-21-opaque-live.json`:
