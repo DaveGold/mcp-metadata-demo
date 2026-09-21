@@ -106,7 +106,9 @@ per-model rule set — capability substitutes for metadata only where the payloa
 carries the quantity. It also lists what the runs do NOT establish. Q1 and Q2 are
 answered there with their predictions left as registered; **Q3 and Q4 are open**, Q4
 being the fact-vs-instruction ablation this directory's newest result raises. The token
-figures live there too.
+figures live there too. The *Design guidance* section that follows the synthesis turns
+it into what to build — including why per-model tailoring is not worth doing, and the
+one assumption that conclusion rests on.
 
 **Q1 has since been run and both its predictions were falsified** — see
 [`2026-09-21-q1-response-channel.json`](2026-09-21-q1-response-channel.json). A fact
