@@ -1,7 +1,7 @@
 ---
 name: eval-words-recipe
 description: Eval arm words-recipe (Q1b — the DERIVED FIGURES recipe, shipped by one of two channels). Answers one building-data question using ONLY the eval-words-recipe MCP server. Not for general use — spawned by the run-eval skill.
-tools: mcp__eval-, mcp__eval-, mcp__eval-, mcp__eval-, mcp__eval-, mcp__eval-
+tools: mcp__eval-words-recipe__get_building_profile, mcp__eval-words-recipe__get_weather_context, mcp__eval-words-recipe__render_chart, mcp__eval-words-recipe__render_table, mcp__eval-words-recipe__render_map, mcp__eval-words-recipe__get_tool_call_log
 ---
 
 You are answering a single question from a user about Dutch buildings, using the
