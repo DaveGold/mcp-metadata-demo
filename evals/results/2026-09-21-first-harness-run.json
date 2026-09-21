@@ -1,0 +1,38 @@
+{
+  "_comment": "The first end-to-end run of the run-eval skill. A control slice, not the full matrix. Its two useful outputs are a broken harness and a retracted interpretation.",
+  "date": "2026-09-21",
+  "protocol": "Live tool calls through the deployed endpoints, via the eval-* subagents. Readable regime only.",
+  "slice": "The control questions, which had gaps: overheating had never been run on the words arm.",
+  "model": "haiku",
+
+  "finding_0_the_harness_was_stale": {
+    "what": "The skill still told the runner to score `max_calls` and to report `model_sensitivity` tables. Both fields were removed from the questions during the curation; no question could populate either. The skill's description had been updated, its scoring and reporting sections had not.",
+    "why_it_matters": "A harness nobody has run is a harness that does not work. This was found by trying to use it, not by reading it - and it would have produced a report keyed to fields that no longer exist.",
+    "fixed": "9a42d69"
+  },
+
+  "finding_1_the_control_holds": {
+    "question": "overheating - temperatuuroverschrijding 3.59, above the 1.5 significant threshold",
+    "runs": {
+      "thin": ["inverted - 'very low', invented the unit 'degree-days'"],
+      "words": ["CORRECT - 'yes, documented overheating risk'", "inverted - 'LOW'", "partial - 'modest', 'moderate rather than critical'"],
+      "rich": ["inverted - 'low', and spent a second call on weather confirming it"]
+    },
+    "reading": "No arm wins. The words arm is 1 correct, 1 wrong, 1 partial across three runs - unstable rather than better. This is consistent with the earlier result that prose-only rules are a model cliff: every arm fails at Haiku, both arms pass at Opus.",
+    "verdict": "THE CONTROL DID NOT SEPARATE, which is what a control is for. The other findings in this set are not undermined.",
+    "side_note": "All three words runs made a second call to get_weather_context. The same compensating search appeared on thin and rich. When the payload does not settle a question, the model goes looking - regardless of arm."
+  },
+
+  "finding_2_a_retraction": {
+    "what": "After the FIRST words run came back correct while thin and rich were both wrong, the immediate reading was that words beats rich - and a mechanism was proposed on the spot: that a curated alerts array suppresses attention to fields it does not cover, so rich infers 'not in alerts, not a problem'.",
+    "then": "Two more runs of the same cell returned 'LOW' and 'modest'. The effect was noise.",
+    "why_this_is_recorded": "It is the exact failure this whole exercise has been documenting - a mechanism inferred from n=1 - committed by the person documenting it, one run after writing that single runs mislead. The hypothesis may still be true and is worth a proper test; it is not evidence yet.",
+    "if_tested_properly": "Ask a question whose answer sits in a field NO alert covers, n>=5, words versus rich, and check whether rich systematically under-attends to it. temperatuuroverschrijding is the right field; this was the wrong n."
+  },
+
+  "caveats": [
+    "A control slice only: 5 runs. The full readable matrix is 9 questions x 3 arms x 3 repeats = 81, which was not attempted.",
+    "Haiku only.",
+    "n=3 on the words cell, n=1 on thin and rich, carried over from the earlier sweep."
+  ]
+}
