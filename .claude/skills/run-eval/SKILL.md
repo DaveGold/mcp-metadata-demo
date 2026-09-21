@@ -35,9 +35,27 @@ NO per-question results — `ground-truth.test.ts` actively fails if `regimes` o
 `outcome_class` reappear there. What happened on previous runs lives in
 `results/`, starting with `results/README.md`.
 
-**Pick the arms by regime.** The readable regime is thin / words / rich; the
-opaque regime is opaque / opaque-words. Do not compare a readable-arm result
-against an opaque-arm one — they differ in field naming as well as metadata.
+**Pick the arms off the ladder.** Each rung adds ONE layer to the rung before
+it, so a gap between ADJACENT rungs is attributable to that layer and a gap
+between distant ones is not:
+
+| rung | adds | answers |
+|---|---|---|
+| `thin` (minimal) | readable field names only | the floor |
+| `schema` | typed + `.describe()`d input/output schemas | what the schema buys |
+| `words` | the prose description | what the words buy |
+| `rich` | server-computed `alerts`, incl. the derived gas figure | what computing it for them buys |
+
+`opaque` / `opaque-words` are the orthogonal FIELD-NAMING axis: the same payload
+with names stripped to terse codes, without and with the glossary. Never compare
+across the two axes — they differ in field naming as well as metadata.
+
+Compare adjacent rungs. `thin` vs `rich` measures four changes at once and tells
+you nothing about which one mattered; that conflation is what the `schema` rung
+was added to break.
+
+NOTE: `eval-schema` is configured but the `mcpSchema` function may not be
+deployed yet. Check the arm actually answers before you spend a run on it.
 
 Before scoring, read `results/2026-09-21-shape-replication.json` for `_the_rule`
 (semantics handle interpretation, classification, prevention and refusal; recipes

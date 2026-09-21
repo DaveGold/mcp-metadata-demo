@@ -16,6 +16,7 @@ import {
 } from './tools/get-building-profile.js';
 import { registerGetBuildingProfileMinimalTool } from './tools/get-building-profile-minimal.js';
 import { registerGetBuildingProfileWordsTool } from './tools/get-building-profile-words.js';
+import { registerGetBuildingProfileSchemaTool } from './tools/get-building-profile-schema.js';
 import { registerGetBuildingProfileOpaqueTool } from './tools/get-building-profile-opaque.js';
 import { registerRenderChartTool } from './tools/render-chart.js';
 import { registerRenderTableTool } from './tools/render-table.js';
@@ -40,7 +41,20 @@ const VERSION = packageJson.version;
  *               Identical in every other respect, so opaque → opaque-words isolates the
  *               guidance itself.
  */
-export type ServerVariant = 'rich' | 'words' | 'minimal' | 'opaque' | 'opaque-words';
+/**
+ * The metadata ladder. Each rung adds exactly ONE layer to the one before it, so
+ * a difference between adjacent rungs is attributable:
+ *
+ *   minimal → schema → words → rich
+ *     minimal  readable field names, one-sentence description, bare schema
+ *     schema   + typed/described input & output schemas
+ *     words    + the prose description (RETURNS / INTERPRETATION / ...)
+ *     rich     + server-computed `alerts`, including the derived gas figure
+ *
+ * `opaque` and `opaque-words` are the orthogonal FIELD-NAMING axis: same payload
+ * with the names stripped to terse codes, without and with the glossary.
+ */
+export type ServerVariant = 'rich' | 'words' | 'schema' | 'minimal' | 'opaque' | 'opaque-words';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -141,6 +155,24 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
       { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
     );
     registerGetBuildingProfileOpaqueTool(server, bagClient, epOnlineClient, { withProse });
+    registerRenderChartTool(server, { minimal: true });
+    registerRenderTableTool(server, { minimal: true });
+    registerRenderMapTool(server, { minimal: true });
+    registerGetWeatherContextTool(server, { minimal: true });
+    registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
+  if (variant === 'schema') {
+    // One rung above minimal: the schemas are the ONLY thing that changes. Same
+    // one-sentence tool description, same bare instructions, no alerts. The
+    // render tools stay minimal too, so the building-profile schema is the sole
+    // variable against `minimal`.
+    const server = new McpServer(
+      { name: 'metadata-demo-schema', version: VERSION },
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+    );
+    registerGetBuildingProfileSchemaTool(server, bagClient, epOnlineClient);
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });

@@ -15,6 +15,10 @@
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal"
     },
+    "eval-schema": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpSchema"
+    },
     "eval-words": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpWords"
