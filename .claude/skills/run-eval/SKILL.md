@@ -23,22 +23,27 @@ description: Run the eval set in evals/questions.json against the arm servers (t
    checkout where the files are already present. Do not attempt the run.
 2. Re-capture `evals/addresses.json` if it is more than a few weeks old. BAG and
    EP-Online are live.
-3. Confirm the `agg-01` gas formula question is resolved (see `evals/README.md`) —
-   otherwise arm C scores wrong on its own flagship question.
+3. Read `_measured_ceilings` in `questions.json`. A question that already scores
+   at or near 100% for every arm on the model you are about to use cannot measure
+   anything — pick a different question or a weaker model, and say which you did.
 
 ## Running
 
 There is ONE set: `evals/questions.json`, 9 questions. Each carries a `shape`,
-an `outcome_class` and per-regime results in `regimes`.
+the `question` string, `ground_truth`, `must_not_say` and `scoring`. It carries
+NO per-question results — `ground-truth.test.ts` actively fails if `regimes` or
+`outcome_class` reappear there. What happened on previous runs lives in
+`results/`, starting with `results/README.md`.
 
 **Pick the arms by regime.** The readable regime is thin / words / rich; the
-opaque regime is opaque / opaque-words. A question's `regimes` block says which
-have been run and what happened. Do not compare a readable-arm result against an
-opaque-arm one — they differ in field naming as well as metadata.
+opaque regime is opaque / opaque-words. Do not compare a readable-arm result
+against an opaque-arm one — they differ in field naming as well as metadata.
 
-Read `_the_rule` before scoring: semantics handle interpretation, classification,
-prevention and refusal; recipes are needed only for derived numbers. A result
-that contradicts it is the interesting one, so report it rather than smoothing it.
+Before scoring, read `results/2026-09-21-shape-replication.json` for `_the_rule`
+(semantics handle interpretation, classification, prevention and refusal; recipes
+are needed only for derived numbers) AND the two live runs that failed to
+replicate it. Treat the rule as an open question, not a finding. A result that
+contradicts it is the interesting one, so report it rather than smoothing it.
 
 For each (question, arm, model, repeat):
 
@@ -63,6 +68,10 @@ The four metrics are defined in `_scoring` in questions.json:
 - **confidently_wrong** — asserts `must_not_say`. The headline number: an answer
   can be incorrect without being confidently wrong, and that distinction is the
   whole point.
+- **declined** — said it could not answer, without asserting `must_not_say`.
+  Its own column, never folded into `correct` or `confidently_wrong`. A refusal
+  and a fabrication are different failures and the argument turns on the
+  difference.
 - **fabricated** — invented a constant, unit or threshold not in the payload.
   Each question's `fabrication_watch` says what to look for. This replaced a
   call-count metric, which carried no signal: `get_building_profile` is one-shot,
@@ -70,7 +79,10 @@ The four metrics are defined in `_scoring` in questions.json:
 - **reproducible** — how many of n runs land in range, and the SPREAD of the
   answers. Report it alongside `correct`, never instead: one arm scored 1-of-4
   at a 44% spread where the other scored 3-of-3 at 0%, and neither number alone
-  says that.
+  says that. Where a run answers with a RANGE, score the MIDPOINT against the
+  tolerance and record the width. Fix that rule before you look at the answers —
+  stronger models answer in ranges far more often, and on one run it was the
+  difference between 0-of-10 and 1-of-10.
 
 CALLS/TOOLS/PARAMS are self-reported by the system under test. Usable for
 spotting thrashing, too weak to headline — say so when reporting them.
@@ -92,6 +104,12 @@ argument lives:
 should hold no advantage over words; `metered-vs-model` and `invented-label`
 should be answered correctly by every arm. If a control separates, report that
 before anything else — it undermines every other number in the run.
+
+**Then check for saturation.** If every arm scores at or near 100% on a
+question, that question measured nothing on this model — report it as no
+headroom rather than as agreement between the arms. Two questions did exactly
+this on sonnet and were hardened on 2026-09-21; their new ceilings are
+unmeasured.
 
 Then state plainly whether the result matches `_the_rule` in questions.json:
 semantics handle interpretation, classification, prevention and refusal; recipes

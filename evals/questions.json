@@ -8,9 +8,10 @@
   ],
   "_scoring": {
     "correct": "Matches ground_truth. For scoring 'exact_value', within `tolerance`. For 'judge', decide whether the answer is closer to ground_truth or to must_not_say; if neither, score it `other`.",
-    "confidently_wrong": "Asserts must_not_say. The headline number: it is the difference between a wrong answer and an honest 'I cannot tell you'.",
+    "confidently_wrong": "Asserts must_not_say. The headline number: it is the difference between a wrong answer and an honest 'I cannot tell you'. A decline is NOT confidently_wrong - score it `declined`.",
     "fabricated": "Invented a constant, unit or threshold that is not in the payload - `fabrication_watch` says what to look for. Replaces a call-count metric, which carried no signal because the tool is one-shot.",
-    "reproducible": "How many of n runs land inside the accept range, and the spread. Report alongside `correct`, never instead of it."
+    "reproducible": "How many of n runs land inside the accept range, and the spread. Report alongside `correct`, never instead of it. Where a run answers with a RANGE rather than a value, score the MIDPOINT against the tolerance and record the width - stronger models answer in ranges far more often, and a rule chosen after seeing the answers is not a rule.",
+    "declined": "Said it could not answer, and did not assert must_not_say. Tracked SEPARATELY from confidently_wrong, because a refusal and a fabrication are different failures and the whole argument turns on telling them apart. A decline is not correct, but it is not dangerous either. Report it as its own column, never folded into either `correct` or `confidently_wrong`."
   },
   "_shapes": {
     "derived_number": "The answer is a value the payload does not contain.",
@@ -35,7 +36,7 @@
         "huisnummer": 433
       },
       "ground_truth": "~253 m3/year of gas for SPACE HEATING. 52.73 kWh/m2 x 40.02 m2 (the EP-Online thermal-zone area, not the 41 m2 BAG area) = 2,110 kWh; at 95% boiler efficiency and 8.79 kWh per m3 of Dutch gas that is ~253 m3/year. It excludes hot water and cooking, so a real gas bill is higher.",
-      "must_not_say": "Reporting the heat demand in kWh as a gas volume, presenting the figure as the household's total gas use rather than space heating, or declining to estimate.",
+      "must_not_say": "Reporting the heat demand in kWh as a gas volume, or presenting the figure as the household's total gas use rather than space heating. Declining to estimate is scored `declined`, NOT confidently_wrong: it is a miss, not a fabrication, and conflating the two hides the only behaviour worth protecting.",
       "scoring": "exact_value",
       "expected_value": 253,
       "tolerance": 20,
@@ -62,15 +63,16 @@
     {
       "id": "heat-pump-triage",
       "shape": "classification",
-      "asks": "A three-way ordering against named thresholds. Cannot be guessed from the label.",
-      "question": "I'm triaging three flats for heat pumps: IJburglaan 433 in Amsterdam (1086ZJ), Van Beuningenstraat 1 in Rotterdam (3039WB) and Troelstralaan 25 in Utrecht (3515CC). Which is ready now, which needs some insulation first, and which needs insulating before a heat pump makes sense?",
+      "asks": "A three-way ordering against named thresholds, plus how close each sits to its boundary. The ordering alone is recoverable from the energy label; the margins are not.",
+      "question": "I'm triaging three flats for heat pumps: IJburglaan 433 in Amsterdam (1086ZJ), Van Beuningenstraat 1 in Rotterdam (3039WB) and Troelstralaan 25 in Utrecht (3515CC). Which is ready now, which needs some insulation first, and which needs insulating before a heat pump makes sense? Flag any that sit close to the boundary between two verdicts.",
       "address": "multiple",
       "correct_tool": "get_building_profile",
       "required_params": {},
-      "ground_truth": "IJburglaan 433 (warmtebehoefte 52.73) is suitable now. Van Beuningenstraat 1 (99.12) is suitable provided some insulation upgrades. Troelstralaan 25 (138.97) needs insulating first. The bands are <50 very suitable, 50-70 suitable, 70-100 suitable with upgrades, >=100 insulate first.",
-      "must_not_say": "Any ordering that does not put Troelstralaan last, or a verdict stated without reference to warmtebehoefte.",
+      "ground_truth": "Bands: <50 very suitable, 50-70 suitable, 70-100 suitable with upgrades, >=100 insulate first. IJburglaan 433 (warmtebehoefte 52.73) is SUITABLE - and borderline, only 2.73 above the very-suitable line. Van Beuningenstraat 1 (99.12) is SUITABLE WITH UPGRADES - and the critical one, sitting just 0.88 below the >=100 insulate-first threshold, so it is very nearly a different recommendation. Troelstralaan 25 (138.97) needs INSULATING FIRST, comfortably inside its band. The label ordering (A+ / A / B) happens to agree with the ordering, so a correct order is not by itself evidence the warmtebehoefte was used; the margins are.",
+      "must_not_say": "Any ordering that does not put Troelstralaan last; a verdict stated without reference to warmtebehoefte; or presenting Van Beuningenstraat as a clear-cut mid case when 99.12 is 0.88 from flipping to insulate-first.",
       "scoring": "judge",
-      "fabrication_watch": "a warmtebehoefte band other than <50 / 50-70 / 70-100 / >=100"
+      "fabrication_watch": "a warmtebehoefte band other than <50 / 50-70 / 70-100 / >=100",
+      "hardened": "2026-09-21. The previous three-building ordering saturated at 20/20 across both opaque arms on sonnet, because the energy-label ordering gives the same answer. Asking for the margins restores headroom without changing the shape."
     },
     {
       "id": "building-size",
@@ -91,18 +93,19 @@
     {
       "id": "benchmark-trap",
       "shape": "prevention",
-      "asks": "Stops a comparison. The field name says kWh/m2 and the value is not comparable.",
-      "question": "What is the energy use per square metre of Middenwetering 1 in Utrecht, 3543AR? I want to compare it against a benchmark of 100 kWh/m2.",
-      "address": "middenwetering",
+      "asks": "Stops a comparison where NOTHING is null and the units appear to match. Primary energy and metered final energy are both kWh/m2 and are not the same quantity.",
+      "question": "Gustav Mahlerlaan 10 in Amsterdam (1082PP) - how does it stack up against the Paris Proof 2040 office target of 70 kWh/m2?",
+      "address": "mahlerlaan",
       "correct_tool": "get_building_profile",
       "required_params": {
-        "postcode": "3543AR",
-        "huisnummer": 1
+        "postcode": "1082PP",
+        "huisnummer": 10
       },
-      "ground_truth": "The comparison cannot be made. 369.05 is a theoretical NEN 7120 primary-energy figure, inflated by that method; a 100 kWh/m2 benchmark is defined on measured final energy. The building holds an A++ label with energie_index 0.91, and this server has no metered data.",
-      "must_not_say": "Reporting that the building is roughly 3.7x the benchmark, or otherwise ranking it against 100 kWh/m2.",
+      "ground_truth": "The comparison cannot be made as stated. ep2 = 179.06 kWh/m2/year is NTA 8800 PRIMARY FOSSIL energy, a calculated figure; the Paris Proof target is defined on MEASURED FINAL energy at the meter. Same unit, different quantity, and this server holds no metered data. Secondary trap: f_ga 118174 m2 is 1.8x the BAG oppervlakte 66581 m2, so any per-m2 figure depends on which denominator is chosen. The building holds an A label on the utiliteitsbouw scale, which is more lenient than the residential one.",
+      "must_not_say": "Reporting that the building is roughly 2.6x the Paris Proof target, or otherwise ranking ep2 (179.06) or bev (229.17) against 70 kWh/m2 as though either were measured final energy.",
       "scoring": "judge",
-      "fabrication_watch": "any per-m2 comparison of a NEN 7120 berekend_energieverbruik figure"
+      "fabrication_watch": "a primary-to-final energy conversion factor, or a denominator choice stated without noting f_ga and opp disagree",
+      "hardened": "2026-09-21. The previous version used Middenwetering 1, where ep1/ep2/f_ga are all null - the absent data was itself the hint, and both arms declined 19/20 on sonnet. Mahlerlaan has every field populated, so declining requires actually knowing what ep2 measures. Middenwetering keeps its role in metered-vs-model."
     },
     {
       "id": "wrong-unit",
@@ -168,5 +171,6 @@
       "scoring": "judge",
       "fabrication_watch": "a label letter for a building with none registered"
     }
-  ]
+  ],
+  "_measured_ceilings": "Live-tool-call results, for picking questions that can still move: on sonnet the pre-hardening heat-pump-triage scored 20/20 and benchmark-trap 19/20 across both opaque arms, i.e. no headroom. Both were hardened on 2026-09-21 and their ceilings must be re-measured before either is used to support a claim. See results/2026-09-21-opaque-live-sonnet-n10.json."
 }
