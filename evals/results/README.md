@@ -18,6 +18,7 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-21-readable-ladder-co2.json`](2026-09-21-readable-ladder-co2.json) | Is the gas result a property of the SHAPE? 120 runs, three models incl. opus. rich replicates at 30/30; the prose rung reverses sign and the reason is legible; opus needs no metadata here. |
 | [`2026-09-21-readable-ladder-wrong-unit.json`](2026-09-21-readable-ladder-wrong-unit.json) | The question the `schema` rung exists for: `thin` has no `huisletter` parameter, so the call cannot be expressed. 72 runs, three models. thin 0/18, schema 18/18 — and the two ways thin fails are not the same. |
 | [`2026-09-21-q1-response-channel.json`](2026-09-21-q1-response-channel.json) | **Q1 from `open-questions.md`, and both registered predictions are wrong.** Same guidance, description vs response. 210 runs, three models. The recipe in the RESPONSE scores 29/30 where the same 438 bytes in the DESCRIPTION score 4/30. Also the first run to complete the `get_tool_call_log` audit — which found that the `inline` arm does not stamp its own log rows. |
+| [`2026-09-21-q2-conditional-interpretation.json`](2026-09-21-q2-conditional-interpretation.json) | **Q2 from `open-questions.md`. Pruning the interpretation to the record is free, and saves almost nothing.** `inline` vs `inline-conditional`, 180 runs, three models. Accuracy 39/90 vs 39/90; tokens −1.84%, cheaper in all nine cells but never by more than ~1k. The question picked to show the cost, `benchmark-trap`, scored **0 of 10 in all six cells** — because the sentence the prediction feared the pruner would delete is not in the block at all, while the `ep1`↔70 line that causes the error survives pruning in both arms. First run whose call counts are fully reconciled against `get_tool_call_log` rather than caveated. |
 
 > **gas-estimate tolerance changed on 2026-09-21**, from 20 to 8 (accept range
 > 233–273 → 245–261). Files above that record `accept_range: 233-273` —
@@ -61,14 +62,30 @@ stay near zero. The channel, not the amount of metadata, is what moved. Read its
 `route_scoring` before quoting any lower-rung number: all 11 correct answers from the
 three non-recipe arms took the wrong derivation road.
 
+**Q2 has since been run.** Its cost half is falsified as stated and its accuracy half
+holds only in the weak form the prediction was written to exclude — see
+[`2026-09-21-q2-conditional-interpretation.json`](2026-09-21-q2-conditional-interpretation.json).
+Cutting 37–50% of the interpretation prose changed accuracy by zero runs in 180 and
+tokens by −1.84%, because the block is only ~2% of a subagent run's token bill. The
+structural argument for conditional guidance — a description cannot be conditional on
+data, a response can — is untouched; what this run shows is that the mechanism is
+*free*, not that it is a large saving. Read
+`why_benchmark_trap_could_not_test_the_prediction` before reusing that question: its
+post-hardening ceiling is zero for both arms, and the cause is the tool's own
+`ep1`↔70 Paris Proof line, not the pruner. **Q2's cross-record half remains
+untested.** Read `scoring._provenance_warning` too — three of five scoring rules were
+fixed during the run rather than before it.
+
 That file is also the first to carry out the `get_tool_call_log` audit the skill now
 mandates, and the audit earned its keep immediately: the `inline` arm writes every row
 with `variant: "unknown"`, `paramsPresent: []` and `rowCount: 0`, so it is invisible to
 any server-side count — and the log's own alert told the reader to discard exactly
 those rows. The cause is a **stale deploy, not a code fault**: `mcpInline` shipped at
 15:42, variant stamping landed at 16:23, and it was never redeployed, while the repo
-source and all 182 tests stayed green. **Redeploy before running Q2** — until then no
-run involving `inline` can be audited. The log tool, the set and the skill have since
+source and all 182 tests stayed green. **That redeploy has since been done and
+verified**: the Q2 run's preflight found `inline` stamping its own rows correctly, and
+its audit reconciled every call on both arms with no unexplained rows — see
+`log_audit` in the Q2 file. The log tool, the set and the skill have since
 been changed so the same miss cannot happen quietly again; see
 `fixes_applied_after_this_run` in that file.
 
