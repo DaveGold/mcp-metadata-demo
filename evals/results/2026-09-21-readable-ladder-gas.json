@@ -51,7 +51,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "52.73x41, 87% boiler, ~10 kWh/m3"
+          "note": "52.73x41, 87% boiler, ~10 kWh/m3",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 2,
@@ -63,7 +65,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "90% boiler"
+          "note": "90% boiler",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 3,
@@ -75,7 +79,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "invented 70% fossil dependency; 10x too high"
+          "note": "invented 70% fossil dependency; 10x too high",
+          "route_disqualifier": "fossil_share_adjustment: invented 70% fossil dependency",
+          "route_correct": false
         },
         {
           "rep": 4,
@@ -87,7 +93,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "90% boiler; noted absence of an alerts field"
+          "note": "90% boiler; noted absence of an alerts field",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 5,
@@ -99,7 +107,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "92% condensing boiler"
+          "note": "92% condensing boiler",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 6,
@@ -111,7 +121,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "90% + degree-day adjustment from get_weather_context"
+          "note": "90% + degree-day adjustment from get_weather_context",
+          "route_disqualifier": "degree_day_adjustment",
+          "route_correct": false
         },
         {
           "rep": 7,
@@ -123,7 +135,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "implied ~10 kWh/m3"
+          "note": "implied ~10 kWh/m3",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 8,
@@ -135,7 +149,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "90% then renewable-share discount to 150-180"
+          "note": "90% then renewable-share discount to 150-180",
+          "route_disqualifier": "renewable_share_discount",
+          "route_correct": false
         },
         {
           "rep": 9,
@@ -147,7 +163,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "90%; also invented a EUR0.60/m3 gas price"
+          "note": "90%; also invented a EUR0.60/m3 gas price",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 10,
@@ -158,8 +176,10 @@
           "confidently_wrong": false,
           "declined": false,
           "fabricated": true,
-          "route": "mixed",
-          "note": "blended wb and ep2 roads"
+          "route": "ep2",
+          "note": "blended wb and ep2 roads",
+          "route_disqualifier": null,
+          "route_correct": false
         }
       ]
     },
@@ -184,7 +204,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "90% boiler; midpoint 230, three short"
+          "note": "90% boiler; midpoint 230, three short",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 2,
@@ -196,7 +218,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "RENEWABLE DISCOUNT: subtracted 30.8% aandeel_hernieuwbaar"
+          "note": "RENEWABLE DISCOUNT: subtracted 30.8% aandeel_hernieuwbaar",
+          "route_disqualifier": "renewable_share_discount",
+          "route_correct": false
         },
         {
           "rep": 3,
@@ -208,7 +232,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "~10.5 kWh/m3"
+          "note": "~10.5 kWh/m3",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 4,
@@ -220,7 +246,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "10 kWh/m3, 90-95%"
+          "note": "10 kWh/m3, 90-95%",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 5,
@@ -232,7 +260,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "added hot-water allowance + weather adjustment"
+          "note": "added hot-water allowance + weather adjustment",
+          "route_disqualifier": "hot_water_uplift + weather_adjustment",
+          "route_correct": false
         },
         {
           "rep": 6,
@@ -244,7 +274,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "85% boiler, 10.7 kWh/m3"
+          "note": "85% boiler, 10.7 kWh/m3",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 7,
@@ -256,7 +288,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "ARITHMETIC BLUNDER: used 0.9 kWh per m3"
+          "note": "ARITHMETIC BLUNDER: used 0.9 kWh per m3",
+          "route_disqualifier": "arithmetic blunder: 0.9 kWh/m3",
+          "route_correct": false
         },
         {
           "rep": 8,
@@ -268,7 +302,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "RENEWABLE DISCOUNT; noted gas-only would be 260-280"
+          "note": "RENEWABLE DISCOUNT; noted gas-only would be 260-280",
+          "route_disqualifier": "renewable_share_discount",
+          "route_correct": false
         },
         {
           "rep": 9,
@@ -280,7 +316,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "10.55 kWh/m3, 90%"
+          "note": "10.55 kWh/m3, 90%",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 10,
@@ -292,7 +330,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "RENEWABLE DISCOUNT + 10.7 kWh/m3"
+          "note": "RENEWABLE DISCOUNT + 10.7 kWh/m3",
+          "route_disqualifier": "renewable_share_discount",
+          "route_correct": false
         }
       ]
     },
@@ -318,7 +358,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "90%, 9 kWh/m3"
+          "note": "90%, 9 kWh/m3",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 2,
@@ -330,7 +372,9 @@
           "declined": true,
           "fabricated": false,
           "route": "none",
-          "note": "DECLINED: gave kWh only, said m3 needs the heating system"
+          "note": "DECLINED: gave kWh only, said m3 needs the heating system",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 3,
@@ -342,7 +386,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "renewable share cited"
+          "note": "renewable share cited",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 4,
@@ -354,7 +400,9 @@
           "declined": true,
           "fabricated": false,
           "route": "none",
-          "note": "DECLINED: 2100 kWh only, 'tool does not provide direct gas in m3'"
+          "note": "DECLINED: 2100 kWh only, 'tool does not provide direct gas in m3'",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 5,
@@ -366,7 +414,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 6,
@@ -378,7 +428,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "RENEWABLE DISCOUNT 31%"
+          "note": "RENEWABLE DISCOUNT 31%",
+          "route_disqualifier": "renewable_share_discount",
+          "route_correct": false
         },
         {
           "rep": 7,
@@ -390,7 +442,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "2535 kWh fossil -> 285 m3; twelve over"
+          "note": "2535 kWh fossil -> 285 m3; twelve over",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 8,
@@ -402,7 +456,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "90% boiler"
+          "note": "90% boiler",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 9,
@@ -414,7 +470,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "90%, 10 kWh/m3"
+          "note": "90%, 10 kWh/m3",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 10,
@@ -426,7 +484,9 @@
           "declined": true,
           "fabricated": false,
           "route": "none",
-          "note": "DECLINED: kWh only, explicitly not gas consumption"
+          "note": "DECLINED: kWh only, explicitly not gas consumption",
+          "route_disqualifier": null,
+          "route_correct": false
         }
       ]
     },
@@ -451,7 +511,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": "read the alert; scoped to space heating"
+          "note": "read the alert; scoped to space heating",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 2,
@@ -463,7 +525,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 3,
@@ -475,7 +539,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 4,
@@ -487,7 +553,9 @@
           "declined": false,
           "fabricated": true,
           "route": "alert",
-          "note": "correct 253 but invented a 350-450 m3 total-household uplift"
+          "note": "correct 253 but invented a 350-450 m3 total-household uplift",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 5,
@@ -499,7 +567,9 @@
           "declined": false,
           "fabricated": true,
           "route": "alert",
-          "note": "invented a 20-30% hot-water uplift"
+          "note": "invented a 20-30% hot-water uplift",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 6,
@@ -511,7 +581,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 7,
@@ -523,7 +595,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 8,
@@ -535,7 +609,9 @@
           "declined": false,
           "fabricated": true,
           "route": "alert",
-          "note": "invented a 300-350 m3 household total"
+          "note": "invented a 300-350 m3 household total",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 9,
@@ -547,7 +623,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 10,
@@ -559,7 +637,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         }
       ]
     },
@@ -585,7 +665,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 63.35 x 41 / 9.77"
+          "note": "EP2 63.35 x 41 / 9.77",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 2,
@@ -597,7 +679,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 3,
@@ -609,7 +693,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 4,
@@ -621,7 +707,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 5,
@@ -633,7 +721,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 6,
@@ -645,7 +735,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 7,
@@ -657,7 +749,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 8,
@@ -669,7 +763,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 9,
@@ -681,7 +777,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "wb road, 90%; also invented a gas price"
+          "note": "wb road, 90%; also invented a gas price",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 10,
@@ -693,7 +791,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         }
       ]
     },
@@ -718,7 +818,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 2,
@@ -730,7 +832,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 3,
@@ -742,7 +846,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 4,
@@ -754,7 +860,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road; hedged heat pump / district heating"
+          "note": "EP2 road; hedged heat pump / district heating",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 5,
@@ -766,7 +874,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 6,
@@ -778,7 +888,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road; hedged 'actual probably zero, stadsverwarming'"
+          "note": "EP2 road; hedged 'actual probably zero, stadsverwarming'",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 7,
@@ -790,7 +902,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road; hedged zero"
+          "note": "EP2 road; hedged zero",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 8,
@@ -802,7 +916,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 9,
@@ -814,7 +930,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road; hedged all-electric"
+          "note": "EP2 road; hedged all-electric",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 10,
@@ -826,7 +944,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road; hedged all-electric"
+          "note": "EP2 road; hedged all-electric",
+          "route_disqualifier": null,
+          "route_correct": false
         }
       ]
     },
@@ -852,7 +972,9 @@
           "declined": true,
           "fabricated": false,
           "route": "none",
-          "note": "DECLINED: gave 2500 kWh primary fossil, no m3; 'probably minimal'"
+          "note": "DECLINED: gave 2500 kWh primary fossil, no m3; 'probably minimal'",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 2,
@@ -864,7 +986,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "midpoint 275, two over"
+          "note": "midpoint 275, two over",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 3,
@@ -876,7 +1000,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 4,
@@ -888,7 +1014,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road over the 40 m2 thermal zone"
+          "note": "EP2 road over the 40 m2 thermal zone",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 5,
@@ -900,7 +1028,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 6,
@@ -912,7 +1042,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "wb road, 90% boiler; hedged stadsverwarming"
+          "note": "wb road, 90% boiler; hedged stadsverwarming",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 7,
@@ -924,7 +1056,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "very wide hedge band"
+          "note": "very wide hedge band",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 8,
@@ -936,7 +1070,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road"
+          "note": "EP2 road",
+          "route_disqualifier": null,
+          "route_correct": false
         },
         {
           "rep": 9,
@@ -948,7 +1084,9 @@
           "declined": false,
           "fabricated": true,
           "route": "wb",
-          "note": "wb road; hedged district heating"
+          "note": "wb road; hedged district heating",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 10,
@@ -960,7 +1098,9 @@
           "declined": false,
           "fabricated": true,
           "route": "ep2",
-          "note": "EP2 road; hedged stadswarmte"
+          "note": "EP2 road; hedged stadswarmte",
+          "route_disqualifier": null,
+          "route_correct": false
         }
       ]
     },
@@ -985,7 +1125,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 2,
@@ -997,7 +1139,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 3,
@@ -1009,7 +1153,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": "quoted 52.73 x 40.02 thermal zone explicitly"
+          "note": "quoted 52.73 x 40.02 thermal zone explicitly",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 4,
@@ -1021,7 +1167,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 5,
@@ -1033,7 +1181,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 6,
@@ -1045,7 +1195,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": "rounded to 250"
+          "note": "rounded to 250",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 7,
@@ -1057,7 +1209,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 8,
@@ -1069,7 +1223,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 9,
@@ -1081,7 +1237,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         },
         {
           "rep": 10,
@@ -1093,7 +1251,9 @@
           "declined": false,
           "fabricated": false,
           "route": "alert",
-          "note": ""
+          "note": "",
+          "route_disqualifier": null,
+          "route_correct": true
         }
       ]
     }
@@ -1155,5 +1315,107 @@
     "effect_on_the_headline": "words -> rich SHARPENS: haiku 1/10 -> 10/10 (p=0.0001), sonnet 2/10 -> 10/10 (p=0.0004). rich is untouched by the change because every one of its 20 runs answered 253 or 250.",
     "effect_on_the_non_monotonicity": "THE LADDER WOBBLE DOES NOT SURVIVE. haiku thin -> schema falls to 1/10 -> 0/10 (p=1.00) and sonnet schema -> words to 1/10 -> 2/10 (p=1.00). Everything below rich floors out, so the two net-negative gaps are no longer distinguishable from each other or from zero. This is the honest cost of the tightening: the non-monotonicity finding recorded in adjacent_rung_gaps was measured in a band wide enough for the lower rungs to score at all, and it is NOT independently supported at tolerance 8. Treat it as an observation about tolerance-20 scoring, not as a standing result.",
     "the_route_loophole_is_NARROWED_NOT_CLOSED": "The EP2 road still passes at two plausible calorific values: 63.35 x 41 / 10.0 = 259.7 and / 10.55 = 246.2, both inside 245-261. It now fails at 9.77 (265.8), 10.7 (242.7) and 9.0 (288.6). All six surviving lower-rung correct answers on sonnet are still EP2-road. Tightening the tolerance removes most of the luck but cannot distinguish the roads - only scoring the DERIVATION can. The recommendation to score the route stands."
+  },
+  "route_scoring": {
+    "_comment": "APPENDIX 2, added in the same session. No new runs: the same 80 rows, classified by WHICH QUANTITY each run derived from. Added because tolerance alone could not exclude the wrong road even after the retightening to 8 - see rescored_at_tolerance_8.the_route_loophole_is_NARROWED_NOT_CLOSED. Each run row in `results` now carries route / route_disqualifier / route_correct alongside its original scoring; nothing was rescored.",
+    "route_classes": {
+      "wb": "derived from warmtebehoefte_kwh_m2 (52.73) - the ground-truth quantity.",
+      "ep2": "derived from ep2_fossiel_kwh_m2 (63.35) or berekend_energieverbruik_kwh_m2 (63.34), treated as a gas volume. NTA 8800 primary fossil energy is not delivered gas. THE WRONG ROAD.",
+      "alert": "read the server-computed figure out of `alerts`. Scored route_correct - the server performed the ground-truth derivation and named its inputs - but recorded separately because the arm did no arithmetic. That distinction is the point of the rich rung.",
+      "none": "declined; no derivation offered."
+    },
+    "disqualifying_steps": "A run on the `wb` road still fails route_correct if it applied a renewable-share discount (subtracting aandeel_hernieuwbaar 30.8%, which double-counts what the label already includes), an invented fossil-share fraction, a degree-day renormalisation, or a hot-water uplift. 9 runs did, all on haiku, 5 of them in the schema arm.",
+    "by_cell": {
+      "thin / haiku": {
+        "value_correct_tol8": "1 of 10",
+        "route_correct": "6 of 10",
+        "both": "1 of 10",
+        "lucky (value right, route wrong)": "0 of 10",
+        "route_classes": {
+          "wb": 9,
+          "ep2": 1
+        },
+        "disqualifying_steps": 3
+      },
+      "schema / haiku": {
+        "value_correct_tol8": "0 of 10",
+        "route_correct": "5 of 10",
+        "both": "0 of 10",
+        "lucky (value right, route wrong)": "0 of 10",
+        "route_classes": {
+          "wb": 10
+        },
+        "disqualifying_steps": 5
+      },
+      "words / haiku": {
+        "value_correct_tol8": "1 of 10",
+        "route_correct": "4 of 10",
+        "both": "1 of 10",
+        "lucky (value right, route wrong)": "0 of 10",
+        "route_classes": {
+          "wb": 5,
+          "none": 3,
+          "ep2": 2
+        },
+        "disqualifying_steps": 1
+      },
+      "rich / haiku": {
+        "value_correct_tol8": "10 of 10",
+        "route_correct": "10 of 10",
+        "both": "10 of 10",
+        "lucky (value right, route wrong)": "0 of 10",
+        "route_classes": {
+          "alert": 10
+        },
+        "disqualifying_steps": 0
+      },
+      "thin / sonnet": {
+        "value_correct_tol8": "3 of 10",
+        "route_correct": "1 of 10",
+        "both": "0 of 10",
+        "lucky (value right, route wrong)": "3 of 10",
+        "route_classes": {
+          "ep2": 9,
+          "wb": 1
+        },
+        "disqualifying_steps": 0
+      },
+      "schema / sonnet": {
+        "value_correct_tol8": "1 of 10",
+        "route_correct": "0 of 10",
+        "both": "0 of 10",
+        "lucky (value right, route wrong)": "1 of 10",
+        "route_classes": {
+          "ep2": 10
+        },
+        "disqualifying_steps": 0
+      },
+      "words / sonnet": {
+        "value_correct_tol8": "2 of 10",
+        "route_correct": "3 of 10",
+        "both": "0 of 10",
+        "lucky (value right, route wrong)": "2 of 10",
+        "route_classes": {
+          "none": 1,
+          "ep2": 6,
+          "wb": 3
+        },
+        "disqualifying_steps": 0
+      },
+      "rich / sonnet": {
+        "value_correct_tol8": "10 of 10",
+        "route_correct": "10 of 10",
+        "both": "10 of 10",
+        "lucky (value right, route wrong)": "0 of 10",
+        "route_classes": {
+          "alert": 10
+        },
+        "disqualifying_steps": 0
+      }
+    },
+    "headline": "REQUIRING BOTH THE RIGHT VALUE AND THE RIGHT DERIVATION: rich 20 of 20. Every other arm combined, 2 of 60. The readable ladder below the rich rung essentially does not answer this question correctly for a correct reason, on either model.",
+    "all_sonnet_wins_below_rich_are_luck": "On sonnet, thin/schema/words produced 6 value-correct answers at tolerance 8 and ZERO of them were route-correct. Every one came from the ep2 road landing inside the band by coincidence. Without route scoring these six read as competence.",
+    "capability_inversion": "Below the rich rung, sonnet is WORSE on derivation than haiku: thin 1 of 10 route-correct on sonnet against 6 of 10 on haiku, and schema 0 of 10 against 5 of 10. Haiku naively picks up warmtebehoefte, which is the right quantity. Sonnet reasons its way to ep2_fossiel - 'fossil energy must be the gas' - which is more sophisticated and wrong, and it does so consistently: 25 of 30 sonnet runs below rich took the ep2 road against 3 of 30 on haiku. Capability made the wrong derivation more confident, not less common. This is the opposite of the saturation story the opaque sonnet pass told, and it is only visible once route is scored.",
+    "what_this_does_not_show": "Route was classified by reading each run's stated reasoning, which is self-reported and was not audited against get_tool_call_log. A run that reached the right quantity while narrating a wrong one, or vice versa, would be misclassified. The classification was done by one party in one pass and no second rater checked it."
   }
 }

@@ -23,10 +23,12 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 > left as they were. Do not compare their gas-estimate counts against anything
 > scored afterwards. `2026-09-21-readable-ladder-gas.json` carries both scorings.
 
-The readable-ladder file is the one to read for the design question, because it is
-the only run where an arm is correct by the ground-truth route rather than by
-coincidence. Read its `the_tolerance_problem` block before quoting any number from
-the three lower rungs.
+The readable-ladder file is the one to read for the design question. It is the only
+run scored on the DERIVATION as well as the value, and that is where its result
+lives: requiring both, `rich` is 20 of 20 and every other arm combined is 2 of 60.
+Read `the_tolerance_problem` and `route_scoring` before quoting any number from the
+three lower rungs — six of their apparent wins on sonnet are the wrong derivation
+landing in the band by coincidence.
 
 Read the sweep first — it is the one that changed the design, and it is a useful
 record of how easily a single run misleads. Then read `2026-09-21-opaque-live.json`:
