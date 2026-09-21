@@ -15,12 +15,42 @@ have produced a subagent with zero tools declining every question. Check you can
 call `mcp__eval-<arm>__get_building_profile` before spending anything.
 
 **Q3 needs no new arm and no deploy** — only instrumentation, which now exists:
-every log row carries `variant`, `paramsPresent` and `rowCount`, and all eight
-arms were redeployed to stamp them.
+every log row carries `variant`, `paramsPresent` and `rowCount`.
+
+> **A SECOND, QUIETER FAILURE MODE, found on 2026-09-21.** "All eight arms were
+> redeployed to stamp them" was true when written and stopped being true when three
+> more arms were added. `mcpInline` was deployed at 15:42, variant stamping landed at
+> 16:23, and `mcpInline` was never redeployed — so for the whole Q1 run it wrote
+> `variant: "unknown"`, `paramsPresent: []` and `rowCount: 0` on every call, while the
+> repo source looked correct and every unit test passed. A `variant:"inline"` filter
+> returned zero rows against 63 real calls.
+>
+> Being able to CALL an arm does not mean it is running current code. Before any run
+> that will be audited: call each arm once and confirm its row comes back stamped.
+> `get_tool_call_log`'s `summary.countByVariant` now shows this in one unfiltered call.
 
 ---
 
 ## Q1 — Does guidance work better in the RESPONSE than in the tool description?
+
+> **ANSWERED 2026-09-21. BOTH PREDICTIONS BELOW ARE FALSIFIED.** 210 live runs, three
+> models, n=10 — [`results/2026-09-21-q1-response-channel.json`](results/2026-09-21-q1-response-channel.json).
+>
+> | | haiku | sonnet | opus |
+> |---|---|---|---|
+> | Q1a `words` (fact, in description) | 0 | 2 | 10 |
+> | Q1a `inline` (fact, in response) | **5** | **10** | 10 |
+> | Q1b `words-recipe` (procedure, in description) | 0 | 3 | 1 |
+> | Q1b `inline-recipe` (procedure, in response) | **9** | **10** | **10** |
+>
+> Q1a falsified on two models (gap of 5 and 8, threshold was 3). Q1b falsified on all
+> three (29 of 30, threshold was 5). Scoring the DERIVATION as well as the value makes
+> it starker: `inline-recipe` is 29/30 route-correct and `words`, `inline` and
+> `words-recipe` are **0/30 between them** — all 11 of their value-correct answers took
+> the ep2 road or invented a constant.
+>
+> **The predictions below are left exactly as registered.** They were wrong, and that is
+> the point of having written them down.
 
 ### Why it matters
 
@@ -260,13 +290,19 @@ call repeatedly, and the claim has to be narrowed accordingly.
 
 ## Suggested order
 
-1. **Q1b first.** It is the only one of the four sub-questions that could overturn a
-   standing result, and a negative costs 40 runs on one question.
-2. **Q1a** next — cheap, and it calibrates how much of Q1b's answer is about
-   procedures versus channels.
-3. **Q2** last. It depends on Q1 finding the response channel usable at all; if
-   `inline` is no better than `schema`, conditional pruning of something that is not
-   being read measures nothing.
+~~1. **Q1b first.**~~ ~~2. **Q1a** next.~~ **Both run on 2026-09-21 and both
+predictions falsified — see the banner under Q1.**
+
+1. **Redeploy every arm and verify stamping.** Blocking, and cheap. `mcpInline` is
+   currently serving pre-stamping code, so no run involving it can be audited. Run
+   `npm run deploy`, then call each arm once and check `summary.countByVariant`
+   accounts for all of them with no `unknown` bucket.
+2. **Q2** is now worth running: it depended on Q1 finding the response channel usable
+   at all, and Q1 found it is not merely usable but decisive. Note its registered
+   prediction has a real failure mode attached — run `benchmark-trap` in it.
+3. **Harder questions before bigger n.** Both `derived_number` questions are now at or
+   near ceiling for the arms that matter (see `_measured_ceilings`). More repeats on
+   them measure nothing; the set needs questions the top arms can still fail.
 
 **Q3 is free to run alongside any of them** — it needs no new arm and no deploy, only
 instrumentation of the harness and an audit against `get_tool_call_log`. Do it on the

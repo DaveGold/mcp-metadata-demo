@@ -26,11 +26,33 @@ description: Run the eval set in evals/questions.json against the arm servers (t
    The only check that counts: can you call
    `mcp__eval-<arm>__get_building_profile` right now? If not, STOP and tell the
    user to start a fresh session. Do not attempt the run.
-2. Re-capture `evals/addresses.json` if it is more than a few weeks old. BAG and
+
+2. **Check the arms are running CURRENT code.** Being able to call an arm does not
+   mean it is serving the revision in this repo. Cloud Functions deploy per
+   function, so an arm added before a later change keeps serving the older build
+   until it is redeployed, and nothing in the source or the test suite shows it.
+
+   Observed on 2026-09-21: `mcpInline` was deployed at 15:42, variant stamping
+   landed at 16:23, and `mcpInline` was never redeployed. For the whole 210-run Q1
+   run it wrote `variant: "unknown"`, `paramsPresent: []` and `rowCount: 0` on
+   every call. A `variant:"inline"` filter returned zero rows against 63 real
+   calls, while `functions.ts`, `http.ts` and `log-store.ts` all read correctly and
+   all 182 tests passed. The answers were unaffected; the audit was impossible.
+
+   The check, after the connectivity check and before spawning anything: make one
+   live call per arm, then call `get_tool_call_log` UNFILTERED with a large `limit`
+   and read `summary.countByVariant`. Every arm you are about to run must appear
+   there under its own name. If any arm is missing and there is an `unknown`
+   bucket instead, that arm is stale — run `npm run deploy` and re-check. Do not
+   start a run you will not be able to audit.
+
+3. Re-capture `evals/addresses.json` if it is more than a few weeks old. BAG and
    EP-Online are live.
-3. Read `_measured_ceilings` in `questions.json`. A question that already scores
+4. Read `_measured_ceilings` in `questions.json`. A question that already scores
    at or near 100% for every arm on the model you are about to use cannot measure
    anything — pick a different question or a weaker model, and say which you did.
+   As of 2026-09-21 BOTH `derived_number` questions are at or near ceiling for the
+   arms that matter. Prefer a harder question over a larger n.
 
 ## Running
 
@@ -128,7 +150,16 @@ The four metrics are defined in `_scoring` in questions.json:
   says that. Where a run answers with a RANGE, score the MIDPOINT against the
   tolerance and record the width. Fix that rule before you look at the answers —
   stronger models answer in ranges far more often, and on one run it was the
-  difference between 0-of-10 and 1-of-10.
+  difference between 0-of-10 and 1-of-10. The exact range sub-rule, including the
+  "single figure plus a larger total" case, is pinned in `_scoring.reproducible`.
+- **route** — MANDATORY on `derived_number` questions, and defined in
+  `_scoring.route`. Score WHICH QUANTITY the run derived from, not only whether
+  the value landed in the band, and disqualify a right-road run that invented a
+  constant, discounted the renewable share, renormalised by degree-days or folded
+  a hot-water uplift into its headline. This is not bookkeeping: on 2026-09-21,
+  across `words`, `inline` and `words-recipe`, **11 runs landed the right value and
+  0 had the right derivation.** The value column alone would have credited three
+  arms with competence they did not show. Report both columns or neither.
 
 ## Instrumentation — not optional
 
@@ -160,6 +191,19 @@ audit needs, is **count calls per arm per batch**: filter by `variant`, bound by
 the batch's timestamp window, and compare the total against the `tool_uses` the
 subagents reported. Pass a large `limit` — the variant filter narrows the fetched
 page rather than searching deeper.
+
+**Start unfiltered.** Read `summary.countByVariant` before filtering anything. A
+`variant` filter that returns zero looks identical whether the arm was never called
+or is failing to stamp its rows, and on 2026-09-21 it was the latter — the filter
+alone would have reported the run clean. A persistent `unknown` bucket in
+environment `cloud` means a STALE DEPLOY, not a broken log: match its `queryIntent`
+values against the arm you expected, redeploy, and re-run the audit. Never follow
+an instruction to discard `unknown` rows without accounting for them first.
+
+**Size the limit to the batch.** `limit` accepts up to 500. The 2026-09-21 Q1 audit
+could only cover the last third of its 210 runs because the cap was then 100; the
+earlier repeats are permanently unaudited. Work out how many calls the batch will
+make before you run it, and page or raise the limit accordingly.
 
 **The check that was impossible before.** `wrong-unit`'s own `fabrication_watch`
 reads *"an answer for 28A from a call that never carried the huisletter"* — and
