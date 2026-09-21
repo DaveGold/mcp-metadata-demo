@@ -1417,5 +1417,41 @@
     "all_sonnet_wins_below_rich_are_luck": "On sonnet, thin/schema/words produced 6 value-correct answers at tolerance 8 and ZERO of them were route-correct. Every one came from the ep2 road landing inside the band by coincidence. Without route scoring these six read as competence.",
     "capability_inversion": "Below the rich rung, sonnet is WORSE on derivation than haiku: thin 1 of 10 route-correct on sonnet against 6 of 10 on haiku, and schema 0 of 10 against 5 of 10. Haiku naively picks up warmtebehoefte, which is the right quantity. Sonnet reasons its way to ep2_fossiel - 'fossil energy must be the gas' - which is more sophisticated and wrong, and it does so consistently: 25 of 30 sonnet runs below rich took the ep2 road against 3 of 30 on haiku. Capability made the wrong derivation more confident, not less common. This is the opposite of the saturation story the opaque sonnet pass told, and it is only visible once route is scored.",
     "what_this_does_not_show": "Route was classified by reading each run's stated reasoning, which is self-reported and was not audited against get_tool_call_log. A run that reached the right quantity while narrating a wrong one, or vice versa, would be misclassified. The classification was done by one party in one pass and no second rater checked it."
+  },
+  "opus_column_added_later": {
+    "_comment": "APPENDIX 3, same session. The original run was haiku and sonnet only, and the caveats flagged the absence of opus as the reason the total-vs-per-m2 opus result could not be generalised. 40 further live runs close that gap: 4 arms x opus x n=10, same protocol, same question, scored at tolerance 8 (245-261) with the same midpoint rule.",
+    "correct_out_of_10": {
+      "thin / opus": "0 of 10",
+      "schema / opus": "1 of 10",
+      "words / opus": "1 of 10",
+      "rich / opus": "10 of 10"
+    },
+    "full_matrix_now": {
+      "_note": "correct out of 10, tolerance 8",
+      "thin": {
+        "haiku": "1",
+        "sonnet": "3",
+        "opus": "0"
+      },
+      "schema": {
+        "haiku": "0",
+        "sonnet": "1",
+        "opus": "1"
+      },
+      "words": {
+        "haiku": "1",
+        "sonnet": "2",
+        "opus": "1"
+      },
+      "rich": {
+        "haiku": "10",
+        "sonnet": "10",
+        "opus": "10"
+      }
+    },
+    "THE_FINDING": "OPUS DOES NOT CLOSE THE GAP HERE. On total-vs-per-m2 opus scored 40 of 40 across every arm including thin. On this question it scores 2 of 30 below the rich rung - no better than sonnet and, on the thin arm, worse. The hypothesis recorded in the co2 file is confirmed: capability rescues a derived number whose inputs are all PRESENT in the payload, and does not rescue one that requires a constant the payload LACKS. Opus cannot invent 8.79 kWh/m3 and 0.95 any more reliably than haiku can.",
+    "what_opus_does_instead": "Opus answers in wide bands - 250-350 was the modal response - and spends most of its output on a genuinely sophisticated inference no other model made: it reads the populated ep2_fossiel_emg_forfaitair field (96.55) alongside aandeel_hernieuwbaar 30.8% as the signature of externe warmtelevering, concludes the flat is probably on IJburg stadsverwarming, and warns that real gas use may be zero. That inference is not in the ground truth, is not wrong, and is arguably more useful to a real user than 253 - but it is not the question asked, and it pulls the stated figure away from the target.",
+    "rich_on_opus": "10 of 10, every run citing 52.73 x 40.02 and the 95% HR boiler from the alert. The alert is the only thing in this experiment that produced the right number on all three models.",
+    "caveat": "40 runs, single sitting, one question. Scored from run transcripts by one rater, same as the rest of this file. Several opus runs led with a hedge ('very little to none') before giving a gas-equivalent band; those were scored on the figure presented as the answer."
   }
 }

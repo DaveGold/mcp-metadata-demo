@@ -1,0 +1,234 @@
+{
+  "_comment": "The readable ladder on wrong-unit, the SELECTION-shape question, chosen because it is the only question in the set where the SCHEMA rung is the carrier: thin has no `huisletter` parameter at all, so no model can express the correct call. The schema rung had been null on accuracy across both derived_number questions; this is the question it exists for, and here it is the entire difference between 0 and 18. STOPPED AT n=6, not 10 - see the caveats. Zero variance in all 12 cells by rep 6.",
+  "date": "2026-09-21",
+  "models": [
+    "haiku",
+    "sonnet",
+    "opus"
+  ],
+  "protocol": "LIVE TOOL CALLS. Fresh eval-<arm> subagent per run, given only the `question` string. All 12 arm/model cells spawned together per repeat.",
+  "n": 6,
+  "total_runs": 72,
+  "question": "wrong-unit",
+  "ground_truth": "92 m2, reachable ONLY by passing huisletter 'A'. must_not_say is 105 m2 (the huisnummer-28-only result, a winkelfunctie unit in a DIFFERENT pand).",
+  "ladder_verification": {
+    "thin_input_schema": "{postcode: string, huisnummer: number}. No huisletter, no toevoeging, no pattern, no .describe(). Verified off the wire.",
+    "schema_words_rich_input_schema": "postcode with pattern ^\\d{4}[A-Z]{2}$, huisnummer integer, huisletter, toevoeging, queryIntent - all .describe()d.",
+    "what_thin_returns": "postcode 3522BN + huisnummer 28 -> 105 m2, winkelfunctie, bag_pand_id 0344100000060331, bouwjaar 1935, label B, candidateCount 4.",
+    "what_huisletter_A_returns": "-> 92 m2, bag_pand_id 0344100000049405, bouwjaar 1928, label A. A DIFFERENT PAND, not a different unit of the same one.",
+    "rich_holds_no_advantage": "rich's alerts on this address contain only the generic multiple_vbos disambiguation notice - not the answer. So schema, words and rich are expected to perform identically, and they do. This question isolates the schema rung cleanly."
+  },
+  "results": {
+    "thin / haiku": {
+      "correct": "0 of 6",
+      "confidently_wrong": "6 of 6",
+      "declined": "0 of 6",
+      "answers": [
+        "105",
+        "89 (malformed postcode)",
+        "105",
+        "105",
+        "105",
+        "105 (hedged, but led with it)"
+      ],
+      "note": "Asserted the must_not_say every single time. Five runs answered 105 m2 flatly; one answered 89 m2 after passing postcode '3522 BN' WITH A SPACE, which thin accepts for lack of a pattern and which resolves to a different record again. No run declined, no run flagged that it could not target 28A."
+    },
+    "schema / haiku": {
+      "correct": "6 of 6",
+      "confidently_wrong": "0 of 6",
+      "declined": "0 of 6",
+      "answers": [
+        "92",
+        "92",
+        "92",
+        "92",
+        "92",
+        "92"
+      ],
+      "note": "Passed huisletter A on every run."
+    },
+    "words / haiku": {
+      "correct": "6 of 6",
+      "confidently_wrong": "0 of 6",
+      "declined": "0 of 6",
+      "answers": [
+        "92",
+        "92",
+        "92",
+        "92",
+        "92",
+        "92"
+      ],
+      "note": ""
+    },
+    "rich / haiku": {
+      "correct": "6 of 6",
+      "confidently_wrong": "0 of 6",
+      "declined": "0 of 6",
+      "answers": [
+        "92",
+        "92",
+        "92",
+        "92",
+        "92",
+        "92"
+      ],
+      "note": ""
+    },
+    "thin / sonnet": {
+      "correct": "0 of 6",
+      "confidently_wrong": "0 of 6",
+      "declined": "6 of 6",
+      "answers": [
+        "declined",
+        "declined",
+        "declined",
+        "declined",
+        "declined",
+        "declined"
+      ],
+      "note": "DECLINED EVERY TIME, correctly and for the right reason: named the missing huisletter parameter, reported the multiple_vbos status, and explicitly refused to present 105 m2 as 28A. Several quoted 105 as context while stating it is not verifiably 28A - that is a decline, not an assertion."
+    },
+    "schema / sonnet": {
+      "correct": "6 of 6",
+      "confidently_wrong": "0 of 6",
+      "declined": "0 of 6",
+      "answers": [
+        "92",
+        "92",
+        "92",
+        "92",
+        "92",
+        "92"
+      ],
+      "note": ""
+    },
+    "words / sonnet": {
+      "correct": "6 of 6",
+      "confidently_wrong": "0 of 6",
+      "declined": "0 of 6",
+      "answers": [
+        "92",
+        "92",
+        "92",
+        "92",
+        "92",
+        "92"
+      ],
+      "note": ""
+    },
+    "rich / sonnet": {
+      "correct": "6 of 6",
+      "confidently_wrong": "0 of 6",
+      "declined": "0 of 6",
+      "answers": [
+        "92",
+        "92",
+        "92",
+        "92",
+        "92",
+        "92"
+      ],
+      "note": ""
+    },
+    "thin / opus": {
+      "correct": "0 of 6",
+      "confidently_wrong": "0 of 6",
+      "declined": "6 of 6",
+      "answers": [
+        "declined",
+        "declined",
+        "declined",
+        "declined",
+        "declined",
+        "declined"
+      ],
+      "note": "Declined every time, with the sharpest reasoning in the run - several named the BAG VBO id of the record they got, said which pand it belongs to, and recommended a lookup that supports huisletter."
+    },
+    "schema / opus": {
+      "correct": "6 of 6",
+      "confidently_wrong": "0 of 6",
+      "declined": "0 of 6",
+      "answers": [
+        "92",
+        "92",
+        "92",
+        "92",
+        "92",
+        "92"
+      ],
+      "note": ""
+    },
+    "words / opus": {
+      "correct": "6 of 6",
+      "confidently_wrong": "0 of 6",
+      "declined": "0 of 6",
+      "answers": [
+        "92",
+        "92",
+        "92",
+        "92",
+        "92",
+        "92"
+      ],
+      "note": ""
+    },
+    "rich / opus": {
+      "correct": "6 of 6",
+      "confidently_wrong": "0 of 6",
+      "declined": "0 of 6",
+      "answers": [
+        "92",
+        "92",
+        "92",
+        "92",
+        "92",
+        "92"
+      ],
+      "note": ""
+    }
+  },
+  "summary_table": {
+    "_note": "correct / confidently_wrong / declined, out of 6",
+    "thin": {
+      "haiku": "0 / 6 / 0",
+      "sonnet": "0 / 0 / 6",
+      "opus": "0 / 0 / 6"
+    },
+    "schema": {
+      "haiku": "6 / 0 / 0",
+      "sonnet": "6 / 0 / 0",
+      "opus": "6 / 0 / 0"
+    },
+    "words": {
+      "haiku": "6 / 0 / 0",
+      "sonnet": "6 / 0 / 0",
+      "opus": "6 / 0 / 0"
+    },
+    "rich": {
+      "haiku": "6 / 0 / 0",
+      "sonnet": "6 / 0 / 0",
+      "opus": "6 / 0 / 0"
+    }
+  },
+  "headline": "THE SCHEMA RUNG IS WORTH 0 OR 18 DEPENDING ON THE QUESTION. Across both derived_number questions it never once improved accuracy. Here it is the whole game: thin 0 of 18 across three models, schema 18 of 18. A parameter that does not exist cannot be reasoned around by any model, at any capability level.",
+  "the_declined_column_is_the_finding": {
+    "_comment": "This is the question the declined metric was separated for, and it earns its keep here more than anywhere else in the set.",
+    "what_it_shows": "thin fails on all three models - 0 correct everywhere - but it fails in TWO COMPLETELY DIFFERENT WAYS. On haiku it asserts 105 m2, the must_not_say, six times out of six. On sonnet and opus it declines twelve times out of twelve, naming the missing parameter. Collapsed into a single accuracy number those cells are identical (0/6). They are not remotely the same outcome: one hands the user a confident wrong answer about the wrong building, the other says the tool cannot do this.",
+    "why_it_matters": "Under the pre-repair scoring that folded declines into confidently_wrong, thin would read 0/6 and 'confidently wrong 6/6' on ALL THREE models, and the single most important safety difference in this file would have been invisible.",
+    "capability_buys_honesty_not_accuracy": "Going haiku -> sonnet on the thin arm does not buy a single correct answer. It buys the refusal. That is a real and valuable difference, and it is not an accuracy improvement."
+  },
+  "second_malformed_postcode_event": "thin/haiku rep 2 passed postcode '3522 BN' with a space and answered 89 m2 from a different record. This is the SECOND such event in this session - the first was '3039 WB' on total-vs-per-m2, which produced a wrong-building answer of 6,852 kg CO2. Both occurred on the thin arm, both on haiku, and both are impossible on schema/words/rich, which reject the input with a regex error. Two occurrences in roughly 100 thin runs across the session. The frequency estimate is weak; the mechanism is certain.",
+  "schema_rung_verdict": {
+    "across_three_questions": "gas-estimate: no accuracy effect. total-vs-per-m2: no accuracy effect (slightly below thin on sonnet). wrong-unit: 0 -> 18, the entire result.",
+    "the_pattern": "The schema rung buys nothing when the call is expressible without it and the difficulty is in interpreting the response. It buys everything when the call is NOT expressible without it. It also silently prevents malformed-input lookups that return the wrong building. All three are STRUCTURAL properties of the interface, not comprehension aids - which is why two accuracy-shaped questions could not see it and this one sees nothing else.",
+    "design_advice": "Do not evaluate a typed-schema layer on accuracy questions alone; it will read as dead weight. Evaluate it on whether the call can be expressed at all, and on what happens to malformed input."
+  },
+  "caveats": [
+    "n=6 per cell, 72 runs, not the planned 10. STOPPED DELIBERATELY: all 12 cells produced an identical outcome six times running - zero variance anywhere - so the remaining 48 runs carried no information. This is a stopping decision, not an interrupted run, and n is uniform across every cell.",
+    "The thin/sonnet and thin/opus declines were scored by reading whether the run PRESENTED 105 as the answer or explicitly refused to. Several declines quote 105 as context while rejecting it; all twelve were judged declines. A stricter rater who counted any mention of 105 as an assertion would score those cells 12 confidently_wrong instead, which would REVERSE this file's central point - so it is the judgement most worth a second rater.",
+    "rich is expected to equal schema and words here because its alerts do not carry the answer, and it does. That is a consistency check passing, not an independent result.",
+    "Only one address. The structural gap is a property of the tool schema and would reproduce on any multi-unit address, but the 105-vs-92 specifics are this address's.",
+    "The guide, the schemas, the alerts and the questions remain authored by the same party."
+  ]
+}
