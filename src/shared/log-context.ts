@@ -17,6 +17,13 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 interface RequestContext {
   sessionId: string;
   environment: string;
+  /**
+   * Which server variant served this request ('rich' | 'words' | 'inline' | ...).
+   * Every arm writes to ONE Firestore collection, so without this a log row
+   * cannot be attributed to an arm — which made the log useless for the eval.
+   * Stamped in http.ts, where the variant is already known.
+   */
+  variant?: string;
 }
 
 const storage = new AsyncLocalStorage<RequestContext>();

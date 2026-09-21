@@ -17,8 +17,10 @@ import { readRecentToolCalls, writeToolCallLog } from '../shared/log-store.js';
 const description = `\
 RETURNS:
 The most recent tool calls made to this server: which tool, the caller's queryIntent (what they
-said they were trying to do), success/error status, and duration. Plus a summary (count per tool,
-the environment this data came from, oldest/newest timestamp covered).
+said they were trying to do), success/error status, duration, which ARM served the call
+(\`variant\`), which OPTIONAL PARAMETERS the caller supplied by name (\`paramsPresent\`), how many rows
+the call resolved to (\`rowCount\`), \`errorType\` and the per-request \`sessionId\`. Plus a summary
+(count per tool, the environment this data came from, oldest/newest timestamp covered).
 
 WHEN TO USE:
 - "What have people actually been asking this server?" / "What's this tool been used for?"
@@ -27,7 +29,9 @@ WHEN TO USE:
 
 WHEN NOT TO USE:
 - You want the actual response data from a past call — this log stores interaction *shape* only
-  (tool name, queryIntent, status, duration), never filter values or response payloads.
+  (tool name, queryIntent, status, duration, which arm, which parameter NAMES were supplied, row
+  count), never parameter values or response payloads. \`paramsPresent\` says that \`huisletter\` was
+  passed, never that it was "A".
 
 INTERPRETATION:
 - Results differ by environment, and the summary tells you which one you got:
@@ -39,6 +43,17 @@ INTERPRETATION:
 - Read consecutive queryIntent values as a narrative, not as isolated rows: three calls whose intent
   drifts from a broad question to a narrower one usually names an exact gap in the tool's description.
 
+USING THIS TO AUDIT AN EVAL RUN:
+- Every arm writes to ONE log. \`variant\` is the only field that attributes a row to an arm — filter
+  on it, and pass a large \`limit\`, since the filter narrows the fetched page rather than searching
+  deeper.
+- \`sessionId\` is per-REQUEST, not per-run: this server is stateless, so a subagent that made three
+  calls produced three different sessionIds. Correlate a run by (variant + timestamp window), and
+  count calls per arm per batch rather than trying to reconstruct individual runs.
+- \`paramsPresent\` is the highest-value field for scoring: it says whether the caller supplied
+  \`huisletter\` at all, which no answer text reliably reveals and which a subagent's self-reported
+  PARAMS line can simply get wrong.
+
 RELATED TOOLS:
 - Every other tool on this server writes to this same log — this tool only reads it back.
 
@@ -48,6 +63,12 @@ const minimalDescription = 'Look up recent tool calls and their queryIntent valu
 
 const inputSchema = {
   tool: z.string().optional().describe('Filter to calls for this exact tool name (e.g. "get_building_profile").'),
+  variant: z
+    .string()
+    .optional()
+    .describe(
+      'Filter to calls served by one arm ("rich" | "words" | "inline" | "schema" | "minimal" | "opaque" | "opaque-words"). Applied AFTER the page is fetched, so pass a large `limit` alongside it.'
+    ),
   limit: z
     .number()
     .int()
@@ -67,6 +88,19 @@ const outputSchema = {
         status: z.enum(['success', 'error']).describe('Call outcome'),
         durationMs: z.number().describe('Call duration in milliseconds'),
         timestamp: z.string().describe('ISO 8601 timestamp'),
+        variant: z
+          .string()
+          .describe('Which arm served the call. "unknown" for stdio, which opens no request context.'),
+        paramsPresent: z
+          .array(z.string())
+          .describe(
+            'Names of the OPTIONAL parameters the caller supplied — never their values. For get_building_profile: huisletter, toevoeging, queryIntent.'
+          ),
+        rowCount: z.number().describe('Rows the call resolved to. 0 on a miss or an error.'),
+        errorType: z.string().nullable().describe('Null on success.'),
+        sessionId: z
+          .string()
+          .describe('Per-REQUEST id. This server is stateless, so this does NOT group a multi-call run.'),
       })
     )
     .describe('Recent calls, most recent first'),
@@ -96,7 +130,7 @@ export function registerGetToolCallLogTool(server: McpServer, opts: { minimal?: 
         openWorldHint: false,
       },
     },
-    async (args: { tool?: string; limit?: number }) => {
+    async (args: { tool?: string; limit?: number; variant?: string }) => {
       const start = Date.now();
       const limit = args.limit ?? 20;
 
@@ -104,7 +138,7 @@ export function registerGetToolCallLogTool(server: McpServer, opts: { minimal?: 
         const ctx = requestContext.getStore();
         const environment = ctx?.environment ?? 'local';
 
-        const records = await readRecentToolCalls(environment, { tool: args.tool, limit });
+        const records = await readRecentToolCalls(environment, { tool: args.tool, limit, variant: args.variant });
 
         const countByTool: Record<string, number> = {};
         for (const r of records) countByTool[r.tool] = (countByTool[r.tool] ?? 0) + 1;
@@ -117,6 +151,16 @@ export function registerGetToolCallLogTool(server: McpServer, opts: { minimal?: 
         }
         if (args.tool && records.length === 0) {
           alerts.push(`No calls found for tool "${args.tool}".`);
+        }
+        if (args.variant && records.length === 0) {
+          alerts.push(
+            `No calls found for variant "${args.variant}" in the last ${limit} rows. The variant filter narrows the fetched page rather than searching deeper — retry with a larger limit before concluding the arm was not called.`
+          );
+        }
+        if (records.some((r) => r.variant === 'unknown')) {
+          alerts.push(
+            'Some rows have variant "unknown": they were written either over stdio (which opens no request context) or before variant stamping existed. Do not count them against any arm.'
+          );
         }
 
         const output = {

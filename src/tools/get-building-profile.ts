@@ -20,7 +20,7 @@ import { writeToolCallLog } from '../shared/log-store.js';
 
 // ── Description ──────────────────────────────────────────────────────────────
 
-const descriptionCore = `\
+const descriptionPreamble = `\
 RETURNS:
 Building profile combining BAG data (bouwjaar, oppervlakte, gebruiksdoel, status, coordinates) and EP-Online energy label data (energieklasse, energie_index or EP-1/EP-2, CO₂ emissie, warmtebehoefte, BENG eisen, SBI sector description, gebouwtype, EMG forfaitair). All data from a single postcode + huisnummer lookup.
 
@@ -38,8 +38,16 @@ QUERY STRATEGY:
 2. If matchStatus = 'multiple_vbos': retry with huisletter (e.g. "A") or toevoeging (e.g. "I", "bis") to get the specific unit.
 3. If matchStatus = 'not_found': verify postcode format (no spaces, uppercase). Some addresses use toevoeging instead of huisletter.
 4. EP-Online coverage: most labeled utility buildings (kantoor, industrie) have data. Residential without recent certification often lacks a label — energielabel null is normal for pre-2008 homes.
-5. Large panden (aantal_verblijfsobjecten > 10, e.g. shopping centers, office parks, care complexes): the returned VBO is the first match — it may be an individual unit with a small oppervlakte_m2. The energielabel and bouwjaar are pand-level and reliable; oppervlakte_m2 is VBO-level and may represent only one unit. For the full-building area, query by huisletter/toevoeging or use BAG directly.
+5. Large panden (aantal_verblijfsobjecten > 10, e.g. shopping centers, office parks, care complexes): the returned VBO is the first match — it may be an individual unit with a small oppervlakte_m2. The energielabel and bouwjaar are pand-level and reliable; oppervlakte_m2 is VBO-level and may represent only one unit. For the full-building area, query by huisletter/toevoeging or use BAG directly.`;
 
+/**
+ * The INTERPRETATION block, kept separate so the 'inline' variant can ship the
+ * SAME BYTES in its tool RESPONSE instead of its description. That variant exists
+ * to test whether guidance is read more strongly from a response than from a tool
+ * description; the comparison only means anything if the text is identical, so it
+ * is composed here rather than copied. See evals/open-questions.md, Q1.
+ */
+const interpretationBlock = `\
 INTERPRETATION:
 Which fields are populated depends on the berekeningstype:
 - NTA 8800 (labels issued after Dec 2021): ep1, ep2, aandeel_hernieuwbaar, warmtebehoefte, compactheid, gebruiksoppervlakte populated. energie_index = null. EMG forfaitair populated for utiliteitsbouw only (null for woningbouw). sbi_code = null.
@@ -68,6 +76,41 @@ Which fields are populated depends on the berekeningstype:
 - soort_opname: "Basisopname" = standard site visit, "Detailopname" = detailed measurement (more accurate). Null = pre-NTA 8800 label or no label.
 - gebouwtype/gebouwsubtype refinements (e.g. hoek/boven) lose more heat than tussen/midden variants — refines the heat-loss estimate for residential buildings.`;
 
+/** Arm B prose: preamble + interpretation, byte-identical to what it always was. */
+const descriptionCore = descriptionPreamble + '\n\n' + interpretationBlock;
+
+/**
+ * The DERIVED FIGURES recipe — a PROCEDURE, deliberately, as opposed to the facts
+ * that fill `interpretationBlock`.
+ *
+ * Authored for open-questions.md Q1b, which asks whether a procedure works in the
+ * tool RESPONSE when it demonstrably does not work in the tool DESCRIPTION: the
+ * equivalent block on the OPAQUE axis was applied by 0 of 13 runs across two
+ * models while sitting verbatim in the description those runs had just read.
+ *
+ * It is a deliberate transliteration of that opaque block — same header, same two
+ * bullets, same constants, same caveat, in the same order — with the terse codes
+ * replaced by the readable field names this axis uses:
+ *
+ *     wb    → warmtebehoefte_kwh_m2
+ *     f_ga  → gebruiksoppervlakte_thermische_zone_m2
+ *     opp   → oppervlakte_m2
+ *
+ * Nothing else changed. If it is reworded to read better, the comparison with the
+ * 0-of-13 result dies and Q1b answers nothing.
+ *
+ * It must NOT state the answer. The whole question is whether the model will
+ * EXECUTE this; a block containing "~253 m³" would be an alert wearing a recipe's
+ * clothes, and would measure the rich tier a second time.
+ *
+ * Shipped in exactly two places, from this one constant, so the channels cannot
+ * drift: the `words-recipe` description and the `inline-recipe` response.
+ */
+const derivedFiguresBlock = `\
+DERIVED FIGURES YOU MUST COMPUTE YOURSELF (nothing below is returned):
+- Whole-building or whole-unit totals: multiply a per-m\u00b2 figure by gebruiksoppervlakte_thermische_zone_m2, not by oppervlakte_m2.
+- Annual gas for space heating: (warmtebehoefte_kwh_m2 \u00d7 gebruiksoppervlakte_thermische_zone_m2) \u00f7 0.95 boiler efficiency \u00f7 8.79 kWh per m\u00b3 of Dutch gas (31.65 MJ \u00f7 3.6). This covers SPACE HEATING ONLY and excludes hot water and cooking.`;
+
 /**
  * The ALERTS paragraph, kept separate so the 'words' variant can omit it.
  * That variant returns no `alerts` field, and a description promising one
@@ -79,7 +122,7 @@ const alertsParagraph = `ALERTS: Always check interpretation.alerts — they con
 export const description = descriptionCore + '\n\n' + alertsParagraph;
 
 /** Arm B description: identical prose, minus the promise of a field it does not return. */
-export { descriptionCore };
+export { descriptionCore, interpretationBlock, derivedFiguresBlock };
 
 
 // ── Input schema ─────────────────────────────────────────────────────────────
@@ -369,5 +412,10 @@ export async function logToolCall({
     hasMore: false,
     durationMs: Date.now() - start,
     errorType: status === 'error' ? 'ToolError' : null,
+    paramsPresent: [
+      args.huisletter ? 'huisletter' : null,
+      args.toevoeging ? 'toevoeging' : null,
+      args.queryIntent ? 'queryIntent' : null,
+    ].filter((v): v is string => v !== null),
   });
 }

@@ -14,6 +14,43 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-21-per-question.json`](2026-09-21-per-question.json) | Per-question outcomes and per-regime results, kept out of `questions.json` so the set reads as a spec. |
 | [`2026-09-21-opaque-live.json`](2026-09-21-opaque-live.json) | Does the shape replication survive live tool calls? It does not — five of six cells disagree, and the derived-figures recipe scores 0 of 3. |
 | [`2026-09-21-opaque-live-sonnet-n10.json`](2026-09-21-opaque-live-sonnet-n10.json) | The confirmation pass for that run — sonnet, n=10, 60 runs. Confirms the recipe failure and shows the other two questions saturate on a stronger model. |
+| [`2026-09-21-readable-ladder-gas.json`](2026-09-21-readable-ladder-gas.json) | The readable ladder on the one question with headroom, and the first measurement of the `schema` rung. 80 runs, two models. Server-computed beats everything at either tolerance; the ladder looked non-monotonic at tolerance 20 and that wobble does not survive the retightening to 8. |
+| [`2026-09-21-readable-ladder-co2.json`](2026-09-21-readable-ladder-co2.json) | Is the gas result a property of the SHAPE? 120 runs, three models incl. opus. rich replicates at 30/30; the prose rung reverses sign and the reason is legible; opus needs no metadata here. |
+| [`2026-09-21-readable-ladder-wrong-unit.json`](2026-09-21-readable-ladder-wrong-unit.json) | The question the `schema` rung exists for: `thin` has no `huisletter` parameter, so the call cannot be expressed. 72 runs, three models. thin 0/18, schema 18/18 — and the two ways thin fails are not the same. |
+
+> **gas-estimate tolerance changed on 2026-09-21**, from 20 to 8 (accept range
+> 233–273 → 245–261). Files above that record `accept_range: 233-273` —
+> `2026-09-21-opaque-live.json`, `2026-09-21-opaque-live-sonnet-n10.json`,
+> `2026-09-21-n3-separators.json` — were scored under the old tolerance and are
+> left as they were. Do not compare their gas-estimate counts against anything
+> scored afterwards. `2026-09-21-readable-ladder-gas.json` carries both scorings.
+
+The three readable-ladder files are the ones to read for the design question. Start
+with the gas file: it is the only run scored on the DERIVATION as well as the value,
+and that is where its result lives — requiring both, `rich` is 20 of 20 and every
+other arm combined is 2 of 60. Read its `the_tolerance_problem` and `route_scoring`
+before quoting any number from the three lower rungs; six of their apparent wins on
+sonnet are the wrong derivation landing in the band by coincidence.
+
+Then read the co2 file: it is the same ladder on the other `derived_number`
+question, and it is the better instrument — its accept range cannot be reached from
+the wrong denominator, so no route metric is needed. The two disagree about what the
+PROSE rung is worth, and the co2 file explains why.
+
+Read the wrong-unit file last, and read it for the `declined` column rather than the
+accuracy column. It is the only question where the SCHEMA rung does anything (0/18 →
+18/18), because it is the only one where the correct call cannot be expressed without
+it. It is also where `thin` fails in two entirely different ways that a single
+accuracy number would have hidden: asserting the forbidden answer on haiku, refusing
+cleanly on sonnet and opus.
+
+Across the three, the `rich` rung is 78 of 78.
+
+Two experiments these runs make obvious but do not answer — guidance in the
+response rather than the tool description, and conditional interpretation sized to
+the record — are written up in [`../open-questions.md`](../open-questions.md), each
+with a prediction registered in advance and the result that would falsify it. The
+token figures from these runs live there too.
 
 Read the sweep first — it is the one that changed the design, and it is a useful
 record of how easily a single run misleads. Then read `2026-09-21-opaque-live.json`:

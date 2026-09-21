@@ -7,20 +7,25 @@ description: Run the eval set in evals/questions.json against the arm servers (t
 
 ## Before running
 
-1. **Check the arms are CONNECTED, not merely configured.** Confirm the
-   `mcp__eval-thin__*`, `mcp__eval-words__*` and `mcp__eval-rich__*` tools are
-   actually available to this session, and that `eval-thin` / `eval-words` /
-   `eval-rich` appear in the agent list.
+1. **Check the arms' MCP TOOLS are connected.** Confirm the
+   `mcp__eval-<arm>__get_building_profile` tools are actually available to this
+   session — not that the arm appears in `.mcp.json`, and **not that the
+   `eval-<arm>` agent appears in the agent list.**
 
-   Their presence in `.mcp.json` and `.claude/agents/` proves nothing: skills
-   reload mid-session but **MCP connections and the agent registry are fixed when
-   the session starts**. A session that began before those files existed — for
-   example one where they arrived via a merge or a branch switch — will load this
-   skill and still have no arms. That is not a deploy problem and no amount of
-   retrying fixes it.
+   The agent list is NOT a proxy for this, and treating it as one will waste a
+   whole run. Observed on 2026-09-21: after `eval-inline` was added mid-session,
+   the harness picked up the new **agent** from `.claude/agents/` and announced it
+   as available, while the **MCP server stayed unconnected**. Spawning that agent
+   would have produced a subagent with zero tools, declining every question — a
+   run that looks like a result and is an artefact of the harness.
 
-   If either is missing, STOP and tell the user to start a fresh session in a
-   checkout where the files are already present. Do not attempt the run.
+   Skills reload mid-session. The agent registry can reload mid-session. **MCP
+   connections do not.** A session that began before an arm's server was added to
+   `.mcp.json` will never reach it, and no amount of retrying fixes it.
+
+   The only check that counts: can you call
+   `mcp__eval-<arm>__get_building_profile` right now? If not, STOP and tell the
+   user to start a fresh session. Do not attempt the run.
 2. Re-capture `evals/addresses.json` if it is more than a few weeks old. BAG and
    EP-Online are live.
 3. Read `_measured_ceilings` in `questions.json`. A question that already scores
@@ -54,8 +59,31 @@ Compare adjacent rungs. `thin` vs `rich` measures four changes at once and tells
 you nothing about which one mattered; that conflation is what the `schema` rung
 was added to break.
 
-NOTE: `eval-schema` is configured but the `mcpSchema` function may not be
-deployed yet. Check the arm actually answers before you spend a run on it.
+`mcpSchema` is deployed and the `eval-schema` arm answers; it was first measured
+on 2026-09-21 over 20 runs. Its description is byte-identical to `thin`'s, so if
+the two arms ever return different prose, the deploy is stale — check that rather
+than assuming the schema layer did it.
+
+**`inline` is a FORK, not a rung.** It hangs off `schema` beside `words`, carrying
+the same prose by a different channel:
+
+```
+thin → schema → words → rich
+            \
+             → inline      (same bytes as `words`, in the RESPONSE)
+```
+
+So the comparisons that mean anything are `schema → inline` (the channel, against
+the same base `schema → words` is measured from) and `inline` vs `words` (the two
+channels head to head). `inline → rich` is NOT an adjacent-rung comparison and
+must not be reported as one: it crosses both the channel and the computation.
+
+`inline` was **deployed on 2026-09-21** and verified on the wire: description
+byte-identical to `schema`'s, `interpretation` present in the response (4,338
+chars), no `alerts`, same building data as the other arms. Its description is
+byte-identical to `schema`'s, enforced by `get-building-profile-inline.test.ts`.
+Read `evals/open-questions.md` Q1 for the predictions registered BEFORE it runs —
+they are there so the result can contradict them.
 
 Before scoring, read `results/2026-09-21-shape-replication.json` for `_the_rule`
 (semantics handle interpretation, classification, prevention and refusal; recipes
@@ -102,8 +130,57 @@ The four metrics are defined in `_scoring` in questions.json:
   stronger models answer in ranges far more often, and on one run it was the
   difference between 0-of-10 and 1-of-10.
 
-CALLS/TOOLS/PARAMS are self-reported by the system under test. Usable for
-spotting thrashing, too weak to headline — say so when reporting them.
+## Instrumentation — not optional
+
+Every result file before 2026-09-21 carries the caveat *"CALLS/TOOLS/PARAMS are
+self-reported and were not audited against `get_tool_call_log`."* It stayed open
+for every one of them because it lived in prose. It does not any more.
+
+**Record per run, in the results file, alongside the answer:** `tool_uses`,
+`duration_ms`, `subagent_tokens`, and the character count of the `ANSWER` line.
+The harness returns the first three with every subagent result; copy them, do not
+reconstruct them from a transcript afterwards.
+
+**Audit against the server-side log.** After each batch, call `get_tool_call_log`
+and reconcile. It is the only account of what happened that does not come from
+the system under test. As of 2026-09-21 every row carries:
+
+| field | what it is for |
+|---|---|
+| `variant` | **the only field that attributes a row to an arm.** Every arm writes to one log; without this the rows are indistinguishable. Filter on it. |
+| `paramsPresent` | which OPTIONAL parameters were supplied, by NAME (never values): `huisletter`, `toevoeging`, `queryIntent`. |
+| `rowCount` | how many rows the call resolved to. 0 on a miss. |
+| `errorType`, `status`, `durationMs` | outcome and latency, server-side. |
+| `sessionId` | per-REQUEST, **not** per-run — see below. |
+
+**How to correlate.** This server is stateless: one `McpServer` per HTTP request,
+so a subagent that made three calls produced three different `sessionId`s. You
+cannot reconstruct an individual run from the log. What you CAN do, and what the
+audit needs, is **count calls per arm per batch**: filter by `variant`, bound by
+the batch's timestamp window, and compare the total against the `tool_uses` the
+subagents reported. Pass a large `limit` — the variant filter narrows the fetched
+page rather than searching deeper.
+
+**The check that was impossible before.** `wrong-unit`'s own `fabrication_watch`
+reads *"an answer for 28A from a call that never carried the huisletter"* — and
+until now nothing could score it. The subagent's self-reported `PARAMS` line is
+the system under test describing itself, and an answer's text never reveals which
+arguments were sent. `paramsPresent` answers it directly and independently. Score
+that question's `fabricated` column from the log, not from the transcript.
+
+Record the reconciliation in the results file — including "they matched", which
+is the outcome that lets the next reader trust the counts. Only then may the file
+say anything about call counts.
+
+This exists because `open-questions.md` Q3 turns on it: `rich` costs FEWER tokens
+per run than `words` despite carrying strictly more, and the two candidate
+explanations (fewer round trips vs. shorter output) are told apart only by these
+numbers. Q3 needs no new arm and no deploy, so it rides along with whatever you
+are running anyway. There is no reason to skip it and no excuse for another file
+carrying the same caveat.
+
+CALLS/TOOLS/PARAMS as *self-reported by the subagent* remain too weak to headline
+on their own — say so — but they are now checkable, so check them.
 
 ## Reporting
 

@@ -31,6 +31,7 @@ import {
   resolveBuildingProfile,
   logToolCall,
   descriptionCore,
+  derivedFiguresBlock,
   inputSchema,
   outputSchema,
   type BagClientLike,
@@ -40,16 +41,26 @@ import {
 /** The rich output schema minus the one field this tier does not produce. */
 export const outputSchemaWithoutAlerts = outputSchema.omit({ alerts: true });
 
+/**
+ * `withRecipe` appends the DERIVED FIGURES procedure to the description — the
+ * `words-recipe` arm of open-questions.md Q1b. The block is imported, never
+ * copied, so this arm and `inline-recipe` ship identical bytes by two channels.
+ */
 export function registerGetBuildingProfileWordsTool(
   server: McpServer,
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
+  epOnlineClient: EpOnlineClientLike,
+  opts: { withRecipe?: boolean } = {}
 ): void {
+  const toolDescription = opts.withRecipe
+    ? descriptionCore + '\n\n' + derivedFiguresBlock
+    : descriptionCore;
+
   server.registerTool(
     'get_building_profile',
     {
       title: 'Building Profile (BAG + Energy Label)',
-      description: descriptionCore,
+      description: toolDescription,
       inputSchema: z.object(inputSchema),
       outputSchema: outputSchemaWithoutAlerts,
       annotations: {
@@ -86,7 +97,7 @@ export function registerGetBuildingProfileWordsTool(
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error('tool.error', { tool: 'get_building_profile', variant: 'words', error: errorMessage });
+        logger.error('tool.error', { tool: 'get_building_profile', variant: opts.withRecipe ? 'words-recipe' : 'words', error: errorMessage });
         await logToolCall({ args, start, status: 'error', rowCount: 0 });
         return {
           content: [{ type: 'text' as const, text: `Error in get_building_profile: ${errorMessage}` }],

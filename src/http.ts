@@ -56,7 +56,7 @@ export function createHttpApp(options: CreateHttpAppOptions = {}): Express {
     const sessionId = req.requestId ?? randomUUID();
     const environment = process.env.K_SERVICE ? 'cloud' : 'local';
 
-    await requestContext.run({ sessionId, environment }, async () => {
+    await requestContext.run({ sessionId, environment, variant: options.variant ?? 'rich' }, async () => {
       try {
         // Stateless: one fresh McpServer + transport pair per request.
         const server = createServer({ variant: options.variant ?? 'rich' });
@@ -97,7 +97,7 @@ if (isMain) {
   const HOST = process.env.HOST ?? '127.0.0.1';
   const rawVariant = process.env.MCP_VARIANT;
   const variant: ServerVariant = (
-    ['minimal', 'words', 'opaque', 'opaque-words'] as const
+    ['minimal', 'schema', 'inline', 'inline-recipe', 'words', 'words-recipe', 'opaque', 'opaque-words'] as const
   ).includes(rawVariant as never)
     ? (rawVariant as ServerVariant)
     : 'rich';

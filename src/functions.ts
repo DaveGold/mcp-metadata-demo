@@ -41,6 +41,32 @@ export const mcpMinimal = onRequest(functionOptions, createHttpApp({ hosted: tru
 export const mcpSchema = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'schema' }));
 
 /**
+ * Inline tier — the CHANNEL arm. Description byte-identical to `mcpSchema`'s
+ * one-liner; the INTERPRETATION prose is delivered in the tool RESPONSE instead.
+ * `mcpSchema` → `mcpWords` and `mcpSchema` → `mcpInline` ship the same bytes by
+ * two different routes, which is the only way to tell delivery from content.
+ * See evals/open-questions.md, Q1.
+ */
+export const mcpInline = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'inline' }));
+
+/**
+ * Q1b RECIPE ARMS. Both ship the SAME imported `derivedFiguresBlock` — a
+ * PROCEDURE, not a fact — by two different channels: `mcpWordsRecipe` appends it
+ * to the description, `mcpInlineRecipe` appends it to the response prose. The
+ * pair asks whether a procedure is executed at all when it arrives in a response,
+ * given that in a description it was applied 0 of 13 times.
+ * See evals/open-questions.md Q1b.
+ */
+export const mcpWordsRecipe = onRequest(
+  functionOptions,
+  createHttpApp({ hosted: true, variant: 'words-recipe' })
+);
+export const mcpInlineRecipe = onRequest(
+  functionOptions,
+  createHttpApp({ hosted: true, variant: 'inline-recipe' })
+);
+
+/**
  * Words tier — arm B of the ablation. Identical prose and schemas to `mcp`, but
  * no computed alerts, so A→B measures what the words buy and B→C measures what
  * the capability adds.

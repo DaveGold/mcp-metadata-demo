@@ -72,3 +72,62 @@ describe('log-store (local / in-memory ring buffer path)', () => {
     expect(records).toEqual([]);
   });
 });
+
+describe('log-store — the fields the eval audit depends on', () => {
+  beforeEach(() => {
+    __resetRingBufferForTests();
+  });
+
+  it('round-trips paramsPresent, rowCount and errorType', async () => {
+    // paramsPresent is the highest-value field on the row: `wrong-unit` turns
+    // entirely on whether huisletter was passed, and no answer text reveals it.
+    await writeToolCallLog(
+      entry({ queryIntent: 'with letter', paramsPresent: ['huisletter', 'queryIntent'], rowCount: 2 })
+    );
+    const [row] = await readRecentToolCalls('local', { limit: 10 });
+
+    expect(row.paramsPresent).toEqual(['huisletter', 'queryIntent']);
+    expect(row.rowCount).toBe(2);
+    expect(row.errorType).toBeNull();
+  });
+
+  it('defaults paramsPresent to an empty array when the caller supplies none', async () => {
+    // Six of the seven tools that write here never set it; they must not break.
+    await writeToolCallLog(entry({ queryIntent: 'no optional params' }));
+    const [row] = await readRecentToolCalls('local', { limit: 10 });
+
+    expect(row.paramsPresent).toEqual([]);
+  });
+
+  it('stamps variant "unknown" when no request context is open', async () => {
+    // stdio opens no context. Those rows must be identifiable so they are not
+    // counted against an arm during an audit.
+    await writeToolCallLog(entry({ queryIntent: 'stdio-ish' }));
+    const [row] = await readRecentToolCalls('local', { limit: 10 });
+
+    expect(row.variant).toBe('unknown');
+  });
+
+  it('filters by variant, which is the only way to attribute a row to an arm', async () => {
+    const { requestContext } = await import('./log-context.js');
+
+    await requestContext.run({ sessionId: 'a', environment: 'local', variant: 'words' }, async () => {
+      await writeToolCallLog(entry({ queryIntent: 'words call' }));
+    });
+    await requestContext.run({ sessionId: 'b', environment: 'local', variant: 'inline' }, async () => {
+      await writeToolCallLog(entry({ queryIntent: 'inline call one' }));
+      await writeToolCallLog(entry({ queryIntent: 'inline call two' }));
+    });
+
+    const all = await readRecentToolCalls('local', { limit: 50 });
+    expect(all).toHaveLength(3);
+
+    const inlineOnly = await readRecentToolCalls('local', { limit: 50, variant: 'inline' });
+    expect(inlineOnly).toHaveLength(2);
+    expect(inlineOnly.every((r) => r.variant === 'inline')).toBe(true);
+
+    const wordsOnly = await readRecentToolCalls('local', { limit: 50, variant: 'words' });
+    expect(wordsOnly).toHaveLength(1);
+    expect(wordsOnly[0].queryIntent).toBe('words call');
+  });
+});
