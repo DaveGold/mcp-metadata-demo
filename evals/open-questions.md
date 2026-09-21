@@ -168,6 +168,76 @@ too, or it is a sales pitch rather than a measurement.
 
 ---
 
+## Q3 — Why does `rich` cost LESS than `words`?
+
+### The observation to be explained
+
+`rich` carries strictly more than `words` — identical description **plus** the alerts
+— and costs fewer tokens per run on both models (~31.8k vs ~32.4k on Haiku, ~41.7k
+vs ~42.3k on Sonnet). Consistent direction, ~600 tokens, both models.
+
+If this holds up it is the most useful single line in the work, because it removes
+the obvious objection to rich metadata: that you pay for it in context. So it should
+be attacked before it is quoted.
+
+### Two candidate mechanisms
+
+**(a) Fewer round trips.** The model does not have to make extra calls to reconstruct
+meaning.
+
+**(b) Less to say.** The model that has the number writes the number; the model that
+does not writes an essay about why it cannot be sure.
+
+### Prediction
+
+> **The saving is almost entirely (b), and (a) is a rounding error.**
+>
+> Evidence for (b): on `gas-estimate`/Sonnet, `rich` runs completed in ~7.3–7.9s
+> against ~17–21s for `words` — a consistent 2–3× duration gap, and duration is
+> mostly a proxy for output length. The answers match: `rich` states 253 and stops,
+> the lower arms add three sentences of unrequested hedging about district heating
+> and metered data.
+>
+> Evidence against (a): extra calls were observed, and concentrated exactly where
+> predicted — `get_weather_context` invoked for degree-day normalisation nobody asked
+> for, in `thin` and `schema`, almost entirely on Haiku, with `rich` essentially
+> always a single call. But that is roughly **10 runs in 240**. A 4% incidence cannot
+> produce a gap that appears on every run.
+>
+> **Falsified if:** call count differs between `rich` and `words` in more than ~15%
+> of runs, or if output length is equal between them while total tokens still differ.
+
+### Why this is not yet provable from what is on disk
+
+The 2026-09-21 results files record answers and scores per run. They do **not**
+record `tool_uses`, `duration_ms` or `subagent_tokens` per run — everything above is
+read back off a session transcript, which is a real observation but not a
+measurement. `subagent_tokens` also does not split input from output, which is
+exactly the decomposition the question needs.
+
+### What to instrument
+
+Record per run, in the results file: `tool_uses`, `duration_ms`, `subagent_tokens`,
+and the character count of the `ANSWER` line. Then:
+
+- **Close the standing caveat.** Every results file says *"CALLS/TOOLS/PARAMS are
+  self-reported and were not audited against `get_tool_call_log`."* Every arm exposes
+  that tool. This experiment is the reason to finally run the audit and get a
+  server-side call count that does not depend on the system under test describing
+  its own behaviour.
+- **Separate the arms' costs.** The description is a fixed input cost per call and is
+  measurable directly by counting its tokens — no run needed. Anything left over is
+  output, which is where the hypothesis says the saving lives.
+
+### Why it matters beyond the talk
+
+If (b) is right, the cost argument generalises: **any** metadata that removes
+uncertainty pays for itself in shorter output, whether or not it is a computed
+figure. If (a) is right, the saving only applies to tools an agent would otherwise
+call repeatedly, and the claim has to be narrowed accordingly.
+
+---
+
 ## Suggested order
 
 1. **Q1b first.** It is the only one of the four sub-questions that could overturn a
@@ -177,3 +247,7 @@ too, or it is a sales pitch rather than a measurement.
 3. **Q2** last. It depends on Q1 finding the response channel usable at all; if
    `inline` is no better than `schema`, conditional pruning of something that is not
    being read measures nothing.
+
+**Q3 is free to run alongside any of them** — it needs no new arm and no deploy, only
+instrumentation of the harness and an audit against `get_tool_call_log`. Do it on the
+next run of anything, whatever that run is for.
