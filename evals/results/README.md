@@ -14,6 +14,12 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-21-per-question.json`](2026-09-21-per-question.json) | Per-question outcomes and per-regime results, kept out of `questions.json` so the set reads as a spec. |
 | [`2026-09-21-opaque-live.json`](2026-09-21-opaque-live.json) | Does the shape replication survive live tool calls? It does not — five of six cells disagree, and the derived-figures recipe scores 0 of 3. |
 | [`2026-09-21-opaque-live-sonnet-n10.json`](2026-09-21-opaque-live-sonnet-n10.json) | The confirmation pass for that run — sonnet, n=10, 60 runs. Confirms the recipe failure and shows the other two questions saturate on a stronger model. |
+| [`2026-09-21-readable-ladder-gas.json`](2026-09-21-readable-ladder-gas.json) | The readable ladder on the one question with headroom, and the first measurement of the `schema` rung. 80 runs, two models. Server-computed beats everything; the ladder is not monotonic. |
+
+The readable-ladder file is the one to read for the design question, because it is
+the only run where an arm is correct by the ground-truth route rather than by
+coincidence. Read its `the_tolerance_problem` block before quoting any number from
+the three lower rungs.
 
 Read the sweep first — it is the one that changed the design, and it is a useful
 record of how easily a single run misleads. Then read `2026-09-21-opaque-live.json`:

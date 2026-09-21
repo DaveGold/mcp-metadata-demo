@@ -1,0 +1,1142 @@
+{
+  "_comment": "First measurement of the READABLE ladder on gas-estimate, and the first measurement of the eval-schema rung at any n. Four rungs (thin -> schema -> words -> rich), two models, n=10, 80 live runs on one question. Two results dominate. (1) words -> rich is decisive on both models (haiku 3->10, sonnet 6->10) and rich is the only arm correct by the ground-truth route with zero spread. (2) The ladder is NOT MONOTONIC: on haiku the new schema rung is sharply NET NEGATIVE (thin 7/10 -> schema 1/10, p=0.02), and on sonnet the words rung is net negative (schema 10/10 -> words 6/10, p=0.09). Metadata is not additive on this question.",
+  "date": "2026-09-21",
+  "models": [
+    "haiku",
+    "sonnet"
+  ],
+  "protocol": "LIVE TOOL CALLS. Each run is a fresh eval-<arm> subagent given only the `question` string from questions.json - no ground_truth, no must_not_say, no required_params. All eight arm/model cells for a given repeat were spawned in the same batch so transient API weather hits them alike. NOT comparable with the payload-in-prompt files, and NOT comparable with the opaque/opaque-words files, which vary field naming instead.",
+  "n": 10,
+  "total_runs": 80,
+  "question": "gas-estimate",
+  "why_this_question": "The only question in the set with measured headroom. _measured_ceilings records heat-pump-triage at 20/20 and benchmark-trap at 19/20 on sonnet; both were hardened on 2026-09-21 and their new ceilings are unmeasured, so neither can support a claim yet.",
+  "arms": {
+    "eval-thin": "mcpMinimal. One-sentence description, untyped input schema (postcode: string, huisnummer: number, no .describe()). The floor.",
+    "eval-schema": "mcpSchema. Description BYTE-IDENTICAL to thin's one sentence; adds the fully typed and .describe()d input and output schemas (postcode pattern, huisnummer integer bound, huisletter/toevoeging, queryIntent). First measurement of this rung. VERIFIED DEPLOYED - the run-eval skill's note that mcpSchema 'may not be deployed yet' is stale.",
+    "eval-words": "mcpWords. Adds the full RETURNS / WHEN TO USE / QUERY STRATEGY / INTERPRETATION prose (descriptionCore, 6099 chars, byte-identical to rich). No alerts array.",
+    "eval-rich": "mcp. Same prose, same schemas, plus the server-computed alerts array."
+  },
+  "ladder_verification": {
+    "_comment": "Called all four arms directly from the parent session on 1086ZJ/433 before spending any runs, to confirm the rungs differ by exactly one layer and serve identical data.",
+    "payloads": "BYTE-IDENTICAL across all four arms. Same 40 fields, same values: oppervlakte_m2 41, warmtebehoefte_kwh_m2 52.73, gebruiksoppervlakte_thermische_zone_m2 40.02, ep2_fossiel_kwh_m2 63.35, aandeel_hernieuwbaar_pct 30.8. rich alone adds `alerts`.",
+    "rich_alert_verbatim": "Estimated space-heating gas equivalent: ~253 m3/year (warmtebehoefte 52.73 kWh/m2 x 40.02 m2 EP-Online thermische zone, HR boiler 95%). SPACE HEATING ONLY - excludes hot water and cooking, so an actual gas bill will be higher.",
+    "CORRECTION_TO_THE_BRIEF": "The readable `words` arm carries NO GAS RECIPE. descriptionCore contains zero occurrences of 8.79, 0.95, 95%, 'gas' or 'boiler'. The formula lives only in alertsParagraph, which the words variant deliberately omits because describing an absent field would be its own metadata defect (get-building-profile-words.ts:18). So on THIS axis words -> rich measures COMPUTED FIGURE vs NOTHING DOCUMENTED, not 'computed figure vs documented recipe'. The documented-recipe contrast exists only on the opaque axis (mcpOpaqueWords carries a DERIVED FIGURES block), which is the orthogonal field-naming axis and is not compared here."
+  },
+  "scoring": {
+    "accept_range": "233-273 (expected_value 253, tolerance 20)",
+    "range_rule": "Fixed BEFORE scoring, per _scoring: score the MIDPOINT of a stated range against the tolerance and record the width. A vague quantifier with no number scores as declined.",
+    "declined": "Tracked as its own column, never folded into correct or confidently_wrong. A run that returned only kWh and said it could not convert to m3 is declined, not confidently wrong.",
+    "sensitivity": "`correct_under_overlap_rule` re-scores each cell under the stricter-in-some-cells alternative 'the stated range overlaps the accept range at all'. Reported per cell so the reader can see which findings depend on the rule."
+  },
+  "results": {
+    "thin / haiku": {
+      "correct": "7 of 10",
+      "confidently_wrong": "3 of 10",
+      "declined": "0 of 10",
+      "fabricated": "10 of 10",
+      "correct_under_overlap_rule": "8 of 10",
+      "midpoint_spread": "220-1350",
+      "route_of_correct": {
+        "wb": 6,
+        "mixed": 1
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "240-250 m3",
+          "midpoint": 245.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "52.73x41, 87% boiler, ~10 kWh/m3"
+        },
+        {
+          "rep": 2,
+          "answer": "230-240 m3",
+          "midpoint": 235.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "90% boiler"
+        },
+        {
+          "rep": 3,
+          "answer": "1200-1500 m3",
+          "midpoint": 1350.0,
+          "range_width": 300,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "invented 70% fossil dependency; 10x too high"
+        },
+        {
+          "rep": 4,
+          "answer": "240 m3",
+          "midpoint": 240.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "90% boiler; noted absence of an alerts field"
+        },
+        {
+          "rep": 5,
+          "answer": "235 m3",
+          "midpoint": 235.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "92% condensing boiler"
+        },
+        {
+          "rep": 6,
+          "answer": "220-230 m3",
+          "midpoint": 225.0,
+          "range_width": 10,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "90% + degree-day adjustment from get_weather_context"
+        },
+        {
+          "rep": 7,
+          "answer": "230-250 m3",
+          "midpoint": 240.0,
+          "range_width": 20,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "implied ~10 kWh/m3"
+        },
+        {
+          "rep": 8,
+          "answer": "200-240 m3",
+          "midpoint": 220.0,
+          "range_width": 40,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "90% then renewable-share discount to 150-180"
+        },
+        {
+          "rep": 9,
+          "answer": "220-250 m3",
+          "midpoint": 235.0,
+          "range_width": 30,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "90%; also invented a EUR0.60/m3 gas price"
+        },
+        {
+          "rep": 10,
+          "answer": "250-280 m3",
+          "midpoint": 265.0,
+          "range_width": 30,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "mixed",
+          "note": "blended wb and ep2 roads"
+        }
+      ]
+    },
+    "schema / haiku": {
+      "correct": "1 of 10",
+      "confidently_wrong": "9 of 10",
+      "declined": "0 of 10",
+      "fabricated": "10 of 10",
+      "correct_under_overlap_rule": "4 of 10",
+      "midpoint_spread": "175-2400",
+      "route_of_correct": {
+        "wb": 1
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "220-240 m3",
+          "midpoint": 230.0,
+          "range_width": 20,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "90% boiler; midpoint 230, three short"
+        },
+        {
+          "rep": 2,
+          "answer": "180-200 m3",
+          "midpoint": 190.0,
+          "range_width": 20,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "RENEWABLE DISCOUNT: subtracted 30.8% aandeel_hernieuwbaar"
+        },
+        {
+          "rep": 3,
+          "answer": "205 m3",
+          "midpoint": 205.0,
+          "range_width": 0,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "~10.5 kWh/m3"
+        },
+        {
+          "rep": 4,
+          "answer": "200-250 m3",
+          "midpoint": 225.0,
+          "range_width": 50,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "10 kWh/m3, 90-95%"
+        },
+        {
+          "rep": 5,
+          "answer": "250-290 m3",
+          "midpoint": 270.0,
+          "range_width": 40,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "added hot-water allowance + weather adjustment"
+        },
+        {
+          "rep": 6,
+          "answer": "200-250 m3",
+          "midpoint": 225.0,
+          "range_width": 50,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "85% boiler, 10.7 kWh/m3"
+        },
+        {
+          "rep": 7,
+          "answer": "2400 m3",
+          "midpoint": 2400.0,
+          "range_width": 0,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "ARITHMETIC BLUNDER: used 0.9 kWh per m3"
+        },
+        {
+          "rep": 8,
+          "answer": "180-200 m3",
+          "midpoint": 190.0,
+          "range_width": 20,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "RENEWABLE DISCOUNT; noted gas-only would be 260-280"
+        },
+        {
+          "rep": 9,
+          "answer": "200-220 m3",
+          "midpoint": 210.0,
+          "range_width": 20,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "10.55 kWh/m3, 90%"
+        },
+        {
+          "rep": 10,
+          "answer": "150-200 m3",
+          "midpoint": 175.0,
+          "range_width": 50,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "RENEWABLE DISCOUNT + 10.7 kWh/m3"
+        }
+      ]
+    },
+    "words / haiku": {
+      "correct": "3 of 10",
+      "confidently_wrong": "4 of 10",
+      "declined": "3 of 10",
+      "fabricated": "7 of 10",
+      "correct_under_overlap_rule": "5 of 10",
+      "midpoint_spread": "155-285",
+      "route_of_correct": {
+        "wb": 2,
+        "ep2": 1
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "230-280 m3",
+          "midpoint": 255.0,
+          "range_width": 50,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "90%, 9 kWh/m3"
+        },
+        {
+          "rep": 2,
+          "answer": "declined",
+          "midpoint": null,
+          "range_width": null,
+          "correct": false,
+          "confidently_wrong": false,
+          "declined": true,
+          "fabricated": false,
+          "route": "none",
+          "note": "DECLINED: gave kWh only, said m3 needs the heating system"
+        },
+        {
+          "rep": 3,
+          "answer": "150-250 m3",
+          "midpoint": 200.0,
+          "range_width": 100,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "renewable share cited"
+        },
+        {
+          "rep": 4,
+          "answer": "declined",
+          "midpoint": null,
+          "range_width": null,
+          "correct": false,
+          "confidently_wrong": false,
+          "declined": true,
+          "fabricated": false,
+          "route": "none",
+          "note": "DECLINED: 2100 kWh only, 'tool does not provide direct gas in m3'"
+        },
+        {
+          "rep": 5,
+          "answer": "250-280 m3",
+          "midpoint": 265.0,
+          "range_width": 30,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 6,
+          "answer": "140-170 m3",
+          "midpoint": 155.0,
+          "range_width": 30,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "RENEWABLE DISCOUNT 31%"
+        },
+        {
+          "rep": 7,
+          "answer": "285 m3",
+          "midpoint": 285.0,
+          "range_width": 0,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "2535 kWh fossil -> 285 m3; twelve over"
+        },
+        {
+          "rep": 8,
+          "answer": "200-250 m3",
+          "midpoint": 225.0,
+          "range_width": 50,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "90% boiler"
+        },
+        {
+          "rep": 9,
+          "answer": "240 m3",
+          "midpoint": 240.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "90%, 10 kWh/m3"
+        },
+        {
+          "rep": 10,
+          "answer": "declined",
+          "midpoint": null,
+          "range_width": null,
+          "correct": false,
+          "confidently_wrong": false,
+          "declined": true,
+          "fabricated": false,
+          "route": "none",
+          "note": "DECLINED: kWh only, explicitly not gas consumption"
+        }
+      ]
+    },
+    "rich / haiku": {
+      "correct": "10 of 10",
+      "confidently_wrong": "0 of 10",
+      "declined": "0 of 10",
+      "fabricated": "3 of 10",
+      "correct_under_overlap_rule": "10 of 10",
+      "midpoint_spread": "253-253",
+      "route_of_correct": {
+        "alert": 10
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": "read the alert; scoped to space heating"
+        },
+        {
+          "rep": 2,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        },
+        {
+          "rep": 3,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        },
+        {
+          "rep": 4,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "alert",
+          "note": "correct 253 but invented a 350-450 m3 total-household uplift"
+        },
+        {
+          "rep": 5,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "alert",
+          "note": "invented a 20-30% hot-water uplift"
+        },
+        {
+          "rep": 6,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        },
+        {
+          "rep": 7,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        },
+        {
+          "rep": 8,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "alert",
+          "note": "invented a 300-350 m3 household total"
+        },
+        {
+          "rep": 9,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        },
+        {
+          "rep": 10,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        }
+      ]
+    },
+    "thin / sonnet": {
+      "correct": "10 of 10",
+      "confidently_wrong": "0 of 10",
+      "declined": "0 of 10",
+      "fabricated": "10 of 10",
+      "correct_under_overlap_rule": "10 of 10",
+      "midpoint_spread": "235-265",
+      "route_of_correct": {
+        "ep2": 9,
+        "wb": 1
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "250-270 m3",
+          "midpoint": 260.0,
+          "range_width": 20,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 63.35 x 41 / 9.77"
+        },
+        {
+          "rep": 2,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 3,
+          "answer": "250-270 m3",
+          "midpoint": 260.0,
+          "range_width": 20,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 4,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 5,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 6,
+          "answer": "250-270 m3",
+          "midpoint": 260.0,
+          "range_width": 20,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 7,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 8,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 9,
+          "answer": "220-250 m3",
+          "midpoint": 235.0,
+          "range_width": 30,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "wb road, 90%; also invented a gas price"
+        },
+        {
+          "rep": 10,
+          "answer": "250-280 m3",
+          "midpoint": 265.0,
+          "range_width": 30,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        }
+      ]
+    },
+    "schema / sonnet": {
+      "correct": "10 of 10",
+      "confidently_wrong": "0 of 10",
+      "declined": "0 of 10",
+      "fabricated": "10 of 10",
+      "correct_under_overlap_rule": "10 of 10",
+      "midpoint_spread": "260-265",
+      "route_of_correct": {
+        "ep2": 10
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 2,
+          "answer": "250-270 m3",
+          "midpoint": 260.0,
+          "range_width": 20,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 3,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 4,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road; hedged heat pump / district heating"
+        },
+        {
+          "rep": 5,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 6,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road; hedged 'actual probably zero, stadsverwarming'"
+        },
+        {
+          "rep": 7,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road; hedged zero"
+        },
+        {
+          "rep": 8,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 9,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road; hedged all-electric"
+        },
+        {
+          "rep": 10,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road; hedged all-electric"
+        }
+      ]
+    },
+    "words / sonnet": {
+      "correct": "6 of 10",
+      "confidently_wrong": "3 of 10",
+      "declined": "1 of 10",
+      "fabricated": "9 of 10",
+      "correct_under_overlap_rule": "9 of 10",
+      "midpoint_spread": "225-275",
+      "route_of_correct": {
+        "ep2": 5,
+        "wb": 1
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "declined",
+          "midpoint": null,
+          "range_width": null,
+          "correct": false,
+          "confidently_wrong": false,
+          "declined": true,
+          "fabricated": false,
+          "route": "none",
+          "note": "DECLINED: gave 2500 kWh primary fossil, no m3; 'probably minimal'"
+        },
+        {
+          "rep": 2,
+          "answer": "250-300 m3",
+          "midpoint": 275.0,
+          "range_width": 50,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "midpoint 275, two over"
+        },
+        {
+          "rep": 3,
+          "answer": "265 m3",
+          "midpoint": 265.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 4,
+          "answer": "250-260 m3",
+          "midpoint": 255.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road over the 40 m2 thermal zone"
+        },
+        {
+          "rep": 5,
+          "answer": "250-270 m3",
+          "midpoint": 260.0,
+          "range_width": 20,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 6,
+          "answer": "200-250 m3",
+          "midpoint": 225.0,
+          "range_width": 50,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "wb road, 90% boiler; hedged stadsverwarming"
+        },
+        {
+          "rep": 7,
+          "answer": "150-300 m3",
+          "midpoint": 225.0,
+          "range_width": 150,
+          "correct": false,
+          "confidently_wrong": true,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "very wide hedge band"
+        },
+        {
+          "rep": 8,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road"
+        },
+        {
+          "rep": 9,
+          "answer": "230-250 m3",
+          "midpoint": 240.0,
+          "range_width": 20,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "wb",
+          "note": "wb road; hedged district heating"
+        },
+        {
+          "rep": 10,
+          "answer": "260-270 m3",
+          "midpoint": 265.0,
+          "range_width": 10,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": true,
+          "route": "ep2",
+          "note": "EP2 road; hedged stadswarmte"
+        }
+      ]
+    },
+    "rich / sonnet": {
+      "correct": "10 of 10",
+      "confidently_wrong": "0 of 10",
+      "declined": "0 of 10",
+      "fabricated": "0 of 10",
+      "correct_under_overlap_rule": "10 of 10",
+      "midpoint_spread": "250-253",
+      "route_of_correct": {
+        "alert": 10
+      },
+      "runs": [
+        {
+          "rep": 1,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        },
+        {
+          "rep": 2,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        },
+        {
+          "rep": 3,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": "quoted 52.73 x 40.02 thermal zone explicitly"
+        },
+        {
+          "rep": 4,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        },
+        {
+          "rep": 5,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        },
+        {
+          "rep": 6,
+          "answer": "250 m3",
+          "midpoint": 250.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": "rounded to 250"
+        },
+        {
+          "rep": 7,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        },
+        {
+          "rep": 8,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        },
+        {
+          "rep": 9,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        },
+        {
+          "rep": 10,
+          "answer": "253 m3",
+          "midpoint": 253.0,
+          "range_width": 0,
+          "correct": true,
+          "confidently_wrong": false,
+          "declined": false,
+          "fabricated": false,
+          "route": "alert",
+          "note": ""
+        }
+      ]
+    }
+  },
+  "adjacent_rung_gaps": {
+    "_comment": "Only ADJACENT rungs are attributable, because each adds exactly one layer. Two-sided Fisher exact on correct-out-of-10.",
+    "haiku thin -> schema": "7/10 -> 1/10. p=0.020. SCHEMA IS NET NEGATIVE ON HAIKU.",
+    "haiku schema -> words": "1/10 -> 3/10. p=0.582. Not distinguishable at this n; words also introduces 3 declines.",
+    "haiku words -> rich": "3/10 -> 10/10. p=0.0015. THE HEADLINE.",
+    "sonnet thin -> schema": "10/10 -> 10/10. p=1.000. No effect; both saturate via the EP2 route.",
+    "sonnet schema -> words": "10/10 -> 6/10. p=0.087. WORDS IS NET NEGATIVE ON SONNET, at the edge of significance.",
+    "sonnet words -> rich": "6/10 -> 10/10. p=0.043."
+  },
+  "headline": "Returning the computed figure is the only intervention that works, and it works completely: rich is 10/10 on both models with zero spread, and is the ONLY arm whose correct answers come from the ground-truth derivation. Every rung below it is worse than the rung below THAT on at least one model - the ladder does not climb monotonically, it wobbles.",
+  "the_tolerance_problem": {
+    "_comment": "The most important caveat in this file. It undercuts most of the non-rich numbers and should be fixed in the set before this question is used again.",
+    "finding": "24 of the 26 correct answers from thin/schema/words on sonnet were reached via the EP2 ROAD: ep2_fossiel_kwh_m2 63.35 x 41 m2 BAG area / an invented calorific value. That conflates NTA 8800 primary fossil energy with delivered gas volume - a different quantity from the ground truth's space-heating warmtebehoefte. It lands in tolerance by coincidence.",
+    "arithmetic": "Ground-truth road: 52.73 x 40.02 / 0.95 / 8.79 = 252.7. EP2 road at 9.77 kWh/m3 = 265.8, at 10.0 = 259.7, at 10.55 = 246.2, at 10.7 = 242.7 - all four INSIDE 233-273. The warmtebehoefte road also passes at many invented-constant pairs (0.90/10.0 = 240.2, 0.95/9.0 = 252.9) and fails at others (0.90/10.7 = 224.5, 0.95/10.0 = 227.6).",
+    "implication": "For the three lower rungs, correctness on this question is close to a LOTTERY OVER INVENTED CONSTANTS. The payload contains no boiler efficiency and no calorific value, so every non-rich correct answer is necessarily fabricated in the metric's sense - fabricated is 10/10, 10/10, 7/10 and 9/10 in those cells and carries no discriminating signal here. Only rich's 10/10 is correct by construction rather than by coincidence.",
+    "recommendation": "Tighten tolerance to about 8 m3 (3%), or score the ROUTE rather than the value, before using gas-estimate to support any claim about the lower rungs. At tolerance 20 the question cannot tell a correct derivation from a lucky one."
+  },
+  "why_schema_hurts_on_haiku": {
+    "observation": "thin/haiku 7/10 -> schema/haiku 1/10 while the description text is byte-identical. The only change is typed, .describe()d input and output schemas.",
+    "mechanism_candidate": "Three of the nine schema/haiku misses applied a RENEWABLE-SHARE DISCOUNT, subtracting aandeel_hernieuwbaar_pct 30.8% from the gas figure and landing at 150-200 m3. Describing that field appears to recruit it into a calculation it does not belong in - the same shape as the sonnet opaque run's benchmark-trap note that naming a dangerous field is what makes misusing it possible.",
+    "honest_caveat": "The mechanism is NOT established. thin/haiku also produced two renewable-discount runs, and the rest of the schema/haiku misses are explained by ordinary variation in invented constants (10.7 and 10.55 kWh/m3 instead of ~10, and one outright blunder using 0.9 kWh/m3 for 2400 m3). The 7-vs-1 gap is unlikely to be chance at p=0.020, but the proximate cause is which constant the model happened to invent, and no arm's metadata specifies that constant. Attributing the gap to the schema layer specifically is weak. Re-run before building anything on it."
+  },
+  "status_of_the_rule": {
+    "_comment": "_the_rule in 2026-09-21-shape-replication.json: semantics handle interpretation, classification and prevention; recipes are needed only for derived numbers. Both halves failed live on the opaque axis. This run tests only the derived_number half, and only on the readable axis.",
+    "first_half_untested": "Classification, prevention, interpretation and refusal shapes were not run here. Nothing in this file speaks to them.",
+    "second_half": "The readable axis carries no recipe at any rung, so this run cannot test 'a documented recipe works'. What it does test is the design advice the rule generates - return the derived figure from the server - and that advice is CONFIRMED, on a second axis and on both models, at the largest n yet: 20 of 20 rich runs correct, zero fabrication on sonnet, zero spread.",
+    "against_the_rule": "The rule's spirit is that words carry the semantics and that adding them should help. On this derived_number question the words rung was net NEGATIVE on sonnet (10/10 -> 6/10) and indistinguishable from the floor on haiku (7/10 thin -> 3/10 words). Prose did not help here; it produced hedging about district heating and metered data, wider ranges, and the only declines in the run."
+  },
+  "declines": "4 of 80 runs declined, ALL of them in the words arm (3 haiku, 1 sonnet). They returned the heat demand in kWh and said the tool cannot give m3 without knowing the heating system. Under the pre-repair scoring these would have been counted confidently_wrong and words would have read 3/10 and 6/10 wrong rather than 3 declined / 4 wrong and 1 declined / 3 wrong. The separation matters exactly as intended: the words arm's failure mode is partly honest refusal, the schema arm's is not - schema declined zero times and was confidently wrong nine.",
+  "self_reported_calls": "CALLS/TOOLS/PARAMS are self-reported by the system under test and were NOT audited against get_tool_call_log. Usable only for spotting thrashing. Noted: 8 runs called get_weather_context as well, all in thin or schema, all on haiku except one - degree-day normalisation nobody asked for. Two runs reported a bare 'get_building_profile' without the server prefix.",
+  "caveats": [
+    "n=10 per cell, 80 runs, ONE question, single sitting. A bad hour is not excluded.",
+    "ONE QUESTION ONLY. gas-estimate is a derived_number question; nothing here generalises to the other four shapes, and the run-eval skill's instruction to report by shape is satisfied only in the trivial sense that one shape was run.",
+    "THE TOLERANCE PROBLEM above is the dominant caveat: at tolerance 20 the accept range admits at least two different derivation roads and a wide space of invented constants, so the lower three rungs' scores measure luck as much as capability.",
+    "Midpoint scoring is load-bearing in three cells. sonnet/words rep 2 (250-300, midpoint 275) misses by two; haiku/schema rep 1 (220-240, midpoint 230) misses by three; haiku/thin rep 6 (220-230, midpoint 225) misses by eight. The per-cell correct_under_overlap_rule field shows the alternative: under it haiku thin goes 7->8, haiku schema 1->4, haiku words 3->5, sonnet words 6->9, and rich stays 10/10 on both models. The words -> rich finding survives both rules; the thin -> schema ordering on haiku is weakened but not reversed (8 vs 4).",
+    "The schema-hurts-haiku mechanism is a hypothesis, not a finding - see why_schema_hurts_on_haiku.",
+    "Both saturating cells (thin/sonnet, schema/sonnet at 10/10) saturate via the EP2 coincidence, so they are not evidence that those rungs are adequate. They are evidence the question cannot discriminate on sonnet below the words rung.",
+    "rich fabricated 3 of 10 on haiku: the value was right every time, but three runs invented an uplift for hot water and cooking (350-450 m3, 300-350 m3, '20-30% more') that the alert deliberately leaves unquantified. Zero such inventions on sonnet.",
+    "No cross-axis comparison was made. The opaque and opaque-words arms were not run and their numbers are not referenced as a baseline.",
+    "The guide, the schemas, the alerts and the questions remain authored by the same party."
+  ]
+}
