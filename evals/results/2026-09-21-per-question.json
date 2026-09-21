@@ -1,0 +1,160 @@
+{
+  "_comment": "Per-question outcomes from the 2026-09-21 runs, kept out of questions.json so the set reads as a spec. See the individual result files for the runs themselves.",
+  "date": "2026-09-21",
+  "per_question": {
+    "gas-estimate": {
+      "shape": "derived_number",
+      "outcome_class": "B",
+      "outcome_class_name": "layer closes the gap",
+      "regimes": {
+        "readable": {
+          "thin": "140 / 240-260 / 200-220 / 200-250 (1 of 4)",
+          "words": "240-260",
+          "rich": "253 x3",
+          "carried_by": "alert",
+          "separates": true
+        },
+        "opaque": {
+          "none": "40.02 x3",
+          "glossary": "UNKNOWN / UNKNOWN / 295",
+          "glossary_plus_recipe": "253 x3 (also 253 at Opus)",
+          "carried_by": "recipe",
+          "separates": true
+        }
+      }
+    },
+    "total-vs-per-m2": {
+      "shape": "derived_number",
+      "outcome_class": "B",
+      "outcome_class_name": "layer closes the gap",
+      "regimes": {
+        "readable": {
+          "thin": "2859 x3",
+          "words": "2859",
+          "rich": "2630 x3",
+          "carried_by": "alert",
+          "separates": true
+        },
+        "opaque": {
+          "note": "not run"
+        }
+      }
+    },
+    "heat-pump-triage": {
+      "shape": "classification",
+      "outcome_class": "B",
+      "outcome_class_name": "layer closes the gap",
+      "regimes": {
+        "readable": {
+          "thin": "inverts the middle two",
+          "rich": "exact ordering",
+          "carried_by": "alert",
+          "separates": true
+        },
+        "opaque": {
+          "none": "VERY SUITABLE x2 (reasons from the label, never wb)",
+          "glossary": "SUITABLE x2 (wb alone)",
+          "carried_by": "semantics",
+          "separates": true,
+          "inversion": "The BINARY form of this question saturated in the readable regime - every arm right, because an A+ label makes \"yes\" guessable. In the opaque regime the glossary is REQUIRED. Same question, opposite verdict: mechanism is a property of question x naming regime, not of the question."
+        }
+      }
+    },
+    "building-size": {
+      "shape": "prevention",
+      "outcome_class": "B",
+      "outcome_class_name": "layer closes the gap",
+      "regimes": {
+        "readable": {
+          "thin": "\"the building is 41 m2\"",
+          "words": "same as thin",
+          "rich": "flags one unit of 106",
+          "carried_by": "alert",
+          "separates": true
+        },
+        "opaque": {
+          "note": "not run"
+        }
+      }
+    },
+    "benchmark-trap": {
+      "shape": "prevention",
+      "outcome_class": "C",
+      "outcome_class_name": "model closes the gap",
+      "regimes": {
+        "readable": {
+          "thin": "\"3.7x higher\" at Haiku and Sonnet; correct at Opus",
+          "rich": "IDENTICAL failures - the name berekend_energieverbruik_kwh_m2 defeats the prose beside it",
+          "carried_by": "none",
+          "separates": false
+        },
+        "opaque": {
+          "none": "58.1 / 102.5 - unstable, two different inventions",
+          "glossary": "CANNOT-COMPARE x2",
+          "carried_by": "semantics",
+          "separates": true,
+          "headline": "A MISLEADING NAME IS WORSE THAN NO NAME. Readable+prose+alerts fails at two model tiers; opaque+glossary succeeds at the weakest."
+        }
+      }
+    },
+    "wrong-unit": {
+      "shape": "selection",
+      "outcome_class": "D",
+      "outcome_class_name": "structural gap",
+      "regimes": {
+        "readable": {
+          "thin": "105 m2 at Haiku; Opus correctly refuses - no huisletter parameter exists",
+          "rich": "92 m2 at Haiku",
+          "carried_by": "schema",
+          "separates": true,
+          "ladder": "rich-Haiku beats thin-Opus outright. The layer makes the weak model right and the strong model safe."
+        },
+        "opaque": {
+          "note": "not run; the schema is identical in both opaque arms by design"
+        }
+      }
+    },
+    "overheating": {
+      "shape": "interpretation",
+      "outcome_class": "C",
+      "outcome_class_name": "model closes the gap",
+      "regimes": {
+        "readable": {
+          "thin": "inverted at Haiku, correct at Opus",
+          "rich": "inverted at Haiku, correct at Opus",
+          "carried_by": "none",
+          "separates": false
+        },
+        "opaque": {
+          "note": "not run"
+        }
+      }
+    },
+    "metered-vs-model": {
+      "shape": "refusal",
+      "outcome_class": "A",
+      "outcome_class_name": "always works",
+      "regimes": {
+        "readable": {
+          "thin": "correct (refused properly)",
+          "carried_by": "none",
+          "separates": false
+        }
+      }
+    },
+    "invented-label": {
+      "shape": "refusal",
+      "outcome_class": "A",
+      "outcome_class_name": "always works",
+      "regimes": {
+        "readable": {
+          "thin": "correct",
+          "words": "correct",
+          "rich": "correct",
+          "carried_by": "none",
+          "separates": false
+        }
+      }
+    }
+  }
+}

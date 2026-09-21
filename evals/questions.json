@@ -1,104 +1,32 @@
 {
-  "_comment": "The curated set. Nine questions, each kept because it demonstrably does work no other question does. Everything cut is listed under `retired` with the reason - the reasoning is worth more than the questions were.",
-  "version": 3,
-  "captured": "2026-09-21",
-  "arms": {
-    "readable": [
-      "thin",
-      "words",
-      "rich"
-    ],
-    "opaque": [
-      "opaque",
-      "opaque-words"
-    ]
-  },
-  "_dimensions": {
-    "shape": "What KIND of work the question asks for: derived_number, classification, prevention, interpretation, selection, refusal. This is the dimension that produced the rule and it was missing until now.",
-    "outcome_class": "What HAPPENS across arms: B layer closes the gap, D structural gap no model closes, C model closes the gap, A always works, E layer cannot fix it (none found).",
-    "regimes": "Results are recorded PER NAMING REGIME because mechanism turned out to be a property of question x naming, not of the question. heat-pump-triage is the proof: it saturates with readable field names and requires the glossary with opaque ones."
-  },
-  "_the_rule": "Semantics handle interpretation, classification, prevention and refusal. Recipes - or server-side computation - are needed only for DERIVED NUMBERS. Replicated across three shapes in the opaque regime; consistent with the readable regime, where all four alert-carried wins were derived numbers or a prevention the alert stated outright.",
-  "_metrics": {
-    "correct": "matches ground_truth.",
-    "confidently_wrong": "asserts must_not_say. The headline number.",
-    "fabricated": "invented a constant, unit or threshold not present in the payload - see fabrication_watch. This REPLACES max_calls, which carried no signal: get_building_profile is one-shot, so almost every run is a single call.",
-    "right_tool_first": "first tool called equals correct_tool.",
-    "reproducible": "how many of n runs land inside the accept range, plus the SPREAD of the answers. Run alongside `correct`, never instead of it: on gas-estimate rich is 3/3 at 0% spread and thin is 1/4 at 44% spread, and neither number alone says that."
-  },
-  "_outcome_classes": {
-    "A_always_works": "Every arm, every model correct. Proves the set is not rigged and fixes the floor. Keep two.",
-    "B_layer_closes_the_gap": "thin fails, rich succeeds, SAME model. The headline. Every one found so far is carried by an ALERT or a SCHEMA field.",
-    "C_model_closes_the_gap": "Both arms fail at the small model, both pass at Opus. Every one found so far has its rule ONLY in INTERPRETATION prose. Shows the limit of the layer.",
-    "D_structural_gap": "The thin arm cannot express the call at all, at any model. The strongest result: rich-Haiku beats thin-Opus.",
-    "E_layer_cannot_fix_it": "rich fails even at Opus. NOT FOUND in this set - state that rather than implying coverage."
-  },
-  "_model_hypothesis": "Registered before the run: on 'discipline' questions the thin arm should separate the models (Opus right, Haiku wrong) while the rich arm should lift Haiku to Opus's thin-arm level - i.e. the metadata layer buys roughly one model tier. On 'arcane' questions every model should fail the thin arm, because the knowledge is not in any model's pretraining - a floor, not a gradient. Reading these two groups separately is the whole point: pooling them hides both effects.",
-  "_results": [
-    "results/2026-09-21-haiku-sweep.json",
-    "results/2026-09-21-n3-separators.json",
-    "results/2026-09-21-opaque-prose.json",
-    "results/2026-09-21-guide-ablation.json",
-    "results/2026-09-21-shape-replication.json"
+  "_what_this_is": "An eval set for one question: does richer tool metadata change what an agent does, and whether its answer is right? Nine questions against Dutch building data (BAG + EP-Online), run against the same server deployed at different metadata tiers.",
+  "_how_to_run": [
+    "1. Pick a pair of arms to compare. Readable field names: thin / words / rich. Opaque field names: opaque / opaque-words. Never compare across the two groups - they differ in field naming as well as metadata.",
+    "2. Ask each arm the `question` verbatim. Pass nothing else: not the ground truth, not must_not_say, not the shape.",
+    "3. Run each question at least 3 times per arm. Single runs are misleading - one arm here answered 140, 240-260, 200-220 and 200-250 to the same question.",
+    "4. Score with the four metrics below and report per shape, not just a total."
   ],
-  "retired": [
-    {
-      "question": "agg-03 heat-pump (binary)",
-      "reason": "Superseded by heat-pump-triage. The binary form is guessable from an A+ label and saturated in the readable regime."
-    },
-    {
-      "question": "sel-03 human-typing",
-      "reason": "Premise wrong: PDOK accepts a postcode with a space, so the thin arm passed \"3543 AR\" through and succeeded. Tested nothing."
-    },
-    {
-      "question": "amb-01",
-      "reason": "Duplicate of benchmark-trap, which is the same trap worded to invite the comparison."
-    },
-    {
-      "question": "ref-01 Domplein no label",
-      "reason": "Duplicate of invented-label, which already serves as the class-A control."
-    },
-    {
-      "question": "agg-04 Troelstralaan heat pump",
-      "reason": "Superseded: heat-pump-triage covers all three bands in one question."
-    },
-    {
-      "question": "amb-04 two floor areas",
-      "reason": "The thin arm picked the thermal-zone area unprompted - the field NAME carries it. In the opaque regime gas-estimate already exercises f_ga."
-    },
-    {
-      "question": "amb-02 sbi_code",
-      "reason": "The value is visibly text in the payload, so the readable regime saturates."
-    },
-    {
-      "question": "sel-02 which unit",
-      "reason": "Duplicate of building-size, which covers the multi-VBO flag."
-    },
-    {
-      "question": "agg-05 Paris Proof",
-      "reason": "Prose-only threshold lookup - the same shape as overheating, which is already a control."
-    },
-    {
-      "question": "int-02 label validity",
-      "reason": "Multi-fact lookup with no trap; expected to saturate."
-    },
-    {
-      "question": "int-03 energie_index",
-      "reason": "Prose-only threshold; benchmark-trap already covers the pre-NTA metric."
-    },
-    {
-      "question": "ref-03 not_found",
-      "reason": "The not_found path is visible in the payload; expected to saturate."
-    },
-    {
-      "question": "tool-02 weather / tool-03 map",
-      "reason": "Tool-selection questions. Both arms expose the same tool set, so neither is expected to discriminate; they test the MCP Apps layer rather than the domain layer."
-    }
-  ],
+  "_scoring": {
+    "correct": "Matches ground_truth. For scoring 'exact_value', within `tolerance`. For 'judge', decide whether the answer is closer to ground_truth or to must_not_say; if neither, score it `other`.",
+    "confidently_wrong": "Asserts must_not_say. The headline number: it is the difference between a wrong answer and an honest 'I cannot tell you'.",
+    "fabricated": "Invented a constant, unit or threshold that is not in the payload - `fabrication_watch` says what to look for. Replaces a call-count metric, which carried no signal because the tool is one-shot.",
+    "reproducible": "How many of n runs land inside the accept range, and the spread. Report alongside `correct`, never instead of it."
+  },
+  "_shapes": {
+    "derived_number": "The answer is a value the payload does not contain.",
+    "classification": "The answer is a category defined by named thresholds.",
+    "prevention": "There is no value to produce. The right answer is to decline, and say why.",
+    "interpretation": "Read one value correctly against its scale.",
+    "selection": "Reach the right record among several.",
+    "refusal": "The data genuinely does not answer the question."
+  },
+  "_ground_truth": "Every value traces to a profile captured live and frozen in addresses.json, and is re-derived from it by evals/ground-truth.test.ts. Nothing here is invented.",
+  "_findings": "What happened when this set was run is in results/ - read results/README.md first.",
   "questions": [
     {
       "id": "gas-estimate",
-      "category": "aggregation",
+      "shape": "derived_number",
+      "asks": "A number the payload does not contain. Needs a unit conversion and the right floor area.",
       "question": "Roughly how much gas does the flat at IJburglaan 433 in Amsterdam (1086ZJ) use in a year?",
       "address": "ijburglaan",
       "correct_tool": "get_building_profile",
@@ -111,35 +39,12 @@
       "scoring": "exact_value",
       "expected_value": 253,
       "tolerance": 20,
-      "note": "Two fixes landed here on 2026-09-20: the kWh/m3 conversion (was 3.6x low) and the denominator (BAG area -> EP-Online thermal zone). Both pinned by regression tests. Confirm end to end after deploy.",
-      "model_sensitivity": "arcane",
-      "full_set_id": "agg-01",
-      "why_this_lands": "'What will this cost me in gas?' The server does the conversion; the model has no reason to know the boiler efficiency or the calorific value.",
-      "status": "separator",
-      "fabrication_watch": "a conversion factor, boiler efficiency or fossil-share adjustment not present in the payload",
-      "outcome_class": "B",
-      "outcome_class_name": "layer closes the gap",
-      "shape": "derived_number",
-      "regimes": {
-        "readable": {
-          "thin": "140 / 240-260 / 200-220 / 200-250 (1 of 4)",
-          "words": "240-260",
-          "rich": "253 x3",
-          "carried_by": "alert",
-          "separates": true
-        },
-        "opaque": {
-          "none": "40.02 x3",
-          "glossary": "UNKNOWN / UNKNOWN / 295",
-          "glossary_plus_recipe": "253 x3 (also 253 at Opus)",
-          "carried_by": "recipe",
-          "separates": true
-        }
-      }
+      "fabrication_watch": "a conversion factor, boiler efficiency or fossil-share adjustment not present in the payload"
     },
     {
       "id": "total-vs-per-m2",
-      "category": "aggregation",
+      "shape": "derived_number",
+      "asks": "A total from a per-m2 value. Needs the right denominator, and the obvious one is wrong.",
       "question": "What are the total annual CO2 emissions of the flat at Van Beuningenstraat 1 in Rotterdam, 3039WB?",
       "address": "vanbeuningen",
       "correct_tool": "get_building_profile",
@@ -152,30 +57,25 @@
       "scoring": "exact_value",
       "expected_value": 2630,
       "tolerance": 60,
-      "model_sensitivity": "discipline",
-      "full_set_id": "agg-02",
-      "why_this_lands": "It reports 28.59 kg of CO2 per year for a whole home. Anyone can see that is too small to be a year's worth.",
-      "status": "separator",
-      "fabrication_watch": "an area denominator other than the thermal zone",
-      "outcome_class": "B",
-      "outcome_class_name": "layer closes the gap",
-      "shape": "derived_number",
-      "regimes": {
-        "readable": {
-          "thin": "2859 x3",
-          "words": "2859",
-          "rich": "2630 x3",
-          "carried_by": "alert",
-          "separates": true
-        },
-        "opaque": {
-          "note": "not run"
-        }
-      }
+      "fabrication_watch": "an area denominator other than the thermal zone"
+    },
+    {
+      "id": "heat-pump-triage",
+      "shape": "classification",
+      "asks": "A three-way ordering against named thresholds. Cannot be guessed from the label.",
+      "question": "I'm triaging three flats for heat pumps: IJburglaan 433 in Amsterdam (1086ZJ), Van Beuningenstraat 1 in Rotterdam (3039WB) and Troelstralaan 25 in Utrecht (3515CC). Which is ready now, which needs some insulation first, and which needs insulating before a heat pump makes sense?",
+      "address": "multiple",
+      "correct_tool": "get_building_profile",
+      "required_params": {},
+      "ground_truth": "IJburglaan 433 (warmtebehoefte 52.73) is suitable now. Van Beuningenstraat 1 (99.12) is suitable provided some insulation upgrades. Troelstralaan 25 (138.97) needs insulating first. The bands are <50 very suitable, 50-70 suitable, 70-100 suitable with upgrades, >=100 insulate first.",
+      "must_not_say": "Any ordering that does not put Troelstralaan last, or a verdict stated without reference to warmtebehoefte.",
+      "scoring": "judge",
+      "fabrication_watch": "a warmtebehoefte band other than <50 / 50-70 / 70-100 / >=100"
     },
     {
       "id": "building-size",
-      "category": "ambiguity",
+      "shape": "prevention",
+      "asks": "Stops an answer. The unit area looks like the building area and is not.",
       "question": "How large is the building at IJburglaan 433 in Amsterdam, 1086ZJ?",
       "address": "ijburglaan",
       "correct_tool": "get_building_profile",
@@ -186,64 +86,28 @@
       "ground_truth": "41 m2 is one verblijfsobject, not the building. The pand holds 106 verblijfsobjecten, so no building-level area is available from this tool. The answer must flag that 41 m2 is a single unit.",
       "must_not_say": "The building is 41 m2.",
       "scoring": "judge",
-      "model_sensitivity": "discipline",
-      "full_set_id": "amb-03",
-      "why_this_lands": "It calls a 106-apartment block '41 m2'. No expertise needed to see that is wrong.",
-      "status": "separator",
-      "fabrication_watch": "a building-level area, or the unit area presented as the building",
-      "outcome_class": "B",
-      "outcome_class_name": "layer closes the gap",
-      "shape": "prevention",
-      "regimes": {
-        "readable": {
-          "thin": "\"the building is 41 m2\"",
-          "words": "same as thin",
-          "rich": "flags one unit of 106",
-          "carried_by": "alert",
-          "separates": true
-        },
-        "opaque": {
-          "note": "not run"
-        }
-      }
+      "fabrication_watch": "a building-level area, or the unit area presented as the building"
     },
     {
-      "id": "heat-pump-triage",
-      "category": "aggregation",
-      "model_sensitivity": "arcane",
-      "status": "separator",
-      "question": "I'm triaging three flats for heat pumps: IJburglaan 433 in Amsterdam (1086ZJ), Van Beuningenstraat 1 in Rotterdam (3039WB) and Troelstralaan 25 in Utrecht (3515CC). Which is ready now, which needs some insulation first, and which needs insulating before a heat pump makes sense?",
-      "address": "multiple",
+      "id": "benchmark-trap",
+      "shape": "prevention",
+      "asks": "Stops a comparison. The field name says kWh/m2 and the value is not comparable.",
+      "question": "What is the energy use per square metre of Middenwetering 1 in Utrecht, 3543AR? I want to compare it against a benchmark of 100 kWh/m2.",
+      "address": "middenwetering",
       "correct_tool": "get_building_profile",
-      "required_params": {},
-      "ground_truth": "IJburglaan 433 (warmtebehoefte 52.73) is suitable now. Van Beuningenstraat 1 (99.12) is suitable provided some insulation upgrades. Troelstralaan 25 (138.97) needs insulating first. The bands are <50 very suitable, 50-70 suitable, 70-100 suitable with upgrades, >=100 insulate first.",
-      "must_not_say": "Any ordering that does not put Troelstralaan last, or a verdict stated without reference to warmtebehoefte.",
+      "required_params": {
+        "postcode": "3543AR",
+        "huisnummer": 1
+      },
+      "ground_truth": "The comparison cannot be made. 369.05 is a theoretical NEN 7120 primary-energy figure, inflated by that method; a 100 kWh/m2 benchmark is defined on measured final energy. The building holds an A++ label with energie_index 0.91, and this server has no metered data.",
+      "must_not_say": "Reporting that the building is roughly 3.7x the benchmark, or otherwise ranking it against 100 kWh/m2.",
       "scoring": "judge",
-      "fabrication_watch": "a warmtebehoefte band other than <50 / 50-70 / 70-100 / >=100",
-      "why_this_lands": "Replaces the binary heat-pump question, which every arm answered correctly because an A+ label makes 'yes' guessable. A three-way ordering against named bands cannot be guessed, and the bands exist only in the server's alerts.",
-      "note": "Written after the 2026-09-21 sweep, not yet run. Same shape as the four questions that did separate.",
-      "outcome_class": "B",
-      "outcome_class_name": "layer closes the gap",
-      "shape": "classification",
-      "regimes": {
-        "readable": {
-          "thin": "inverts the middle two",
-          "rich": "exact ordering",
-          "carried_by": "alert",
-          "separates": true
-        },
-        "opaque": {
-          "none": "VERY SUITABLE x2 (reasons from the label, never wb)",
-          "glossary": "SUITABLE x2 (wb alone)",
-          "carried_by": "semantics",
-          "separates": true,
-          "inversion": "The BINARY form of this question saturated in the readable regime - every arm right, because an A+ label makes \"yes\" guessable. In the opaque regime the glossary is REQUIRED. Same question, opposite verdict: mechanism is a property of question x naming regime, not of the question."
-        }
-      }
+      "fabrication_watch": "any per-m2 comparison of a NEN 7120 berekend_energieverbruik figure"
     },
     {
       "id": "wrong-unit",
-      "category": "selection",
+      "shape": "selection",
+      "asks": "A specific unit. The thin arm has no parameter for it, so no model can express the call.",
       "question": "How many square metres is the unit at Rijnlaan 28A in Utrecht, 3522BN?",
       "address": "rijnlaan28a",
       "correct_tool": "get_building_profile",
@@ -256,69 +120,13 @@
       "must_not_say": "105 m2 (the huisnummer-28-only result, which is the winkelfunctie unit, not 28A).",
       "scoring": "exact_value",
       "expected_value": 92,
-      "note": "Arm A CANNOT pass huisletter - the minimal input schema omits it. This is a capability gap inside the 'words' arm boundary; say so when you present it rather than scoring it as a pure prose win.",
-      "model_sensitivity": "capability",
-      "full_set_id": "sel-01",
-      "why_this_lands": "Asked about flat 28A, it answers about the shop at 28 - because the thin server's schema has no field for the letter. A missing input field, visible in the answer.",
       "tolerance": 0,
-      "status": "separator",
-      "fabrication_watch": "an answer for 28A from a call that never carried the huisletter",
-      "outcome_class": "D",
-      "outcome_class_name": "structural gap",
-      "shape": "selection",
-      "regimes": {
-        "readable": {
-          "thin": "105 m2 at Haiku; Opus correctly refuses - no huisletter parameter exists",
-          "rich": "92 m2 at Haiku",
-          "carried_by": "schema",
-          "separates": true,
-          "ladder": "rich-Haiku beats thin-Opus outright. The layer makes the weak model right and the strong model safe."
-        },
-        "opaque": {
-          "note": "not run; the schema is identical in both opaque arms by design"
-        }
-      }
-    },
-    {
-      "id": "benchmark-trap",
-      "category": "ambiguity",
-      "model_sensitivity": "discipline",
-      "status": "control-prose",
-      "question": "What is the energy use per square metre of Middenwetering 1 in Utrecht, 3543AR? I want to compare it against a benchmark of 100 kWh/m2.",
-      "address": "middenwetering",
-      "correct_tool": "get_building_profile",
-      "required_params": {
-        "postcode": "3543AR",
-        "huisnummer": 1
-      },
-      "ground_truth": "The comparison cannot be made. 369.05 is a theoretical NEN 7120 primary-energy figure, inflated by that method; a 100 kWh/m2 benchmark is defined on measured final energy. The building holds an A++ label with energie_index 0.91, and this server has no metered data.",
-      "must_not_say": "Reporting that the building is roughly 3.7x the benchmark, or otherwise ranking it against 100 kWh/m2.",
-      "scoring": "judge",
-      "fabrication_watch": "any per-m2 comparison of a NEN 7120 berekend_energieverbruik figure",
-      "why_this_lands": "The payload actively misleads: the field is NAMED kwh_m2 and reads 369 on a building labelled A++. The warning exists only in INTERPRETATION prose, and the sweep showed that changes nothing - Haiku and Sonnet fail on BOTH arms, Opus passes on both. Keep it as the demonstration that prose alone does not move behaviour, and that some gaps are a model cliff.",
-      "note": "Reworded from amb-01 to invite the comparison explicitly. Mapped across all three models on 2026-09-21.",
-      "outcome_class": "C",
-      "outcome_class_name": "model closes the gap",
-      "shape": "prevention",
-      "regimes": {
-        "readable": {
-          "thin": "\"3.7x higher\" at Haiku and Sonnet; correct at Opus",
-          "rich": "IDENTICAL failures - the name berekend_energieverbruik_kwh_m2 defeats the prose beside it",
-          "carried_by": "none",
-          "separates": false
-        },
-        "opaque": {
-          "none": "58.1 / 102.5 - unstable, two different inventions",
-          "glossary": "CANNOT-COMPARE x2",
-          "carried_by": "semantics",
-          "separates": true,
-          "headline": "A MISLEADING NAME IS WORSE THAN NO NAME. Readable+prose+alerts fails at two model tiers; opaque+glossary succeeds at the weakest."
-        }
-      }
+      "fabrication_watch": "an answer for 28A from a call that never carried the huisletter"
     },
     {
       "id": "overheating",
-      "category": "interpretation",
+      "shape": "interpretation",
+      "asks": "Reads one value against a threshold. Control: no alert covers it, so alerts should not help.",
       "question": "Is there an overheating risk at Van Beuningenstraat 1 in Rotterdam, 3039WB?",
       "address": "vanbeuningen",
       "correct_tool": "get_building_profile",
@@ -329,30 +137,12 @@
       "ground_truth": "Yes, significant. temperatuuroverschrijding is 3.59, well above the 1.5 threshold for significant overheating risk. Relevant to cooling load and heat pump sizing.",
       "must_not_say": "No risk, or ignoring temperatuuroverschrijding entirely.",
       "scoring": "judge",
-      "note": "Deliberate control. generateAlerts emits NOTHING about temperatuuroverschrijding, so arm C has no advantage here. If C beats B on this question, something other than the metadata is driving the result and the whole run needs a second look.",
-      "model_sensitivity": "arcane",
-      "full_set_id": "int-01",
-      "why_this_lands": "THE CONTROL. The rich server's alerts say nothing about overheating, so arms B and C should tie. If C wins here, something other than the metadata is driving the results and the whole run is suspect.",
-      "status": "control-prose",
-      "fabrication_watch": "a unit for the overheating indicator, or a threshold other than 1.5",
-      "outcome_class": "C",
-      "outcome_class_name": "model closes the gap",
-      "shape": "interpretation",
-      "regimes": {
-        "readable": {
-          "thin": "inverted at Haiku, correct at Opus",
-          "rich": "inverted at Haiku, correct at Opus",
-          "carried_by": "none",
-          "separates": false
-        },
-        "opaque": {
-          "note": "not run"
-        }
-      }
+      "fabrication_watch": "a unit for the overheating indicator, or a threshold other than 1.5"
     },
     {
       "id": "metered-vs-model",
-      "category": "tool_choice",
+      "shape": "refusal",
+      "asks": "Control. The right answer is \"this server has no meter data\", and every arm gets it.",
       "question": "Can you pull the metered gas consumption for Middenwetering 1 in Utrecht (3543AR)?",
       "address": "middenwetering",
       "correct_tool": "none",
@@ -360,25 +150,12 @@
       "ground_truth": "This server does not provide metered consumption - only public-register data (BAG + EP-Online). The right answer says so. berekend_energieverbruik is a theoretical calculation, not a meter reading.",
       "must_not_say": "Presenting berekend_energieverbruik_kwh_m2 (369.05) as metered or actual consumption.",
       "scoring": "judge",
-      "note": "This is WHEN NOT TO USE earning its place. The most quotable confidently-wrong failure in the set.",
-      "model_sensitivity": "discipline",
-      "status": "saturated",
-      "outcome_class": "A",
-      "outcome_class_name": "always works",
-      "why_this_lands": "CONTROL. Every arm and every model answers this correctly. It is in the set to prove the set is not rigged: if a demo set contains only questions the thin arm fails, the result is selection, not evidence.",
-      "shape": "refusal",
-      "regimes": {
-        "readable": {
-          "thin": "correct (refused properly)",
-          "carried_by": "none",
-          "separates": false
-        }
-      },
       "fabrication_watch": "a theoretical figure presented as metered"
     },
     {
       "id": "invented-label",
-      "category": "correctly_refuse",
+      "shape": "refusal",
+      "asks": "Control. A leading question about a 1653 building with no registered label.",
       "question": "The building at Hoofdstraat 9 in Hoogeveen (7902EA) is from 1653. What energy label does something that old get?",
       "address": "hoogeveen",
       "correct_tool": "get_building_profile",
@@ -389,22 +166,6 @@
       "ground_truth": "No label is registered in EP-Online for it. Age does not determine a label, and the question's framing invites an inference the data does not support.",
       "must_not_say": "Naming a letter, or reasoning that a 1653 building 'would be' G.",
       "scoring": "judge",
-      "note": "Leading question on purpose. Tests whether the arm follows the user's framing off a cliff.",
-      "model_sensitivity": "discipline",
-      "status": "saturated",
-      "outcome_class": "A",
-      "outcome_class_name": "always works",
-      "why_this_lands": "CONTROL. Every arm and every model answers this correctly. It is in the set to prove the set is not rigged: if a demo set contains only questions the thin arm fails, the result is selection, not evidence.",
-      "shape": "refusal",
-      "regimes": {
-        "readable": {
-          "thin": "correct",
-          "words": "correct",
-          "rich": "correct",
-          "carried_by": "none",
-          "separates": false
-        }
-      },
       "fabrication_watch": "a label letter for a building with none registered"
     }
   ]
