@@ -150,6 +150,28 @@ is always irrelevant to the record in hand.
 the branch matching the record's `berekeningstype`, plus field-level notes for fields
 that are actually non-null in that response.
 
+> **BUILT AND DEPLOYED 2026-09-21**, endpoint `mcpInlineConditional`, arm
+> `eval-inline-conditional`. Verified on the wire and stamping its own log rows
+> (`variant: "inline-conditional"`, `paramsPresent`, `rowCount` all populated).
+>
+> Measured pruning on the two eval addresses, against the 4,338-char full block:
+>
+> | record | interpretation shipped | cut |
+> |---|---|---|
+> | Van Beuningenstraat 1 (NTA 8800, woningbouw) | 2,730 chars | 37% |
+> | Middenwetering 1 (NEN 7120, utiliteitsbouw) | ~1,000 chars | ~77% |
+>
+> The pruning is MECHANICAL and deliberately not hand-tuned — see the header of
+> `src/tools/get-building-profile-inline-conditional.ts`. Every line it emits is
+> sliced from `interpretationBlock`, never retyped, so it cannot drift from `words`
+> and `inline`; `get-building-profile-inline-conditional.test.ts` asserts that.
+>
+> One thing already visible without running anything: on the `total-vs-per-m2`
+> record the sentence that question turns on — `gebruiksoppervlakte_thermische_zone_m2`
+> vs `oppervlakte_m2` — SURVIVES the pruning, because its field is populated. So the
+> prediction's "wins on single-record questions" half is at least not blocked by the
+> pruner deleting the load-bearing sentence. `benchmark-trap` is the one to watch.
+
 ### Prediction
 
 > Tokens down substantially. **Accuracy flat or UP** — not merely "the same, but

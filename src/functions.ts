@@ -67,6 +67,17 @@ export const mcpInlineRecipe = onRequest(
 );
 
 /**
+ * Q2 arm — CONDITIONAL interpretation. As `mcpInline`, but the response carries
+ * only the branch matching the record's berekeningstype plus the notes for fields
+ * that are actually populated. A description cannot do this: it is written before
+ * the data is known. See evals/open-questions.md, Q2.
+ */
+export const mcpInlineConditional = onRequest(
+  functionOptions,
+  createHttpApp({ hosted: true, variant: 'inline-conditional' })
+);
+
+/**
  * Words tier — arm B of the ablation. Identical prose and schemas to `mcp`, but
  * no computed alerts, so A→B measures what the words buy and B→C measures what
  * the capability adds.

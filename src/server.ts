@@ -17,6 +17,7 @@ import {
 import { registerGetBuildingProfileMinimalTool } from './tools/get-building-profile-minimal.js';
 import { registerGetBuildingProfileWordsTool } from './tools/get-building-profile-words.js';
 import { registerGetBuildingProfileInlineTool } from './tools/get-building-profile-inline.js';
+import { registerGetBuildingProfileInlineConditionalTool } from './tools/get-building-profile-inline-conditional.js';
 import { registerGetBuildingProfileSchemaTool } from './tools/get-building-profile-schema.js';
 import { registerGetBuildingProfileOpaqueTool } from './tools/get-building-profile-opaque.js';
 import { registerRenderChartTool } from './tools/render-chart.js';
@@ -60,6 +61,7 @@ export type ServerVariant =
   | 'words'
   | 'inline'
   | 'inline-recipe'
+  | 'inline-conditional'
   | 'words-recipe'
   | 'schema'
   | 'minimal'
@@ -203,6 +205,24 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerGetBuildingProfileInlineTool(server, bagClient, epOnlineClient, {
       withRecipe: variant === 'inline-recipe',
     });
+    registerRenderChartTool(server, { minimal: true });
+    registerRenderTableTool(server, { minimal: true });
+    registerRenderMapTool(server, { minimal: true });
+    registerGetWeatherContextTool(server, { minimal: true });
+    registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
+  if (variant === 'inline-conditional') {
+    // Q2. As `inline`, but the response carries only the INTERPRETATION lines that
+    // apply to the record: the matching berekeningstype branch, plus the notes for
+    // fields that are actually populated. Same description, same schemas, same
+    // render tools as `inline` — the only variable is how much of the prose ships.
+    const server = new McpServer(
+      { name: 'metadata-demo-inline-conditional', version: VERSION },
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+    );
+    registerGetBuildingProfileInlineConditionalTool(server, bagClient, epOnlineClient);
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
