@@ -132,6 +132,34 @@ field — the ladder's attributability depends on both.
 
 ## Q2 — Conditional interpretation: send only the guidance the data calls for
 
+> **ANSWERED 2026-09-21** — `results/2026-09-21-q2-conditional-interpretation.json`,
+> 180 live runs, three models. The predictions below are left exactly as registered.
+>
+> **Cost half: FAILED as stated.** Tokens fell in all nine question x model cells, but
+> by 1.4–2.4% (mean −707, −1.84%). Cutting 37–50% of the prose saves almost exactly
+> the tokens it removes — the block is only ~2% of a subagent run's bill, so no
+> pruning of it can be "substantial".
+>
+> **Accuracy half: HELD only in the weak form it was written to exclude.** Dead flat,
+> 39 of 90 correct for each arm. The result is "the same, but slightly cheaper".
+>
+> **"Wins single-record, loses cross-record": NEITHER half confirmed, and the second
+> could not be tested.** `benchmark-trap` scored **0 of 10 in all six cells**. The
+> sentence this section feared the pruner would delete — that ep2 is calculated
+> primary energy while Paris Proof is measured final energy — **is not in the 4,338-char
+> block at all** (no "metered", no "final energy", no "primary fossil" anywhere in it).
+> Meanwhile the line that *causes* the error, `ep1 ... Paris Proof 2040 targets —
+> kantoor: 70 kWh/m²`, survives pruning because ep1 is populated, and all 60 runs of
+> both arms ranked ep1 81.68 against 70. The prediction below was right that
+> `benchmark-trap` was the one to watch, and wrong about why.
+>
+> The note below — that the `gebruiksoppervlakte` sentence survives on the
+> `total-vs-per-m2` record — was confirmed: that question scored 29/30 vs 28/30.
+>
+> **Still open:** the cross-record half, and the ~77% pruning case. All three
+> questions run used NTA 8800 records, so only the 37–50% band was exercised.
+
+
 ### Why it matters
 
 A tool description is written before the data is known. **A response is the only
