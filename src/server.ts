@@ -18,6 +18,7 @@ import { registerGetBuildingProfileMinimalTool } from './tools/get-building-prof
 import { registerGetBuildingProfileWordsTool } from './tools/get-building-profile-words.js';
 import { registerGetBuildingProfileInlineTool } from './tools/get-building-profile-inline.js';
 import { registerGetBuildingProfileInlineConditionalTool } from './tools/get-building-profile-inline-conditional.js';
+import { registerGetBuildingProfileInlineAblationTool } from './tools/get-building-profile-inline-ablation.js';
 import { registerGetBuildingProfileSchemaTool } from './tools/get-building-profile-schema.js';
 import { registerGetBuildingProfileOpaqueTool } from './tools/get-building-profile-opaque.js';
 import { registerRenderChartTool } from './tools/render-chart.js';
@@ -62,6 +63,8 @@ export type ServerVariant =
   | 'inline'
   | 'inline-recipe'
   | 'inline-conditional'
+  | 'inline-fact'
+  | 'inline-instruction'
   | 'words-recipe'
   | 'schema'
   | 'minimal'
@@ -223,6 +226,26 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
       { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
     );
     registerGetBuildingProfileInlineConditionalTool(server, bagClient, epOnlineClient);
+    registerRenderChartTool(server, { minimal: true });
+    registerRenderTableTool(server, { minimal: true });
+    registerRenderMapTool(server, { minimal: true });
+    registerGetWeatherContextTool(server, { minimal: true });
+    registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
+  if (variant === 'inline-fact' || variant === 'inline-instruction') {
+    // Q4. As `inline` in every respect except ONE LINE of the response prose: the
+    // CALCULATED vs MEASURED line is cut down to its FACT half or its INSTRUCTION
+    // half. `inline` itself is the third arm (both halves) and is already deployed,
+    // so the comparison is three-way with only that one line varying.
+    const server = new McpServer(
+      { name: `metadata-demo-${variant}`, version: VERSION },
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+    );
+    registerGetBuildingProfileInlineAblationTool(server, bagClient, epOnlineClient, {
+      mode: variant === 'inline-fact' ? 'fact' : 'instruction',
+    });
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
