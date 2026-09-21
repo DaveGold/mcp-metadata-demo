@@ -90,6 +90,56 @@ would have padded the totals without testing anything:
    Haiku, but thin-Sonnet reached 250–300 m³ by a different route. Treat every
    separation as model-specific until shown otherwise.
 
+### Interpretation guidance: the test the three arms could not run
+
+The thin arm was never metadata-free. It strips descriptions, schemas and alerts,
+but still returns `gebruiksoppervlakte_thermische_zone_m2`, `berekeningstype`,
+`aantal_verblijfsobjecten` and `matchStatus`. **Those names are metadata**, and
+Haiku reads straight through them — put three prose-shaped questions to the thin
+arm and it answers all three, inferring from `berekeningstype: "NEN 7120"` that
+the method does not populate warmtebehoefte, and picking the thermal-zone area as
+the right denominator unprompted.
+
+So A→B could never measure what guidance buys: the naming had already done the
+job. A real legacy register emits `EP1`, `VBO_OPP`, `BER_TYPE` and a numeric
+status. Two further arms restore that —
+[`get-building-profile-opaque.ts`](../src/tools/get-building-profile-opaque.ts):
+
+| arm | field names | description |
+|---|---|---|
+| **A′ · opaque** | `f_ga`, `calc_t`, `wb`, `n_vbo`, `st: 2` | one sentence |
+| **B′ · opaque-words** | identical | the guidance, keyed to those codes |
+
+Same input schema, no output schema, no alerts, identical payloads. **Only the
+description differs**, and a test asserts it.
+
+Asked how much gas the IJburglaan flat uses (ground truth ~253 m³):
+
+| | answer | |
+|---|---|---|
+| A′ · **Opus** | ⚠️ *"you'd need the field's definition and unit"* | information not recoverable |
+| A′ · **Haiku** | ❌ **164 m³** — read `f_ga` as *"gas"* | fabricates |
+| B′ · **Haiku** | ✅ **252 m³** | correct, with the space-heating caveat |
+
+**B′-Haiku beats A′-Opus** — not because Haiku is the better model, but because
+the guidance carries information absent from the payload at any level of
+capability. Opus does not fail by being wrong; it fails by correctly reporting
+that the question cannot be answered. Haiku fails by inventing.
+
+So there are two claims here, and they are different:
+
+1. **Against a realistically opaque API, interpretation guidance is decisive.**
+   Without it the data is not usable and no model fixes that.
+2. **Against an API whose fields are already well named, guidance adds little**,
+   and the remaining value sits in computed alerts and schema fields.
+
+Both are true. The second is why the first is easy to under-measure in a demo
+built on good naming — and why this repo needed a fourth and fifth arm to see it.
+
+n=1 per cell, and a payload-in-prompt proxy rather than a live tool call. The
+deployed `mcpOpaque` / `mcpOpaqueWords` endpoints run the same comparison end to
+end.
+
 ### The layer collapses variance, not just error (n=3)
 
 The sweep above is n=1. The two numeric separators were re-run three times each

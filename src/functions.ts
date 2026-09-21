@@ -38,3 +38,13 @@ export const mcpMinimal = onRequest(functionOptions, createHttpApp({ hosted: tru
  * the capability adds.
  */
 export const mcpWords = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'words' }));
+
+/**
+ * Opaque tiers — A' and B'. Same data, field names stripped to the terse codes a
+ * legacy register would emit. `mcpOpaque` carries a one-sentence description;
+ * `mcpOpaqueWords` adds the interpretation guidance keyed to those codes, and
+ * differs in nothing else. The pair isolates what the guidance buys once the
+ * self-describing field names are no longer doing the work for it.
+ */
+export const mcpOpaque = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'opaque' }));
+export const mcpOpaqueWords = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'opaque-words' }));
