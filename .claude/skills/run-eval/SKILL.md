@@ -43,7 +43,6 @@ between distant ones is not:
 |---|---|---|
 | `thin` (minimal) | readable field names only | the floor |
 | `schema` | typed + `.describe()`d input/output schemas | what the schema buys |
-| `inline` | the same prose, in the RESPONSE instead of the description | whether the CHANNEL matters |
 | `words` | the prose description | what the words buy |
 | `rich` | server-computed `alerts`, incl. the derived gas figure | what computing it for them buys |
 
@@ -60,11 +59,24 @@ on 2026-09-21 over 20 runs. Its description is byte-identical to `thin`'s, so if
 the two arms ever return different prose, the deploy is stale — check that rather
 than assuming the schema layer did it.
 
-NOTE: `inline` is **built but not deployed** as of 2026-09-21. It is not a rung of
-the same ladder — it is a fork off `schema`, carrying the same prose as `words` by
-a different channel, so compare it to `schema` and to `words`, never to `rich`
-directly. Its description is byte-identical to `schema`'s by test. See
-`evals/open-questions.md` Q1 for the registered predictions before running it.
+**`inline` is a FORK, not a rung.** It hangs off `schema` beside `words`, carrying
+the same prose by a different channel:
+
+```
+thin → schema → words → rich
+            \
+             → inline      (same bytes as `words`, in the RESPONSE)
+```
+
+So the comparisons that mean anything are `schema → inline` (the channel, against
+the same base `schema → words` is measured from) and `inline` vs `words` (the two
+channels head to head). `inline → rich` is NOT an adjacent-rung comparison and
+must not be reported as one: it crosses both the channel and the computation.
+
+`inline` is **built but not deployed** as of 2026-09-21. Its description is
+byte-identical to `schema`'s, enforced by `get-building-profile-inline.test.ts`.
+Read `evals/open-questions.md` Q1 for the predictions registered BEFORE it runs —
+they are there so the result can contradict them.
 
 Before scoring, read `results/2026-09-21-shape-replication.json` for `_the_rule`
 (semantics handle interpretation, classification, prevention and refusal; recipes
