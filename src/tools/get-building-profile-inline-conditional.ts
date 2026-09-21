@@ -79,6 +79,19 @@ const GATES: Array<[string, (p: Profile) => boolean]> = [
   ["- matchStatus 'not_found'", (p) => str(p, 'matchStatus') === 'not_found'],
   ['- energielabel null:', (p) => !has(p, 'energielabel')],
   ['- ep1_energiebehoefte_kwh_m2', (p) => has(p, 'ep1_energiebehoefte_kwh_m2')],
+  // The calculated-vs-measured note concerns ep1, ep2 and berekend_energieverbruik,
+  // so it is gated on its own fields like every other field note: kept when any of
+  // the three is populated, pruned when none is. On an NTA 8800 record all three are
+  // populated, so BOTH arms ship it; on a record with none of them it goes. This gate
+  // was NOT hand-tuned to keep the sentence on the benchmark-trap record — it follows
+  // the same mechanical rule as the rest of the table.
+  [
+    '- CALCULATED vs MEASURED',
+    (p) =>
+      has(p, 'ep1_energiebehoefte_kwh_m2') ||
+      has(p, 'ep2_fossiel_kwh_m2') ||
+      has(p, 'berekend_energieverbruik_kwh_m2'),
+  ],
   ['- energie_index (pre-NTA 8800)', (p) => has(p, 'energie_index')],
   ['- gebruiksoppervlakte_thermische_zone_m2', (p) => has(p, 'gebruiksoppervlakte_thermische_zone_m2')],
   [
