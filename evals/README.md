@@ -90,6 +90,34 @@ would have padded the totals without testing anything:
    Haiku, but thin-Sonnet reached 250–300 m³ by a different route. Treat every
    separation as model-specific until shown otherwise.
 
+### The layer collapses variance, not just error (n=3)
+
+The sweep above is n=1. The two numeric separators were re-run three times each
+to check the headline held — and it found something n=1 could not see
+([`results/2026-09-21-n3-separators.json`](results/2026-09-21-n3-separators.json)):
+
+| gas-estimate · Haiku | answers on identical input | correct | spread |
+|---|---|---|---|
+| thin | 140 · 240–260 · 200–220 · 200–250 | 1 of 4 | **44%** |
+| rich | 253 · 253 · 253 | 3 of 3 | **0%** |
+
+Accuracy is only half of it. **The layer makes the answer reproducible.** Every
+thin run invented its own conversion — a 69.2% fossil share, "~10 kWh per m³ at
+85–90%", a degree-day cross-check. For anyone building on the output, an answer
+that changes every call is worse than one that is consistently wrong, because a
+spot check cannot catch it.
+
+And the thin arm fails in **two different shapes**:
+
+- **No path in the payload** (`gas-estimate`) → it improvises, and scatters.
+- **An obvious but wrong path** (`total-vs-per-m2`: multiply by the visible BAG
+  area) → it is perfectly stable and perfectly wrong, 2,859 three times out of
+  three. This one is the more dangerous, because it looks reliable.
+
+Note also that n=1 called `gas-estimate` a clean separator on a single 140 m³
+run. At n=4 the thin arm is right once. The separation is real, but weaker and
+noisier than one run implied — which is the whole argument for repeats.
+
 ### Call count is dead; count fabrication instead
 
 `get_building_profile` is one-shot, so nearly every run was a single call. The

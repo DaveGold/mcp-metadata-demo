@@ -180,10 +180,11 @@
       "model_sensitivity": "arcane",
       "status": "separator",
       "mechanism": "alert",
-      "sweep_2026_09_21": "thin 140 / words 240-260 / rich 253 (Haiku). Collapses at Sonnet: thin reaches 250-300 another way.",
+      "sweep_2026_09_21": "Separator, but noisier than n=1 suggested: the thin arm improvises a different conversion each run.",
       "fabrication_watch": "a conversion factor or an efficiency/fossil-share adjustment that the payload does not contain",
       "outcome_class": "B",
-      "outcome_class_name": "layer closes the gap"
+      "outcome_class_name": "layer closes the gap",
+      "n3_2026_09_21": "thin 140 / 240-260 / 200-220 / 200-250 (1 of 4, 44% spread). rich 253 / 253 / 253 (3 of 3, 0% spread)."
     },
     {
       "id": "agg-02",
@@ -204,10 +205,11 @@
       "model_sensitivity": "discipline",
       "status": "separator",
       "mechanism": "alert",
-      "sweep_2026_09_21": "thin 2859 / words 2859 / rich 2630 (Haiku)",
+      "sweep_2026_09_21": "Separator. The thin arm is CONSISTENTLY wrong here - the payload offers an obvious-but-incorrect path (multiply by the visible BAG area).",
       "fabrication_watch": "an area denominator other than gebruiksoppervlakte_thermische_zone_m2",
       "outcome_class": "B",
-      "outcome_class_name": "layer closes the gap"
+      "outcome_class_name": "layer closes the gap",
+      "n3_2026_09_21": "thin 2859 x3 (0 of 3, stable and wrong). rich 2630 x3 (3 of 3)."
     },
     {
       "id": "agg-03",
@@ -480,7 +482,8 @@
     "correct": "matches ground_truth.",
     "confidently_wrong": "asserts must_not_say. The headline number.",
     "fabricated": "invented a constant, unit or threshold not present in the payload - see fabrication_watch. This REPLACES max_calls, which carried no signal: get_building_profile is one-shot, so almost every run is a single call.",
-    "right_tool_first": "first tool called equals correct_tool."
+    "right_tool_first": "first tool called equals correct_tool.",
+    "reproducible": "how many of n runs land inside the accept range, plus the SPREAD of the answers. Run alongside `correct`, never instead of it: on gas-estimate rich is 3/3 at 0% spread and thin is 1/4 at 44% spread, and neither number alone says that."
   },
   "_sweep": "evals/results/2026-09-21-haiku-sweep.json",
   "_outcome_classes": {
@@ -489,5 +492,9 @@
     "C_model_closes_the_gap": "Both arms fail at the small model, both pass at Opus. Every one found so far has its rule ONLY in INTERPRETATION prose. Shows the limit of the layer.",
     "D_structural_gap": "The thin arm cannot express the call at all, at any model. The strongest result: rich-Haiku beats thin-Opus.",
     "E_layer_cannot_fix_it": "rich fails even at Opus. NOT FOUND in this set - state that rather than implying coverage."
-  }
+  },
+  "_results": [
+    "results/2026-09-21-haiku-sweep.json",
+    "results/2026-09-21-n3-separators.json"
+  ]
 }
