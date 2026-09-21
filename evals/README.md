@@ -203,6 +203,40 @@ treated an unrecognised code as unknown. It reached for the nearest plausible
 meaning and committed. **The failure mode of a badly named field is not
 confusion, it is confident misreading.**
 
+### The rule, replicated across three question shapes
+
+The decomposition above rested on one derived-number question. Running the same
+ablation on two other shapes turns it into a rule
+([`results/2026-09-21-shape-replication.json`](results/2026-09-21-shape-replication.json)):
+
+| shape | A′ none | B″ glossary only | B′ + recipe |
+|---|---|---|---|
+| **derived number** — how much gas? | `40.02` ×3 | `UNKNOWN` ·`UNKNOWN` · `295` | **`253` ×3** ✅ |
+| **classification** — heat-pump verdict? | `VERY SUITABLE` ×2 | **`SUITABLE` ×2** ✅ | not needed |
+| **prevention** — benchmark against 100? | `58.1` · `102.5` | **`CANNOT-COMPARE` ×2** ✅ | not needed |
+
+> **Semantics handle interpretation, classification and prevention.
+> Recipes are needed only for derived numbers.**
+
+That is directly actionable when designing a tool. A threshold, a unit caveat or
+a field's meaning belongs in the **description**. An arithmetic conversion does
+not — it has to be documented as a recipe, or better, **computed and returned by
+the server**. It also explains the earlier alert result: the four questions that
+only the rich arm got right were all derived numbers.
+
+**The unguided failure mode varies by shape, and the variation matters:**
+
+- *Derived number* — **stable** fabrication: `40.02` three times, from misreading
+  a field name.
+- *Classification* — **stable** wrong answer: it reasoned from the A+ label
+  instead of `wb`. Plausible, confident, wrong.
+- *Prevention* — **unstable** fabrication: `58.1`, then `102.5`. With no
+  plausible field to anchor on, each run invents a different conversion.
+
+The stable wrong answers are the dangerous ones. `40.02` and `VERY SUITABLE` come
+back identically every time and survive a spot check; `58.1` versus `102.5` at
+least announces that something is wrong.
+
 ### What is and is not proven
 
 | claim | status |
