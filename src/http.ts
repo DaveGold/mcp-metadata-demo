@@ -97,7 +97,7 @@ if (isMain) {
   const HOST = process.env.HOST ?? '127.0.0.1';
   const rawVariant = process.env.MCP_VARIANT;
   const variant: ServerVariant = (
-    ['minimal', 'words', 'opaque', 'opaque-words'] as const
+    ['minimal', 'schema', 'inline', 'words', 'opaque', 'opaque-words'] as const
   ).includes(rawVariant as never)
     ? (rawVariant as ServerVariant)
     : 'rich';

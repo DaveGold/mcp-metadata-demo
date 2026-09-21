@@ -41,6 +41,15 @@ export const mcpMinimal = onRequest(functionOptions, createHttpApp({ hosted: tru
 export const mcpSchema = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'schema' }));
 
 /**
+ * Inline tier — the CHANNEL arm. Description byte-identical to `mcpSchema`'s
+ * one-liner; the INTERPRETATION prose is delivered in the tool RESPONSE instead.
+ * `mcpSchema` → `mcpWords` and `mcpSchema` → `mcpInline` ship the same bytes by
+ * two different routes, which is the only way to tell delivery from content.
+ * See evals/open-questions.md, Q1.
+ */
+export const mcpInline = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'inline' }));
+
+/**
  * Words tier — arm B of the ablation. Identical prose and schemas to `mcp`, but
  * no computed alerts, so A→B measures what the words buy and B→C measures what
  * the capability adds.

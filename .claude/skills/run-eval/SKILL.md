@@ -43,6 +43,7 @@ between distant ones is not:
 |---|---|---|
 | `thin` (minimal) | readable field names only | the floor |
 | `schema` | typed + `.describe()`d input/output schemas | what the schema buys |
+| `inline` | the same prose, in the RESPONSE instead of the description | whether the CHANNEL matters |
 | `words` | the prose description | what the words buy |
 | `rich` | server-computed `alerts`, incl. the derived gas figure | what computing it for them buys |
 
@@ -58,6 +59,12 @@ was added to break.
 on 2026-09-21 over 20 runs. Its description is byte-identical to `thin`'s, so if
 the two arms ever return different prose, the deploy is stale — check that rather
 than assuming the schema layer did it.
+
+NOTE: `inline` is **built but not deployed** as of 2026-09-21. It is not a rung of
+the same ladder — it is a fork off `schema`, carrying the same prose as `words` by
+a different channel, so compare it to `schema` and to `words`, never to `rich`
+directly. Its description is byte-identical to `schema`'s by test. See
+`evals/open-questions.md` Q1 for the registered predictions before running it.
 
 Before scoring, read `results/2026-09-21-shape-replication.json` for `_the_rule`
 (semantics handle interpretation, classification, prevention and refusal; recipes
@@ -104,8 +111,32 @@ The four metrics are defined in `_scoring` in questions.json:
   stronger models answer in ranges far more often, and on one run it was the
   difference between 0-of-10 and 1-of-10.
 
-CALLS/TOOLS/PARAMS are self-reported by the system under test. Usable for
-spotting thrashing, too weak to headline — say so when reporting them.
+## Instrumentation — not optional
+
+Every result file before 2026-09-21 carries the caveat *"CALLS/TOOLS/PARAMS are
+self-reported and were not audited against `get_tool_call_log`."* It stayed open
+for every one of them because it lived in prose. It does not any more.
+
+**Record per run, in the results file, alongside the answer:** `tool_uses`,
+`duration_ms`, `subagent_tokens`, and the character count of the `ANSWER` line.
+The harness returns the first three with every subagent result; copy them, do not
+reconstruct them from a transcript afterwards.
+
+**Audit the call counts.** After each batch, call `get_tool_call_log` on the arms
+in it and reconcile against what the subagents reported. That is a server-side
+count that does not depend on the system under test describing its own behaviour.
+Record the reconciliation — including "they matched" — and only then may a
+results file say anything about call counts.
+
+This exists because `open-questions.md` Q3 turns on it: `rich` costs FEWER tokens
+per run than `words` despite carrying strictly more, and the two candidate
+explanations (fewer round trips vs. shorter output) are told apart only by these
+numbers. Q3 needs no new arm and no deploy, so it rides along with whatever you
+are running anyway. There is no reason to skip it and no excuse for another file
+carrying the same caveat.
+
+CALLS/TOOLS/PARAMS as *self-reported by the subagent* remain too weak to headline
+on their own — say so — but they are now checkable, so check them.
 
 ## Reporting
 

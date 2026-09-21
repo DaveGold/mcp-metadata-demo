@@ -16,6 +16,7 @@ import {
 } from './tools/get-building-profile.js';
 import { registerGetBuildingProfileMinimalTool } from './tools/get-building-profile-minimal.js';
 import { registerGetBuildingProfileWordsTool } from './tools/get-building-profile-words.js';
+import { registerGetBuildingProfileInlineTool } from './tools/get-building-profile-inline.js';
 import { registerGetBuildingProfileSchemaTool } from './tools/get-building-profile-schema.js';
 import { registerGetBuildingProfileOpaqueTool } from './tools/get-building-profile-opaque.js';
 import { registerRenderChartTool } from './tools/render-chart.js';
@@ -54,7 +55,14 @@ const VERSION = packageJson.version;
  * `opaque` and `opaque-words` are the orthogonal FIELD-NAMING axis: same payload
  * with the names stripped to terse codes, without and with the glossary.
  */
-export type ServerVariant = 'rich' | 'words' | 'schema' | 'minimal' | 'opaque' | 'opaque-words';
+export type ServerVariant =
+  | 'rich'
+  | 'words'
+  | 'inline'
+  | 'schema'
+  | 'minimal'
+  | 'opaque'
+  | 'opaque-words';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -173,6 +181,24 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
       { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
     );
     registerGetBuildingProfileSchemaTool(server, bagClient, epOnlineClient);
+    registerRenderChartTool(server, { minimal: true });
+    registerRenderTableTool(server, { minimal: true });
+    registerRenderMapTool(server, { minimal: true });
+    registerGetWeatherContextTool(server, { minimal: true });
+    registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
+  if (variant === 'inline') {
+    // The CHANNEL arm. Same one-sentence description and schemas as `schema`;
+    // the INTERPRETATION prose rides in the RESPONSE instead of the description.
+    // Render tools stay minimal so the building-profile tool is the sole variable,
+    // exactly as in the `schema` branch it is compared against.
+    const server = new McpServer(
+      { name: 'metadata-demo-inline', version: VERSION },
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+    );
+    registerGetBuildingProfileInlineTool(server, bagClient, epOnlineClient);
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
