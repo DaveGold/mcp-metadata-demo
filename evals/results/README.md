@@ -17,6 +17,7 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-21-readable-ladder-gas.json`](2026-09-21-readable-ladder-gas.json) | The readable ladder on the one question with headroom, and the first measurement of the `schema` rung. 80 runs, two models. Server-computed beats everything at either tolerance; the ladder looked non-monotonic at tolerance 20 and that wobble does not survive the retightening to 8. |
 | [`2026-09-21-readable-ladder-co2.json`](2026-09-21-readable-ladder-co2.json) | Is the gas result a property of the SHAPE? 120 runs, three models incl. opus. rich replicates at 30/30; the prose rung reverses sign and the reason is legible; opus needs no metadata here. |
 | [`2026-09-21-readable-ladder-wrong-unit.json`](2026-09-21-readable-ladder-wrong-unit.json) | The question the `schema` rung exists for: `thin` has no `huisletter` parameter, so the call cannot be expressed. 72 runs, three models. thin 0/18, schema 18/18 — and the two ways thin fails are not the same. |
+| [`2026-09-21-q1-response-channel.json`](2026-09-21-q1-response-channel.json) | **Q1 from `open-questions.md`, and both registered predictions are wrong.** Same guidance, description vs response. 210 runs, three models. The recipe in the RESPONSE scores 29/30 where the same 438 bytes in the DESCRIPTION score 4/30. Also the first run to complete the `get_tool_call_log` audit — which found that the `inline` arm does not stamp its own log rows. |
 
 > **gas-estimate tolerance changed on 2026-09-21**, from 20 to 8 (accept range
 > 233–273 → 245–261). Files above that record `accept_range: 233-273` —
@@ -51,6 +52,20 @@ response rather than the tool description, and conditional interpretation sized 
 the record — are written up in [`../open-questions.md`](../open-questions.md), each
 with a prediction registered in advance and the result that would falsify it. The
 token figures from these runs live there too.
+
+**Q1 has since been run and both its predictions were falsified** — see
+[`2026-09-21-q1-response-channel.json`](2026-09-21-q1-response-channel.json). A fact
+moved into the response gained +8 on sonnet where the prediction said it would gain
+nothing; a procedure in the response scored 29/30 where the prediction said it would
+stay near zero. The channel, not the amount of metadata, is what moved. Read its
+`route_scoring` before quoting any lower-rung number: all 11 correct answers from the
+three non-recipe arms took the wrong derivation road.
+
+That file is also the first to carry out the `get_tool_call_log` audit the skill now
+mandates, and the audit earned its keep immediately: the `inline` arm writes every row
+with `variant: "unknown"`, `paramsPresent: []` and `rowCount: 0`, so it is invisible to
+any server-side count — and the log's own alert tells the reader to discard exactly
+those rows. See `the_instrumentation_defect`. Fix that before running Q2.
 
 Read the sweep first — it is the one that changed the design, and it is a useful
 record of how easily a single run misleads. Then read `2026-09-21-opaque-live.json`:
