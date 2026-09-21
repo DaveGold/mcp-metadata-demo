@@ -7,20 +7,25 @@ description: Run the eval set in evals/questions.json against the arm servers (t
 
 ## Before running
 
-1. **Check the arms are CONNECTED, not merely configured.** Confirm the
-   `mcp__eval-thin__*`, `mcp__eval-words__*` and `mcp__eval-rich__*` tools are
-   actually available to this session, and that `eval-thin` / `eval-words` /
-   `eval-rich` appear in the agent list.
+1. **Check the arms' MCP TOOLS are connected.** Confirm the
+   `mcp__eval-<arm>__get_building_profile` tools are actually available to this
+   session — not that the arm appears in `.mcp.json`, and **not that the
+   `eval-<arm>` agent appears in the agent list.**
 
-   Their presence in `.mcp.json` and `.claude/agents/` proves nothing: skills
-   reload mid-session but **MCP connections and the agent registry are fixed when
-   the session starts**. A session that began before those files existed — for
-   example one where they arrived via a merge or a branch switch — will load this
-   skill and still have no arms. That is not a deploy problem and no amount of
-   retrying fixes it.
+   The agent list is NOT a proxy for this, and treating it as one will waste a
+   whole run. Observed on 2026-09-21: after `eval-inline` was added mid-session,
+   the harness picked up the new **agent** from `.claude/agents/` and announced it
+   as available, while the **MCP server stayed unconnected**. Spawning that agent
+   would have produced a subagent with zero tools, declining every question — a
+   run that looks like a result and is an artefact of the harness.
 
-   If either is missing, STOP and tell the user to start a fresh session in a
-   checkout where the files are already present. Do not attempt the run.
+   Skills reload mid-session. The agent registry can reload mid-session. **MCP
+   connections do not.** A session that began before an arm's server was added to
+   `.mcp.json` will never reach it, and no amount of retrying fixes it.
+
+   The only check that counts: can you call
+   `mcp__eval-<arm>__get_building_profile` right now? If not, STOP and tell the
+   user to start a fresh session. Do not attempt the run.
 2. Re-capture `evals/addresses.json` if it is more than a few weeks old. BAG and
    EP-Online are live.
 3. Read `_measured_ceilings` in `questions.json`. A question that already scores
@@ -73,7 +78,9 @@ the same base `schema → words` is measured from) and `inline` vs `words` (the 
 channels head to head). `inline → rich` is NOT an adjacent-rung comparison and
 must not be reported as one: it crosses both the channel and the computation.
 
-`inline` is **built but not deployed** as of 2026-09-21. Its description is
+`inline` was **deployed on 2026-09-21** and verified on the wire: description
+byte-identical to `schema`'s, `interpretation` present in the response (4,338
+chars), no `alerts`, same building data as the other arms. Its description is
 byte-identical to `schema`'s, enforced by `get-building-profile-inline.test.ts`.
 Read `evals/open-questions.md` Q1 for the predictions registered BEFORE it runs —
 they are there so the result can contradict them.
