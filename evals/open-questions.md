@@ -159,8 +159,8 @@ field — the ladder's attributability depends on both.
 > **Still open:** the cross-record half, and the ~77% pruning case. All three
 > questions run used NTA 8800 records, so only the 37–50% band was exercised.
 >
-> **FOLLOW-UP, 2026-09-21: the missing sentence has been ADDED, the re-run is NOT
-> done.** `interpretationBlock` now carries a `CALCULATED vs MEASURED` line stating
+> **FOLLOW-UP, 2026-09-21: the missing sentence has been ADDED and the question
+> RE-RUN.** `interpretationBlock` now carries a `CALCULATED vs MEASURED` line stating
 > that ep1/ep2/berekend are calculated NTA 8800 figures, that Paris Proof is defined
 > on measured final energy, and that this server holds no metered data. The
 > `ep1 … 70 kWh/m²` line was left in place — this change adds, it does not remove, per
@@ -175,21 +175,19 @@ field — the ladder's attributability depends on both.
 > - on a NEN 7120 record (all three null) the line IS pruned — which for the first time
 >   creates a genuine test of Q2's cross-record half, on `metered-vs-model`, not here.
 >
-> **BLOCKED ON DEPLOY.** `npm run deploy` fails with `Missing permissions required for
-> functions deploy … iam.serviceAccounts.ActAs on mcp-metadata-demo@appspot.gserviceaccount.com`.
-> Verified on the wire after the edit: the live `inline` arm still returns the OLD
-> 4,338-char block with no `CALCULATED vs MEASURED` line. Running benchmark-trap now
-> would score the old metadata and produce a file that looks like a result — the exact
-> artefact this repo has already been burned by twice. Deploy first, confirm the line on
-> the wire, then re-run.
+> **DONE AND RE-RUN, 2026-09-21** — deployed (the IAM error was the wrong firebase
+> account, not a missing role: `mcp-metadata-demo` is invisible to the warmtebouw
+> account) and verified on the wire in both arms before spawning. 60 runs:
+> **benchmark-trap went from 0 of 60 to 59 of 60.** Fabrications 22 → 0,
+> confidently-wrong 1 → 0, `named_mismatch` 13/60 → 60/60. Cost ~260 tokens a call.
+> See `results/2026-09-21-benchmark-trap-calculated-vs-measured.json`.
 >
-> **Expected ceiling if the sentence works:** benchmark-trap should move off 0/10 toward
-> `correct` (a principled refusal naming the quantity mismatch) and/or toward
-> `named_mismatch`. If it stays at 0/10 with the sentence present in both arms, the
-> conclusion changes materially: prose in the response would not be enough to prevent a
-> comparison the same prose elsewhere invites, and the `ep1 … 70` line becomes the next
-> thing to change.
-
+> So the registered expectation below HELD, decisively. The question was never
+> measuring conditional guidance; it was measuring a hole in the metadata. Both arms
+> remain at ceiling against each other (inline 29/30, conditional 30/30, tokens
+> −2.27%), so Q2's own prediction is untouched and its cross-record half is STILL
+> untested — though it is now testable on `metered-vs-model`, where the new sentence
+> IS pruned.
 
 ### Why it matters
 

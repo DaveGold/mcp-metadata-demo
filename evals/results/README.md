@@ -19,6 +19,17 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-21-readable-ladder-wrong-unit.json`](2026-09-21-readable-ladder-wrong-unit.json) | The question the `schema` rung exists for: `thin` has no `huisletter` parameter, so the call cannot be expressed. 72 runs, three models. thin 0/18, schema 18/18 — and the two ways thin fails are not the same. |
 | [`2026-09-21-q1-response-channel.json`](2026-09-21-q1-response-channel.json) | **Q1 from `open-questions.md`, and both registered predictions are wrong.** Same guidance, description vs response. 210 runs, three models. The recipe in the RESPONSE scores 29/30 where the same 438 bytes in the DESCRIPTION score 4/30. Also the first run to complete the `get_tool_call_log` audit — which found that the `inline` arm does not stamp its own log rows. |
 | [`2026-09-21-q2-conditional-interpretation.json`](2026-09-21-q2-conditional-interpretation.json) | **Q2 from `open-questions.md`. Pruning the interpretation to the record is free, and saves almost nothing.** `inline` vs `inline-conditional`, 180 runs, three models. Accuracy 39/90 vs 39/90; tokens −1.84%, cheaper in all nine cells but never by more than ~1k. The question picked to show the cost, `benchmark-trap`, scored **0 of 10 in all six cells** — because the sentence the prediction feared the pruner would delete is not in the block at all, while the `ep1`↔70 line that causes the error survives pruning in both arms. First run whose call counts are fully reconciled against `get_tool_call_log` rather than caveated. |
+| [`2026-09-21-benchmark-trap-calculated-vs-measured.json`](2026-09-21-benchmark-trap-calculated-vs-measured.json) | **The repair, and the biggest single effect in this directory.** The Q2 run found `benchmark-trap` scoring 0/60 because `interpretationBlock` never said the NTA 8800 figures are CALCULATED while Paris Proof is MEASURED. One sentence added, arms redeployed, same 60 runs: **0/60 → 59/60**, fabrications 22 → 0, confidently-wrong 1 → 0, `named_mismatch` 13/60 → 60/60, at a cost of ~260 tokens a call. Also records that the LIVE Warmtebouw Duurzaam server has the same defect and **server-computes the wrong verdict as an alert**. |
+
+> **2026-09-21, `interpretationBlock` CHANGED** — a `CALCULATED vs MEASURED` line was
+> added (4,338 → 5,020 chars); see
+> [`2026-09-21-benchmark-trap-calculated-vs-measured.json`](2026-09-21-benchmark-trap-calculated-vs-measured.json).
+> The block feeds `descriptionCore`, so this moved the DESCRIPTION of `words`, `rich`
+> and `words-recipe` and the RESPONSE of `inline`, `inline-recipe` and
+> `inline-conditional` — **six arms, not two**. Every file above predates it and is
+> **not comparable** with anything scored afterwards on a question touching `ep1`,
+> `ep2` or `berekend_energieverbruik`: that is `benchmark-trap`, `gas-estimate` and
+> `heat-pump-triage`. The ep1↔70 Paris Proof line was deliberately left in place.
 
 > **gas-estimate tolerance changed on 2026-09-21**, from 20 to 8 (accept range
 > 233–273 → 245–261). Files above that record `accept_range: 233-273` —
