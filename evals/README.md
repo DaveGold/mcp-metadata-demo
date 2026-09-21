@@ -5,7 +5,6 @@ explain themselves. Everything here is real: every `ground_truth` traces to a
 profile captured from the live server and frozen in
 [`addresses.json`](addresses.json).
 
-- **[`questions-core.json`](questions-core.json) — 9 questions. Start here.**
 - [`questions.json`](questions.json) — the full set, with every question tagged by outcome class
 - [`results/`](results/) — what has actually been run
 - [`addresses.json`](addresses.json) — frozen reference profiles + known gaps
@@ -202,6 +201,43 @@ the model honest. And note what never happened in any unguided run: no model
 treated an unrecognised code as unknown. It reached for the nearest plausible
 meaning and committed. **The failure mode of a badly named field is not
 confusion, it is confident misreading.**
+
+## The set: nine questions, three dimensions
+
+Cut from 22 to 9. Everything removed is listed under `retired` in
+[`questions.json`](questions.json) with the reason — the reasoning is worth more
+than the questions were. The rule for keeping one: **it has to do work no other
+question does.** A question that has never discriminated anything, and is not
+needed as a control, only costs compute.
+
+Each question now carries three orthogonal tags:
+
+- **`shape`** — what kind of work it asks for: `derived_number`, `classification`,
+  `prevention`, `interpretation`, `selection`, `refusal`. This is the dimension
+  that produced the rule, and it was missing from the set entirely until now.
+- **`outcome_class`** — what happens across arms (B/D/C/A/E).
+- **`regimes`** — results recorded separately for readable and opaque field
+  names, because **mechanism turned out to be a property of question × naming,
+  not of the question**.
+
+| shape | ×2 | outcome class | |
+|---|---|---|---|
+| derived_number | gas-estimate, total-vs-per-m2 | B · layer closes the gap | ×4 |
+| prevention | building-size, benchmark-trap | D · structural gap | ×1 |
+| classification | heat-pump-triage | C · model closes the gap | ×2 |
+| selection | wrong-unit | A · always works | ×2 |
+| interpretation | overheating | E · layer can't fix it | none found |
+| refusal | metered-vs-model, invented-label | | |
+
+### Why the regime dimension exists
+
+`heat-pump-triage` is the proof. Its **binary** form saturated with readable
+field names — every arm right, because an A+ label makes "yes" guessable, so it
+was retired. In the **opaque** regime the glossary is *required*: without it the
+model reasons from the label and answers VERY SUITABLE instead of SUITABLE.
+
+Same question. Opposite verdict. A schema that records `mechanism` as a property
+of the question cannot say that, which is why results are now per regime.
 
 ### The rule, replicated across three question shapes
 

@@ -1,6 +1,6 @@
 ---
 name: run-eval
-description: Run the thin/words/rich eval set (evals/questions-core.json, or the full evals/questions.json) against the three arm servers and score the results. Use when asked to run the eval, score an arm, compare arms or models on the building-profile eval, or reproduce the numbers for the talk.
+description: Run the eval set in evals/questions.json against the arm servers (thin/words/rich, or opaque/opaque-words) and score the results. Use when asked to run the eval, score an arm, compare arms or models on the building-profile eval, or reproduce the numbers for the talk.
 ---
 
 # Run the eval
@@ -28,9 +28,17 @@ description: Run the thin/words/rich eval set (evals/questions-core.json, or the
 
 ## Running
 
-**Default to `evals/questions-core.json` (9 questions, 243 runs).** Use the full
-`evals/questions.json` (21 questions, 567 runs) only when asked for the complete
-set or for the final numbers. Always say which file you ran.
+There is ONE set: `evals/questions.json`, 9 questions. Each carries a `shape`,
+an `outcome_class` and per-regime results in `regimes`.
+
+**Pick the arms by regime.** The readable regime is thin / words / rich; the
+opaque regime is opaque / opaque-words. A question's `regimes` block says which
+have been run and what happened. Do not compare a readable-arm result against an
+opaque-arm one — they differ in field naming as well as metadata.
+
+Read `_the_rule` before scoring: semantics handle interpretation, classification,
+prevention and refusal; recipes are needed only for derived numbers. A result
+that contradicts it is the interesting one, so report it rather than smoothing it.
 
 For each (question, arm, model, repeat):
 
@@ -41,7 +49,7 @@ For each (question, arm, model, repeat):
 - Spawn independent runs in parallel, but keep every arm/model of the same
   question in the same batch so transient API weather hits them alike.
 
-Default matrix: 9 questions × 3 arms × 3 models × 3 repeats = 243 runs. When
+Default matrix: 9 questions × 3 readable arms × 3 models × 3 repeats = 243 runs. When
 asked for a smaller slice, say which slice you ran.
 
 ## Scoring
