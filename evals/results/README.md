@@ -1,7 +1,15 @@
 # Results
 
-What happened when the set was run. Each file records its own caveats; none of
-these are measurements yet — n is 2–3 per cell and mostly Haiku.
+What happened when the set was run. Each file records its own caveats.
+
+**This header used to say "none of these are measurements yet — n is 2–3 per cell
+and mostly Haiku." That stopped being true on 2026-09-21 and was not updated.** The
+files now split into two tiers: the 2026-09-21/22 runs are **n=10–20 per cell across
+up to three models with server-side call audits**, and the earlier sweeps are still
+n=1–3 and directional. Which tier a claim sits in, and whether its gap is large
+enough to quote as a size, is settled file-by-file in
+[`2026-09-22-variance-audit-of-prior-results.json`](2026-09-22-variance-audit-of-prior-results.json).
+Read that before quoting any number from this directory.
 
 | file | what it answers |
 |---|---|
@@ -10,12 +18,12 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-21-opaque-prose.json`](2026-09-21-opaque-prose.json) | What interpretation guidance buys once field naming stops doing its job for it. |
 | [`2026-09-21-guide-ablation.json`](2026-09-21-guide-ablation.json) | Which half of the guide does the work — glossary, or the derived-figure recipe. |
 | [`2026-09-21-shape-replication.json`](2026-09-21-shape-replication.json) | Does that decomposition hold across question shapes? It does, and becomes a rule. |
-| [`2026-09-21-first-harness-run.json`](2026-09-21-first-harness-run.json) | The first end-to-end run of the run-eval skill. Found the skill out of sync with the set, confirmed the overheating control does not separate, and records a retracted n=1 interpretation. |
+| [`2026-09-21-first-harness-run.json`](2026-09-21-first-harness-run.json) | The first end-to-end run of the run-eval skill. Found the skill out of sync with the set, and records a retracted n=1 interpretation. **Its `finding_1_the_control_holds` is VOID — see the control-audit banner below.** It read `overheating` not separating as a control passing; the arms did not separate because all three were failing it. |
 | [`2026-09-21-per-question.json`](2026-09-21-per-question.json) | Per-question outcomes and per-regime results, kept out of `questions.json` so the set reads as a spec. |
 | [`2026-09-21-opaque-live.json`](2026-09-21-opaque-live.json) | Does the shape replication survive live tool calls? It does not — five of six cells disagree, and the derived-figures recipe scores 0 of 3. |
 | [`2026-09-21-opaque-live-sonnet-n10.json`](2026-09-21-opaque-live-sonnet-n10.json) | The confirmation pass for that run — sonnet, n=10, 60 runs. Confirms the recipe failure and shows the other two questions saturate on a stronger model. |
 | [`2026-09-21-readable-ladder-gas.json`](2026-09-21-readable-ladder-gas.json) | The readable ladder on the one question with headroom, and the first measurement of the `schema` rung. 80 runs, two models. Server-computed beats everything at either tolerance; the ladder looked non-monotonic at tolerance 20 and that wobble does not survive the retightening to 8. |
-| [`2026-09-21-readable-ladder-co2.json`](2026-09-21-readable-ladder-co2.json) | Is the gas result a property of the SHAPE? 120 runs, three models incl. opus. rich replicates at 30/30; the prose rung reverses sign and the reason is legible; opus needs no metadata here. |
+| [`2026-09-21-readable-ladder-co2.json`](2026-09-21-readable-ladder-co2.json) | Is the gas result a property of the SHAPE? 120 runs, three models incl. opus. rich replicates at 30/30; the prose rung reverses sign and the reason is legible; opus needs no metadata here. **DOWNGRADED 2026-09-22:** its `schema` 2/10 → `words` 8/10 on sonnet — the "prose is the carrier" claim — is **direction only**. That `words`/sonnet cell is the one the variance warning was built from and reads 2 in q1-response-channel, which would erase the gap entirely. The rich-rung numbers are unaffected. See the [variance audit](2026-09-22-variance-audit-of-prior-results.json). |
 | [`2026-09-21-readable-ladder-wrong-unit.json`](2026-09-21-readable-ladder-wrong-unit.json) | The question the `schema` rung exists for: `thin` has no `huisletter` parameter, so the call cannot be expressed. 72 runs, three models. thin 0/18, schema 18/18 — and the two ways thin fails are not the same. |
 | [`2026-09-21-q1-response-channel.json`](2026-09-21-q1-response-channel.json) | **Q1 from `open-questions.md`, and both registered predictions are wrong.** Same guidance, description vs response. 210 runs, three models. The recipe in the RESPONSE scores 29/30 where the same 438 bytes in the DESCRIPTION score 4/30. **Its "+8 on sonnet" figure is a within-batch direction, not a stable size — see the variance warning below.** Also the first run to complete the `get_tool_call_log` audit — which found that the `inline` arm does not stamp its own log rows. |
 | [`2026-09-21-q2-conditional-interpretation.json`](2026-09-21-q2-conditional-interpretation.json) | **Q2 from `open-questions.md`. Pruning the interpretation to the record is free, and saves almost nothing.** `inline` vs `inline-conditional`, 180 runs, three models. Accuracy 39/90 vs 39/90; tokens −1.84%, cheaper in all nine cells but never by more than ~1k. The question picked to show the cost, `benchmark-trap`, scored **0 of 10 in all six cells** — because the sentence the prediction feared the pruner would delete is not in the block at all, while the `ep1`↔70 line that causes the error survives pruning in both arms. First run whose call counts are fully reconciled against `get_tool_call_log` rather than caveated. |
@@ -30,6 +38,35 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-22-q5-deliberation-control.json`](2026-09-22-q5-deliberation-control.json) | **The attack on Q3 — and the first registered prediction in this repo to be CONFIRMED.** If the saving is deliberation it should vanish on a question `rich`'s alerts do not answer. `overheating`: `temperatuuroverschrijding` 3.59 is in both arms, and none of `rich`'s five alerts mention it. **The sign flips** — `rich` goes from **594 tokens cheaper** to **1,172 dearer**, and the duration ratio collapses from **1.63× to 1.01×**. So Q3's line needs its qualifier: the saving comes from metadata that answers *the question being asked*; irrelevant metadata is charged at list price on every call. Magnitude ran 3.3× over prediction because the alert payload is carried every turn, not once. **Separately and seriously: `overheating` is not working as a control** — 8/10 `rich` and 7/10 `words` asserted no-or-low risk against a ground truth of *significant*, inventing thresholds ('below the 40-hour standard', 'below 5 K') instead of using the one in the prose. That is README §2 again, and this time it defeats prose present in **both** arms. |
 | [`2026-09-22-q6-overheating-naming.json`](2026-09-22-q6-overheating-naming.json) | **Is the `overheating` failure a naming problem? No — and the answer is worse than that.** Prediction falsified: `opaque-words`, which names the field `to` (no connotation) *and* says **"unitless"** with the 1.5 threshold in capitals, scored **0/7** against `words`' 2/7. Three of its runs ignored the field entirely and invented `ahe` (the renewable share) as an overheating indicator. The regimes fail differently — the readable name gets the model to the right field then misleads it on units (3.59 read as hours, or as degrees); the terse name loses it altogether. **This contradicts `_the_rule`:** interpretation-shape question, semantics explicit in two arms, **2 correct out of 21**. Third failure to replicate the rule and the clearest, since the guidance here is spelled out rather than merely present. **Conclusion: a defect in the shipped tool that prose will not fix.** `generateAlerts` computes the gas figure and heat-pump suitability but nothing for `temperatuuroverschrijding` — which is why Q5 found `rich` no better than `words`. The fix is the `benchmark-trap` playbook: compute it server-side. |
 | [`2026-09-22-overheating-alert-verification.json`](2026-09-22-overheating-alert-verification.json) | **The fix, deployed and re-run — `rich` 2/10 → 10/10.** Q6 showed prose could not carry the overheating threshold, so the verdict is now computed in `generateAlerts`. Deployed, verified live, re-run haiku n=10 per arm. **All ten `rich` runs use the alert's own framing** — 'significant', 'exceeds the 1.5 threshold', several naming TOjuli/GTO — language that did not exist in any arm before the deploy. The benchmark-trap playbook reproducing on a harder defect: harder because there prose worked and here it demonstrably did not. **Caution reported alongside: `words` moved 3/10 → 7/10 with no code change**, so part of the gain may be the same n=10 drift found earlier today. `rich`'s +8 is twice that and mechanistically attributable, but the alert is not worth *exactly* 8 runs. This does **not** fix the alertless tiers, and `overheating` is now unusable as a control — it separates `rich` from the rest. |
+| [`2026-09-22-q13-overheating-response-channel.json`](2026-09-22-q13-overheating-response-channel.json) | **Q13 — the alertless tiers CAN be fixed, for free, and all three registered predictions are wrong.** #48's computed verdict reaches only `rich`. Q6 concluded prose could not carry this threshold — but every arm Q6 tested carries its guidance in the DESCRIPTION. `inline` carries the byte-identical line in the RESPONSE and had never been run on this question. 60 runs, haiku, n=20, one batch, no deploy and no source change. **`words` 5/20, `inline` 20/20, `rich` 20/20.** The cleanest number in the file: the 1.5 threshold is present verbatim in both `words` and `inline`, and `words` cited it **0 times in 20** against `inline`'s **20 of 20** — same sentence, same model, same sitting, only the channel differs. `words` invents a unit in 9 of 20 runs and every invented unit (hours/year, K, °C, %) makes 3.59 sound negligible, which is why 10 of 20 conclude low or no risk. **`inline` is also the CHEAPEST arm** — −9.7% tokens against `words`, −12.3% against `rich` — **the first arm measured here that is simultaneously cheapest and best.** So Q1's channel finding generalises from recipes to plain facts, **Q6's "prose will not fix it" is corrected to "prose in the DESCRIPTION will not fix it"**, and #48 was the expensive fix to a defect that had a free one. Audit reconciled exactly: 84 rows in window, words 29/29, inline 23/23 + 1 preflight, rich 31/31, zero stray rows; 7 of 60 self-reported CALLS counts understated the harness, which the log contradicts. |
+| [`2026-09-22-variance-audit-of-prior-results.json`](2026-09-22-variance-audit-of-prior-results.json) | **The variance bar, finally applied backwards. No new runs.** The warning below was written on 2026-09-22 and then never carried back through the directory. Every claim that compares two cells is classified SAFE / NULL / DIRECTION-ONLY / NOT-MEASURED. **Three downgraded, everything else holds.** The weakest load-bearing claim in the directory is *"the prose rung is the carrier on sonnet"* (`schema` 2/10 → `words` 8/10 in readable-ladder-co2): it rests on the **exact cell the variance warning was built from**, which reads 8 there and 2 in q1-response-channel — if the true level were nearer 2 the claim would not shrink, it would vanish. Also records the sharper version of the rule: the same-batch halves of one run gave 8-v-7 and 10-v-3, so **same-batch protects a comparison's DIRECTION but not its SIZE**. Large-n nulls (39/90 vs 39/90, 30/30 vs 30/30, 20/20 vs 20/20) come out as the most robust results here, because noise would have to CREATE agreement rather than destroy it. |
+
+> ### ⚠️ `overheating` WAS NEVER A WORKING CONTROL — audit, 2026-09-22
+>
+> It was built as a *non-separation* control: no alert covered it, so `rich` should
+> hold no advantage over `words`. It has now failed in that role **twice, in
+> opposite directions**, and it is re-designated in `questions.json` as a
+> computation discriminator. Every file in this directory was checked for what it
+> leaned on. Five mention it; **one is void, one is frozen, three are unaffected.**
+>
+> | file | how it used `overheating` | status |
+> |---|---|---|
+> | [`first-harness-run`](2026-09-21-first-harness-run.json) | as a **passing control** — "THE CONTROL DID NOT SEPARATE, which is what a control is for… The other findings in this set are not undermined" | **VOID.** The arms did not separate because *all three were wrong*: thin inverted, rich inverted, words 1 right / 1 wrong / 1 partial. A question every arm fails is a floor, not a control, and it licenses no conclusion about the other findings. Nothing else in that file depends on it. |
+> | [`q5-deliberation-control`](2026-09-22-q5-deliberation-control.json) | as a question **`rich`'s alerts do not answer** — the whole design of the Q3 attack | **MEASUREMENT STANDS, PREMISE NOW FALSE.** Verified on the wire *at the time*: five alerts, none about overheating. The computed alert landed afterwards, so the numbers are sound but **the run can never be reproduced on this question.** A replication needs a different alert-free field; after #48 the only substantive one left is `compactheid`. |
+> | [`haiku-sweep`](2026-09-21-haiku-sweep.json) · [`per-question`](2026-09-21-per-question.json) | as a **measurement** question — the prose-only "model cliff", outcome class C | **UNAFFECTED**, and independently corroborated: Q6 reached the same conclusion at 21 runs where these were n=1–2. Neither claims the control held. |
+> | [`readable-ladder-co2`](2026-09-21-readable-ladder-co2.json) | names its outcome class in passing | **UNAFFECTED.** |
+>
+> [`q1-response-channel`](2026-09-21-q1-response-channel.json) and
+> [`q2-conditional-interpretation`](2026-09-21-q2-conditional-interpretation.json) ran
+> **no** controls and say so. Those caveats stand as written — and are in fact
+> understated, since the control they would have run would not have worked.
+>
+> **What this costs the set going forward.** Both surviving controls
+> (`metered-vs-model`, `invented-label`) are refusals every arm should pass. There is
+> now **no non-separation control at all**, so no run can currently detect an arm
+> separating for a reason other than the layer under test on a question it is
+> supposed to win. State that in the caveats of any new run rather than letting the
+> word "controls" imply cover that is not there.
 
 > ### ⚠️ SITTING-TO-SITTING VARIANCE — read before comparing any two files
 >
@@ -57,6 +94,15 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 >
 > **The bar this implies at n=10:** treat a per-cell difference of fewer than ~4 runs as
 > noise unless the two cells were run in the same batch.
+>
+> **And same-batch is weaker protection than it sounds.** The two same-batch halves of
+> [`absent-sizing-input-haiku-n20`](2026-09-22-absent-sizing-input-haiku-n20.json) gave
+> **8-v-7 and 10-v-3** — identical protocol, minutes apart, inside one run. So being in
+> one batch protects a comparison's **direction**; it does not stabilise its **size**.
+>
+> **This bar has now been applied backwards through the whole directory** — see
+> [`2026-09-22-variance-audit-of-prior-results.json`](2026-09-22-variance-audit-of-prior-results.json).
+> Three claims are downgraded to direction-only; the rest hold.
 >
 > Results that clear the bar comfortably, and can be quoted as sizes:
 > - recipe in the RESPONSE vs the same 438 bytes in the DESCRIPTION — 29/30 vs 4/30
@@ -93,7 +139,8 @@ other arm combined is 2 of 60. Read its `the_tolerance_problem` and `route_scori
 before quoting any number from the three lower rungs; six of their apparent wins on
 sonnet are the wrong derivation landing in the band by coincidence.
 
-Then read the co2 file: it is the same ladder on the other `derived_number`
+Then read the co2 file — but read its `schema` → `words` gap as a direction only, per the
+[variance audit](2026-09-22-variance-audit-of-prior-results.json). It is the same ladder on the other `derived_number`
 question, and it is the better instrument — its accept range cannot be reached from
 the wrong denominator, so no route metric is needed. The two disagree about what the
 PROSE rung is worth, and the co2 file explains why.

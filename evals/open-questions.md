@@ -13,6 +13,12 @@ read that file for *why these questions*: the six axes (channel, timing, distanc
 conditionality, addressability, activation), which of them the answered questions cover,
 and which design principles are still unfalsified.
 
+**Q13 is ANSWERED** — registered and run on 2026-09-22, after Q7–Q12 were filed.
+It asks whether the ALERTLESS tiers can be fixed at all, and all three of its
+predictions were falsified. **Read it together with Q7**: Q13 measured the same
+sentence at 0-of-20 use in the description against 20-of-20 in the response, and
+Q7 is what decides whether that is *absence* or *presence-and-non-application*.
+
 Read *What the runs support so far* next — it is the synthesis, and it is a narrower
 claim than "richer metadata is better" — then *Design guidance*, which turns it into what
 to build.
@@ -741,6 +747,15 @@ the saving is deliberation about *the answer*, it must vanish here.
 > interpretation. That is the third failure to replicate the rule and the clearest:
 > the guidance is not absent or ambiguous here, it is spelled out and ignored.
 >
+> **CORRECTED 2026-09-22 BY Q13 — "prose will not fix it" is TOO GENERAL.** Every arm
+> Q6 tested (`words`, `opaque-words`, `opaque`) carries its guidance in the
+> **DESCRIPTION**. The response channel was never tested. It fixes the defect
+> completely: `inline`, carrying the byte-identical threshold line in the RESPONSE,
+> scores **20/20** where `words` scores 5/20 and cites the threshold in **0 of 20**
+> runs. What Q6 measured is a delivery failure, not a failure of prose. The original
+> text is left below as written. See
+> [`results/2026-09-22-q13-overheating-response-channel.json`](results/2026-09-22-q13-overheating-response-channel.json).
+>
 > **So yes — this is a defect in the shipped tool, and prose will not fix it.** The
 > indicated fix is server-side computation, exactly as for the gas figure:
 > `generateAlerts` computes *"~253 m³/year"* and *"suitable for a heat pump"* but
@@ -1429,6 +1444,301 @@ Q1's shape, nothing more.
 
 1 question × 2 arms × 2 models × n=10 = **40 runs**, plus the work of writing a second
 domain's ground truth — which is the real cost, and the reason this is last.
+---
+
+## Q13 — Can the ALERTLESS tiers be fixed at all? Prose in the RESPONSE vs computation
+
+> **ANSWERED 2026-09-22 — ALL THREE PREDICTIONS FALSIFIED. The channel is the whole
+> story.** 60 runs, haiku, n=20 per arm, one batch. See
+> [`results/2026-09-22-q13-overheating-response-channel.json`](results/2026-09-22-q13-overheating-response-channel.json).
+>
+> | arm | where the threshold sits | correct | confidently wrong | fabricated | **cited the 1.5 threshold** |
+> |---|---|---|---|---|---|
+> | `words` | DESCRIPTION | **5** | 10 | 9 | **0 of 20** |
+> | `inline` | **RESPONSE** | **20** | 0 | 0 | **20 of 20** |
+> | `rich` | computed verdict | **20** | 0 | 0 | 20 of 20 |
+>
+> The 1.5 threshold is present verbatim in **both** `words` and `inline`. `words`
+> cited it **zero times in twenty**; `inline` cited it **twenty times in twenty**.
+> Same sentence, same model, same question, same sitting — only the channel differs.
+>
+> - **P1** (`inline` ≤ 10/20) → **20/20.** Falsified.
+> - **P2** (`rich` − `inline` ≥ 8) → **0.** Falsified.
+> - **P3** (`inline` − `words` < 4) → **+15.** Falsified.
+>
+> **The registered reasoning was wrong in a specific, legible way.** It assumed the
+> failure was a *prior* that survived the guidance — that 3.59 "sounds small"
+> whatever you tell the model. Placement alone refutes that. Zero of twenty `words`
+> runs cited the threshold against twenty of twenty for `inline`; when they do not
+> use it they invent a unit, always one that makes 3.59 negligible — hours a year,
+> degrees, percent — and 10 of 20 then conclude low or no risk.
+>
+> **But WHY placement mattered is not settled here, and an earlier draft of this
+> banner overclaimed it.** It said the runs "never retrieved" the threshold. That is
+> an inference about what was in context, and **Q7 is registered to test exactly
+> it** — Q5 already charged `rich`'s tool-definition bytes *per call*, which points
+> at the description being present the whole time. If it was, this result is the
+> stronger one: the knowledge was available and placement decided whether it was
+> applied. What this run measured is **use**, not availability.
+>
+> **And it is cheaper.** `inline` costs **9.7% fewer tokens than `words`** and
+> **12.3% fewer than `rich`**, while tying for best. **This is the first arm measured
+> in this repo that is simultaneously the cheapest and the best** — every previous
+> cost/quality finding has them pointing in opposite directions.
+>
+> **Q6's conclusion is corrected.** Q6 said this was "a defect prose will not fix".
+> True of prose in the DESCRIPTION, which is all Q6 tested. Prose in the RESPONSE
+> fixes it completely. So **#48's computed alert was not wrong, but it was not
+> necessary** — it is the expensive fix to a defect that had a free one. Check the
+> channel before writing a computation.
+>
+> **And the interpretation block should not be edited for this.** The sequencing
+> argument below was the point of running Q13 first, and it paid: the wording was
+> never the problem, so the six-arm comparability cost stays unpaid.
+
+> **REGISTERED 2026-09-22, BEFORE THE RUN.** Committed before any run was spawned.
+> No new arm, no deploy, no change to any shipped byte — all three arms already
+> exist and were preflighted on the wire for this run.
+
+### The gap this closes
+
+The overheating verdict is now computed (#48) and `rich` went **2/10 → 10/10**. But
+the fix lives in `generateAlerts`, and **only `rich` has alerts.** `words`,
+`opaque-words`, `schema`, `thin` and `inline` all still hand the caller a bare
+`temperatuuroverschrijding: 3.59` and let them read it as degrees or as hours.
+
+That population is not a curiosity. **It is the closest analogue in this repo to a
+real third-party consumer of a plain MCP tool** — a description, a typed payload,
+and no computed layer. If the only available fix is "compute it server-side", then
+every MCP server that ships without a computation step has this defect and cannot
+metadata its way out.
+
+### Why this is NOT "reword the interpretation block"
+
+Q6 already ran that experiment and it failed: the threshold is stated, in capitals,
+with the word *unitless*, and the combined score across two arms carrying it was
+**2 of 21**. Rewording is not the open question.
+
+The open question is **channel**, which is the one variable Q1 showed to be
+dominant — the same 438 bytes scored **29/30 in the RESPONSE and 4/30 in the
+DESCRIPTION**. Every arm Q6 tested carried the threshold in the **description**.
+`inline` carries the byte-identical line in the **response**, and *has never been
+run on this question*.
+
+Verified on the wire before registering:
+
+| arm | where the threshold line sits | measured on `overheating`? |
+|---|---|---|
+| `words` | DESCRIPTION | yes — 2/7 (Q6), then 3/10 and 7/10 |
+| `inline` | **RESPONSE**, byte-identical line | **never** |
+| `rich` | computed verdict in `alerts` | yes — 10/10 post-#48 |
+
+### The sequencing argument — why this runs before anything is changed
+
+Changing `interpretationBlock` moves **six arms** (`words`/`rich`/`words-recipe`
+descriptions, `inline`/`inline-recipe`/`inline-conditional` responses) and
+invalidates comparability with everything scored before it on any question touching
+the changed text. That is an expensive, one-way cost.
+
+This run costs **nothing** — no deploy, no edit — and tells you whether that cost is
+worth paying. If the response channel already fixes it, the alertless tiers need no
+new prose at all, only a move. If it does not, then no wording in any channel will,
+and the block should not be touched.
+
+### The arms
+
+`words` · `inline` · `rich`, all **readable** field names, so no cross-regime
+comparison is involved and the README's prohibition is not engaged.
+
+Per the skill: `inline` vs `words` is the two channels head to head and is the
+clean single-variable comparison. **`inline` → `rich` is NOT an adjacent-rung
+comparison** — it crosses the channel *and* the computation — and must be reported
+as "prose versus computation", never as the value of one layer.
+
+**haiku, n=20 per arm, all three arms interleaved in ONE batch, 60 runs.** haiku
+because Q6 and the #48 verification both used it and it has headroom; n=20 because
+the verification file flagged `words` drifting **3/10 → 7/10 with no code change**,
+and this run re-measures that cell at double n in a single sitting as a by-product.
+
+### Prediction
+
+> **The channel will NOT fix it. Computation is doing the work, not placement.**
+>
+> - **P1 — `inline` does not fix it: ≤ 10/20.** Falsified if `inline` ≥ 16/20.
+> - **P2 — the computation gap is large: `rich` − `inline` ≥ 8 runs.** Falsified if
+>   the gap is under 4 runs, the directory's noise bar at n=10.
+> - **P3 — the channel buys little here: `inline` − `words` < 4 runs.** Falsified
+>   if `inline` beats `words` by 4 or more.
+>
+> **Reasoning, recorded so it can be wrong.** Q6's failure mode is not that the
+> guidance goes *unread* — three arms reached the right field and then misread it.
+> It is that `3.59` is interpreted through a prior about what an overheating number
+> means, and *sounds small* on every unit the model might assume. Moving the same
+> sentence nearer the data does not contradict a prior; it just repeats the rule.
+> The computed alert works because it **removes the inference step** — it states the
+> verdict instead of the rule that would produce it.
+>
+> **The case against my own prediction**, which is real: Q1's channel effect was
+> enormous and this repo's registered predictions are 1-for-6. If P1 and P3 are both
+> falsified, the reading is that `overheating` was a channel problem all along, #48
+> was an expensive fix to a cheap one, and Q1 generalises from recipes to plain facts.
+
+### Why the outcome is useful either way
+
+| if | then |
+|---|---|
+| prediction **holds** | There are facts **prose cannot carry in any channel**. That is a boundary condition on Q1, which is currently stated without one — and it means the alertless tiers have **no metadata-only fix**. For a plain MCP tool that translates to one concrete instruction: write the verdict into the response body. |
+| prediction **falsified** | The alertless population has a **free** fix — move the guidance from the description into the response — and the computation was not required. That is the cheaper and more generally useful result, and it would extend Q1 from procedures to facts. |
+
+### Cost
+
+1 question × 3 arms × 1 model × n=20 = **60 runs.** No new arm, no deploy, no
+source change. Records `tool_uses`, `duration_ms`, `subagent_tokens` and the ANSWER
+character count per run, and audits against `get_tool_call_log` unfiltered.
+
+### Known limits, stated up front
+
+- **haiku only.** Per §8 semantics scale inversely with model size, so a null result
+  here is the *strong* direction (the model most helped by metadata is not helped);
+  a null on opus would mean little. It still cannot support a claim above haiku.
+- **One question, one defect.** `overheating` is a single interpretation-shape
+  failure. A channel null here does not generalise to every fact.
+- **No control.** `overheating` was the set's only non-separation control and has
+  just been re-designated; both survivors are refusals. This run has no control
+  behind it and the caveats must say so.
+
+---
+
+## Q14 — Is ONE line enough? The minimum viable response payload
+
+> **REGISTERED 2026-09-22, BEFORE THE RUN.** Committed before any run is spawned.
+>
+> **DEPLOYED AND VERIFIED ON THE WIRE, 2026-09-22.** Both preflight steps done as far
+> as they can be from the session that built it:
+>
+> - `mcpInlineOneline` live at `.../mcpInlineOneline`; a raw MCP `tools/call` on
+>   3039WB/1 returns `temperatuuroverschrijding: 3.59`, **no `alerts` key**, and
+>   `interpretation` = the single 181-character line and nothing else.
+> - It stamps its own log rows: `summary.countByVariant` shows `inline-oneline`
+>   under its own name, `paramsPresent: ["queryIntent"]`, `rowCount: 3`. No
+>   `unknown` bucket. **Not a stale deploy.**
+>
+> **It still cannot be RUN from that session** — MCP connections are fixed at process
+> start, so the `.mcp.json` entry added today is unreachable until a fresh session.
+> The agent file exists and is *not* evidence to the contrary; that is precisely the
+> trap. Start a new session, re-run both preflight steps, then spawn.
+
+### Why it matters, and why Q13 does not already answer it
+
+Q13 moved the **whole** interpretation block into the response and took
+`overheating` from 5/20 to 20/20. That is a real result and it is **not one a
+production server can act on**, because "put your entire interpretation block in
+every response" is an expensive instruction and nobody has checked whether it is a
+*necessary* one.
+
+Two answered questions say it probably is not:
+
+- **Q2 measured volume twice and found it inert.** Pruning the response block to
+  the record cost **zero** accuracy — 39/90 vs 39/90, then 30/30 vs 30/30 with two
+  thirds of the block cut.
+- **Q5 measured the cost of the rest.** Metadata that does *not* answer the
+  question is charged at list price: `rich` went from 594 tokens cheaper to 1,172
+  dearer the moment its alerts stopped being relevant.
+
+So the payoff should come from **the lines that bear on the question**, not from
+the volume. This is the limit case of that claim: **one line.**
+
+It is also the exact question MCPSER-81 now turns on. The live Warmtebouw Duurzaam
+server carries its threshold in the description and nothing in the response — the
+`words` configuration, verified on the wire. The cheap fix there is to add one line
+to the response, not to relocate a 5,020-character block.
+
+### The arm
+
+`inline-oneline`, deployed as `mcpInlineOneline`:
+
+| | description | response |
+|---|---|---|
+| `words` | full prose, **incl. the threshold line** | nothing |
+| **`inline-oneline`** | **identical, byte for byte** | **that one line, sliced** |
+| `inline` | minimal (`schema`'s one-liner) | the whole block |
+
+**`words` → `inline-oneline` is the single-variable comparison**: one line added to
+the response, nothing else. The description is deliberately **not** stripped — this
+is an ADDITION, not a move, because that is what a real server would ship and it is
+strictly cheaper than relocating.
+
+`inline` is the reference **ceiling**, not an adjacent rung: it differs in both the
+description and the amount of response prose. Do not report `inline-oneline` →
+`inline` as the value of a layer.
+
+The line is sliced from `interpretationBlock` via `overheatingLine` and throws at
+module load if the block is edited out from under it. Six tests pin that the
+description is byte-identical to `words`', that the line is one line, and that it
+carries the 1.5 threshold.
+
+### Prediction
+
+> **One line is enough. `inline-oneline` ≥ 16/20, i.e. it lands with `inline`
+> (20/20) rather than with `words` (5/20).**
+>
+> - **P1 — `inline-oneline` ≥ 16/20.** Falsified if ≤ 10/20.
+> - **P2 — it beats `words` by ≥ 8 runs.** Falsified if the gap is under 4, the
+>   directory's noise bar.
+> - **P3 — the threshold is cited in ≥ 16 of 20 runs**, against `words`' 0 of 20.
+>   This is the mechanism check; falsified if ≤ 8.
+>
+> **Reasoning.** Q2 showed the block's volume does no work, twice. If volume is
+> inert, then what Q13 moved into the response was one useful line and 5,000
+> characters of ballast, and the line should carry the result alone.
+>
+> **The case against it**, which is real and is why this is worth running: nothing
+> here has yet tested whether a response needs enough *substance* to be attended to
+> at all. A single line beside a 40-field payload may simply not be noticed, in
+> which case the effect Q13 found is partly about the block's bulk and "prune
+> aggressively" becomes bad advice. That would also complicate Q2, which only ever
+> pruned down to *several* notes, never to one.
+>
+> Note this repo's record: **six of seven registered predictions have been wrong.**
+
+### What each outcome buys
+
+| if | then |
+|---|---|
+| **≥16/20** | The production rule is cheap and precise: *put the line that answers the question in the response.* MCPSER-81 takes the one-line fix, and Q2's pruning result extends from "free" to "free down to a single line". |
+| **≤10/20** | Bulk matters as well as placement, Q13's result is partly about the block not the line, and the honest advice for a plain MCP server becomes the expensive one. It would also put a floor under how far Q2's pruning can go. |
+| **11–15** | Partial. Report as direction only and re-run at n=40 before anyone quotes it. |
+
+### Protocol
+
+`words` · `inline-oneline` · `inline`, haiku, **n=20 per arm, all three interleaved
+in one batch**, on `overheating`. Same scoring rule as Q13, which is pinned in that
+run's `scoring_rule` — fixed before looking at these answers this time. Record
+`tool_uses`, `duration_ms`, `subagent_tokens` and the ANSWER character count, and
+audit against `get_tool_call_log` unfiltered, `countByVariant` before any filter.
+
+**Read the cost columns too.** If the prediction holds, `inline-oneline` should be
+the cheapest arm in the set — it carries `words`' description plus ~180 characters,
+where `inline` carries a 5,020-character block on every call.
+
+### Known limits, stated up front
+
+- **haiku only**, one question, one defect, one address. `overheating` is
+  saturated at the `inline` and `rich` rungs, so this measures the gap between
+  `words` and `inline-oneline` and nothing above it.
+- **It cannot separate "one line" from "this particular line."** The overheating
+  line is unusually self-contained — a field name, three bands, a threshold. A
+  rule needing two fields to be read together might not survive the same cut.
+- **No control.** Both surviving controls are refusals and neither is in this run.
+- **Same mechanism caveat as Q13**: a citation count measures *use*, not
+  availability. Q7 still gates any claim about why.
+
+### Cost
+
+1 question × 3 arms × 1 model × n=20 = **60 runs.** One new arm, already built and
+deployed. **It needs a fresh session** — a session that predates the `.mcp.json`
+entry can never reach the server, and the agent list is not evidence to the
+contrary.
 
 ---
 

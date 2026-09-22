@@ -17,6 +17,7 @@ export {
   mcpSchema,
   mcpInline,
   mcpInlineRecipe,
+  mcpInlineOneline,
   mcpInlineConditional,
   mcpInlineFact,
   mcpInlineInstruction,

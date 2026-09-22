@@ -162,6 +162,33 @@ export const description = descriptionCore + '\n\n' + alertsParagraph;
 /** Arm B description: identical prose, minus the promise of a field it does not return. */
 export { descriptionCore, interpretationBlock, derivedFiguresBlock };
 
+/**
+ * The one INTERPRETATION line about `temperatuuroverschrijding`, SLICED out of
+ * `interpretationBlock` rather than retyped — the `inline-oneline` arm of
+ * open-questions.md Q14 ships exactly these bytes and no others in its response,
+ * so it cannot drift from the block the description carries.
+ *
+ * Q13 showed the whole block in the RESPONSE scores 20/20 where the same block in
+ * the DESCRIPTION scores 5/20. Q14 asks whether ONE line buys the same thing, which
+ * is the question a production server actually faces: it is the cheap fix, and
+ * nobody has measured whether it works.
+ *
+ * Throws at module load if the line is not found, because an arm that silently
+ * ships an empty response is worse than one that fails to start.
+ */
+export const overheatingLabel = '- temperatuuroverschrijding (TOjuli/GTO overheating-risk indicator):';
+
+export const overheatingLine = (() => {
+  const line = interpretationBlock.split('\n').find((l) => l.startsWith(overheatingLabel));
+  if (!line) {
+    throw new Error(
+      'overheatingLine: no line in interpretationBlock starts with overheatingLabel. ' +
+        'The block was edited without updating the slice — fix the label, do not retype the line.'
+    );
+  }
+  return line;
+})();
+
 
 // ── Input schema ─────────────────────────────────────────────────────────────
 

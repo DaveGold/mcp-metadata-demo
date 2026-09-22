@@ -40,15 +40,31 @@ supplies two things this tool cannot — a response that dials from ~330 to ~18,
 mechanism here where **output** field names must be passed as an **input** parameter, and
 where guessing them fails *silently*. See Q9 and Q11, both amended 2026-09-22.
 
-`metered-vs-model` and `invented-label` are **controls**. `overheating` was
-designed as one — it is covered by no alert, so the rich arm should have no
-advantage — but **it does not hold**: on 2026-09-22 both arms asserted no-or-low
-risk in 7–8 runs of 10 against a ground truth of *significant*, by inventing
-thresholds instead of using the one in the prose. Treat it as a live defect, not
-a control, until that is fixed. The two refusals should be answered correctly
-by every arm. A set containing only questions the thin arm fails is selection,
-not evidence — if the controls ever separate, something other than the metadata
-is driving the result and the run is suspect.
+`metered-vs-model` and `invented-label` are **controls**, and as of 2026-09-22
+they are the **only** ones. They should be answered correctly by every arm. A set
+containing only questions the thin arm fails is selection, not evidence — if the
+controls ever separate, something other than the metadata is driving the result
+and the run is suspect.
+
+> **`overheating` is NOT a control any more — re-designated 2026-09-22.** It was
+> built as a *non-separation* control: covered by no alert, so `rich` should hold
+> no advantage. It failed in that role twice, in opposite directions. Before the
+> computed alert it did not separate — but only because **both arms were mostly
+> wrong**, 7–8 runs in 10 asserting no-or-low risk against a ground truth of
+> *significant*, inventing thresholds instead of using the one in the prose. A
+> question every arm fails is a floor, not a control. After the verdict was
+> computed server-side it went `rich` 2/10 → 10/10 while every alertless arm stayed
+> put, so it now separates **by construction**. It is now a *computation*
+> discriminator; see `redesignated` in [`questions.json`](questions.json).
+>
+> **This leaves a real gap.** Both surviving controls are refusals. The set has no
+> non-separation control at all — no question where the arms carry different
+> metadata and are expected to score the same — so a run can no longer detect an
+> arm separating for a reason other than the layer under test. A replacement needs
+> a field no alert covers; after the overheating alert landed, the only substantive
+> one left is `compactheid`, whose prose gives a direction and no threshold. Not
+> built, and a control is not a control until it has been *measured* not to
+> separate.
 
 ## The arms
 
@@ -116,13 +132,13 @@ own caveats. The picture changed substantially on 2026-09-21/22: the early
 findings were n=2–3 and mostly Haiku, and have since been re-run at **n=10–20 per
 cell across three models**. Where a claim has been superseded it says so.
 
-**Six questions were registered in [`open-questions.md`](open-questions.md)
-before they were run. All six are now answered — and five of the six registered
+**Seven questions were registered in [`open-questions.md`](open-questions.md)
+before they were run. All seven are now answered — and six of the seven registered
 predictions were wrong.** That pattern is itself the most reliable thing here:
-the effects are large and legible, and intuitions about *why* were wrong five
-times out of six.
+the effects are large and legible, and intuitions about *why* keep missing.
 
-**Six more are registered and open (Q7–Q12).** They come from
+**Six more are registered and open (Q7–Q12).** (Q13 is the seventh answered one,
+registered after them and run the same day — see §9.) They come from
 [`research-frame.md`](research-frame.md), which is the map the register is drawn
 on: the six axes a placement effect could run along — channel, timing, distance,
 conditionality, addressability, activation — which of them the answered questions
@@ -253,6 +269,38 @@ Sonnet and opus read the null field, know unaided what it is for, and decline �
 
 §7 is the sharpest instance: an 8-run gap on haiku, zero on sonnet and opus.
 
+### 9 · The channel finding is not about recipes — and it can be free
+
+**Q13, 60 runs, haiku.** `temperatuuroverschrijding` 3.59 against a stated 1.5
+threshold. The threshold line is present **verbatim** in two arms:
+
+| arm | where the line sits | correct | **cited the 1.5 threshold** | tokens vs `words` |
+|---|---|---|---|---|
+| `words` | DESCRIPTION | 5/20 | **0 of 20** | — |
+| `inline` | **RESPONSE** | **20/20** | **20 of 20** | **−9.7%** |
+| `rich` | computed verdict | 20/20 | 20 of 20 | +1.5% |
+
+Zero against twenty on whether the sentence was **used** at all. Where it goes
+unused the model invents a unit for 3.59 — 9 of 20 runs — and every invented unit
+(hours a year, K, °C, %) makes the number sound negligible, so 10 of 20 concluded
+low or no risk.
+
+**Why placement mattered is not established.** This measures use, not availability,
+and tool definitions are re-sent every turn on most hosts — so the description may
+have been present and simply not applied. That is [`open-questions.md`](open-questions.md)
+**Q7**, and until it lands no "the model never saw it" sentence here is quotable.
+
+Two things follow. **§4 was measured on a recipe; this is the same effect on a bare
+fact** — one threshold, one comparison, no arithmetic. And **`inline` is the
+cheapest arm as well as the best**, the first in this repo where quality and cost
+point the same way.
+
+> **A defect that prose "cannot fix" may just be prose in the wrong channel. Check
+> that before you write a computation.**
+
+The computed overheating alert was not wrong — it scores 20/20 — but it was the
+expensive fix to a defect that had a free one.
+
 ### The strongest single result
 
 `wrong-unit` asks for the area of flat 28A. The thin schema has no `huisletter`
@@ -276,9 +324,15 @@ strong model safe.
   directional; §4–§7 are measured.
 - **Run-to-run variance is larger than it looks.** On one question, four passes
   at n≤10 gave four different answers (9-v-4, 2-v-2, 8-v-7, 10-v-3) — anything
-  from level to 3×. Large effects (0/60→59/60, 10/30 vs 30/30) sit far outside
-  that band; **findings resting on a few-run gap at n=10 in one sitting do not**,
-  and several older files in `results/` are sized exactly that way.
+  from level to 3×. Two of those were **same-batch halves of a single run**, so
+  being in one batch protects a comparison's *direction* but not its *size*.
+  Large effects (0/60→59/60, 10/30 vs 30/30, 5/20 vs 20/20) sit far outside that
+  band; few-run gaps do not. **This bar has now been applied backwards through
+  every file** — see
+  [`results/2026-09-22-variance-audit-of-prior-results.json`](results/2026-09-22-variance-audit-of-prior-results.json).
+  Three claims are downgraded to direction-only; the rest hold. The weakest is
+  *"the prose rung is the carrier on sonnet"*, whose supporting cell is the very
+  one the variance warning was built from.
 - **Self-reported call counts are not trustworthy on their own.** One run
   reported `CALLS: 3` against a server log that accounted for fewer. Every recent
   file reconciles against `get_tool_call_log` instead.

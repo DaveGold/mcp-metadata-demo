@@ -17,6 +17,7 @@ import {
 import { registerGetBuildingProfileMinimalTool } from './tools/get-building-profile-minimal.js';
 import { registerGetBuildingProfileWordsTool } from './tools/get-building-profile-words.js';
 import { registerGetBuildingProfileInlineTool } from './tools/get-building-profile-inline.js';
+import { registerGetBuildingProfileInlineOnelineTool } from './tools/get-building-profile-inline-oneline.js';
 import { registerGetBuildingProfileInlineConditionalTool } from './tools/get-building-profile-inline-conditional.js';
 import { registerGetBuildingProfileInlineAblationTool } from './tools/get-building-profile-inline-ablation.js';
 import { registerGetBuildingProfileSchemaTool } from './tools/get-building-profile-schema.js';
@@ -63,6 +64,7 @@ export type ServerVariant =
   | 'inline'
   | 'inline-recipe'
   | 'inline-conditional'
+  | 'inline-oneline'
   | 'inline-fact'
   | 'inline-instruction'
   | 'words-recipe'
@@ -208,6 +210,24 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerGetBuildingProfileInlineTool(server, bagClient, epOnlineClient, {
       withRecipe: variant === 'inline-recipe',
     });
+    registerRenderChartTool(server, { minimal: true });
+    registerRenderTableTool(server, { minimal: true });
+    registerRenderMapTool(server, { minimal: true });
+    registerGetWeatherContextTool(server, { minimal: true });
+    registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
+  if (variant === 'inline-oneline') {
+    // Q14. The MINIMUM VIABLE RESPONSE arm. `words`' description, byte for byte,
+    // PLUS one sliced INTERPRETATION line in the response. The only difference
+    // from `words` is that one line, which is the cheapest fix a production
+    // server could ship and the one Q13 left untested.
+    const server = new McpServer(
+      { name: `metadata-demo-${variant}`, version: VERSION },
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+    );
+    registerGetBuildingProfileInlineOnelineTool(server, bagClient, epOnlineClient);
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });

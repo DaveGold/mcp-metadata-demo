@@ -20,7 +20,16 @@ description: Run the eval set in evals/questions.json against the arm servers (t
    run that looks like a result and is an artefact of the harness.
 
    Skills reload mid-session. The agent registry can reload mid-session. **MCP
-   connections do not.** A session that began before an arm's server was added to
+   connections do not.**
+
+   **Reproduced again on 2026-09-22, both halves visible in one session.** The
+   `eval-inline-oneline` arm was built, deployed and verified on the wire by raw
+   HTTP. Minutes later the harness announced the new **agent** as available — and
+   a `ToolSearch` for `mcp__eval-inline-oneline__get_building_profile` returned
+   **no matching tool** in the same session. Agent present, tools absent,
+   simultaneously. Spawning it there would have produced 60 runs of a subagent
+   with no tools, declining every question, and the output would have looked like
+   a result. The endpoint was fine the whole time; the session was the problem. A session that began before an arm's server was added to
    `.mcp.json` will never reach it, and no amount of retrying fixes it.
 
    The only check that counts: can you call
@@ -261,10 +270,23 @@ argument lives:
 2. arm × model on everything else, split by shape
 3. confidently-wrong and fabricated counts, arm × model
 
-**Check the controls first.** `overheating` is covered by no alert, so rich
-should hold no advantage over words; `metered-vs-model` and `invented-label`
-should be answered correctly by every arm. If a control separates, report that
-before anything else — it undermines every other number in the run.
+**Check the controls first.** `metered-vs-model` and `invented-label` should be
+answered correctly by every arm. If a control separates, report that before
+anything else — it undermines every other number in the run.
+
+**`overheating` is NOT a control — re-designated 2026-09-22.** It used to be
+listed here as one, on the grounds that no alert covered it. An alert now does:
+the verdict is computed in `generateAlerts`, and the question went `rich` 2/10 →
+10/10 while every alertless arm stayed put. It separates by construction. Use it
+to measure **computation versus prose**, never as a control, and never in a
+`rich`-vs-anything comparison meant to isolate some other layer. Note also that
+before the alert it "held" only because *both* arms were failing it — so any
+older run that cited it as a passing control was checking something that was
+never true. See `redesignated` in `questions.json`.
+
+There is currently **no non-separation control in the set** — both survivors are
+refusals. Say so in the run's caveats rather than implying the controls covered
+this.
 
 **Then check for saturation.** If every arm scores at or near 100% on a
 question, that question measured nothing on this model — report it as no

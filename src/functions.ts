@@ -72,6 +72,17 @@ export const mcpInlineRecipe = onRequest(
  * that are actually populated. A description cannot do this: it is written before
  * the data is known. See evals/open-questions.md, Q2.
  */
+/**
+ * Q14 arm — the MINIMUM VIABLE RESPONSE. `words`' description byte for byte, plus
+ * ONE sliced INTERPRETATION line in the response. `mcpWords` → `mcpInlineOneline`
+ * differs by exactly that line, which is the cheapest fix a production server
+ * could ship. See open-questions.md Q14.
+ */
+export const mcpInlineOneline = onRequest(
+  functionOptions,
+  createHttpApp({ hosted: true, variant: 'inline-oneline' })
+);
+
 export const mcpInlineConditional = onRequest(
   functionOptions,
   createHttpApp({ hosted: true, variant: 'inline-conditional' })
