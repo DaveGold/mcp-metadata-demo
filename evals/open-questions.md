@@ -687,7 +687,7 @@ in tension or unrelated.
 
 2 questions × 3 arms × 3 models × n=10 = **180 runs**, two new arms to build and deploy.
 `metered-vs-model` is also where Q2's untested cross-record half can finally be run,
-since the calculated-vs-measured line IS pruned on a NEN 7120 record — so one build
+since the calculated-vs-measured line was believed to be pruned on a NEN 7120 record — so one build
 serves two open questions.
 
 ## Suggested order
@@ -698,6 +698,19 @@ predictions falsified — see the banner under Q1.**
 ~~1. Redeploy and verify stamping.~~ ~~2. **Q2.**~~ **Both done on 2026-09-21** — the
 redeploy is verified and Q2 is answered, along with the `benchmark-trap` repair its
 failure mode uncovered.
+
+> **CORRECTION, 2026-09-22 — the claim above is FALSE.** The CALCULATED vs MEASURED
+> line is **NOT** pruned on a NEN 7120 record. Measured on the wire before running:
+> it is PRESENT, with its instruction clause, in BOTH arms on BOTH records. The
+> pruner treats it as unconditional. `inline-conditional` does cut the block hard on
+> a NEN 7120 record — 5,020 → 1,668 chars, −66.8% — but that line survives. Q2's
+> cross-record half as described therefore cannot be run, and the run that replaced
+> it measured what pruning two thirds of the block costs instead: **nothing in
+> accuracy (30/30 vs 30/30), −4.78% in tokens.** See
+> [`results/2026-09-22-q2-cross-record-pruning.json`](results/2026-09-22-q2-cross-record-pruning.json).
+> The same false claim was repeated in
+> [`results/2026-09-21-benchmark-trap-calculated-vs-measured.json`](results/2026-09-21-benchmark-trap-calculated-vs-measured.json)
+> (`newly_possible`) and in the Q4 results file and PR #44.
 
 1. **Q4 first.** It is the highest-value open question, the cheapest build in the file
    (two response variants of one line), and it is the only one that could reframe the

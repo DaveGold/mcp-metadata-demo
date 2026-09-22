@@ -288,13 +288,13 @@
     "metered-vs-model is saturated at 90/90 and measures nothing comparative; it is retained here for its diagnostic value only.",
     "The correct/other boundary on benchmark-trap is a judgment call. It was pre-registered, calibrated against inline's known ceiling before the arms under test were read, and applied uniformly — but 25 of 180 runs turn on it, and a stricter or looser reading would move the fact-only column more than the instruction-only column.",
     "Token deltas are self-reported by the harness, come from a single sitting, and at 0.4% are too small to headline.",
-    "Q2's untested cross-record half was NOT run. It needs the inline-conditional arm on metered-vs-model, and the arm set for this run was inline / inline-fact / inline-instruction. Since metered-vs-model saturated at 30/30 for every arm here, that half would likely measure nothing anyway, but it remains formally untested.",
+    "Q2's cross-record half was NOT run in THIS run, and the reason given here for deferring it was itself based on a false premise: the CALCULATED vs MEASURED line is not pruned on a NEN 7120 record. It was run separately on 2026-09-22 — see results/2026-09-22-q2-cross-record-pruning.json.",
     "CALLS/TOOLS/PARAMS as self-reported by the subagent remain too weak to headline on their own; they are reported because they are now checkable, and they were checked."
   ],
   "still_outstanding": [
     "Separate the fact from the label: a fourth arm shipping the label plus the instruction, without the semantic clauses, would say whether the two-word label alone restores the trigger.",
     "benchmark-trap now measures nothing on opus and little on sonnet for fact-only. A harder prevention question is needed before this axis can separate further.",
-    "Q2 cross-record: run inline vs inline-conditional on a NEN 7120 record where the CALCULATED vs MEASURED line is pruned, on a question that is not already saturated."
+    "Q2 cross-record: RUN 2026-09-22, and the premise in this file's caveats was wrong. The CALCULATED vs MEASURED line is NOT pruned on a NEN 7120 record; it survives pruning on both records. See results/2026-09-22-q2-cross-record-pruning.json — accuracy 30/30 vs 30/30, tokens -4.78% for a 66.8% prose cut."
   ],
   "runs": [
     {

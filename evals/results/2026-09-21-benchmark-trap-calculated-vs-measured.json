@@ -220,7 +220,8 @@
    "Q2's cross-record half. Still untested. On this record the sentence survives pruning in both arms, so the run cannot show a pruning cost.",
    "The gas-estimate and total-vs-per-m2 numbers in the first Q2 file. Not re-run."
   ],
-  "newly_possible": "Because the sentence IS pruned on a NEN 7120 record (86% cut, all three gated fields null), Q2's cross-record half is now testable for the first time — on metered-vs-model, which uses Middenwetering 1. That run has not been done."
+  "newly_possible": "Because the sentence IS pruned on a NEN 7120 record (86% cut, all three gated fields null), Q2's cross-record half is now testable for the first time — on metered-vs-model, which uses Middenwetering 1. That run has not been done.",
+  "newly_possible_CORRECTION_2026_09_22": "FALSE as written. The sentence is NOT pruned on a NEN 7120 record \u2014 measured on the wire 2026-09-22, it is present WITH its instruction clause in both inline and inline-conditional on BOTH records. inline-conditional does cut the block to 1,668 chars (-66.8%) on Middenwetering 1, but this line survives the cut, so Q2's cross-record half as described cannot be run. What was run instead: metered-vs-model, inline vs inline-conditional, three models, n=10, 60 runs \u2014 accuracy 30/30 vs 30/30, tokens -4.78%. See results/2026-09-22-q2-cross-record-pruning.json. The original claim is left above unedited so the error stays visible."
  },
  "cost_of_the_sentence": {
   "_comment": "The sentence adds 682 chars to the block. Mean subagent_tokens, before -> after, same question and protocol.",

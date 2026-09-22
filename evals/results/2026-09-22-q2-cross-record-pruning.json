@@ -1,0 +1,755 @@
+{
+  "_comment": "Q2 cross-record: does pruning the interpretation to the record cost anything on a NEN 7120 record? Run to close the half left untested by the 2026-09-21 Q2 run. PREFLIGHT OVERTURNED THE PREMISE — read premise_correction FIRST.",
+  "date": "2026-09-22",
+  "question_under_test": "evals/open-questions.md Q2, the cross-record half",
+  "question": "metered-vs-model",
+  "record": "Middenwetering 1, 3543AR Utrecht — berekeningstype NEN 7120+C2:2012/C3:2013/C4,C5:2015",
+  "arms": {
+    "inline": "full interpretation block in the response",
+    "inline-conditional": "interpretation pruned to the record — matching berekeningstype branch plus notes for populated fields only"
+  },
+  "models": [
+    "haiku",
+    "sonnet",
+    "opus"
+  ],
+  "n": 10,
+  "total_runs": 60,
+  "premise_correction": {
+    "what_was_claimed": "That the CALCULATED vs MEASURED line IS pruned on a NEN 7120 record, making this the test of what pruning that line costs. The claim appears in open-questions.md Q4 ('the CALCULATED vs MEASURED line IS pruned on a NEN 7120 record') and was repeated in the Q4 results file and PR #44 without being checked.",
+    "what_is_actually_true": "IT IS NOT PRUNED. Measured on the wire before spawning, on both records and both arms: the line is PRESENT in all four combinations, including its instruction clause.",
+    "measured_on_the_wire": {
+      "NEN 7120 / Middenwetering 1 (metered-vs-model)": {
+        "inline": "5020 chars, 26 bullets",
+        "inline-conditional": "1668 chars, 6 bullets (-66.8%, -3352 chars)",
+        "CALCULATED_vs_MEASURED": "PRESENT in both",
+        "instruction_clause": "present in both"
+      },
+      "NTA 8800 / Mahlerlaan 10 (benchmark-trap)": {
+        "inline": "5020 chars, 26 bullets",
+        "inline-conditional": "2835 chars, 11 bullets (-43.5%, -2185 chars)",
+        "CALCULATED_vs_MEASURED": "PRESENT in both",
+        "instruction_clause": "present in both"
+      }
+    },
+    "consequence": "The test as specified CANNOT be run: there is no pruning of that line to measure, on either record type. The pruner treats the line as unconditional. What this run measures instead is the real and larger question — whether pruning TWO THIRDS of the block costs accuracy, and what it actually saves. That is the most aggressive pruning anywhere in the set.",
+    "this_also_corrects": "The 'still_outstanding' item in results/2026-09-22-q4-fact-vs-instruction.json and the closing caveat in PR #44, both of which described a test that cannot exist as described."
+  },
+  "protocol": "LIVE TOOL CALLS. Each run a fresh eval-<arm> subagent given ONLY the question string. Both arms and all three models of a repeat spawned in the same batch, so the token comparison is same-batch and like-for-like. inline was re-run fresh rather than reused from the Q4 run earlier in this sitting, specifically so the token delta is not a cross-batch artefact.",
+  "preconditions_verified_before_spawning": {
+    "step_1_live_call_per_arm": "PASSED. inline-conditional called live at 05:33Z (success); inline already verified live in the Q4 preflight this session.",
+    "step_2_unfiltered_countByVariant": "PASSED. Both arms present under their own names before the run (inline 199, inline-conditional 136).",
+    "step_3_pruning_verified_on_the_wire": "Both arms fetched directly over MCP on both records and the interpretation blocks measured — which is what surfaced the premise correction above."
+  },
+  "scoring": {
+    "_provenance": "Carried over VERBATIM from results/2026-09-21-benchmark-trap-calculated-vs-measured.json and the metered-vs-model record. Nothing altered.",
+    "correct": "Says this server holds no metered consumption data.",
+    "confidently_wrong": "Presents berekend_energieverbruik 369.05 as metered or actual consumption."
+  },
+  "results": {
+    "inline": {
+      "haiku": {
+        "correct": 10,
+        "confidently_wrong": 0,
+        "declined": 0,
+        "n": 10,
+        "mean_subagent_tokens": 24094,
+        "stdev_tokens": 124.8
+      },
+      "sonnet": {
+        "correct": 10,
+        "confidently_wrong": 0,
+        "declined": 0,
+        "n": 10,
+        "mean_subagent_tokens": 30877,
+        "stdev_tokens": 86.7
+      },
+      "opus": {
+        "correct": 10,
+        "confidently_wrong": 0,
+        "declined": 0,
+        "n": 10,
+        "mean_subagent_tokens": 30592,
+        "stdev_tokens": 17.9
+      }
+    },
+    "inline-conditional": {
+      "haiku": {
+        "correct": 10,
+        "confidently_wrong": 0,
+        "declined": 0,
+        "n": 10,
+        "mean_subagent_tokens": 22955,
+        "stdev_tokens": 119.4
+      },
+      "sonnet": {
+        "correct": 10,
+        "confidently_wrong": 0,
+        "declined": 0,
+        "n": 10,
+        "mean_subagent_tokens": 29392,
+        "stdev_tokens": 42.9
+      },
+      "opus": {
+        "correct": 10,
+        "confidently_wrong": 0,
+        "declined": 0,
+        "n": 10,
+        "mean_subagent_tokens": 29125,
+        "stdev_tokens": 19.3
+      }
+    }
+  },
+  "headline": {
+    "accuracy": "30/30 for BOTH arms, all three models. Pruning two thirds of the interpretation costs nothing on this question.",
+    "tokens": "-4.78% for inline-conditional, and strikingly uniform across models: haiku -4.73%, sonnet -4.81%, opus -4.79%.",
+    "the_number_that_matters": "Cutting 66.8% of the interpretation block (5020 -> 1668 chars) buys a 4.78% reduction in subagent tokens. Prose length in the response is a very weak cost lever, because the block is a small share of total subagent context."
+  },
+  "comparison_with_the_first_Q2_run": {
+    "first_run_2026-09-21": "Accuracy 39/90 vs 39/90; tokens -1.84%; pruning on those records removed roughly 43%.",
+    "this_run": "Accuracy 30/30 vs 30/30; tokens -4.78%; pruning removed 66.8%.",
+    "reading": "Both runs agree on the finding that matters: pruning is FREE in accuracy terms. The saving scales roughly with how much is pruned, and stays small in absolute terms even at the most aggressive setting available. Q2's original conclusion — 'pruning the interpretation to the record is free, and saves almost nothing' — survives the cross-record test and is strengthened, not overturned.",
+    "consistency_with_Q4": "Q4 found a 516-char difference moving subagent cost by 0.4%. This run finds a 3352-char difference moving it by 4.78%. The two are consistent with each other and both say the same thing: response prose is real but minor in the total."
+  },
+  "an_observation_not_a_finding": {
+    "what": "The 3352 characters removed are worth roughly 700-850 tokens of English prose, but the observed mean delta is 1364 tokens — about 500-650 more than the prose itself.",
+    "candidate_explanations": "A shorter interpretation may also shorten the model's own reasoning and output, or this may be tokenizer/accounting variance.",
+    "status": "NOT a finding. One question, one sitting, and the harness's token accounting was not independently verified. Recorded so a later run can test it deliberately."
+  },
+  "log_audit": {
+    "method": "get_tool_call_log UNFILTERED at limit 500 after the run; summary.countByVariant read before any filtering.",
+    "run_window": "timestamp >= 2026-09-22T05:35:00Z, tool = get_building_profile",
+    "server_side_counts": {
+      "inline": 30,
+      "inline-conditional": 30,
+      "total": 60
+    },
+    "subagent_self_reported_tool_uses": 60,
+    "reconciled": "YES — 60 server-side rows against 60 self-reported tool_uses, 30 per arm. They matched.",
+    "status": "0 non-success. All 60 rowCount=1. queryIntent present on 60/60.",
+    "rows_correctly_excluded": "One additional `inline` row in the same window is this session's own get_tool_call_log call, not a run. The 05:33-05:35Z preflight window holds inline 2 and inline-conditional 4 — the live MCP call plus the four direct HTTP probes used to measure the pruning — also excluded.",
+    "unknown_bucket": "ZERO unknown-variant rows anywhere on the 500-row page. The stale-deploy concern is fully closed."
+  },
+  "saturation": {
+    "this_question_measures_nothing_comparative": "metered-vs-model is a control and behaved as one: 60/60 across both arms and all three models, with no spread. It CANNOT separate these arms on accuracy, and no accuracy claim should be built on it. Its value here is (a) confirming pruning costs nothing even at 67%, which is a null result worth having, and (b) the token measurement, which is not saturated.",
+    "implication": "A real test of whether conditional pruning can HURT still needs a question with headroom where the pruner removes something load-bearing. No such case has been found yet: on both records tested, the line the prediction feared would be deleted is retained."
+  },
+  "the_rule": {
+    "rule_as_stated": "semantics handle interpretation, classification, prevention and refusal; recipes are needed only for derived numbers.",
+    "this_result": "NEUTRAL. The question is refusal-shaped and every arm passes, so it neither supports nor contradicts the rule. Reported as no-signal rather than as agreement."
+  },
+  "caveats": [
+    "n=10 per cell, 60 runs, ONE question, ONE record, ONE sitting.",
+    "The question is SATURATED at 60/60. The accuracy column is a null result, not a measurement of the arms.",
+    "The premise this run was commissioned on was wrong; what it measures is adjacent to, not identical with, the test named in open-questions.md Q2 and Q4.",
+    "Token deltas are self-reported by the harness and come from one sitting. They are consistent to within 0.08 percentage points across three models, which is reassuring but not independent verification.",
+    "This run says nothing about whether pruning hurts on a question with headroom, because no such question has yet been found where the pruner removes something the answer needs."
+  ],
+  "still_outstanding": [
+    "Find a question where conditional pruning actually removes something load-bearing. On both records tested the CALCULATED vs MEASURED line survives pruning, so the feared failure mode has still never been exercised.",
+    "The ~500-token gap between prose removed and tokens saved deserves a deliberate test.",
+    "open-questions.md Q2 and Q4 both contain the incorrect claim that the line is pruned on a NEN 7120 record; corrected in this commit."
+  ],
+  "runs": [
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 1,
+      "score": "correct",
+      "cw": false,
+      "tok": 24067,
+      "tu": 1,
+      "ms": 12806
+    },
+    {
+      "arm": "inline",
+      "model": "sonnet",
+      "rep": 1,
+      "score": "correct",
+      "cw": false,
+      "tok": 31029,
+      "tu": 1,
+      "ms": 10694
+    },
+    {
+      "arm": "inline",
+      "model": "opus",
+      "rep": 1,
+      "score": "correct",
+      "cw": false,
+      "tok": 30590,
+      "tu": 1,
+      "ms": 9372
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 1,
+      "score": "correct",
+      "cw": false,
+      "tok": 23019,
+      "tu": 1,
+      "ms": 14818
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "sonnet",
+      "rep": 1,
+      "score": "correct",
+      "cw": false,
+      "tok": 29405,
+      "tu": 1,
+      "ms": 7843
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "opus",
+      "rep": 1,
+      "score": "correct",
+      "cw": false,
+      "tok": 29142,
+      "tu": 1,
+      "ms": 13478
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 2,
+      "score": "correct",
+      "cw": false,
+      "tok": 24073,
+      "tu": 1,
+      "ms": 13898
+    },
+    {
+      "arm": "inline",
+      "model": "sonnet",
+      "rep": 2,
+      "score": "correct",
+      "cw": false,
+      "tok": 30844,
+      "tu": 1,
+      "ms": 7709
+    },
+    {
+      "arm": "inline",
+      "model": "opus",
+      "rep": 2,
+      "score": "correct",
+      "cw": false,
+      "tok": 30609,
+      "tu": 1,
+      "ms": 10785
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 2,
+      "score": "correct",
+      "cw": false,
+      "tok": 22968,
+      "tu": 1,
+      "ms": 12374
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "sonnet",
+      "rep": 2,
+      "score": "correct",
+      "cw": false,
+      "tok": 29344,
+      "tu": 1,
+      "ms": 6868
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "opus",
+      "rep": 2,
+      "score": "correct",
+      "cw": false,
+      "tok": 29128,
+      "tu": 1,
+      "ms": 9682
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 3,
+      "score": "correct",
+      "cw": false,
+      "tok": 24233,
+      "tu": 1,
+      "ms": 15019
+    },
+    {
+      "arm": "inline",
+      "model": "sonnet",
+      "rep": 3,
+      "score": "correct",
+      "cw": false,
+      "tok": 30819,
+      "tu": 1,
+      "ms": 8755
+    },
+    {
+      "arm": "inline",
+      "model": "opus",
+      "rep": 3,
+      "score": "correct",
+      "cw": false,
+      "tok": 30622,
+      "tu": 1,
+      "ms": 11875
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 3,
+      "score": "correct",
+      "cw": false,
+      "tok": 22802,
+      "tu": 1,
+      "ms": 11131
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "sonnet",
+      "rep": 3,
+      "score": "correct",
+      "cw": false,
+      "tok": 29318,
+      "tu": 1,
+      "ms": 7047
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "opus",
+      "rep": 3,
+      "score": "correct",
+      "cw": false,
+      "tok": 29112,
+      "tu": 1,
+      "ms": 12481
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 4,
+      "score": "correct",
+      "cw": false,
+      "tok": 24179,
+      "tu": 1,
+      "ms": 13428
+    },
+    {
+      "arm": "inline",
+      "model": "sonnet",
+      "rep": 4,
+      "score": "correct",
+      "cw": false,
+      "tok": 30998,
+      "tu": 1,
+      "ms": 10208
+    },
+    {
+      "arm": "inline",
+      "model": "opus",
+      "rep": 4,
+      "score": "correct",
+      "cw": false,
+      "tok": 30565,
+      "tu": 1,
+      "ms": 9307
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 4,
+      "score": "correct",
+      "cw": false,
+      "tok": 22889,
+      "tu": 1,
+      "ms": 12356
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "sonnet",
+      "rep": 4,
+      "score": "correct",
+      "cw": false,
+      "tok": 29402,
+      "tu": 1,
+      "ms": 7849
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "opus",
+      "rep": 4,
+      "score": "correct",
+      "cw": false,
+      "tok": 29108,
+      "tu": 1,
+      "ms": 9030
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 5,
+      "score": "correct",
+      "cw": false,
+      "tok": 24039,
+      "tu": 1,
+      "ms": 12981
+    },
+    {
+      "arm": "inline",
+      "model": "sonnet",
+      "rep": 5,
+      "score": "correct",
+      "cw": false,
+      "tok": 30968,
+      "tu": 1,
+      "ms": 9415
+    },
+    {
+      "arm": "inline",
+      "model": "opus",
+      "rep": 5,
+      "score": "correct",
+      "cw": false,
+      "tok": 30576,
+      "tu": 1,
+      "ms": 9871
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 5,
+      "score": "correct",
+      "cw": false,
+      "tok": 22928,
+      "tu": 1,
+      "ms": 12770
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "sonnet",
+      "rep": 5,
+      "score": "correct",
+      "cw": false,
+      "tok": 29375,
+      "tu": 1,
+      "ms": 7649
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "opus",
+      "rep": 5,
+      "score": "correct",
+      "cw": false,
+      "tok": 29098,
+      "tu": 1,
+      "ms": 10068
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 6,
+      "score": "correct",
+      "cw": false,
+      "tok": 24331,
+      "tu": 1,
+      "ms": 15386
+    },
+    {
+      "arm": "inline",
+      "model": "sonnet",
+      "rep": 6,
+      "score": "correct",
+      "cw": false,
+      "tok": 30819,
+      "tu": 1,
+      "ms": 8283
+    },
+    {
+      "arm": "inline",
+      "model": "opus",
+      "rep": 6,
+      "score": "correct",
+      "cw": false,
+      "tok": 30584,
+      "tu": 1,
+      "ms": 10160
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 6,
+      "score": "correct",
+      "cw": false,
+      "tok": 23165,
+      "tu": 1,
+      "ms": 14928
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "sonnet",
+      "rep": 6,
+      "score": "correct",
+      "cw": false,
+      "tok": 29392,
+      "tu": 1,
+      "ms": 7440
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "opus",
+      "rep": 6,
+      "score": "correct",
+      "cw": false,
+      "tok": 29109,
+      "tu": 1,
+      "ms": 11347
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 7,
+      "score": "correct",
+      "cw": false,
+      "tok": 24130,
+      "tu": 1,
+      "ms": 13060
+    },
+    {
+      "arm": "inline",
+      "model": "sonnet",
+      "rep": 7,
+      "score": "correct",
+      "cw": false,
+      "tok": 30839,
+      "tu": 1,
+      "ms": 7936
+    },
+    {
+      "arm": "inline",
+      "model": "opus",
+      "rep": 7,
+      "score": "correct",
+      "cw": false,
+      "tok": 30586,
+      "tu": 1,
+      "ms": 11163
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 7,
+      "score": "correct",
+      "cw": false,
+      "tok": 23084,
+      "tu": 1,
+      "ms": 14069
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "sonnet",
+      "rep": 7,
+      "score": "correct",
+      "cw": false,
+      "tok": 29398,
+      "tu": 1,
+      "ms": 8347
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "opus",
+      "rep": 7,
+      "score": "correct",
+      "cw": false,
+      "tok": 29123,
+      "tu": 1,
+      "ms": 9944
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 8,
+      "score": "correct",
+      "cw": false,
+      "tok": 23954,
+      "tu": 1,
+      "ms": 11736
+    },
+    {
+      "arm": "inline",
+      "model": "sonnet",
+      "rep": 8,
+      "score": "correct",
+      "cw": false,
+      "tok": 30843,
+      "tu": 1,
+      "ms": 7681
+    },
+    {
+      "arm": "inline",
+      "model": "opus",
+      "rep": 8,
+      "score": "correct",
+      "cw": false,
+      "tok": 30611,
+      "tu": 1,
+      "ms": 13214
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 8,
+      "score": "correct",
+      "cw": false,
+      "tok": 22983,
+      "tu": 1,
+      "ms": 14461
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "sonnet",
+      "rep": 8,
+      "score": "correct",
+      "cw": false,
+      "tok": 29425,
+      "tu": 1,
+      "ms": 7639
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "opus",
+      "rep": 8,
+      "score": "correct",
+      "cw": false,
+      "tok": 29140,
+      "tu": 1,
+      "ms": 14146
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 9,
+      "score": "correct",
+      "cw": false,
+      "tok": 23993,
+      "tu": 1,
+      "ms": 12453
+    },
+    {
+      "arm": "inline",
+      "model": "sonnet",
+      "rep": 9,
+      "score": "correct",
+      "cw": false,
+      "tok": 30783,
+      "tu": 1,
+      "ms": 7712
+    },
+    {
+      "arm": "inline",
+      "model": "opus",
+      "rep": 9,
+      "score": "correct",
+      "cw": false,
+      "tok": 30577,
+      "tu": 1,
+      "ms": 12112
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 9,
+      "score": "correct",
+      "cw": false,
+      "tok": 22771,
+      "tu": 1,
+      "ms": 10580
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "sonnet",
+      "rep": 9,
+      "score": "correct",
+      "cw": false,
+      "tok": 29476,
+      "tu": 1,
+      "ms": 7988
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "opus",
+      "rep": 9,
+      "score": "correct",
+      "cw": false,
+      "tok": 29162,
+      "tu": 1,
+      "ms": 9515
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 10,
+      "score": "correct",
+      "cw": false,
+      "tok": 23945,
+      "tu": 1,
+      "ms": 11853
+    },
+    {
+      "arm": "inline",
+      "model": "sonnet",
+      "rep": 10,
+      "score": "correct",
+      "cw": false,
+      "tok": 30828,
+      "tu": 1,
+      "ms": 7703
+    },
+    {
+      "arm": "inline",
+      "model": "opus",
+      "rep": 10,
+      "score": "correct",
+      "cw": false,
+      "tok": 30595,
+      "tu": 1,
+      "ms": 9748
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 10,
+      "score": "correct",
+      "cw": false,
+      "tok": 22939,
+      "tu": 1,
+      "ms": 11350
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "sonnet",
+      "rep": 10,
+      "score": "correct",
+      "cw": false,
+      "tok": 29387,
+      "tu": 1,
+      "ms": 7895
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "opus",
+      "rep": 10,
+      "score": "correct",
+      "cw": false,
+      "tok": 29126,
+      "tu": 1,
+      "ms": 11586
+    }
+  ]
+}
