@@ -127,6 +127,17 @@ BAG and EP-Online are live registers. Re-capture before a scoring run.
 
 ## What we found
 
+> ### ⚠️ 2026-09-22 — the description channel was truncated in every run below
+>
+> The host these runs used (Claude Code) sends only the **first 2,048 characters** of each
+> MCP tool description. In `words` and `rich` that cuts 70–72%: nearly the whole
+> INTERPRETATION block, the CALCULATED vs MEASURED line and the overheating threshold.
+> §4 and §9 below compare **delivered** guidance (response) with **undelivered** guidance
+> (description past the cut). Their numbers stand; their mechanism is not "channel". It is
+> "whether the text arrived". The claim *the response beats the description* is
+> **untested**. See Q7 in [`open-questions.md`](open-questions.md) and
+> [`results/2026-09-22-q7-description-truncation.json`](results/2026-09-22-q7-description-truncation.json).
+
 Everything below is from runs recorded in [`results/`](results/), each with its
 own caveats. The picture changed substantially on 2026-09-21/22: the early
 findings were n=2–3 and mostly Haiku, and have since been re-run at **n=10–20 per
@@ -285,10 +296,10 @@ unused the model invents a unit for 3.59 — 9 of 20 runs — and every invented
 (hours a year, K, °C, %) makes the number sound negligible, so 10 of 20 concluded
 low or no risk.
 
-**Why placement mattered is not established.** This measures use, not availability,
-and tool definitions are re-sent every turn on most hosts — so the description may
-have been present and simply not applied. That is [`open-questions.md`](open-questions.md)
-**Q7**, and until it lands no "the model never saw it" sentence here is quotable.
+**Why placement mattered — ANSWERED by Q7, 2026-09-22: the model never saw it.** The
+definitions are re-sent every turn, but this host cuts each MCP tool description at
+2,048 characters, and the threshold line starts at character 6,181. So this is 0 of 20
+for an *absent* sentence against 20 of 20 for a delivered one.
 
 Two things follow. **§4 was measured on a recipe; this is the same effect on a bare
 fact** — one threshold, one comparison, no arithmetic. And **`inline` is the

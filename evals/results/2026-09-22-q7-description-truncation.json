@@ -1,0 +1,92 @@
+{
+  "_comment": "Q7 from evals/open-questions.md. Method pinned in the Q7 amendment (commit ab4c1e6) before 7a was computed and before any canary arm existed. 7b was BUILT, deployed and verified, and then NOT RUN, for the reason in `why_7b_was_not_run`. No eval subagent run was spawned for this file; the evidence is the host's own tool listing, the API's per-request usage recorded in ~1,000 existing subagent transcripts, and two zero-tool diagnostic probes.",
+  "date": "2026-09-22",
+  "question": "Q7 — was the tool description ABSENT at interpretation time, or present and ignored?",
+  "host": "Claude Code (desktop app, Code tab), subagents spawned via the Agent tool — the host every run in this repo used.",
+
+  "headline": "ABSENT — but not for the reason the question imagined. The tool definitions ARE re-sent on every request (7a, 1,012 of 1,012 runs). What is re-sent is the description CUT AT 2,048 CHARACTERS. This host truncates every MCP tool description to its first 2,048 characters and appends '… [truncated]'. `words`' description is 6,779 characters; the 1.5 overheating threshold line starts at character 6,181. It never reached the model, on any turn, in any run.",
+
+  "the_single_cleanest_number": "Asked, with no tool calls, what their get_building_profile description ends with, an eval-words subagent on haiku AND one on sonnet both quote it ending '…EMG forfaitair populated for utiliteitsbouw only (null fo… [truncated]' — which is character 2,048 of the live description, measured independently from raw tools/list. Both say the words 'temperatuuroverschrijding' and 'CALCULATED' do not appear.",
+
+  "evidence": {
+    "1_host_listing": "This session's own view of mcp__eval-words__get_building_profile and mcp__eval-opaque-words__get_building_profile (via ToolSearch select) ends in '… [truncated]'. Matching against raw HTTP tools/list from the deployed functions, the shown text is exactly the first 2,048 characters in both cases (words 6,779 → 2,048; opaque-words 4,789 → 2,048). The server instructions of the prose arms are shown truncated the same way.",
+    "2_subagent_probes": {
+      "method": "Two eval-words subagents (haiku, sonnet), told not to call any tool, asked for the final 120 characters of their get_building_profile description verbatim and whether two words appear. Diagnostic only; not an eval run and not scored.",
+      "haiku": "Final 120: 'ppervlakte populated. energie_index = null. EMG forfaitair populated for utiliteitsbouw only (null fo… [truncated]'. temperatuuroverschrijding: no. CALCULATED: no. tool_uses 0, subagent_tokens 32,005.",
+      "sonnet": "Same ending, and adds unprompted that the description 'was cut off with a \"[truncated]\" marker in what I was given, so this is not the tool's true ending'. temperatuuroverschrijding: no. CALCULATED: no. tool_uses 0, subagent_tokens 31,560."
+    },
+    "3_token_accounting_same_session": {
+      "method": "Median request-1 total input (input + cache_creation + cache_read) from the transcripts on disk, pairs of arms run in the SAME parent session on the SAME question and model, so the system prompt is held constant.",
+      "words_to_words_recipe": "+12 (haiku), +24 (sonnet, opus) tokens. `words-recipe` appends 438 bytes AFTER character 6,779. If delivered that is ~110+ tokens. +12/+24 is what the extra '-recipe' in six tool names costs. The recipe contributed nothing to the request.",
+      "words_to_rich": "+0 (haiku), +6 (sonnet, opus). `rich` appends a 579-char ALERTS paragraph after character 6,781 and adds an alerts bullet inside its server instructions. Both vanish under a fixed-length cut, which is exactly what fixed-length truncation predicts.",
+      "inline_to_inline_oneline": "+658 to +672 (haiku). The two differ only in description: a one-liner vs descriptionCore (6,779 chars). ~660 tokens is about 2,048 characters, not 6,779.",
+      "opaque_to_opaque_words": "+644 (haiku), +823 (sonnet). One-liner vs 4,789 chars: again the size of 2,048 characters."
+    }
+  },
+
+  "7a_accounting": {
+    "method_as_pinned": "For every eval-* run with >=2 requests, whether the request that follows the last get_building_profile result has cache_read >= total input of request 1 (strict), and cache_read > 0 (weak). The API caches by exact prefix in the order tools -> system -> messages, so a cache read covering request 1 means the tool definitions were re-sent byte for byte.",
+    "corpus": "1,012 eval-* subagent runs on disk across 14 arms and three models, every one with a get_building_profile call followed by at least one more request. No run used a tool-search step; MCP tools are loaded directly.",
+    "strict_as_pinned": "125 of 1,012 pass. THE PINNED CRITERION WAS WRONG, for a mechanical reason found on inspection: request 1's last 2–10 tokens (its uncached input_tokens — the tail of the user message, after the final cache breakpoint) are by construction never written to cache, so they can never be read from it. In 887 of the 887 strict failures the shortfall equals request 1's input_tokens EXACTLY.",
+    "weak_as_pinned": "1,012 of 1,012 pass.",
+    "corrected_post_hoc": "LABELLED POST HOC. cache_read(interpretation request) >= the cached part of request 1 (cache_read + cache_creation): 1,012 of 1,012. Every interpretation request re-read the whole cached portion of request 1, which begins with the tool definitions.",
+    "test_b_1_vs_3_call": "eval-words / haiku / overheating. 2-request trajectory: request-1 cached prefix 20,987; request 2 cache_read 20,987. 3-request trajectory: prefix 20,987; requests 2 and 3 cache_read 20,987 and 24,814. Across ALL eval-words runs, 199 of 199 requests after the first carry the full request-1 cached prefix. The definitions are sent on every request and billed at the cache-read rate after the first — PRESENT on every turn, as registered.",
+    "test_c": "The pinned expectation — `words` above `schema` by roughly the description's size — is what exposed the truncation: the same-session deltas in `evidence.3` are the size of 2,048 characters, not of the descriptions. The canary-vs-base half of Test C was not run, because 7b was not run."
+  },
+
+  "why_7b_was_not_run": "The canary sentence is appended at character 6,781 of `words`' description and 4,791 of `opaque-words'`. Both are past the 2,048 cut. The marker would have scored 0 of 10 on both arms by construction — a clean 'falsified' that measures the host's truncation, not whether a present description is read. Running 40 subagents to produce an artefact that already has a known cause would have cost money and added a misleading row. Both arms were deployed and verified (commit 61e3d89) and then DELETED on 2026-09-23 — `firebase functions:delete` on mcpWordsCanary and mcpOpaqueWordsCanary (both now 404 while mcpWords still answers 200), and the wiring reverted. They answered nothing as built. To rebuild them, see commit 61e3d89; a useful canary must sit inside the first 2,048 characters.",
+
+  "prediction_scoring": {
+    "registered": "Present, and read. 7a shows tool-definition bytes charged per turn; 7b's marker appears in >=8 of 10 runs on both arms.",
+    "7a_half": "HOLDS as worded — the definitions are re-sent and charged every turn.",
+    "7b_half": "NOT TESTED. Untestable as designed on this host.",
+    "the_question_itself": "Answered, and in the direction the prediction bet AGAINST: the guidance was ABSENT at interpretation time. Not because the host drops definitions after the tool-selection turn, which is what the registration's falsifier imagined, but because it never sends more than the first 2,048 characters of any of them. 'The model never saw it' is TRUE for every line past character 2,048, on every turn."
+  },
+
+  "where_the_limit_comes_from": {
+    "in_the_binary": "Claude Code 2.1.275 hard-codes `tx=2048`. Server instructions are cut with `slice(0,tx) + '… [truncated]'`, and a line '<name> truncated from N to 2048 chars' is written ONLY to the debug log. Tool descriptions are sliced to the same constant.",
+    "changelog": "The only CHANGELOG entry that mentions it is 2.1.280: 'Added CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH to change the 2,048-character cap on MCP tool descriptions and server instructions for every MCP server in the session.' So the cap existed BEFORE 2.1.280. The version that introduced it is not established here.",
+    "docs": "The Claude Code MCP docs page (checked 2026-09-23) does not mention the cap. It documents only the 25,000-token limit on tool OUTPUT.",
+    "did_it_change_during_this_project": "No. 952 of the eval runs on disk ran on 2.1.275 and 60 on 2.1.280. The `words` − `thin` request-1 delta is an identical +3,727 tokens (haiku) / +4,879 (sonnet, opus) in every session, from the first run on 2026-09-21 06:13 onward. Every live-tool-call run in this repo was truncated.",
+    "why_nobody_saw_it": "Every check in this repo was protocol-side. Raw HTTP tools/list, the unit tests and the log audit all see the full description, because the cut happens inside the client after tools/list. The only host-side trace is a debug-log line. research-frame.md warned about exactly this gap ('protocol-visible is not model-effective'); Q7 was the first run to look at the model-facing context.",
+    "now_configurable": "From 2.1.280, CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH raises the cap per session. That makes a direct re-run of the description arms with the full text possible, in a session started with the variable set."
+  },
+
+  "runs_affected": {
+    "method": "Live eval subagent transcripts on disk (1,014; earlier runs recorded in results files are not all on disk), by arm × question, against where the question's guidance sits relative to char 2,048.",
+    "affected_guidance_never_delivered": "words: gas-estimate 61, total-vs-per-m2 61, overheating 43 (165 of its 188). words-recipe: all 30 (the recipe sits at char 6,781). opaque-words: gas-estimate 13 plus the overheating runs among its 26 others. rich: its overheating runs from before the computed alert. ≈ 250 runs in all.",
+    "unaffected": "Every response-channel arm (inline, inline-oneline, inline-conditional, inline-recipe, inline-fact, inline-instruction; ≈ 390 runs). thin and schema, which carry no prose. rich wherever its answer came from computed alerts, which ride in the response. wrong-unit and building-size on words, whose guidance sits in QUERY STRATEGY, before the cut. All payload-in-prompt files, where the prose was pasted into the prompt in full."
+  },
+
+  "what_was_past_the_cut": {
+    "words_rich_words-recipe": "Visible: RETURNS, WHEN TO USE, WHEN NOT TO USE, QUERY STRATEGY, the INTERPRETATION header and part of its first bullet (NTA 8800). CUT: every other INTERPRETATION line — the NEN 7120 and Nader Voorschrift unit warnings, matchStatus, energielabel null, the ep1 Paris Proof line (3,194), CALCULATED vs MEASURED (3,377), energie_index, thermal-zone vs BAG area (4,229), co2 units, warmtebehoefte, temperatuuroverschrijding (6,181), compactheid; `rich`'s ALERTS paragraph; `words-recipe`'s DERIVED FIGURES recipe (6,781). 70–72% of each description.",
+    "opaque-words": "Visible: RETURNS and the FIELD GUIDE through st, n_c, adr, opp, f_ga, n_vbo, gbd/gk, bj, vbo_st, lbl, calc_t and most of the NEN 7120 bullet. CUT: Nader Voorschrift, ei, ep1, ep2, wb bands, `to` (the overheating threshold, 3,105), cmp, the DERIVED FIGURES recipe (4,025), QUERY STRATEGY, WHEN NOT TO USE. 57%.",
+    "response_channel_arms": "`inline`, `inline-oneline`, `inline-conditional`, `inline-recipe`, `inline-fact`, `inline-instruction` carry their guidance in the tool RESULT, which is not subject to this cut. Their results stand as delivered text."
+  },
+
+  "what_this_changes": [
+    "Q1 (29/30 response vs 4/30 description) — the description copy of the recipe was appended past character 6,779 and never delivered. The comparison is DELIVERED vs UNDELIVERED, not response vs description. 'Weakened' is wrong; so is 'present but not applied'. The honest statement is: on this host, guidance past the first 2,048 characters of a tool description does not exist for the model.",
+    "Q13 and Q14 (the 1.5 line: 0/20 cited in the description, 20/20 in the response) — the description copy was never delivered. 0 of 20 is what a model does when the sentence is absent. The withdrawn mechanism claim is now CORRECTED, not confirmed: the model did not see it.",
+    "Q6 ('prose will not fix it', opaque-words 0/7 with the threshold 'spelled out in capitals') — the `to` line sits at character 3,105; it was never delivered. That test did not measure prose.",
+    "README §2 ('they trusted the name and skipped the prose beside it') — on the live-tool-call arms the prose beside it (CALCULATED vs MEASURED, ep1 Paris Proof) was past the cut. Where §2 rests on payload-in-prompt runs it is unaffected; where it rests on live `words`/`rich` runs it measured absent prose.",
+    "README §4 / research-frame principle 1 ('guidance works far better in the RESPONSE than in the description') — on this host it is 'text delivered beats text not delivered', plus whatever the first 2,048 characters did. The channel claim is UNTESTED, not falsified: no run here has ever compared the same sentence delivered in both channels.",
+    "The `words` rung of the readable ladder is really 'the first 2,048 characters of the prose'. Every `schema -> words` claim measured that, not the prose.",
+    "Q3 and Q5 — `rich`'s '+725 chars of tool definition per call' input penalty was computed from the protocol objects. The appended paragraph was never sent (same-session request-1 delta words -> rich: +0 haiku, +6 sonnet/opus). The response-side +788 chars are real. Q3's '~378 tokens more on input' is overstated by the definition half; its residual-deliberation arithmetic needs redoing with the measured figure.",
+    "MCPSER-81 — the live Warmtebouw Duurzaam get_building_profile description is ALSO cut at 2,048 characters in this host (it stops mid-QUERY STRATEGY 2). Its threshold line cannot be reaching Claude Code users at all. Q14's one-line-in-the-response fix still stands and is now also the explanation."
+  ],
+
+  "what_this_does_NOT_establish": [
+    "Whether a sentence that IS delivered in the description is applied. That is the question Q7 was trying to ask, and it is still open. The canary, and the 1.5 line, must sit inside the first 2,048 characters to test it.",
+    "Anything about other hosts. The cut is a property of this client, not of MCP; the protocol sets no description limit. Other clients may send the full text.",
+    "Why the limit exists or whether it is configurable. Not investigated; not claimed.",
+    "That the results in the channel-arm rows are wrong. They measured real, delivered text and stand."
+  ],
+
+  "caveats": [
+    "One transcript was opened before the method was pinned, to find that per-request usage exists. Disclosed in the amendment.",
+    "The strict 7a criterion as pinned was wrong for a mechanical reason; it is reported as pinned (125/1,012) and the correction is labelled post hoc. The weak criterion, also pinned, is 1,012/1,012.",
+    "The truncation was found through Test C's pinned comparison but confirmed by means not in the pinned method: the host's tool listing and two diagnostic probes. Those are reported as what they are.",
+    "The per-request usage is the API's accounting as written by the client into its transcript — not a capture of the request body.",
+    "The deploy of the canary arms was done with the Firebase account that owns the project (davidgolverdingen@gmail.com, per-command --account); the default CLI account lacks iam.serviceAccounts.ActAs."
+  ]
+}

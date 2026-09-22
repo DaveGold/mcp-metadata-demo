@@ -1,5 +1,16 @@
 # Open questions
 
+> ### ⚠️ 2026-09-22 — THE DESCRIPTION CHANNEL WAS TRUNCATED IN EVERY RUN HERE
+>
+> The host these runs used (Claude Code) sends only the **first 2,048 characters** of each
+> MCP tool description. The `words` / `rich` / `words-recipe` descriptions are 6.8–7.4k
+> characters, so **70–72% of them, including almost the whole INTERPRETATION block, the
+> CALCULATED vs MEASURED line, the overheating threshold and the recipe, never reached the
+> model.** In `opaque-words`, 57% was cut, including the `to` threshold and the recipe. Found by Q7; see its banner and
+> [`results/2026-09-22-q7-description-truncation.json`](results/2026-09-22-q7-description-truncation.json).
+> Every "description vs response" result below compares **delivered with undelivered**
+> text. Read each one that way until it is re-run with the sentence inside the cut.
+
 Twelve experiments. Each carries a **prediction registered before the run** and the
 result that would **falsify** it — written down in advance precisely because this repo
 has already been burned once by a rule chosen after seeing the answers (see
@@ -28,6 +39,10 @@ to build.
 **Q7 is foundational and is not optional.** It asks whether the tool description was even
 absent at interpretation time. If it was present, the word "weakened" is wrong everywhere
 it appears below, and Q1's result is a stronger claim than the one currently written.
+**ANSWERED 2026-09-22: absent, by truncation. See the banner at the top of this file.**
+"Weakened" is still wrong everywhere below, but for the opposite reason: nothing weakened.
+Past character 2,048 the guidance was never sent. Q1's result is a *different* claim from the
+one written, not a stronger one.
 
 Every arm Q1–Q6 needed is **built and deployed** — `inline`, `words-recipe`,
 `inline-recipe`, `inline-conditional`, `inline-fact` and `inline-instruction`. **Q8–Q11
@@ -966,6 +981,34 @@ serves two open questions.
 
 ## Q7 — Was the description ABSENT at interpretation time, or present and ignored?
 
+> **ANSWERED 2026-09-22 — ABSENT, and not for the reason this question imagined.** See
+> [`results/2026-09-22-q7-description-truncation.json`](results/2026-09-22-q7-description-truncation.json).
+>
+> **7a: the tool definitions ARE re-sent on every request** — 1,012 of 1,012 runs on disk
+> re-read request 1's whole cached prefix, which starts with the tools. **But what is
+> re-sent is the description cut at 2,048 characters.** This host (Claude Code) truncates
+> every MCP tool description to its first 2,048 characters and appends `… [truncated]`.
+> `words`' description is 6,779 characters and the 1.5 threshold line starts at character
+> **6,181**; in `opaque-words` it starts at **3,105**. It never reached the model.
+>
+> Confirmed three independent ways: the host's own tool listing; an `eval-words` subagent
+> on haiku and on sonnet, asked for the last 120 characters of its description, both
+> quoting the text ending at exactly character 2,048; and same-session token accounting,
+> where `words-recipe`'s appended 438-byte recipe adds **+12 / +24 tokens** — the length
+> of `-recipe` in six tool names, and nothing else.
+>
+> **7b was built, deployed and verified, NOT RUN, and deleted on 2026-09-23** (code in commit 61e3d89). The canary is appended past the
+> cut, so it would have scored 0/10 by construction. That result would have looked like
+> a falsification and would really have measured the truncation.
+>
+> **What it changes:** Q1, Q13, Q14 and Q6 compared *delivered* guidance with
+> *undelivered* guidance. "Weakened" is wrong. So is "present and ignored". The honest
+> statement is that, on this host, text past character 2,048 of a tool description does
+> not exist for the model. **The channel question itself is untested**: no run here has
+> put the same sentence where both channels deliver it. The question Q7 meant to ask,
+> *is a delivered description sentence applied?*, is still open, and needs the sentence
+> inside the first 2,048 characters.
+
 > **REGISTERED 2026-09-22, BEFORE THE RUN.** Registered with Q8–Q12 in one commit,
 > from the frame in [`research-frame.md`](research-frame.md).
 
@@ -1044,6 +1087,121 @@ up Q4's fact-versus-instruction result rather than repeat it.
 
 7a: re-reading instrumentation on any existing run — free. 7b: 1 question × 2 arms ×
 1 model × n=10 = **20 runs**, one description edit, one deploy.
+
+### AMENDED 2026-09-22 — BEFORE ANY 7b RUN, AND BEFORE 7a IS COMPUTED
+
+> Committed before a canary arm exists, before any 7b subagent is spawned, and before
+> the 7a corpus analysis below is run. The prediction above is **not** reopened; this
+> fixes what the registration left open. Nothing here may be revised after the answers
+> are visible.
+
+#### 7a — it is measurable, and not the way the registration assumed
+
+The harness's `subagent_tokens` is one total per run, so it cannot answer 7a. **But
+every subagent transcript on disk records the API's own `usage` for every request** —
+`input_tokens`, `cache_creation_input_tokens`, `cache_read_input_tokens` — under
+`~/.claude/projects/*building-profile*/*/subagents/agent-*.jsonl`, with `agentType`
+and `model` in the sibling `.meta.json`. ~1,500 eval runs are on disk, ~230 of them
+`eval-words`.
+
+**Disclosure.** That this data exists was found by opening ONE transcript (an
+`eval-words` / haiku / `overheating` run: request 1 input 20,997; request 2 cache-read
+20,987). Nothing else was inspected before this amendment.
+
+**Why cache reads answer the question.** The Messages API caches by exact prefix, in
+the fixed order **tools → system → messages**. A request whose `cache_read_input_tokens`
+covers the whole of request 1's input began with request 1's prefix byte for byte —
+**including the tool definitions**, which come first. If the definitions were dropped
+or changed after request 1, the prefix would break at its very start.
+
+**Method, pinned.**
+
+- One API request = one assistant `message.id`; usage from its final streamed line.
+  `total_in = input_tokens + cache_creation_input_tokens + cache_read_input_tokens`.
+- **Test A — present at the interpretation request.** For every `eval-*` run with ≥2
+  requests, whether the request that follows the last `get_building_profile` result has
+  `cache_read ≥ total_in(request 1)`. Reported as a fraction per arm and model, with
+  the weaker `cache_read > 0` alongside.
+- **Test B — 1-call vs 3-call, as registered.** For `eval-words` / haiku, the
+  per-request `total_in` and `cache_read` of the shortest and a ≥3-call trajectory, on
+  the same question. "Charged per turn" = the request-1 prefix appears in the input of
+  every request.
+- **Test C — the description is in that prefix at all** (i.e. not deferred behind a
+  tool search). Median `total_in(request 1)`, same question and model: `words` above
+  `schema` by roughly the description's size; and, after 7b, **`words-canary` above
+  `words` by the canary sentence's token count** and nothing else.
+- **Falsified, as registered, if** the definitions are absent from requests after the
+  first — Test A failing on most runs.
+- **Wording, fixed now.** After the first request, the prefix is billed at the
+  cache-read rate. "Charged once per session" in the registration means *sent* once;
+  a definition that is re-sent and billed at a discount is **present**, and will be
+  reported that way.
+- **Limit, fixed now.** This is Claude Code's subagent host, reading the API's
+  accounting from the client's transcript. It is the host every run in this repo used,
+  so it settles Q1/Q13/Q14 as run; it says nothing about other hosts, and it is not a
+  capture of the request body.
+
+#### 7b — the three decisions the registration left open
+
+**1. Which question.** `overheating` on **haiku**. Every answer is scored for BOTH the
+marker (an instruction in the description, obeyed?) and the 1.5 citation (a domain
+sentence in the same description, applied?).
+
+**2. Arms and n.** n=10 per canary arm, **as registered; thresholds unchanged**. The
+two bases, `words` and `opaque-words`, run in the **same batch** at n=10 as well —
+40 runs, five waves of eight, two per arm per wave. The bases are **not** part of the
+prediction. They exist to show the canary changed nothing else. Canary vs base is
+reported descriptively, under the directory's noise bar (a gap under 4 runs is noise).
+Each canary is compared **only to its own base**, never readable against opaque.
+
+**The model-visible name.** The subagent sees each MCP server's key inside every tool
+name (`mcp__<key>__get_building_profile`). A key containing `canary` would put a word
+meaning *tripwire* next to an instruction to emit a token. That is an avoidable
+confound on exactly the thing being measured. So the **`.mcp.json` keys are neutral —
+`eval-words-b` and `eval-opaque-words-b`** — while the variant, function, log and agent
+names stay `words-canary` / `opaque-words-canary` (none of those is shown to the
+model). The base keys differ from the canary keys by `-b` and nothing else.
+
+**3. What counts as the marker, and where.** The agents must return exactly
+`ANSWER:` / `CALLS:` / `TOOLS:` / `PARAMS:`, and the canary says *end your answer with
+the marker*. The two instructions compete, so position cannot be what the prediction is
+scored on.
+
+- **OBEYED** (the prediction's measure) = the token `D7`, bare or in any bracket pair
+  (`⟨D7⟩`, `<D7>`, `[D7]`, `(D7)`), **anywhere** in the subagent's returned text. `D7`
+  appears in nothing else the subagent sees — not the question, the agent prompt, the
+  payload or the addresses file (checked). A run that *mentions* the marker ("the tool
+  asks me to add ⟨D7⟩") also counts: it proves the sentence was read, which is all Q7
+  asks.
+- **Reported, not thresholded:** EXACT (`⟨D7⟩`) vs VARIANT; and position —
+  `END_OF_ANSWER` (last token of the ANSWER line), `IN_ANSWER`, `AFTER_PARAMS` (on or
+  after the PARAMS line), `OTHER`. A marker after PARAMS **counts as obeyed**; it is
+  the canary winning "end of answer" over the format.
+- **Carried or produced?** From the transcript on disk: whether `D7` appears in any
+  assistant text *before* the final request. If it only appears in the final message,
+  it was produced at the post-tool step. Thinking may not be visible on disk; say so
+  where it is not.
+- **Confirmed** if OBEYED ≥ 8/10 on **both** canary arms. **Falsified** if ≤ 3/10 on
+  **either**. Anything else is partial and is reported as direction only. (The
+  registration's "falsified if ≤3 of 10" did not say *on either arm*; this is the
+  reading, fixed now.)
+
+**Domain scoring.** CORRECT / CONFIDENTLY_WRONG / OTHER / FABRICATED / CITES_1_5 exactly
+as pinned in `results/2026-09-22-q13-overheating-response-channel.json` → `scoring_rule`,
+applied to the answer with the marker stripped. `opaque-words` carries the same
+threshold ("ABOVE 1.5 = significant overheating risk"), so the same rule applies.
+
+**The awkward outcome, operationalised.** On the same canary arm: OBEYED ≥ 8/10 **and**
+CITES_1_5 ≤ 3/10. Reported as a per-run 2×2 (marker × citation) for each canary arm,
+whatever the counts.
+
+**Exclusions, fixed now.** A run that never receives a `get_building_profile` result
+cannot test an instruction conditional on reporting a record. It is scored `NO_RECORD`,
+kept in the file, and dropped from the marker denominator. Not replaced.
+
+**Per run, recorded:** `tool_uses`, `duration_ms`, `subagent_tokens`, ANSWER character
+count (with the marker stripped), the markers above, the domain columns, and the
+per-request usage from disk.
 
 ---
 
@@ -1772,7 +1930,8 @@ where `inline` carries a 5,020-character block on every call.
   rule needing two fields to be read together might not survive the same cut.
 - **No control.** Both surviving controls are refusals and neither is in this run.
 - **Same mechanism caveat as Q13**: a citation count measures *use*, not
-  availability. Q7 still gates any claim about why.
+  availability. Q7 still gates any claim about why. **Q7 answered 2026-09-22: the
+  description copy sat past the host's 2,048-character cut and was never delivered.**
 
 ### Cost
 
