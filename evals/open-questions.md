@@ -13,8 +13,10 @@ read that file for *why these questions*: the six axes (channel, timing, distanc
 conditionality, addressability, activation), which of them the answered questions cover,
 and which design principles are still unfalsified.
 
-**Q13 is ANSWERED** — registered and run on 2026-09-22, after Q7–Q12 were filed.
-It asks whether the ALERTLESS tiers can be fixed at all, and all three of its
+**Q13 and Q14 are ANSWERED** — registered and run on 2026-09-22, after Q7–Q12 were filed.
+Q14's prediction was **confirmed**: one line in the response does what the whole block did.
+
+Q13 asks whether the ALERTLESS tiers can be fixed at all, and all three of its
 predictions were falsified. **Read it together with Q7**: Q13 measured the same
 sentence at 0-of-20 use in the description against 20-of-20 in the response, and
 Q7 is what decides whether that is *absence* or *presence-and-non-application*.
@@ -1610,6 +1612,39 @@ character count per run, and audits against `get_tool_call_log` unfiltered.
 ---
 
 ## Q14 — Is ONE line enough? The minimum viable response payload
+
+> **ANSWERED 2026-09-22 — ALL THREE PREDICTIONS CONFIRMED.** 60 runs, haiku, n=20 per
+> arm, one batch. See
+> [`results/2026-09-22-q14-one-line-response.json`](results/2026-09-22-q14-one-line-response.json).
+>
+> | arm | response carries | correct | fabricated | **cited 1.5** | tokens (median) |
+> |---|---|---|---|---|---|
+> | `words` | nothing | 8/20 | 20 | **0 of 20** | 27,615 |
+> | **`inline-oneline`** | **one 181-char line** | **20/20** | 1 | **20 of 20** | **23,556** |
+> | `inline` | the whole 5,020-char block | 20/20 | 0 | 20 of 20 | 24,058 |
+>
+> P1 (≥16) → **20**. P2 (gap ≥8) → **+12**. P3 (cited ≥16) → **20**. The second confirmed
+> prediction in this file, after Q5 — and, like Q5, the one that bet on the simpler
+> mechanism.
+>
+> **One line does what the whole block did.** The line is in the *description* of both
+> `words` and `inline-oneline`, byte for byte; the only difference is that
+> `inline-oneline` also carries it in the response. Cited 0 of 20 without that copy, 20
+> of 20 with it. The counter-case — that a response needs enough bulk to be noticed —
+> did not fire.
+>
+> **Adding 181 characters made it 14.7% cheaper** than `words` (median), with answer
+> lengths within 10 characters. The `words` runs spend the difference improvising a
+> unit for 3.59; every one of them did. Against `inline` the one-line arm is cheaper by
+> only ~2% — a tie. The saving is from answering the question, not from shipping less.
+>
+> **For MCPSER-81 this is the answer:** a plain server can fix the overheating defect by
+> adding the one relevant line to its response. Not by moving its block, not by
+> computing an alert.
+>
+> **It does not settle Q7.** Both arms carry the line in the description, which is
+> compatible with it being absent at interpretation time *and* with it being present
+> and ignored.
 
 > **REGISTERED 2026-09-22, BEFORE THE RUN.** Committed before any run is spawned.
 >
