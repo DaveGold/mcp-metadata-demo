@@ -596,6 +596,39 @@ call repeatedly, and the claim has to be narrowed accordingly.
 
 ## Q5 — Does the deliberation saving survive when the answer is NOT handed over?
 
+> **ANSWERED 2026-09-22 — PREDICTION CONFIRMED. The first one in this file that
+> has survived its own test.** 20 runs, haiku, n=10 per arm, same batch. See
+> [`results/2026-09-22-q5-deliberation-control.json`](results/2026-09-22-q5-deliberation-control.json).
+>
+> | | `gas-estimate` (alerts DO answer it) | `overheating` (alerts do NOT) |
+> |---|---|---|
+> | token delta | **rich 594 CHEAPER** | **rich 1,172 DEARER** |
+> | duration ratio | **1.63×** | **1.01×** |
+>
+> The sign flips and the duration gap collapses. Same arms, same protocol, same
+> model — only the question changed. Neither falsification criterion fired.
+>
+> Magnitude ran ~3.3× larger than the predicted ~350 tokens, because the
+> prediction priced the alert payload once per call when it is in fact carried
+> through every turn, and because `rich` averaged slightly more tool calls.
+>
+> **Q3's claim now needs its qualifier:** the saving comes from metadata that
+> answers *the question being asked*. Metadata that is merely present and
+> irrelevant is charged at list price on every call — here, +1,172 tokens for five
+> alerts about gas, CO₂ and Paris Proof when the question was about overheating.
+>
+> That is more useful than the unqualified version, because it tells you what to
+> put in alerts: the things your users actually ask about.
+>
+> **A separate and serious finding:** `overheating` is **not functioning as a
+> control**. Ground truth is *significant* risk (3.59 > the 1.5 threshold), and
+> **8/10 rich and 7/10 words asserted no or low risk** — the `must_not_say`. Both
+> arms carry the threshold line and both ignore it, inventing their own instead
+> ("below the 40-hour standard", "below the 5 K threshold"). They read 3.59 as
+> degrees or hours, which sound small, rather than as the index the prose defines.
+> **This is README finding §2 again** — a misleading name defeating adjacent
+> guidance — and this time it defeats prose present in *both* arms.
+
 > **REGISTERED 2026-09-22, BEFORE THE RUN.** This is an attack on Q3's finding,
 > not a confirmation of it. Written and committed before any run was spawned.
 

@@ -26,8 +26,12 @@ arms differ only in how much the tool explains itself.
 | | `invented-label` | a 1653 building with no registered label |
 | | `absent-sizing-input` | the field the answer needs is null, and only one arm says which |
 
-`metered-vs-model`, `invented-label` and `overheating` are **controls**. `overheating` is covered by no alert, so the
-rich arm should have no advantage; the two refusals should be answered correctly
+`metered-vs-model` and `invented-label` are **controls**. `overheating` was
+designed as one — it is covered by no alert, so the rich arm should have no
+advantage — but **it does not hold**: on 2026-09-22 both arms asserted no-or-low
+risk in 7–8 runs of 10 against a ground truth of *significant*, by inventing
+thresholds instead of using the one in the prose. Treat it as a live defect, not
+a control, until that is fixed. The two refusals should be answered correctly
 by every arm. A set containing only questions the thin arm fails is selection,
 not evidence — if the controls ever separate, something other than the metadata
 is driving the result and the run is suspect.

@@ -1,0 +1,241 @@
+{
+  "_comment": "Q5 — does Q3's deliberation saving survive when rich's alerts do NOT answer the question? IT DOES NOT, exactly as predicted. The sign flips and the duration gap collapses. First registered prediction in this repo to be CONFIRMED. Also uncovers that `overheating` is not functioning as a control.",
+  "date": "2026-09-22",
+  "question_under_test": "evals/open-questions.md Q5 (registered before the run, commit 088b42f)",
+  "question": "overheating",
+  "record": "Van Beuningenstraat 1, 3039WB Rotterdam",
+  "arms": [
+    "rich",
+    "words"
+  ],
+  "models": [
+    "haiku"
+  ],
+  "n": 10,
+  "total_runs": 20,
+  "protocol": "LIVE TOOL CALLS, arms interleaved in the same batch, fresh subagent per run given ONLY the question string. Identical protocol to the Q3 run so the two are directly comparable.",
+  "why_this_question": {
+    "verified_on_the_wire_before_registering": "temperatuuroverschrijding = 3.59 is present in BOTH arms' responses. rich returns 5 alerts on this record (multiple VBOs, Paris Proof, gas estimate, CO2, heat-pump suitability) and NOT ONE mentions overheating. rich still pays the input penalty: +1,398 chars (~+350 tokens) per call.",
+    "so": "Both arms hold identical information about the thing asked, and rich carries payload irrelevant to it. If Q3's saving is deliberation about the answer, it must vanish here."
+  },
+  "THE_RESULT": {
+    "rich_mean_tokens": 28084,
+    "words_mean_tokens": 26912,
+    "token_delta": 1172,
+    "rich_mean_duration_ms": 15710,
+    "words_mean_duration_ms": 15882,
+    "duration_ratio_words_over_rich": 1.01,
+    "rich_mean_tool_uses": 1.6,
+    "words_mean_tool_uses": 1.5
+  },
+  "SIDE_BY_SIDE_WITH_Q3": {
+    "gas-estimate (rich's alerts DO answer it)": {
+      "token_delta": "rich 594 CHEAPER",
+      "duration_ratio": "1.63x"
+    },
+    "overheating (rich's alerts do NOT answer it)": {
+      "token_delta": "rich 1172 MORE EXPENSIVE",
+      "duration_ratio": "1.01x"
+    },
+    "statement": "The sign flips and the duration gap collapses from 1.63x to 1.01x. Same arms, same protocol, same model, different question."
+  },
+  "VERDICT_ON_THE_REGISTERED_PREDICTION": {
+    "predicted": "The saving disappears and reverses. rich MORE expensive by roughly its input penalty (~350 tokens, range 200-450). Durations converge to within ~1.2x.",
+    "outcome": "CONFIRMED on both limbs. This is the FIRST registered prediction in this repo that has survived its own test — Q1, Q2, Q3 and Q4 were all wrong.",
+    "direction": "correct — rich is more expensive.",
+    "magnitude": "LARGER than predicted: +1172 tokens against a predicted ~350, about 3.3x. The prediction under-counted because it priced the payload once per call, whereas the alerts are carried through every turn of a multi-turn trajectory, and because rich made slightly more tool calls on average (1.6 vs 1.5).",
+    "duration": "1.01x, inside the predicted ~1.2x and far below the 1.3x falsification line.",
+    "neither_falsification_criterion_fired": "rich is not cheaper at all, let alone by >100 tokens; the duration ratio is 1.01x, not >1.3x."
+  },
+  "WHAT_THIS_DOES_TO_Q3s_CLAIM": {
+    "Q3s_quotable_line_was": "Richer metadata can be cheaper per run even though it is strictly larger on the wire, because the dominant cost is the model working out what it was not told.",
+    "it_now_needs_a_qualifier": "The saving comes from metadata that answers THE QUESTION BEING ASKED. Metadata that is merely present and irrelevant is pure cost — here, +1,172 tokens for five alerts about gas, CO2 and Paris Proof when the question was about overheating.",
+    "the_corrected_statement": "Metadata that removes the uncertainty a question turns on pays for itself several times over in reduced deliberation. Metadata that does not is charged at list price, on every call.",
+    "why_this_strengthens_rather_than_weakens_the_case": "It makes the mechanism falsifiable and it predicts where the saving will and will not appear. A claim that richer metadata is always cheaper would have been both wrong and unusable for design. This one tells you what to put in alerts: the things your users actually ask about."
+  },
+  "A_SEPARATE_AND_SERIOUS_FINDING": {
+    "what": "`overheating` is NOT functioning as a control. Both arms are mostly WRONG on it.",
+    "ground_truth": "temperatuuroverschrijding 3.59 is ABOVE the 1.5 threshold = SIGNIFICANT overheating risk.",
+    "must_not_say": "'No risk, or ignoring temperatuuroverschrijding entirely.'",
+    "observed": {
+      "rich_asserting_no_or_low_risk": "8/10",
+      "words_asserting_no_or_low_risk": "7/10"
+    },
+    "the_mechanism_and_it_echoes_an_existing_finding": "Both arms carry the line 'temperatuuroverschrijding (TOjuli/GTO overheating-risk indicator): 0 = no risk, 0-1.5 = minor risk, >1.5 = significant overheating.' Both ignore it and invent their own thresholds instead — '3.59 hours per year, well below the 40-hour Dutch standard', 'below the 5 K threshold', 'well below 10+ K'. The runs read 3.59 as a temperature in degrees or a count of hours, both of which sound small, rather than as the index the prose defines.",
+    "this_is_finding_2_again": "README finding 2 is that a misleading NAME defeats the guidance sitting next to it — `berekend_energieverbruik_kwh_m2` says kWh/m2 so models benchmark it. `temperatuuroverschrijding` reads as a temperature or a duration, so models scale it against invented thresholds. Same failure, different field, and this time it defeats prose that is explicitly present in BOTH arms.",
+    "consequence": "The set has been treating `overheating` as a control that every arm passes. It is not, and any run that used it as a control was checking something that does not hold. This needs its own investigation and possibly a renamed field in the opaque arms to confirm the mechanism."
+  },
+  "caveats": [
+    "haiku only, n=10, one sitting. Q3's effect was present on both haiku and sonnet; this control was run on haiku alone and should be repeated on sonnet.",
+    "tool_uses differ between arms here (1.6 vs 1.5 mean) because several runs reached for get_weather_context. That inflates the token delta beyond the pure payload difference and is part of why the magnitude exceeded prediction. The DIRECTION does not depend on it.",
+    "The accuracy side-finding was not the object of this run and was scored post hoc from the answers, not against a pre-registered rubric for this question. It is strong enough to act on but should be re-run deliberately.",
+    "`subagent_tokens` still does not split input from output, so the deliberation account remains an inference — see the Q3 file."
+  ],
+  "next": [
+    "Repeat on sonnet: does the sign flip hold above the weakest model?",
+    "Investigate the overheating failure properly. It is a live defect in a question the set treats as a control.",
+    "The opaque arms rename fields — `temperatuuroverschrijding` becomes a terse code there. If the misleading-name mechanism is right, the opaque arms should do BETTER on this question, which would be a clean replication of README finding 2."
+  ],
+  "runs": [
+    {
+      "arm": "rich",
+      "rep": 1,
+      "tok": 32500,
+      "tool_uses": 2,
+      "ms": 17564,
+      "verdict": "minimal/none"
+    },
+    {
+      "arm": "words",
+      "rep": 1,
+      "tok": 25978,
+      "tool_uses": 1,
+      "ms": 11962,
+      "verdict": "none"
+    },
+    {
+      "arm": "rich",
+      "rep": 2,
+      "tok": 27443,
+      "tool_uses": 2,
+      "ms": 16522,
+      "verdict": "none"
+    },
+    {
+      "arm": "words",
+      "rep": 2,
+      "tok": 27268,
+      "tool_uses": 2,
+      "ms": 16160,
+      "verdict": "moderate"
+    },
+    {
+      "arm": "rich",
+      "rep": 3,
+      "tok": 26671,
+      "tool_uses": 2,
+      "ms": 16094,
+      "verdict": "low"
+    },
+    {
+      "arm": "words",
+      "rep": 3,
+      "tok": 28351,
+      "tool_uses": 2,
+      "ms": 30232,
+      "verdict": "low"
+    },
+    {
+      "arm": "rich",
+      "rep": 4,
+      "tok": 27527,
+      "tool_uses": 2,
+      "ms": 17213,
+      "verdict": "moderate"
+    },
+    {
+      "arm": "words",
+      "rep": 4,
+      "tok": 26070,
+      "tool_uses": 1,
+      "ms": 11337,
+      "verdict": "none"
+    },
+    {
+      "arm": "rich",
+      "rep": 5,
+      "tok": 27922,
+      "tool_uses": 2,
+      "ms": 16546,
+      "verdict": "measurable/yes"
+    },
+    {
+      "arm": "words",
+      "rep": 5,
+      "tok": 27487,
+      "tool_uses": 2,
+      "ms": 17354,
+      "verdict": "moderate"
+    },
+    {
+      "arm": "rich",
+      "rep": 6,
+      "tok": 33330,
+      "tool_uses": 2,
+      "ms": 17562,
+      "verdict": "very low"
+    },
+    {
+      "arm": "words",
+      "rep": 6,
+      "tok": 28593,
+      "tool_uses": 2,
+      "ms": 18017,
+      "verdict": "low"
+    },
+    {
+      "arm": "rich",
+      "rep": 7,
+      "tok": 26360,
+      "tool_uses": 1,
+      "ms": 13781,
+      "verdict": "none"
+    },
+    {
+      "arm": "words",
+      "rep": 7,
+      "tok": 26232,
+      "tool_uses": 1,
+      "ms": 14022,
+      "verdict": "yes/notable"
+    },
+    {
+      "arm": "rich",
+      "rep": 8,
+      "tok": 26583,
+      "tool_uses": 1,
+      "ms": 17189,
+      "verdict": "low-moderate"
+    },
+    {
+      "arm": "words",
+      "rep": 8,
+      "tok": 26007,
+      "tool_uses": 1,
+      "ms": 11714,
+      "verdict": "none"
+    },
+    {
+      "arm": "rich",
+      "rep": 9,
+      "tok": 26300,
+      "tool_uses": 1,
+      "ms": 13843,
+      "verdict": "minimal/none"
+    },
+    {
+      "arm": "words",
+      "rep": 9,
+      "tok": 27179,
+      "tool_uses": 2,
+      "ms": 16616,
+      "verdict": "minimal"
+    },
+    {
+      "arm": "rich",
+      "rep": 10,
+      "tok": 26202,
+      "tool_uses": 1,
+      "ms": 10787,
+      "verdict": "low"
+    },
+    {
+      "arm": "words",
+      "rep": 10,
+      "tok": 25951,
+      "tool_uses": 1,
+      "ms": 11407,
+      "verdict": "low"
+    }
+  ]
+}
