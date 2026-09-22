@@ -553,6 +553,44 @@ call repeatedly, and the claim has to be narrowed accordingly.
 
 ## Q4 — Is the operative ingredient the FACT or the INSTRUCTION?
 
+> **ANSWERED 2026-09-22 — THE PREDICTION BELOW IS FALSIFIED ON BOTH OF ITS OWN
+> CRITERIA.** 180 runs, three arms, three models, two questions. See
+> [`results/2026-09-22-q4-fact-vs-instruction.json`](results/2026-09-22-q4-fact-vs-instruction.json).
+> The prediction is left exactly as registered.
+>
+> | `benchmark-trap` | haiku | sonnet | opus | total |
+> |---|---|---|---|---|
+> | `inline` (both) | 10 | 10 | 10 | **30/30** |
+> | `inline-fact` | 5 | 10 | 10 | **25/30** |
+> | `inline-instruction` | 0 | 0 | 10 | **10/30** |
+>
+> `metered-vs-model`: **30/30 for all three arms.** 0 confidently-wrong and 0
+> fabricated across all 180 runs.
+>
+> Both registered falsification criteria fired: fact-only came within 3 of both on
+> TWO models (0 apart on each), and instruction-only scored below fact-only on TWO
+> models. The second prediction inverted too — instruction-only was predicted to WIN
+> on `benchmark-trap` and LOSE on `metered-vs-model`; it lost the first and tied the
+> second.
+>
+> **Why.** The instruction is conditional: *"where a question asks how a building
+> compares to a METERED BENCHMARK, say the comparison cannot be made."* Its trigger
+> condition is the very fact that was withheld — to fire it on `benchmark-trap` the
+> model must already know Paris Proof is defined on measured final energy. The
+> control settles it: on `metered-vs-model` the question itself contains the word
+> "metered", the trigger is visible in the prompt with no domain fact needed, and the
+> same arm scores 30/30. **An instruction is not executable without the semantics
+> that say when it applies.** The "tool metadata must specify BEHAVIOUR, not
+> SEMANTICS" reframing this question was registered to test gets no support here.
+>
+> **Tokens.** `instruction-only` is the cheapest arm — by 112 tokens, 0.4% — and also
+> the worst. Quality and cost still do not point the same way.
+>
+> **Caveats that matter.** `instruction-only` also lost the two-word label by design,
+> so fact and label cannot be separated by this run. opus scored 10/10 on all three
+> arms, so a third of the matrix measures nothing. Q2's cross-record half was NOT
+> run: it needs `inline-conditional`, which was not in this arm set.
+
 > **REGISTERED 2026-09-21. ARMS BUILT AND DEPLOYED; NOT YET RUN.** The prediction
 > below was written before the arms existed and is left exactly as registered.
 >
@@ -649,7 +687,7 @@ in tension or unrelated.
 
 2 questions × 3 arms × 3 models × n=10 = **180 runs**, two new arms to build and deploy.
 `metered-vs-model` is also where Q2's untested cross-record half can finally be run,
-since the calculated-vs-measured line IS pruned on a NEN 7120 record — so one build
+since the calculated-vs-measured line was believed to be pruned on a NEN 7120 record — so one build
 serves two open questions.
 
 ## Suggested order
@@ -660,6 +698,19 @@ predictions falsified — see the banner under Q1.**
 ~~1. Redeploy and verify stamping.~~ ~~2. **Q2.**~~ **Both done on 2026-09-21** — the
 redeploy is verified and Q2 is answered, along with the `benchmark-trap` repair its
 failure mode uncovered.
+
+> **CORRECTION, 2026-09-22 — the claim above is FALSE.** The CALCULATED vs MEASURED
+> line is **NOT** pruned on a NEN 7120 record. Measured on the wire before running:
+> it is PRESENT, with its instruction clause, in BOTH arms on BOTH records. The
+> pruner treats it as unconditional. `inline-conditional` does cut the block hard on
+> a NEN 7120 record — 5,020 → 1,668 chars, −66.8% — but that line survives. Q2's
+> cross-record half as described therefore cannot be run, and the run that replaced
+> it measured what pruning two thirds of the block costs instead: **nothing in
+> accuracy (30/30 vs 30/30), −4.78% in tokens.** See
+> [`results/2026-09-22-q2-cross-record-pruning.json`](results/2026-09-22-q2-cross-record-pruning.json).
+> The same false claim was repeated in
+> [`results/2026-09-21-benchmark-trap-calculated-vs-measured.json`](results/2026-09-21-benchmark-trap-calculated-vs-measured.json)
+> (`newly_possible`) and in the Q4 results file and PR #44.
 
 1. **Q4 first.** It is the highest-value open question, the cheapest build in the file
    (two response variants of one line), and it is the only one that could reframe the

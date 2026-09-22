@@ -1,0 +1,410 @@
+{
+  "_comment": "absent-sizing-input on OPUS, n=20 per arm, same-batch. Completes the ladder. 20/20 both arms, zero fabrications — same as sonnet. The effect is haiku-only, confirmed at full n on all three models.",
+  "date": "2026-09-22",
+  "question": "absent-sizing-input",
+  "record": "Middenwetering 1, 3543AR Utrecht — NEN 7120",
+  "arms": [
+    "inline",
+    "inline-conditional"
+  ],
+  "model": "opus",
+  "n": 20,
+  "total_runs": 40,
+  "protocol": "LIVE TOOL CALLS, identical to the haiku and sonnet n=20 runs: arms interleaved in the same batch, fresh subagent per run given ONLY the question string, same pre-registered scoring rule.",
+  "results": {
+    "inline": {
+      "correct": 20,
+      "other": 0,
+      "fabricated": 0,
+      "n": 20,
+      "mean_subagent_tokens": 30903
+    },
+    "inline-conditional": {
+      "correct": 20,
+      "other": 0,
+      "fabricated": 0,
+      "n": 20,
+      "mean_subagent_tokens": 29364
+    }
+  },
+  "headline": "20/20 for BOTH arms, zero fabrications in 40 runs — identical to sonnet.",
+  "THE_COMPLETE_LADDER": {
+    "table": {
+      "haiku": {
+        "inline": "18/20",
+        "inline-conditional": "10/20",
+        "fabrications": "3 vs 10",
+        "gap": "8 runs"
+      },
+      "sonnet": {
+        "inline": "20/20",
+        "inline-conditional": "20/20",
+        "fabrications": "0 vs 0",
+        "gap": "0"
+      },
+      "opus": {
+        "inline": "20/20",
+        "inline-conditional": "20/20",
+        "fabrications": "0 vs 0",
+        "gap": "0"
+      }
+    },
+    "total_runs_across_the_ladder": 120,
+    "conclusion": "Conditional pruning's failure mode is REAL on haiku and ABSENT on both sonnet and opus, each measured at n=20 per arm. It is a small-model effect, now confirmed at full n rather than inferred from a 3-run spot check.",
+    "decision_it_supports": "Do NOT invert the GATES rule. The proposed one-line fix would address a defect only haiku exhibits and would cost the 66.8% prose saving on every record for every model. Keep conditional pruning as-is; if the deployment target is haiku-class, ship the unpruned block instead. That is a deployment choice, not a defect."
+  },
+  "why_the_stronger_models_do_not_need_the_note": {
+    "observation": "All 80 sonnet and opus runs name warmtebehoefte_kwh_m2 and state it is null — including the 40 conditional runs where the note about it was pruned. Many go further and name temperatuuroverschrijding and compactheid as also null, which the conditional arm likewise never mentions.",
+    "mechanism": "Pruning removes the NOTE, not the FIELD. The null field is in the payload under both arms. Sonnet and opus read it, know unaided that it is the heat-pump sizing input, and decline. Haiku does not reliably make that connection and substitutes an invented rate.",
+    "what_this_says_about_the_metadata": "This guidance buys nothing where the model already knows the domain, and a lot where it does not. That is a sharper claim than 'metadata helps', and it is the cleanest statement this repo has produced about WHO interpretation prose is for."
+  },
+  "log_audit": {
+    "method": "get_tool_call_log UNFILTERED at limit 500; countByVariant read before filtering.",
+    "run_window": "timestamp >= 2026-09-22T07:05:00Z (the sonnet run ended 07:02), tool = get_building_profile",
+    "server_side": {
+      "inline": 21,
+      "inline-conditional": 20,
+      "total": 41
+    },
+    "runs_completed": 41,
+    "reconciled": "IN AGGREGATE, yes: 41 server rows against 41 completed runs. 21 inline rows for 21 completed inline runs (20 recorded plus the one discarded, see below); 20 conditional rows for 20 completed conditional runs.",
+    "A_SELF_REPORT_THAT_DID_NOT_RECONCILE": "One inline run self-reported `CALLS: 3` with three get_building_profile entries, one of them labelled 'Retry'. If accurate, the window should hold 43 rows, not 41. The 'Retry' call IS logged (08:00:01.298Z) but the full set of three is not accounted for. I cannot attribute the difference precisely, because the server is stateless and sessionId is per-REQUEST rather than per-run. This is the first concrete instance in this repo of a subagent's self-reported CALLS being contradicted by the server log — exactly the weakness the run-eval skill warns about, and a reason the log is treated as authoritative.",
+    "status": "0 non-success, 0 rowCount!=1, 0 unknown-variant rows on the page. 1 get_weather_context call in the window (one run reached for degree-days).",
+    "a_run_lost_to_infrastructure": "One conditional run in batch A failed before executing, with 'claude-sonnet-5[1m] is temporarily unavailable (timed out), so auto mode cannot determine the safety of Agent'. That is a harness failure, not a result. Its inline partner completed but was DISCARDED so the remaining pairs stay strictly same-batch; that discarded run is the 21st inline server row."
+  },
+  "arm_assignment_verification": {
+    "method": "Assignment by issue order (arms strictly interleaved), corroborated by token bimodality with no overlap across all 40 runs.",
+    "inline_token_range": "30681-32402",
+    "conditional_token_range": "29254-29547",
+    "note": "Needed because many subagents report a bare `get_building_profile` rather than the prefixed tool name, so the transcript alone does not identify the arm."
+  },
+  "caveats": [
+    "Both arms saturate at 20/20, so this question measures NOTHING about the arms on opus. A null result at n=20 with zero spread is strong evidence of no effect, but it is not evidence of absence for a small one.",
+    "One question, one record, one sitting per model.",
+    "The haiku comparison this rests against carries its own warning: its two same-batch halves gave 8-v-7 and 10-v-3, so the haiku gap is real at n=20 but its magnitude is unstable.",
+    "40 of 42 issued opus agents produced usable paired runs; one was lost to a classifier timeout and its partner discarded to preserve pairing.",
+    "Scoring is the ANSWER line for correct/other and the whole output for fabricated. On opus no run came near the boundary — all 40 declined explicitly and none produced a figure anywhere, so the boundary decided nothing here."
+  ],
+  "runs": [
+    {
+      "arm": "inline",
+      "rep": 1,
+      "score": "correct",
+      "fab": false,
+      "tok": 30795,
+      "batch": "A"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 1,
+      "score": "correct",
+      "fab": false,
+      "tok": 29376,
+      "batch": "A"
+    },
+    {
+      "arm": "inline",
+      "rep": 2,
+      "score": "correct",
+      "fab": false,
+      "tok": 32402,
+      "batch": "A"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 2,
+      "score": "correct",
+      "fab": false,
+      "tok": 29399,
+      "batch": "A"
+    },
+    {
+      "arm": "inline",
+      "rep": 3,
+      "score": "correct",
+      "fab": false,
+      "tok": 30718,
+      "batch": "A"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 3,
+      "score": "correct",
+      "fab": false,
+      "tok": 29421,
+      "batch": "A"
+    },
+    {
+      "arm": "inline",
+      "rep": 4,
+      "score": "correct",
+      "fab": false,
+      "tok": 30868,
+      "batch": "A"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 4,
+      "score": "correct",
+      "fab": false,
+      "tok": 29378,
+      "batch": "A"
+    },
+    {
+      "arm": "inline",
+      "rep": 5,
+      "score": "correct",
+      "fab": false,
+      "tok": 30838,
+      "batch": "A"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 5,
+      "score": "correct",
+      "fab": false,
+      "tok": 29492,
+      "batch": "A"
+    },
+    {
+      "arm": "inline",
+      "rep": 6,
+      "score": "correct",
+      "fab": false,
+      "tok": 30685,
+      "batch": "A"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 6,
+      "score": "correct",
+      "fab": false,
+      "tok": 29376,
+      "batch": "A"
+    },
+    {
+      "arm": "inline",
+      "rep": 7,
+      "score": "correct",
+      "fab": false,
+      "tok": 31394,
+      "batch": "A"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 7,
+      "score": "correct",
+      "fab": false,
+      "tok": 29547,
+      "batch": "A"
+    },
+    {
+      "arm": "inline",
+      "rep": 8,
+      "score": "correct",
+      "fab": false,
+      "tok": 30843,
+      "batch": "B"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 8,
+      "score": "correct",
+      "fab": false,
+      "tok": 29360,
+      "batch": "B"
+    },
+    {
+      "arm": "inline",
+      "rep": 9,
+      "score": "correct",
+      "fab": false,
+      "tok": 30772,
+      "batch": "B"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 9,
+      "score": "correct",
+      "fab": false,
+      "tok": 29316,
+      "batch": "B"
+    },
+    {
+      "arm": "inline",
+      "rep": 10,
+      "score": "correct",
+      "fab": false,
+      "tok": 30851,
+      "batch": "B"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 10,
+      "score": "correct",
+      "fab": false,
+      "tok": 29319,
+      "batch": "B"
+    },
+    {
+      "arm": "inline",
+      "rep": 11,
+      "score": "correct",
+      "fab": false,
+      "tok": 30933,
+      "batch": "B"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 11,
+      "score": "correct",
+      "fab": false,
+      "tok": 29284,
+      "batch": "B"
+    },
+    {
+      "arm": "inline",
+      "rep": 12,
+      "score": "correct",
+      "fab": false,
+      "tok": 30767,
+      "batch": "B"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 12,
+      "score": "correct",
+      "fab": false,
+      "tok": 29254,
+      "batch": "B"
+    },
+    {
+      "arm": "inline",
+      "rep": 13,
+      "score": "correct",
+      "fab": false,
+      "tok": 30731,
+      "batch": "B"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 13,
+      "score": "correct",
+      "fab": false,
+      "tok": 29370,
+      "batch": "B"
+    },
+    {
+      "arm": "inline",
+      "rep": 14,
+      "score": "correct",
+      "fab": false,
+      "tok": 30727,
+      "batch": "B"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 14,
+      "score": "correct",
+      "fab": false,
+      "tok": 29417,
+      "batch": "B"
+    },
+    {
+      "arm": "inline",
+      "rep": 15,
+      "score": "correct",
+      "fab": false,
+      "tok": 30797,
+      "batch": "B"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 15,
+      "score": "correct",
+      "fab": false,
+      "tok": 29277,
+      "batch": "B"
+    },
+    {
+      "arm": "inline",
+      "rep": 16,
+      "score": "correct",
+      "fab": false,
+      "tok": 30791,
+      "batch": "C"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 16,
+      "score": "correct",
+      "fab": false,
+      "tok": 29361,
+      "batch": "C"
+    },
+    {
+      "arm": "inline",
+      "rep": 17,
+      "score": "correct",
+      "fab": false,
+      "tok": 30876,
+      "batch": "C"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 17,
+      "score": "correct",
+      "fab": false,
+      "tok": 29318,
+      "batch": "C"
+    },
+    {
+      "arm": "inline",
+      "rep": 18,
+      "score": "correct",
+      "fab": false,
+      "tok": 30681,
+      "batch": "C"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 18,
+      "score": "correct",
+      "fab": false,
+      "tok": 29297,
+      "batch": "C"
+    },
+    {
+      "arm": "inline",
+      "rep": 19,
+      "score": "correct",
+      "fab": false,
+      "tok": 30824,
+      "batch": "C"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 19,
+      "score": "correct",
+      "fab": false,
+      "tok": 29332,
+      "batch": "C"
+    },
+    {
+      "arm": "inline",
+      "rep": 20,
+      "score": "correct",
+      "fab": false,
+      "tok": 30776,
+      "batch": "C"
+    },
+    {
+      "arm": "inline-conditional",
+      "rep": 20,
+      "score": "correct",
+      "fab": false,
+      "tok": 29378,
+      "batch": "C"
+    }
+  ]
+}
