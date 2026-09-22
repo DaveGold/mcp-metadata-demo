@@ -1,0 +1,480 @@
+{
+  "_comment": "Q3 — why does `rich` cost LESS than `words`? ANSWERED. Neither of the two registered mechanisms explains it. The saving is intermediate REASONING, not round trips and not final output.",
+  "date": "2026-09-22",
+  "question_under_test": "evals/open-questions.md Q3",
+  "question": "gas-estimate",
+  "arms": [
+    "rich",
+    "words"
+  ],
+  "models": [
+    "haiku",
+    "sonnet"
+  ],
+  "n": 10,
+  "total_runs": 40,
+  "protocol": "LIVE TOOL CALLS. Arms interleaved in the same batch, one batch per model, fresh subagent per run given ONLY the question string. Recorded per run exactly what Q3 asked for: tool_uses, duration_ms, subagent_tokens AND the ANSWER character count — the last of which no previous file in this directory records.",
+  "PART_1_measured_with_no_runs_at_all": {
+    "why": "Q3: 'The description is a fixed input cost per call and is measurable directly by counting its tokens — no run needed.'",
+    "tool_definition_chars": {
+      "rich": 15980,
+      "words": 15255,
+      "rich_minus_words": 725
+    },
+    "response_payload_chars_on_this_record": {
+      "rich": 2425,
+      "words": 1637,
+      "rich_minus_words": 788,
+      "rich_alerts": "5 items, 815 chars"
+    },
+    "THE_POINT": "`rich` pays MORE on input, on both counts: +1513 chars total (~+378 tokens) every single call. It carries a bigger tool definition AND a bigger response. So the saving it shows overall has to be larger than the observed gap, not equal to it — the books only balance if output falls by the gap PLUS this."
+  },
+  "PART_2_the_runs": {
+    "haiku": {
+      "rich_mean_tokens": 26219,
+      "words_mean_tokens": 26813,
+      "token_saving_for_rich": 594,
+      "rich_mean_answer_chars": 333,
+      "words_mean_answer_chars": 377,
+      "answer_chars_shorter_for_rich": 44,
+      "answer_saving_in_tokens_approx": 11,
+      "rich_mean_duration_ms": 12614,
+      "words_mean_duration_ms": 20558,
+      "duration_ratio_words_over_rich": 1.63,
+      "pairs_with_differing_call_count": 1
+    },
+    "sonnet": {
+      "rich_mean_tokens": 33908,
+      "words_mean_tokens": 34413,
+      "token_saving_for_rich": 505,
+      "rich_mean_answer_chars": 471,
+      "words_mean_answer_chars": 631,
+      "answer_chars_shorter_for_rich": 160,
+      "answer_saving_in_tokens_approx": 40,
+      "rich_mean_duration_ms": 9256,
+      "words_mean_duration_ms": 18608,
+      "duration_ratio_words_over_rich": 2.01,
+      "pairs_with_differing_call_count": 0
+    }
+  },
+  "PART_3_the_accounting": {
+    "haiku": {
+      "rich_extra_input_tokens": 378,
+      "observed_token_saving": 594,
+      "so_rich_must_save_elsewhere": 972,
+      "explained_by_shorter_ANSWER": 11,
+      "residual_unexplained": 961,
+      "residual_pct": 99
+    },
+    "sonnet": {
+      "rich_extra_input_tokens": 378,
+      "observed_token_saving": 505,
+      "so_rich_must_save_elsewhere": 883,
+      "explained_by_shorter_ANSWER": 40,
+      "residual_unexplained": 843,
+      "residual_pct": 95
+    },
+    "statement": "On both models roughly 95-99% of the saving is unexplained by the final ANSWER. It is not round trips either — call counts are identical in 19 of 20 pairs. What is left is intermediate reasoning."
+  },
+  "VERDICT_ON_THE_REGISTERED_PREDICTION": {
+    "prediction": "The saving is almost entirely (b) 'less to say', and (a) 'fewer round trips' is a rounding error.",
+    "on_(a)_CONFIRMED": "Call counts differ in 1 of 20 pairs (5%), well under the 15% falsification threshold. haiku 1/10, sonnet 0/10. The one difference is a `words` run retrying with a huisletter. Round trips are indeed a rounding error.",
+    "on_(b)_NOT_SUPPORTED": "The ANSWER is shorter for `rich` — by 44 chars on haiku and 160 on sonnet — but that is ~11 and ~40 tokens against gaps of 594 and 505. Final output explains about 2% of the saving on haiku and 8% on sonnet. It is a real effect and a small one.",
+    "the_literal_criterion_was_not_tripped": "Q3 said 'falsified if output length is equal between them while total tokens still differ'. Output length is NOT equal — `rich` is genuinely shorter. So the criterion as written does not fire. But the substantive claim, that the saving is ALMOST ENTIRELY (b), is not supported by the decomposition.",
+    "THE_ACTUAL_MECHANISM": "A third one Q3 never named: **less to think**. The arm without the computed figure does not write a longer essay — it deliberates longer to produce an essay of similar length. Duration is the visible proxy and it is dramatic: with identical call counts and comparable answer lengths, `words` takes 1.63x longer on haiku and 2.01x on sonnet.",
+    "note_on_the_original_evidence": "Q3 cited ~7.3-7.9s for rich against ~17-21s for words on sonnet, read off a transcript. Measured here: 9.3s vs 18.6s. The duration observation replicates; what it was taken to MEAN (shorter output) does not."
+  },
+  "why_this_matters": {
+    "Q3s_own_framing": "'If (b) is right, the cost argument generalises: any metadata that removes uncertainty pays for itself in shorter output. If (a) is right, the saving only applies to tools an agent would otherwise call repeatedly.'",
+    "what_the_answer_actually_licenses": "Neither statement as written. The cost argument DOES generalise — but the mechanism is that metadata removing uncertainty pays for itself in LESS DELIBERATION, not shorter output. That is a broader claim than (b), because deliberation is where the tokens are, and it explains why the saving survives `rich` paying ~378 tokens more in input on every call.",
+    "the_line_that_can_now_be_quoted": "Richer metadata can be cheaper per run even though it is strictly larger on the wire, because the dominant cost is the model working out what it was not told."
+  },
+  "log_audit": {
+    "method": "get_tool_call_log UNFILTERED; countByVariant read before filtering.",
+    "run_window": "timestamp >= 2026-09-22T10:01:00Z",
+    "server_side": {
+      "rich": 22,
+      "words": 23,
+      "total": 45
+    },
+    "accounted_for": "45 = 41 runs + 4 preflight calls. rich: 20 runs + 2 preflight. words: 20 runs + 2 preflight + 1 extra (haiku rep 9 retried with a huisletter, visible in paramsPresent).",
+    "self_reported_tool_uses": 41,
+    "reconciled": "EXACTLY. 41 server rows attributable to runs against 41 self-reported tool_uses. Unlike the opus run earlier today, the self-reports here are corroborated.",
+    "status": "0 non-success. 0 unknown-variant rows."
+  },
+  "caveats": [
+    "`subagent_tokens` does not split input from output — Q3 flagged this itself as the missing decomposition. 'Reasoning' is therefore a RESIDUAL inference: total saving minus the measured input penalty minus the measured ANSWER saving. It is not directly measured.",
+    "Duration is independent corroboration but is also a proxy, and is sensitive to load. It was measured in one sitting.",
+    "The ~4 chars/token conversion used throughout is an approximation. The conclusion does not depend on it: the residual is 95-99%, and no plausible conversion factor closes that.",
+    "One question, one record, two models, one sitting. `gas-estimate` is the question where rich's advantage is largest (the alerts hand over the answer), so the magnitude here is probably an upper bound.",
+    "n=10 per cell. Today's absent-sizing-input run showed n=10 can be unstable — but the effect here is present in every single pair on both models, not a few-run margin, and the duration gap is 1.6-2.0x rather than a handful of runs.",
+    "Both arms score well on this question; this file measures COST, not accuracy, and says nothing about which answer is better."
+  ],
+  "still_outstanding": [
+    "Direct input/output token split would convert the residual from an inference into a measurement. That needs harness support the eval does not currently have.",
+    "Does the effect hold on a question where rich does NOT hand over the answer? If the saving is deliberation, it should shrink toward zero as the arms converge in what they know.",
+    "opus untested here."
+  ],
+  "runs": [
+    {
+      "arm": "rich",
+      "model": "haiku",
+      "rep": 1,
+      "tok": 26188,
+      "tool_uses": 1,
+      "ms": 15294,
+      "answer_chars": 315
+    },
+    {
+      "arm": "words",
+      "model": "haiku",
+      "rep": 1,
+      "tok": 26657,
+      "tool_uses": 1,
+      "ms": 21467,
+      "answer_chars": 403
+    },
+    {
+      "arm": "rich",
+      "model": "haiku",
+      "rep": 2,
+      "tok": 26326,
+      "tool_uses": 1,
+      "ms": 13582,
+      "answer_chars": 408
+    },
+    {
+      "arm": "words",
+      "model": "haiku",
+      "rep": 2,
+      "tok": 26488,
+      "tool_uses": 1,
+      "ms": 21216,
+      "answer_chars": 426
+    },
+    {
+      "arm": "rich",
+      "model": "haiku",
+      "rep": 3,
+      "tok": 26123,
+      "tool_uses": 1,
+      "ms": 11464,
+      "answer_chars": 251
+    },
+    {
+      "arm": "words",
+      "model": "haiku",
+      "rep": 3,
+      "tok": 26901,
+      "tool_uses": 1,
+      "ms": 19545,
+      "answer_chars": 389
+    },
+    {
+      "arm": "rich",
+      "model": "haiku",
+      "rep": 4,
+      "tok": 26125,
+      "tool_uses": 1,
+      "ms": 10786,
+      "answer_chars": 191
+    },
+    {
+      "arm": "words",
+      "model": "haiku",
+      "rep": 4,
+      "tok": 26600,
+      "tool_uses": 1,
+      "ms": 19882,
+      "answer_chars": 291
+    },
+    {
+      "arm": "rich",
+      "model": "haiku",
+      "rep": 5,
+      "tok": 26332,
+      "tool_uses": 1,
+      "ms": 13483,
+      "answer_chars": 424
+    },
+    {
+      "arm": "words",
+      "model": "haiku",
+      "rep": 5,
+      "tok": 26653,
+      "tool_uses": 1,
+      "ms": 19394,
+      "answer_chars": 407
+    },
+    {
+      "arm": "rich",
+      "model": "haiku",
+      "rep": 6,
+      "tok": 26169,
+      "tool_uses": 1,
+      "ms": 11667,
+      "answer_chars": 474
+    },
+    {
+      "arm": "words",
+      "model": "haiku",
+      "rep": 6,
+      "tok": 26914,
+      "tool_uses": 1,
+      "ms": 21977,
+      "answer_chars": 413
+    },
+    {
+      "arm": "rich",
+      "model": "haiku",
+      "rep": 7,
+      "tok": 26204,
+      "tool_uses": 1,
+      "ms": 12087,
+      "answer_chars": 456
+    },
+    {
+      "arm": "words",
+      "model": "haiku",
+      "rep": 7,
+      "tok": 26538,
+      "tool_uses": 1,
+      "ms": 18076,
+      "answer_chars": 361
+    },
+    {
+      "arm": "rich",
+      "model": "haiku",
+      "rep": 8,
+      "tok": 26191,
+      "tool_uses": 1,
+      "ms": 11644,
+      "answer_chars": 273
+    },
+    {
+      "arm": "words",
+      "model": "haiku",
+      "rep": 8,
+      "tok": 26646,
+      "tool_uses": 1,
+      "ms": 18610,
+      "answer_chars": 357
+    },
+    {
+      "arm": "rich",
+      "model": "haiku",
+      "rep": 9,
+      "tok": 26150,
+      "tool_uses": 1,
+      "ms": 11917,
+      "answer_chars": 237
+    },
+    {
+      "arm": "words",
+      "model": "haiku",
+      "rep": 9,
+      "tok": 28097,
+      "tool_uses": 2,
+      "ms": 27753,
+      "answer_chars": 364
+    },
+    {
+      "arm": "rich",
+      "model": "haiku",
+      "rep": 10,
+      "tok": 26379,
+      "tool_uses": 1,
+      "ms": 14213,
+      "answer_chars": 305
+    },
+    {
+      "arm": "words",
+      "model": "haiku",
+      "rep": 10,
+      "tok": 26636,
+      "tool_uses": 1,
+      "ms": 17657,
+      "answer_chars": 360
+    },
+    {
+      "arm": "rich",
+      "model": "sonnet",
+      "rep": 1,
+      "tok": 33872,
+      "tool_uses": 1,
+      "ms": 8777,
+      "answer_chars": 467
+    },
+    {
+      "arm": "words",
+      "model": "sonnet",
+      "rep": 1,
+      "tok": 34452,
+      "tool_uses": 1,
+      "ms": 19589,
+      "answer_chars": 702
+    },
+    {
+      "arm": "rich",
+      "model": "sonnet",
+      "rep": 2,
+      "tok": 33911,
+      "tool_uses": 1,
+      "ms": 8941,
+      "answer_chars": 544
+    },
+    {
+      "arm": "words",
+      "model": "sonnet",
+      "rep": 2,
+      "tok": 34622,
+      "tool_uses": 1,
+      "ms": 22802,
+      "answer_chars": 617
+    },
+    {
+      "arm": "rich",
+      "model": "sonnet",
+      "rep": 3,
+      "tok": 33952,
+      "tool_uses": 1,
+      "ms": 9793,
+      "answer_chars": 514
+    },
+    {
+      "arm": "words",
+      "model": "sonnet",
+      "rep": 3,
+      "tok": 34156,
+      "tool_uses": 1,
+      "ms": 15425,
+      "answer_chars": 603
+    },
+    {
+      "arm": "rich",
+      "model": "sonnet",
+      "rep": 4,
+      "tok": 33898,
+      "tool_uses": 1,
+      "ms": 8996,
+      "answer_chars": 445
+    },
+    {
+      "arm": "words",
+      "model": "sonnet",
+      "rep": 4,
+      "tok": 34421,
+      "tool_uses": 1,
+      "ms": 19008,
+      "answer_chars": 643
+    },
+    {
+      "arm": "rich",
+      "model": "sonnet",
+      "rep": 5,
+      "tok": 33875,
+      "tool_uses": 1,
+      "ms": 9227,
+      "answer_chars": 380
+    },
+    {
+      "arm": "words",
+      "model": "sonnet",
+      "rep": 5,
+      "tok": 34957,
+      "tool_uses": 1,
+      "ms": 25127,
+      "answer_chars": 670
+    },
+    {
+      "arm": "rich",
+      "model": "sonnet",
+      "rep": 6,
+      "tok": 33883,
+      "tool_uses": 1,
+      "ms": 9584,
+      "answer_chars": 487
+    },
+    {
+      "arm": "words",
+      "model": "sonnet",
+      "rep": 6,
+      "tok": 34103,
+      "tool_uses": 1,
+      "ms": 14187,
+      "answer_chars": 489
+    },
+    {
+      "arm": "rich",
+      "model": "sonnet",
+      "rep": 7,
+      "tok": 33860,
+      "tool_uses": 1,
+      "ms": 8573,
+      "answer_chars": 470
+    },
+    {
+      "arm": "words",
+      "model": "sonnet",
+      "rep": 7,
+      "tok": 34033,
+      "tool_uses": 1,
+      "ms": 14151,
+      "answer_chars": 577
+    },
+    {
+      "arm": "rich",
+      "model": "sonnet",
+      "rep": 8,
+      "tok": 34025,
+      "tool_uses": 1,
+      "ms": 10368,
+      "answer_chars": 439
+    },
+    {
+      "arm": "words",
+      "model": "sonnet",
+      "rep": 8,
+      "tok": 34317,
+      "tool_uses": 1,
+      "ms": 16691,
+      "answer_chars": 552
+    },
+    {
+      "arm": "rich",
+      "model": "sonnet",
+      "rep": 9,
+      "tok": 33889,
+      "tool_uses": 1,
+      "ms": 9121,
+      "answer_chars": 471
+    },
+    {
+      "arm": "words",
+      "model": "sonnet",
+      "rep": 9,
+      "tok": 34647,
+      "tool_uses": 1,
+      "ms": 21060,
+      "answer_chars": 621
+    },
+    {
+      "arm": "rich",
+      "model": "sonnet",
+      "rep": 10,
+      "tok": 33917,
+      "tool_uses": 1,
+      "ms": 9184,
+      "answer_chars": 492
+    },
+    {
+      "arm": "words",
+      "model": "sonnet",
+      "rep": 10,
+      "tok": 34421,
+      "tool_uses": 1,
+      "ms": 18044,
+      "answer_chars": 832
+    }
+  ]
+}
