@@ -698,6 +698,104 @@ the saving is deliberation about *the answer*, it must vanish here.
 
 ---
 
+## Q6 — Is the `overheating` failure caused by the FIELD NAME?
+
+> **ANSWERED 2026-09-22 — PREDICTION FALSIFIED. It is not the name.** 21 runs,
+> haiku, n=7 per arm, all three arms in the same batch. See
+> [`results/2026-09-22-q6-overheating-naming.json`](results/2026-09-22-q6-overheating-naming.json).
+>
+> | arm | correct | wrong | declined | other |
+> |---|---|---|---|---|
+> | `words` | **2** | 5 | 0 | 0 |
+> | `opaque-words` | **0** | 6 | 1 | 0 |
+> | `opaque` | **0** | 1 | 3 | 3 |
+>
+> `opaque-words` did not beat `words` — it did **worse**, despite carrying strictly
+> better guidance on both counts: a field name with no connotation *and* an explicit
+> *"unitless"* with the 1.5 threshold spelled out in capitals. **It scored zero.**
+>
+> Three of its seven runs did not use `to` at all and invented a different field
+> instead — *"ahe (Actuele Huisklimaatindex) value of 0, which indicates no risk"*.
+> `ahe` is the renewable share.
+>
+> The two regimes fail **differently**: the readable name gets the model to the right
+> field and then misleads it about units (3.59 read as hours, or as degrees); the
+> terse name loses the model entirely. `words` scores higher only because it at least
+> engages the correct field.
+>
+> **This contradicts `_the_rule`.** `overheating` is interpretation-shape — read one
+> value against a stated threshold. The semantics are present, correct and explicit
+> in two arms, and the combined score is **2 of 21**. Semantics do not handle this
+> interpretation. That is the third failure to replicate the rule and the clearest:
+> the guidance is not absent or ambiguous here, it is spelled out and ignored.
+>
+> **So yes — this is a defect in the shipped tool, and prose will not fix it.** The
+> indicated fix is server-side computation, exactly as for the gas figure:
+> `generateAlerts` computes *"~253 m³/year"* and *"suitable for a heat pump"* but
+> computes **nothing** for `temperatuuroverschrijding`, which is why Q5 found `rich`
+> no better than `words` here. An alert reading *"Overheating risk: SIGNIFICANT
+> (TOjuli 3.59, above the 1.5 threshold)"* is the `benchmark-trap` playbook, which
+> took that question from 0/60 to 59/60. **The live Warmtebouw Duurzaam server
+> exposes the same field and should be checked.**
+
+> **REGISTERED 2026-09-22, BEFORE THE RUN.** Committed before any run was spawned.
+
+### The defect
+
+Q5 found `overheating` is not working as a control: **8/10 `rich` and 7/10 `words`
+asserted no-or-low risk** against a ground truth of *significant*
+(`temperatuuroverschrijding` 3.59, threshold 1.5). Both arms carry the threshold
+line; both ignore it and invent their own — *"below the 40-hour Dutch standard"*,
+*"below the 5 K threshold"*, *"well below 10+ K"*.
+
+### The hypothesis
+
+The field name is doing the damage. `temperatuuroverschrijding` means "temperature
+exceedance", so `3.59` reads as **3.59 °C** or **3.59 hours** — both of which sound
+small. The prose beside it is defeated by the name, which is exactly README §2
+(`berekend_energieverbruik_kwh_m2` says kWh/m², so models benchmark it).
+
+Two defects, verified on the wire, and the opaque arms have **neither**:
+
+| | readable (`rich`/`words`) | opaque (`opaque-words`) |
+|---|---|---|
+| field name | `temperatuuroverschrijding` — reads as °C or hours | **`to`** — no connotation |
+| glossary says unitless? | **no** | **yes** — *"unitless"* |
+
+### Prediction
+
+> **`opaque-words` beats `words` on this question, by a wide margin — despite
+> carrying strictly less readable field naming.** `opaque` (code, no glossary)
+> scores near zero, because `to: 3.59` is uninterpretable without the glossary.
+>
+> Expected ordering: **`opaque-words` ≫ `words` > `opaque` ≈ 0.**
+>
+> **Falsified if** `opaque-words` does not clearly beat `words`, which would mean
+> the name is not the cause and the failure is something else — most likely that
+> `3.59` simply reads as "small" regardless of what it is called, in which case no
+> renaming fixes it and the guidance itself has to change.
+
+### Note on comparing across regimes
+
+The README says never to compare readable against opaque, because they differ in
+field naming **as well as** metadata. Here field naming **is the variable under
+test**, deliberately. The comparison is legitimate for this question and this
+question only, and the confound is the point rather than a flaw.
+
+### If the prediction holds
+
+This is not just a measurement — it is a **defect in the shipped tool**, in the
+same class as the `CALCULATED vs MEASURED` gap that took `benchmark-trap` from
+0/60 to 59/60. The fix would be to say **unitless** in the readable interpretation
+block, as the opaque glossary already does, and re-run. The live Warmtebouw
+Duurzaam server exposes the same field and should be checked too.
+
+### Cost
+
+1 question × 3 arms × 1 model × n=10 = **30 runs**. No new arm, no deploy.
+
+---
+
 ## Q4 — Is the operative ingredient the FACT or the INSTRUCTION?
 
 > **ANSWERED 2026-09-22 — THE PREDICTION BELOW IS FALSIFIED ON BOTH OF ITS OWN
