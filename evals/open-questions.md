@@ -1611,9 +1611,22 @@ character count per run, and audits against `get_tool_call_log` unfiltered.
 
 ## Q14 — Is ONE line enough? The minimum viable response payload
 
-> **REGISTERED 2026-09-22, BEFORE THE RUN.** The arm is built, wired and deployed;
-> it cannot be *run* from the session that built it, because MCP connections are
-> fixed at process start. Committed before any run is spawned, as usual.
+> **REGISTERED 2026-09-22, BEFORE THE RUN.** Committed before any run is spawned.
+>
+> **DEPLOYED AND VERIFIED ON THE WIRE, 2026-09-22.** Both preflight steps done as far
+> as they can be from the session that built it:
+>
+> - `mcpInlineOneline` live at `.../mcpInlineOneline`; a raw MCP `tools/call` on
+>   3039WB/1 returns `temperatuuroverschrijding: 3.59`, **no `alerts` key**, and
+>   `interpretation` = the single 181-character line and nothing else.
+> - It stamps its own log rows: `summary.countByVariant` shows `inline-oneline`
+>   under its own name, `paramsPresent: ["queryIntent"]`, `rowCount: 3`. No
+>   `unknown` bucket. **Not a stale deploy.**
+>
+> **It still cannot be RUN from that session** — MCP connections are fixed at process
+> start, so the `.mcp.json` entry added today is unreachable until a fresh session.
+> The agent file exists and is *not* evidence to the contrary; that is precisely the
+> trap. Start a new session, re-run both preflight steps, then spawn.
 
 ### Why it matters, and why Q13 does not already answer it
 
