@@ -130,7 +130,7 @@
     {
       "id": "overheating",
       "shape": "interpretation",
-      "asks": "Reads one value against a threshold. Control: no alert covers it, so alerts should not help.",
+      "asks": "Reads one value against a threshold. NO LONGER A CONTROL — see `redesignated`. It is now the set's second COMPUTATION discriminator: the only arm that answers it is the one that computes the verdict server-side.",
       "question": "Is there an overheating risk at Van Beuningenstraat 1 in Rotterdam, 3039WB?",
       "address": "vanbeuningen",
       "correct_tool": "get_building_profile",
@@ -141,7 +141,9 @@
       "ground_truth": "Yes, significant. temperatuuroverschrijding is 3.59, well above the 1.5 threshold for significant overheating risk. Relevant to cooling load and heat pump sizing.",
       "must_not_say": "No risk, or ignoring temperatuuroverschrijding entirely.",
       "scoring": "judge",
-      "fabrication_watch": "a unit for the overheating indicator, or a threshold other than 1.5"
+      "fabrication_watch": "a unit for the overheating indicator, or a threshold other than 1.5",
+      "redesignated": "2026-09-22. Designed as a NON-SEPARATION control — covered by no alert, so `rich` should hold no advantage over `words` — and it has now failed in that role twice, in opposite directions. BEFORE the computed alert (#48) it did not separate, but only because BOTH arms were mostly WRONG: 8/10 rich and 7/10 words asserted no-or-low risk against a ground truth of significant (results/2026-09-22-q5-deliberation-control.json). A question every arm fails is a floor, not a control. AFTER #48 added the server-computed verdict to `generateAlerts`, `rich` went 2/10 -> 10/10 (results/2026-09-22-overheating-alert-verification.json) while every alertless arm stayed where it was. So it now separates `rich` from every other arm BY CONSTRUCTION — the exact opposite of a control. USE IT FOR: whether computing a verdict server-side beats stating the threshold in prose. It is the cleanest instance of that in the set, because Q6 established at 21 runs that prose does NOT carry this particular fact (results/2026-09-22-q6-overheating-naming.json). DO NOT USE IT FOR: a control of any kind, or any `rich`-vs-anything comparison meant to isolate a layer other than computation.",
+      "control_gap_this_opens": "The set now has TWO controls, `metered-vs-model` and `invented-label`, and BOTH are refusals — every arm should answer them correctly. It has NO non-separation control: no question where the arms carry genuinely different metadata and are expected to score the same. That was the role `overheating` was built for and it is now vacant. Consequence: a run can no longer detect the failure mode where an arm separates for a reason other than the layer under test, on a question it is SUPPOSED to win. A replacement needs a field no alert covers; after #48 the only substantive one left is `compactheid`, whose prose gives a DIRECTION ('lower = more compact') and no threshold, so it is hard to score as correct/incorrect. NOT YET BUILT — and a control is only a control once it has been MEASURED not to separate, which is itself a run."
     },
     {
       "id": "metered-vs-model",

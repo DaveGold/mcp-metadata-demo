@@ -10,7 +10,7 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-21-opaque-prose.json`](2026-09-21-opaque-prose.json) | What interpretation guidance buys once field naming stops doing its job for it. |
 | [`2026-09-21-guide-ablation.json`](2026-09-21-guide-ablation.json) | Which half of the guide does the work — glossary, or the derived-figure recipe. |
 | [`2026-09-21-shape-replication.json`](2026-09-21-shape-replication.json) | Does that decomposition hold across question shapes? It does, and becomes a rule. |
-| [`2026-09-21-first-harness-run.json`](2026-09-21-first-harness-run.json) | The first end-to-end run of the run-eval skill. Found the skill out of sync with the set, confirmed the overheating control does not separate, and records a retracted n=1 interpretation. |
+| [`2026-09-21-first-harness-run.json`](2026-09-21-first-harness-run.json) | The first end-to-end run of the run-eval skill. Found the skill out of sync with the set, and records a retracted n=1 interpretation. **Its `finding_1_the_control_holds` is VOID — see the control-audit banner below.** It read `overheating` not separating as a control passing; the arms did not separate because all three were failing it. |
 | [`2026-09-21-per-question.json`](2026-09-21-per-question.json) | Per-question outcomes and per-regime results, kept out of `questions.json` so the set reads as a spec. |
 | [`2026-09-21-opaque-live.json`](2026-09-21-opaque-live.json) | Does the shape replication survive live tool calls? It does not — five of six cells disagree, and the derived-figures recipe scores 0 of 3. |
 | [`2026-09-21-opaque-live-sonnet-n10.json`](2026-09-21-opaque-live-sonnet-n10.json) | The confirmation pass for that run — sonnet, n=10, 60 runs. Confirms the recipe failure and shows the other two questions saturate on a stronger model. |
@@ -30,6 +30,33 @@ these are measurements yet — n is 2–3 per cell and mostly Haiku.
 | [`2026-09-22-q5-deliberation-control.json`](2026-09-22-q5-deliberation-control.json) | **The attack on Q3 — and the first registered prediction in this repo to be CONFIRMED.** If the saving is deliberation it should vanish on a question `rich`'s alerts do not answer. `overheating`: `temperatuuroverschrijding` 3.59 is in both arms, and none of `rich`'s five alerts mention it. **The sign flips** — `rich` goes from **594 tokens cheaper** to **1,172 dearer**, and the duration ratio collapses from **1.63× to 1.01×**. So Q3's line needs its qualifier: the saving comes from metadata that answers *the question being asked*; irrelevant metadata is charged at list price on every call. Magnitude ran 3.3× over prediction because the alert payload is carried every turn, not once. **Separately and seriously: `overheating` is not working as a control** — 8/10 `rich` and 7/10 `words` asserted no-or-low risk against a ground truth of *significant*, inventing thresholds ('below the 40-hour standard', 'below 5 K') instead of using the one in the prose. That is README §2 again, and this time it defeats prose present in **both** arms. |
 | [`2026-09-22-q6-overheating-naming.json`](2026-09-22-q6-overheating-naming.json) | **Is the `overheating` failure a naming problem? No — and the answer is worse than that.** Prediction falsified: `opaque-words`, which names the field `to` (no connotation) *and* says **"unitless"** with the 1.5 threshold in capitals, scored **0/7** against `words`' 2/7. Three of its runs ignored the field entirely and invented `ahe` (the renewable share) as an overheating indicator. The regimes fail differently — the readable name gets the model to the right field then misleads it on units (3.59 read as hours, or as degrees); the terse name loses it altogether. **This contradicts `_the_rule`:** interpretation-shape question, semantics explicit in two arms, **2 correct out of 21**. Third failure to replicate the rule and the clearest, since the guidance here is spelled out rather than merely present. **Conclusion: a defect in the shipped tool that prose will not fix.** `generateAlerts` computes the gas figure and heat-pump suitability but nothing for `temperatuuroverschrijding` — which is why Q5 found `rich` no better than `words`. The fix is the `benchmark-trap` playbook: compute it server-side. |
 | [`2026-09-22-overheating-alert-verification.json`](2026-09-22-overheating-alert-verification.json) | **The fix, deployed and re-run — `rich` 2/10 → 10/10.** Q6 showed prose could not carry the overheating threshold, so the verdict is now computed in `generateAlerts`. Deployed, verified live, re-run haiku n=10 per arm. **All ten `rich` runs use the alert's own framing** — 'significant', 'exceeds the 1.5 threshold', several naming TOjuli/GTO — language that did not exist in any arm before the deploy. The benchmark-trap playbook reproducing on a harder defect: harder because there prose worked and here it demonstrably did not. **Caution reported alongside: `words` moved 3/10 → 7/10 with no code change**, so part of the gain may be the same n=10 drift found earlier today. `rich`'s +8 is twice that and mechanistically attributable, but the alert is not worth *exactly* 8 runs. This does **not** fix the alertless tiers, and `overheating` is now unusable as a control — it separates `rich` from the rest. |
+
+> ### ⚠️ `overheating` WAS NEVER A WORKING CONTROL — audit, 2026-09-22
+>
+> It was built as a *non-separation* control: no alert covered it, so `rich` should
+> hold no advantage over `words`. It has now failed in that role **twice, in
+> opposite directions**, and it is re-designated in `questions.json` as a
+> computation discriminator. Every file in this directory was checked for what it
+> leaned on. Five mention it; **one is void, one is frozen, three are unaffected.**
+>
+> | file | how it used `overheating` | status |
+> |---|---|---|
+> | [`first-harness-run`](2026-09-21-first-harness-run.json) | as a **passing control** — "THE CONTROL DID NOT SEPARATE, which is what a control is for… The other findings in this set are not undermined" | **VOID.** The arms did not separate because *all three were wrong*: thin inverted, rich inverted, words 1 right / 1 wrong / 1 partial. A question every arm fails is a floor, not a control, and it licenses no conclusion about the other findings. Nothing else in that file depends on it. |
+> | [`q5-deliberation-control`](2026-09-22-q5-deliberation-control.json) | as a question **`rich`'s alerts do not answer** — the whole design of the Q3 attack | **MEASUREMENT STANDS, PREMISE NOW FALSE.** Verified on the wire *at the time*: five alerts, none about overheating. The computed alert landed afterwards, so the numbers are sound but **the run can never be reproduced on this question.** A replication needs a different alert-free field; after #48 the only substantive one left is `compactheid`. |
+> | [`haiku-sweep`](2026-09-21-haiku-sweep.json) · [`per-question`](2026-09-21-per-question.json) | as a **measurement** question — the prose-only "model cliff", outcome class C | **UNAFFECTED**, and independently corroborated: Q6 reached the same conclusion at 21 runs where these were n=1–2. Neither claims the control held. |
+> | [`readable-ladder-co2`](2026-09-21-readable-ladder-co2.json) | names its outcome class in passing | **UNAFFECTED.** |
+>
+> [`q1-response-channel`](2026-09-21-q1-response-channel.json) and
+> [`q2-conditional-interpretation`](2026-09-21-q2-conditional-interpretation.json) ran
+> **no** controls and say so. Those caveats stand as written — and are in fact
+> understated, since the control they would have run would not have worked.
+>
+> **What this costs the set going forward.** Both surviving controls
+> (`metered-vs-model`, `invented-label`) are refusals every arm should pass. There is
+> now **no non-separation control at all**, so no run can currently detect an arm
+> separating for a reason other than the layer under test on a question it is
+> supposed to win. State that in the caveats of any new run rather than letting the
+> word "controls" imply cover that is not there.
 
 > ### ⚠️ SITTING-TO-SITTING VARIANCE — read before comparing any two files
 >

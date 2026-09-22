@@ -261,10 +261,23 @@ argument lives:
 2. arm × model on everything else, split by shape
 3. confidently-wrong and fabricated counts, arm × model
 
-**Check the controls first.** `overheating` is covered by no alert, so rich
-should hold no advantage over words; `metered-vs-model` and `invented-label`
-should be answered correctly by every arm. If a control separates, report that
-before anything else — it undermines every other number in the run.
+**Check the controls first.** `metered-vs-model` and `invented-label` should be
+answered correctly by every arm. If a control separates, report that before
+anything else — it undermines every other number in the run.
+
+**`overheating` is NOT a control — re-designated 2026-09-22.** It used to be
+listed here as one, on the grounds that no alert covered it. An alert now does:
+the verdict is computed in `generateAlerts`, and the question went `rich` 2/10 →
+10/10 while every alertless arm stayed put. It separates by construction. Use it
+to measure **computation versus prose**, never as a control, and never in a
+`rich`-vs-anything comparison meant to isolate some other layer. Note also that
+before the alert it "held" only because *both* arms were failing it — so any
+older run that cited it as a passing control was checking something that was
+never true. See `redesignated` in `questions.json`.
+
+There is currently **no non-separation control in the set** — both survivors are
+refusals. Say so in the run's caveats rather than implying the controls covered
+this.
 
 **Then check for saturation.** If every arm scores at or near 100% on a
 question, that question measured nothing on this model — report it as no

@@ -40,15 +40,31 @@ supplies two things this tool cannot — a response that dials from ~330 to ~18,
 mechanism here where **output** field names must be passed as an **input** parameter, and
 where guessing them fails *silently*. See Q9 and Q11, both amended 2026-09-22.
 
-`metered-vs-model` and `invented-label` are **controls**. `overheating` was
-designed as one — it is covered by no alert, so the rich arm should have no
-advantage — but **it does not hold**: on 2026-09-22 both arms asserted no-or-low
-risk in 7–8 runs of 10 against a ground truth of *significant*, by inventing
-thresholds instead of using the one in the prose. Treat it as a live defect, not
-a control, until that is fixed. The two refusals should be answered correctly
-by every arm. A set containing only questions the thin arm fails is selection,
-not evidence — if the controls ever separate, something other than the metadata
-is driving the result and the run is suspect.
+`metered-vs-model` and `invented-label` are **controls**, and as of 2026-09-22
+they are the **only** ones. They should be answered correctly by every arm. A set
+containing only questions the thin arm fails is selection, not evidence — if the
+controls ever separate, something other than the metadata is driving the result
+and the run is suspect.
+
+> **`overheating` is NOT a control any more — re-designated 2026-09-22.** It was
+> built as a *non-separation* control: covered by no alert, so `rich` should hold
+> no advantage. It failed in that role twice, in opposite directions. Before the
+> computed alert it did not separate — but only because **both arms were mostly
+> wrong**, 7–8 runs in 10 asserting no-or-low risk against a ground truth of
+> *significant*, inventing thresholds instead of using the one in the prose. A
+> question every arm fails is a floor, not a control. After the verdict was
+> computed server-side it went `rich` 2/10 → 10/10 while every alertless arm stayed
+> put, so it now separates **by construction**. It is now a *computation*
+> discriminator; see `redesignated` in [`questions.json`](questions.json).
+>
+> **This leaves a real gap.** Both surviving controls are refusals. The set has no
+> non-separation control at all — no question where the arms carry different
+> metadata and are expected to score the same — so a run can no longer detect an
+> arm separating for a reason other than the layer under test. A replacement needs
+> a field no alert covers; after the overheating alert landed, the only substantive
+> one left is `compactheid`, whose prose gives a direction and no threshold. Not
+> built, and a control is not a control until it has been *measured* not to
+> separate.
 
 ## The arms
 

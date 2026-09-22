@@ -13,6 +13,12 @@ read that file for *why these questions*: the six axes (channel, timing, distanc
 conditionality, addressability, activation), which of them the answered questions cover,
 and which design principles are still unfalsified.
 
+**Q13 is ANSWERED** — registered and run on 2026-09-22, after Q7–Q12 were filed.
+It asks whether the ALERTLESS tiers can be fixed at all, and all three of its
+predictions were falsified. **Read it together with Q7**: Q13 measured the same
+sentence at 0-of-20 use in the description against 20-of-20 in the response, and
+Q7 is what decides whether that is *absence* or *presence-and-non-application*.
+
 Read *What the runs support so far* next — it is the synthesis, and it is a narrower
 claim than "richer metadata is better" — then *Design guidance*, which turns it into what
 to build.
@@ -1429,6 +1435,120 @@ Q1's shape, nothing more.
 
 1 question × 2 arms × 2 models × n=10 = **40 runs**, plus the work of writing a second
 domain's ground truth — which is the real cost, and the reason this is last.
+---
+
+## Q13 — Can the ALERTLESS tiers be fixed at all? Prose in the RESPONSE vs computation
+
+> **REGISTERED 2026-09-22, BEFORE THE RUN.** Committed before any run was spawned.
+> No new arm, no deploy, no change to any shipped byte — all three arms already
+> exist and were preflighted on the wire for this run.
+
+### The gap this closes
+
+The overheating verdict is now computed (#48) and `rich` went **2/10 → 10/10**. But
+the fix lives in `generateAlerts`, and **only `rich` has alerts.** `words`,
+`opaque-words`, `schema`, `thin` and `inline` all still hand the caller a bare
+`temperatuuroverschrijding: 3.59` and let them read it as degrees or as hours.
+
+That population is not a curiosity. **It is the closest analogue in this repo to a
+real third-party consumer of a plain MCP tool** — a description, a typed payload,
+and no computed layer. If the only available fix is "compute it server-side", then
+every MCP server that ships without a computation step has this defect and cannot
+metadata its way out.
+
+### Why this is NOT "reword the interpretation block"
+
+Q6 already ran that experiment and it failed: the threshold is stated, in capitals,
+with the word *unitless*, and the combined score across two arms carrying it was
+**2 of 21**. Rewording is not the open question.
+
+The open question is **channel**, which is the one variable Q1 showed to be
+dominant — the same 438 bytes scored **29/30 in the RESPONSE and 4/30 in the
+DESCRIPTION**. Every arm Q6 tested carried the threshold in the **description**.
+`inline` carries the byte-identical line in the **response**, and *has never been
+run on this question*.
+
+Verified on the wire before registering:
+
+| arm | where the threshold line sits | measured on `overheating`? |
+|---|---|---|
+| `words` | DESCRIPTION | yes — 2/7 (Q6), then 3/10 and 7/10 |
+| `inline` | **RESPONSE**, byte-identical line | **never** |
+| `rich` | computed verdict in `alerts` | yes — 10/10 post-#48 |
+
+### The sequencing argument — why this runs before anything is changed
+
+Changing `interpretationBlock` moves **six arms** (`words`/`rich`/`words-recipe`
+descriptions, `inline`/`inline-recipe`/`inline-conditional` responses) and
+invalidates comparability with everything scored before it on any question touching
+the changed text. That is an expensive, one-way cost.
+
+This run costs **nothing** — no deploy, no edit — and tells you whether that cost is
+worth paying. If the response channel already fixes it, the alertless tiers need no
+new prose at all, only a move. If it does not, then no wording in any channel will,
+and the block should not be touched.
+
+### The arms
+
+`words` · `inline` · `rich`, all **readable** field names, so no cross-regime
+comparison is involved and the README's prohibition is not engaged.
+
+Per the skill: `inline` vs `words` is the two channels head to head and is the
+clean single-variable comparison. **`inline` → `rich` is NOT an adjacent-rung
+comparison** — it crosses the channel *and* the computation — and must be reported
+as "prose versus computation", never as the value of one layer.
+
+**haiku, n=20 per arm, all three arms interleaved in ONE batch, 60 runs.** haiku
+because Q6 and the #48 verification both used it and it has headroom; n=20 because
+the verification file flagged `words` drifting **3/10 → 7/10 with no code change**,
+and this run re-measures that cell at double n in a single sitting as a by-product.
+
+### Prediction
+
+> **The channel will NOT fix it. Computation is doing the work, not placement.**
+>
+> - **P1 — `inline` does not fix it: ≤ 10/20.** Falsified if `inline` ≥ 16/20.
+> - **P2 — the computation gap is large: `rich` − `inline` ≥ 8 runs.** Falsified if
+>   the gap is under 4 runs, the directory's noise bar at n=10.
+> - **P3 — the channel buys little here: `inline` − `words` < 4 runs.** Falsified
+>   if `inline` beats `words` by 4 or more.
+>
+> **Reasoning, recorded so it can be wrong.** Q6's failure mode is not that the
+> guidance goes *unread* — three arms reached the right field and then misread it.
+> It is that `3.59` is interpreted through a prior about what an overheating number
+> means, and *sounds small* on every unit the model might assume. Moving the same
+> sentence nearer the data does not contradict a prior; it just repeats the rule.
+> The computed alert works because it **removes the inference step** — it states the
+> verdict instead of the rule that would produce it.
+>
+> **The case against my own prediction**, which is real: Q1's channel effect was
+> enormous and this repo's registered predictions are 1-for-6. If P1 and P3 are both
+> falsified, the reading is that `overheating` was a channel problem all along, #48
+> was an expensive fix to a cheap one, and Q1 generalises from recipes to plain facts.
+
+### Why the outcome is useful either way
+
+| if | then |
+|---|---|
+| prediction **holds** | There are facts **prose cannot carry in any channel**. That is a boundary condition on Q1, which is currently stated without one — and it means the alertless tiers have **no metadata-only fix**. For a plain MCP tool that translates to one concrete instruction: write the verdict into the response body. |
+| prediction **falsified** | The alertless population has a **free** fix — move the guidance from the description into the response — and the computation was not required. That is the cheaper and more generally useful result, and it would extend Q1 from procedures to facts. |
+
+### Cost
+
+1 question × 3 arms × 1 model × n=20 = **60 runs.** No new arm, no deploy, no
+source change. Records `tool_uses`, `duration_ms`, `subagent_tokens` and the ANSWER
+character count per run, and audits against `get_tool_call_log` unfiltered.
+
+### Known limits, stated up front
+
+- **haiku only.** Per §8 semantics scale inversely with model size, so a null result
+  here is the *strong* direction (the model most helped by metadata is not helped);
+  a null on opus would mean little. It still cannot support a claim above haiku.
+- **One question, one defect.** `overheating` is a single interpretation-shape
+  failure. A channel null here does not generalise to every fact.
+- **No control.** `overheating` was the set's only non-separation control and has
+  just been re-designated; both survivors are refusals. This run has no control
+  behind it and the caveats must say so.
 
 ---
 
