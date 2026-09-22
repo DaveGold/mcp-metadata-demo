@@ -1,5 +1,16 @@
 # Open questions
 
+> ### ⚠️ 2026-09-22 — THE DESCRIPTION CHANNEL WAS TRUNCATED IN EVERY RUN HERE
+>
+> The host these runs used (Claude Code) sends only the **first 2,048 characters** of each
+> MCP tool description. The `words` / `rich` / `words-recipe` descriptions are 6.8–7.4k
+> characters, so **70–72% of them, including almost the whole INTERPRETATION block, the
+> CALCULATED vs MEASURED line, the overheating threshold and the recipe, never reached the
+> model.** In `opaque-words`, 57% was cut, including the `to` threshold and the recipe. Found by Q7; see its banner and
+> [`results/2026-09-22-q7-description-truncation.json`](results/2026-09-22-q7-description-truncation.json).
+> Every "description vs response" result below compares **delivered with undelivered**
+> text. Read each one that way until it is re-run with the sentence inside the cut.
+
 Twelve experiments. Each carries a **prediction registered before the run** and the
 result that would **falsify** it — written down in advance precisely because this repo
 has already been burned once by a rule chosen after seeing the answers (see
@@ -28,6 +39,10 @@ to build.
 **Q7 is foundational and is not optional.** It asks whether the tool description was even
 absent at interpretation time. If it was present, the word "weakened" is wrong everywhere
 it appears below, and Q1's result is a stronger claim than the one currently written.
+**ANSWERED 2026-09-22: absent, by truncation. See the banner at the top of this file.**
+"Weakened" is still wrong everywhere below, but for the opposite reason: nothing weakened.
+Past character 2,048 the guidance was never sent. Q1's result is a *different* claim from the
+one written, not a stronger one.
 
 Every arm Q1–Q6 needed is **built and deployed** — `inline`, `words-recipe`,
 `inline-recipe`, `inline-conditional`, `inline-fact` and `inline-instruction`. **Q8–Q11
@@ -966,6 +981,34 @@ serves two open questions.
 
 ## Q7 — Was the description ABSENT at interpretation time, or present and ignored?
 
+> **ANSWERED 2026-09-22 — ABSENT, and not for the reason this question imagined.** See
+> [`results/2026-09-22-q7-description-truncation.json`](results/2026-09-22-q7-description-truncation.json).
+>
+> **7a: the tool definitions ARE re-sent on every request** — 1,012 of 1,012 runs on disk
+> re-read request 1's whole cached prefix, which starts with the tools. **But what is
+> re-sent is the description cut at 2,048 characters.** This host (Claude Code) truncates
+> every MCP tool description to its first 2,048 characters and appends `… [truncated]`.
+> `words`' description is 6,779 characters and the 1.5 threshold line starts at character
+> **6,181**; in `opaque-words` it starts at **3,105**. It never reached the model.
+>
+> Confirmed three independent ways: the host's own tool listing; an `eval-words` subagent
+> on haiku and on sonnet, asked for the last 120 characters of its description, both
+> quoting the text ending at exactly character 2,048; and same-session token accounting,
+> where `words-recipe`'s appended 438-byte recipe adds **+12 / +24 tokens** — the length
+> of `-recipe` in six tool names, and nothing else.
+>
+> **7b was built, deployed and verified, and NOT RUN.** The canary is appended past the
+> cut, so it would have scored 0/10 by construction. That result would have looked like
+> a falsification and would really have measured the truncation.
+>
+> **What it changes:** Q1, Q13, Q14 and Q6 compared *delivered* guidance with
+> *undelivered* guidance. "Weakened" is wrong. So is "present and ignored". The honest
+> statement is that, on this host, text past character 2,048 of a tool description does
+> not exist for the model. **The channel question itself is untested**: no run here has
+> put the same sentence where both channels deliver it. The question Q7 meant to ask,
+> *is a delivered description sentence applied?*, is still open, and needs the sentence
+> inside the first 2,048 characters.
+
 > **REGISTERED 2026-09-22, BEFORE THE RUN.** Registered with Q8–Q12 in one commit,
 > from the frame in [`research-frame.md`](research-frame.md).
 
@@ -1887,7 +1930,8 @@ where `inline` carries a 5,020-character block on every call.
   rule needing two fields to be read together might not survive the same cut.
 - **No control.** Both surviving controls are refusals and neither is in this run.
 - **Same mechanism caveat as Q13**: a citation count measures *use*, not
-  availability. Q7 still gates any claim about why.
+  availability. Q7 still gates any claim about why. **Q7 answered 2026-09-22: the
+  description copy sat past the host's 2,048-character cut and was never delivered.**
 
 ### Cost
 
