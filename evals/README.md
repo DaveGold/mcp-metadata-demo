@@ -301,6 +301,21 @@ point the same way.
 The computed overheating alert was not wrong — it scores 20/20 — but it was the
 expensive fix to a defect that had a free one.
 
+**And the free fix is one line.** Q14 kept `words`' description untouched and added
+only the 181-character threshold line to the response:
+
+| arm | response | correct | cited 1.5 | tokens (median) |
+|---|---|---|---|---|
+| `words` | nothing | 8/20 | 0 of 20 | 27,615 |
+| `inline-oneline` | **one line** | **20/20** | **20 of 20** | **23,556** |
+| `inline` | whole block | 20/20 | 20 of 20 | 24,058 |
+
+One line did everything the 5,020-character block did, and adding it made the run
+cheaper, not dearer. The registered prediction was confirmed on all three criteria.
+
+> **Put the line that answers the question in the response. That is the whole rule,
+> on this question, on haiku.**
+
 ### The strongest single result
 
 `wrong-unit` asks for the area of flat 28A. The thin schema has no `huisletter`

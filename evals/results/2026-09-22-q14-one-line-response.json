@@ -1,0 +1,100 @@
+{
+  "_comment": "Q14 — is ONE line enough? Q13 moved the whole 5,020-char interpretation block into the response and took `overheating` from 5/20 to 20/20. This adds a single 181-char line to the response of an otherwise-unchanged `words` arm. ALL THREE REGISTERED PREDICTIONS CONFIRMED — the second confirmed prediction in this repo, after Q5. One line does what the whole block did, at the lowest cost of the three arms.",
+  "date": "2026-09-22",
+  "question": "overheating",
+  "shape": "interpretation",
+  "model": "haiku",
+  "n_per_arm": 20,
+  "total_runs": 60,
+  "protocol": "Live tool calls through the deployed endpoints via the eval-* subagents. All three arms interleaved in four balanced waves of 5+5+5 in a single sitting. Only the `question` string was passed.",
+  "registered": "evals/open-questions.md Q14, committed in 5f63b9b (PR #51) BEFORE any subagent was spawned. Scoring rule pre-committed by reference to the Q13 results file's `scoring_rule`, used verbatim and not revised during this run.",
+
+  "the_session_note": "This run was executed from the SAME session that built and deployed the arm. For several hours that session could not reach the new MCP server (agent present, ToolSearch empty). The MCP client later reconnected on its own and picked it up. The skill's claim that this required a fresh session has been corrected in the same PR as this file.",
+
+  "preflight": {
+    "step_1_real_calls": "mcp__eval-inline-oneline__, mcp__eval-words__ and mcp__eval-inline__get_building_profile each CALLED live on 3039WB/1 — not a schema lookup. inline-oneline returned temperatuuroverschrijding 3.59, no `alerts` key, and `interpretation` = exactly the one 181-char line.",
+    "step_2_stamping": "get_tool_call_log UNFILTERED: countByVariant showed `inline`, `words` and `inline-oneline` each under its own name. No `unknown` bucket.",
+    "window_opens": "2026-09-22T21:11:37Z, immediately after the last preflight call (inline, 21:11:36.8Z)."
+  },
+
+  "arms": {
+    "words": "full prose in the DESCRIPTION, including the threshold line. Nothing in the response.",
+    "inline-oneline": "the SAME description, byte for byte, PLUS the single sliced temperatuuroverschrijding line in the response. An ADDITION, not a move: the line is in BOTH channels.",
+    "inline": "minimal description, the WHOLE 5,020-char block in the response. Reference ceiling, not an adjacent rung."
+  },
+  "comparison_validity": "`words` → `inline-oneline` is the single-variable comparison: 181 characters added to the response, nothing else changed. `inline-oneline` vs `inline` differs in BOTH description and response volume and is reported only as 'one line vs the whole block', never as the value of a layer. All readable regime.",
+
+  "scoring_rule": "Verbatim from results/2026-09-22-q13-overheating-response-channel.json → scoring_rule. CORRECT = asserts a real risk without downgrading. CONFIDENTLY_WRONG = no / low / minor / modest / marginal / negligible risk. OTHER = 'moderate' or 'elevated' without naming it significant or downgrading it. FABRICATED = assigns a unit to the 3.59 index or states a threshold for it other than 1.5, anywhere in the output. CITES_1_5 = the answer names the 1.5 threshold. Fixed before the run; not revised during it.",
+
+  "headline": {
+    "words":          {"correct": 8,  "other": 4, "confidently_wrong": 8, "declined": 0, "fabricated": 20, "cited_the_1_5_threshold": 0},
+    "inline-oneline": {"correct": 20, "other": 0, "confidently_wrong": 0, "declined": 0, "fabricated": 1,  "cited_the_1_5_threshold": 20},
+    "inline":         {"correct": 20, "other": 0, "confidently_wrong": 0, "declined": 0, "fabricated": 0,  "cited_the_1_5_threshold": 20}
+  },
+
+  "the_single_cleanest_number": "The threshold line is in the DESCRIPTION of both `words` and `inline-oneline`, byte for byte. `inline-oneline` additionally carries it in the RESPONSE. Cited 0 of 20 without that response copy; 20 of 20 with it. Same model, same question, same sitting, same description — 181 characters of difference.",
+
+  "predictions_all_three_confirmed": {
+    "P1": {"registered": "inline-oneline >= 16/20 (falsified if <= 10/20)", "measured": "20/20", "verdict": "CONFIRMED"},
+    "P2": {"registered": "beats words by >= 8 (falsified if under 4)", "measured": "+12", "verdict": "CONFIRMED"},
+    "P3": {"registered": "threshold cited in >= 16/20 (falsified if <= 8)", "measured": "20/20", "verdict": "CONFIRMED"},
+    "the_counter_case_that_did_not_fire": "The registered case against was that a single line beside a 40-field payload might go unnoticed, making Q13's effect partly about the block's BULK. It was not noticed less: 20/20, identical to the whole block. Bulk contributed nothing measurable here.",
+    "record": "Two of eight registered predictions in this repo are now confirmed (Q5, Q14). Both are the ones that predicted the SIMPLER mechanism."
+  },
+
+  "cost": {
+    "subagent_tokens_mean":   {"words": 29543, "inline-oneline": 23835, "inline": 24223},
+    "subagent_tokens_median": {"words": 27615, "inline-oneline": 23556, "inline": 24058},
+    "vs_words": {"inline-oneline": "-19.3% mean, -14.7% median", "inline": "-18.0% mean, -12.9% median"},
+    "oneline_vs_inline": "-1.6% mean, -2.1% median — effectively equal",
+    "duration_ms_mean": {"words": 20039, "inline-oneline": 16447, "inline": 13694},
+    "answer_chars_mean": {"words": 456, "inline-oneline": 446, "inline": 420},
+    "tool_uses_total": {"words": 42, "inline-oneline": 38, "inline": 26},
+    "weather_calls": {"words": 22, "inline-oneline": 18, "inline": 6},
+    "prediction_on_cost": "Registered that inline-oneline should be the CHEAPEST arm. It is, by mean and by median — but against `inline` only by 1.6–2.1%, which is a tie in practice. The large saving is against `words`.",
+    "adding_181_characters_made_it_cheaper": "`words` → `inline-oneline` ADDS content and cuts cost by 14.7% (median). Answer lengths are within 10 characters of each other, so it is not output. It is the Q3 mechanism again: the `words` runs spend their tokens improvising a unit for 3.59. Every one of them did (fabricated 20/20).",
+    "caveat_on_words_mean": "`words`' mean is pulled up by five runs at 30–42k tokens. Quote the median (27,615). The oneline arm's maximum (24,993) is below `words`' median, so the gap is not outlier-driven.",
+    "an_observation_not_explained": "inline-oneline made 18 compensating weather calls against inline's 6. The two differ in description (full prose vs one sentence). Whether the fuller description invites more exploration is unmeasured; recorded, not claimed."
+  },
+
+  "how_words_fails_this_sitting": {
+    "every_run_invented_a_unit": "20 of 20 `words` runs attached a unit or threshold to 3.59 that is nowhere in the payload: °C (most), hours per year, hours per day, and invented bands (150 h, 2.9 °C, 26 °C, 27 °C, 28 °C). Q13 measured 9 of 20 on the same arm; this sitting's runs were more unit-happy, and made more weather calls (22 vs 9).",
+    "the_level_keeps_moving": "`words` on this question has now measured 2/7, 3/10, 7/10, 5/20 and 8/20 across five sittings — anywhere from 25% to 70%. That is the variance warning in its clearest form. The `words` → `inline-oneline` DIRECTION is a same-batch comparison and has been the same in both Q13 and Q14; the `words` LEVEL is not a quantity this repo can state."
+  },
+
+  "the_one_oneline_fabrication": "One inline-oneline run cited the 1.5 threshold, called the risk significant — correct on both counts — and then wrote 'indoor temperatures predicted to exceed comfort limits by over 3.5 °C'. The line in its response says nothing about units. Scored correct AND fabricated, per the rule. It is the only trace of the words-arm failure mode in 40 response-channel runs.",
+
+  "log_audit": {
+    "method": "get_tool_call_log, limit 200, read UNFILTERED via countByVariant first, then bounded by timestamp to the run window. The unfiltered page (19:41–21:15Z) also contains 40 `rich` rows from earlier today; all fall outside the window and are excluded by timestamp.",
+    "reconciliation": "EXACT. Harness tool_uses: words 42, inline-oneline 38, inline 26 = 106. Log in window: 42 / 38 / 26 = 106. Zero unexplained rows, zero non-target variants.",
+    "profile_calls": "Exactly 20 get_building_profile calls per arm, every one rowCount 3, every one paramsPresent ['queryIntent'] — no run passed huisletter or toevoeging.",
+    "errors": "17 errors, all on get_weather_context (inline-oneline 10, words 4, inline 3), none on get_building_profile.",
+    "self_report": "6 of 60 subagent self-reported CALLS counts were BELOW harness tool_uses (words 3, inline-oneline 3, inline 0); none overstated. The harness reconciles exactly with the log. Fourth recorded instance; the log stays authoritative."
+  },
+
+  "what_this_changes": {
+    "1_the_production_fix_is_one_line": "A plain MCP server with its guidance in the tool description can fix this defect by adding the ONE relevant line to its response. Not by moving its interpretation block, and not by computing an alert. That is the MCPSER-81 answer for the overheating half, and it is the cheapest intervention measured in this repo.",
+    "2_Q2_extends_to_its_limit": "Q2 found pruning the response block free twice, but never pruned below several notes. This prunes to one and costs nothing — 20/20 against 20/20. Volume is inert down to a single line on this question.",
+    "3_bulk_is_not_the_mechanism": "The registered counter-case — that a response needs enough substance to be attended to — does not hold here. One line was attended to exactly as often as 5,020 characters.",
+    "4_it_does_NOT_settle_Q7": "Both `words` and `inline-oneline` carry the line in the DESCRIPTION. That is compatible with the description being absent at interpretation time AND with it being present and ignored. Q7 is still what decides it."
+  },
+
+  "what_this_does_NOT_establish": [
+    "That one line suffices for every rule. The overheating line is unusually self-contained: one field, three bands, one threshold. A rule that needs two fields read together may not survive the same cut.",
+    "Anything above haiku. Semantics effects are largest on the weakest model (README section 8); sonnet and opus are unmeasured on this question at every rung.",
+    "That inline-oneline and inline are equivalent. They are tied at 20/20 because the question is saturated at both. A tie at ceiling is not a measurement of equality.",
+    "WHY the response channel works. It measures use, not availability. See open-questions.md Q7.",
+    "A stable level for `words`. See how_words_fails_this_sitting.the_level_keeps_moving."
+  ],
+
+  "caveats": [
+    "haiku only, one question, one address, one sitting, 60 runs.",
+    "NO CONTROL. Both surviving controls are refusals and neither was run. The set has no non-separation control at all.",
+    "`overheating` is now saturated at inline-oneline, inline and rich on haiku. Further runs at those rungs measure nothing.",
+    "Fabrication scoring distinguishes assigning a unit to the INDEX (scored) from a separate general comfort statement (not scored). One inline run wrote 'comfort levels (typically 26 °C+)' after correctly using the 1.5 threshold; not scored. The words-side count is insensitive to this call — excluding the one borderline words run, it is still 19/20.",
+    "Answer character counts are computed from ANSWER lines as transcribed into the scoring script.",
+    "subagent_tokens does not split input from output."
+  ],
+
+  "does_it_match__the_rule": "Yes, with the rider Q13 added. `overheating` is interpretation-shape, and semantics handle it — 20/20 — when they are in a channel the model uses. Q14 shows the amount of semantics required is one line."
+}

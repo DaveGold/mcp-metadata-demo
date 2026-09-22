@@ -19,22 +19,40 @@ description: Run the eval set in evals/questions.json against the arm servers (t
    would have produced a subagent with zero tools, declining every question — a
    run that looks like a result and is an artefact of the harness.
 
-   Skills reload mid-session. The agent registry can reload mid-session. **MCP
-   connections do not.**
+   Skills reload mid-session. The agent registry can reload mid-session. **An MCP
+   connection is established when the client connects — at process start, and
+   again on any reconnect.**
 
-   **Reproduced again on 2026-09-22, both halves visible in one session.** The
+   **Observed on 2026-09-22, in one session, in both directions.** The
    `eval-inline-oneline` arm was built, deployed and verified on the wire by raw
    HTTP. Minutes later the harness announced the new **agent** as available — and
    a `ToolSearch` for `mcp__eval-inline-oneline__get_building_profile` returned
-   **no matching tool** in the same session. Agent present, tools absent,
+   **no matching tool** in that same session. Agent present, tools absent,
    simultaneously. Spawning it there would have produced 60 runs of a subagent
    with no tools, declining every question, and the output would have looked like
-   a result. The endpoint was fine the whole time; the session was the problem. A session that began before an arm's server was added to
-   `.mcp.json` will never reach it, and no amount of retrying fixes it.
+   a result.
+
+   **Then, later in the SAME session, the MCP client dropped and reconnected —
+   and picked the new arm up.** A live call to
+   `mcp__eval-inline-oneline__get_building_profile` returned the correct payload.
+
+   > **CORRECTION, 2026-09-22.** This step used to say MCP connections "do not"
+   > reload, and that a session predating an arm "will never reach it, and no
+   > amount of retrying fixes it." **That is too strong and it is now known to be
+   > false.** A reconnect picks up `.mcp.json` entries added since the session
+   > began, and a reconnect can happen on its own. A full restart is *a* fix, not
+   > *the only* fix.
+   >
+   > What survives, and is the part that matters: **the agent registry and the MCP
+   > connection move independently, so the agent list is never evidence.** The
+   > window where an agent exists and its tools do not is real and was observed
+   > twice today. Do not infer either state from the other, in either direction.
 
    The only check that counts: can you call
-   `mcp__eval-<arm>__get_building_profile` right now? If not, STOP and tell the
-   user to start a fresh session. Do not attempt the run.
+   `mcp__eval-<arm>__get_building_profile` right now — an actual call, not a
+   schema lookup? If not, STOP. Do not attempt the run. Re-check later in the
+   session before concluding a fresh one is needed: the connection may come back
+   on its own, and on 2026-09-22 it did.
 
 2. **Check the arms are running CURRENT code.** Being able to call an arm does not
    mean it is serving the revision in this repo. Cloud Functions deploy per
