@@ -997,7 +997,7 @@ serves two open questions.
 > where `words-recipe`'s appended 438-byte recipe adds **+12 / +24 tokens** — the length
 > of `-recipe` in six tool names, and nothing else.
 >
-> **7b was built, deployed and verified, and NOT RUN.** The canary is appended past the
+> **7b was built, deployed and verified, NOT RUN, and deleted on 2026-09-23** (code in commit 61e3d89). The canary is appended past the
 > cut, so it would have scored 0/10 by construction. That result would have looked like
 > a falsification and would really have measured the truncation.
 >

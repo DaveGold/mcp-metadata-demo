@@ -37,7 +37,6 @@ import {
   type BagClientLike,
   type EpOnlineClientLike,
 } from './get-building-profile.js';
-import { withQ7Canary } from './q7-canary.js';
 
 /** The rich output schema minus the one field this tier does not produce. */
 export const outputSchemaWithoutAlerts = outputSchema.omit({ alerts: true });
@@ -46,21 +45,16 @@ export const outputSchemaWithoutAlerts = outputSchema.omit({ alerts: true });
  * `withRecipe` appends the DERIVED FIGURES procedure to the description — the
  * `words-recipe` arm of open-questions.md Q1b. The block is imported, never
  * copied, so this arm and `inline-recipe` ship identical bytes by two channels.
- *
- * `withCanary` appends Q7b's one-sentence marker instruction to the description —
- * the throwaway `words-canary` arm. Nothing else changes.
  */
 export function registerGetBuildingProfileWordsTool(
   server: McpServer,
   bagClient: BagClientLike,
   epOnlineClient: EpOnlineClientLike,
-  opts: { withRecipe?: boolean; withCanary?: boolean } = {}
+  opts: { withRecipe?: boolean } = {}
 ): void {
-  const baseDescription = opts.withRecipe
+  const toolDescription = opts.withRecipe
     ? descriptionCore + '\n\n' + derivedFiguresBlock
     : descriptionCore;
-  const toolDescription = opts.withCanary ? withQ7Canary(baseDescription) : baseDescription;
-  const variant = opts.withCanary ? 'words-canary' : opts.withRecipe ? 'words-recipe' : 'words';
 
   server.registerTool(
     'get_building_profile',
@@ -103,7 +97,7 @@ export function registerGetBuildingProfileWordsTool(
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error('tool.error', { tool: 'get_building_profile', variant, error: errorMessage });
+        logger.error('tool.error', { tool: 'get_building_profile', variant: opts.withRecipe ? 'words-recipe' : 'words', error: errorMessage });
         await logToolCall({ args, start, status: 'error', rowCount: 0 });
         return {
           content: [{ type: 'text' as const, text: `Error in get_building_profile: ${errorMessage}` }],

@@ -31,7 +31,7 @@
     "test:coverage": "vitest run --coverage",
     "test:live": "tsx scripts/smoke.ts 3543AR 1",
     "typecheck": "tsc --noEmit",
-    "deploy": "npm run build && firebase deploy --only functions:mcp,functions:mcpMinimal,functions:mcpSchema,functions:mcpInline,functions:mcpInlineRecipe,functions:mcpInlineConditional,functions:mcpInlineOneline,functions:mcpInlineFact,functions:mcpInlineInstruction,functions:mcpWordsRecipe,functions:mcpWords,functions:mcpOpaque,functions:mcpOpaqueWords,functions:mcpWordsCanary,functions:mcpOpaqueWordsCanary",
+    "deploy": "npm run build && firebase deploy --only functions:mcp,functions:mcpMinimal,functions:mcpSchema,functions:mcpInline,functions:mcpInlineRecipe,functions:mcpInlineConditional,functions:mcpInlineOneline,functions:mcpInlineFact,functions:mcpInlineInstruction,functions:mcpWordsRecipe,functions:mcpWords,functions:mcpOpaque,functions:mcpOpaqueWords",
     "deploy:setup-secret": "firebase functions:secrets:set EP_ONLINE_API_KEY",
     "logs": "firebase functions:log --only mcp,mcpMinimal,mcpSchema,mcpInline,mcpInlineRecipe,mcpInlineConditional,mcpWordsRecipe,mcpWords,mcpOpaque,mcpOpaqueWords",
     "prepublishOnly": "npm run build",
