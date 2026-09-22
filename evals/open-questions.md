@@ -1,19 +1,31 @@
 # Open questions
 
-Four experiments the 2026-09-21 runs make obvious. Each carries a **prediction
-registered before the run** and the result that would **falsify** it — written down
-in advance precisely because this repo has already been burned once by a rule chosen
-after seeing the answers (see `results/2026-09-21-shape-replication.json` and the two
-live runs that failed to replicate it).
+Twelve experiments. Each carries a **prediction registered before the run** and the
+result that would **falsify** it — written down in advance precisely because this repo
+has already been burned once by a rule chosen after seeing the answers (see
+`results/2026-09-21-shape-replication.json` and the two live runs that failed to
+replicate it).
 
-**Q1 and Q2 are ANSWERED** (banners in their sections; predictions left as registered).
-**Q3 and Q4 are open.** Read *What the runs support so far* next — it is the synthesis,
-and it is a narrower claim than "richer metadata is better" — then *Design guidance*,
-which turns it into what to build.
+**Q1–Q6 are ANSWERED** (banners in their sections; predictions left as registered — five
+of the six were wrong, which is the point of registering them). **Q7–Q12 are open**, and
+were added on 2026-09-22 from the frame in [`research-frame.md`](research-frame.md) —
+read that file for *why these questions*: the six axes (channel, timing, distance,
+conditionality, addressability, activation), which of them the answered questions cover,
+and which design principles are still unfalsified.
 
-Every arm Q1 and Q2 needed is **built and deployed as of 2026-09-21** — `inline`,
-`words-recipe`, `inline-recipe` and `inline-conditional`. **Q4's two arms are not
-built.** Either way a session that predates a deploy cannot reach a NEW arm: MCP connections are fixed when a session starts, and
+Read *What the runs support so far* next — it is the synthesis, and it is a narrower
+claim than "richer metadata is better" — then *Design guidance*, which turns it into what
+to build.
+
+**Q7 is foundational and is not optional.** It asks whether the tool description was even
+absent at interpretation time. If it was present, the word "weakened" is wrong everywhere
+it appears below, and Q1's result is a stronger claim than the one currently written.
+
+Every arm Q1–Q6 needed is **built and deployed** — `inline`, `words-recipe`,
+`inline-recipe`, `inline-conditional`, `inline-fact` and `inline-instruction`. **Q8–Q11
+each need a new arm** (`guidance-recipe`, `inline-head`, `inline-addressed`,
+`schema-semantic`); Q7 and Q12 need none. A session that predates a deploy cannot reach a
+NEW arm: MCP connections are fixed when a session starts, and
 the agent list is NOT proof of a connection — on 2026-09-21 the `eval-inline`
 agent appeared mid-session while its MCP server stayed unconnected, which would
 have produced a subagent with zero tools declining every question. Check you can
@@ -935,6 +947,382 @@ in tension or unrelated.
 since the calculated-vs-measured line was believed to be pruned on a NEN 7120 record — so one build
 serves two open questions.
 
+## Q7 — Was the description ABSENT at interpretation time, or present and ignored?
+
+> **REGISTERED 2026-09-22, BEFORE THE RUN.** Registered with Q8–Q12 in one commit,
+> from the frame in [`research-frame.md`](research-frame.md).
+
+### Why it matters
+
+This file currently says the description-channel guidance "weakened substantially by the
+time the model had to interpret the returned data" (Q1). That phrasing survives only
+because nobody checked the obvious alternative: **the description may have been sitting
+in the request the whole time.** Most hosts keep tool definitions in every inference
+request, not only the one that selects the tool.
+
+If it was present, then `4/30` versus `29/30` **cannot** be explained by the model no
+longer having the information, and every sentence in this repo that reads like
+"forgetting" is wrong. The defensible claim becomes the stronger and stranger one:
+
+> **The knowledge was available, and placement changed whether it was applied.**
+
+Until this lands, `research-frame.md` principle 1 is not quotable and neither is the
+word "weakened". Everything else in the file is downstream of it, which is why it is Q7
+and not Q12.
+
+### What is already known, and why it points one way
+
+Q5 measured `rich`'s input penalty as **+725 chars of tool definition per call** — per
+*call*, not per session. The accounting only works if the definition is re-sent on every
+turn. That is strong circumstantial evidence for "present", from a run done for another
+purpose entirely.
+
+### The test — two probes, neither needing a new arm
+
+**7a — accounting.** Record input tokens per turn for a 1-call and a 3-call trajectory on
+the same arm and question. If the tool-definition bytes are charged once, the description
+is sent once; if they scale with turns, it is present at interpretation time. Q5's
+per-call figure predicts the latter.
+
+**7b — canary.** Append to the `words` description one instruction that can only be obeyed
+*after* the result exists: *"When you report a record from this tool, end your answer with
+the marker ⟨D7⟩."* It is content-free — no domain knowledge, nothing to reason about, no
+ground truth to get wrong. If the marker appears, the description was present **and read**
+at the post-tool step, and the 4/30 is a failure to *apply* domain guidance rather than
+to *see* it.
+
+Run 7b against `words` and `opaque-words` so the answer is not a property of one
+description.
+
+**Do not edit the shipped `words` and `opaque-words` arms to do it.** This repo has
+already lost a run to an arm that changed underneath it (see the stamping failure at the
+top of this file) and six prose arms are still awaiting re-baselining. Deploy
+`words-canary` and `opaque-words-canary` as throwaway variants, and delete them after.
+The canary's whole value is that it changes nothing else — so it must change nothing
+else.
+
+### Prediction
+
+> **Present, and read. 7a shows tool-definition bytes charged per turn; 7b's marker
+> appears in ≥8 of 10 runs on both arms.**
+>
+> The reasoning: Q5's per-call penalty, plus the fact that a bare formatting instruction
+> asks nothing of the model except compliance — and compliance with format instructions
+> is the one thing every arm in this repo does well, haiku excepted.
+>
+> **Falsified if** the marker appears in ≤3 of 10, **or** if input accounting shows the
+> definition charged once per session. Either would mean the description really does fall
+> out of the interpretation step, Q1 becomes a much more mundane result — knowledge that
+> is gone cannot be applied — and the interesting question moves to *which* hosts drop it.
+
+### The outcome that would be most awkward
+
+Marker at 8/10 while the *domain* sentence in the same description scores 4/30. That is
+the sharpest single finding available in this file: same channel, same request, same
+turn — obeyed as an instruction, ignored as domain knowledge. It would make the variable
+**what the model does with a channel**, not what the channel contains, and it would set
+up Q4's fact-versus-instruction result rather than repeat it.
+
+### Cost
+
+7a: re-reading instrumentation on any existing run — free. 7b: 1 question × 2 arms ×
+1 model × n=10 = **20 runs**, one description edit, one deploy.
+
+---
+
+## Q8 — The bootstrap channel: is the boundary the RESPONSE, or just NOT-THE-DESCRIPTION?
+
+> **REGISTERED 2026-09-22, BEFORE THE RUN.**
+
+### Why it matters
+
+Q1b compared exactly two channels for the DERIVED FIGURES recipe — description
+(`words-recipe`, 4/30) and data response (`inline-recipe`, 29/30) — and the file has been
+reading that as *responses beat descriptions*. There is a third channel between them that
+this repo has never built: a **parameterless guidance call** that returns HOW before any
+data exists. It is a real pattern (the production Duurzaam server ships `start_duurzaam`),
+and it sits on the far side of the execution boundary while still being *upstream* of the
+data.
+
+That distinguishes two very different stories:
+
+- **"Interpretation must travel with the data"** — then guidance-call placement should
+  fail like the description did, because the recipe still arrives before the record.
+- **"Anything the model receives as a tool RESULT is treated differently from a tool
+  DEFINITION"** — then guidance should score like the response arm, and the variable is
+  channel *role*, not proximity to data.
+
+The second is the more useful finding for anyone building a server, and it is the one
+this repo cannot currently tell apart.
+
+### The arm
+
+`guidance-recipe` — new variant, same shape as the others:
+
+- `get_building_profile` description: minimal, **no** recipe;
+- calling it with no parameters returns the HOW block verbatim (the same bytes as
+  `words-recipe` and `inline-recipe` ship);
+- the parameterised call returns data with **no** interpretation prose.
+
+Byte-identical guidance, three channels, one question. `gas-estimate` is the question,
+because the recipe is the whole difference between 0/10 and 10/10 on it and no model
+tested derives the conversion unaided (see `2026-09-21-guide-ablation.json`).
+
+### Prediction
+
+> **`guidance-recipe` lands with the response arm, not the description arm: ≥25/30,
+> against `words-recipe`'s 4/30.**
+>
+> The reasoning: the guide ablation showed the recipe works whenever the model actually
+> reads it, and Q7 (if it holds) says the description is read too — so what separates
+> 4/30 from 29/30 is not availability but the role the model assigns to the surface.
+> A tool *result* is evidence about the task; a tool *definition* is documentation about
+> a capability. The guidance call is a result.
+>
+> **Falsified if** `guidance-recipe` scores ≤10/30, which would mean proximity to the
+> data is what matters and the recipe must ride along with the record — a stricter and
+> more expensive design rule, since it has to be re-sent on every call.
+
+### Also worth reading off the same run
+
+Whether the model *makes* the parameterless call unprompted. If it does not, the channel
+is worthless regardless of how well its content performs, and that is a finding about
+bootstrap patterns generally — including the shipped `start_duurzaam`.
+
+### Cost
+
+1 question × 3 arms (`words-recipe`, `guidance-recipe`, `inline-recipe`) × 2 models ×
+n=10 = **60 runs**, one new arm to build and deploy.
+
+---
+
+## Q9 — Position inside the response, and distance across turns
+
+> **REGISTERED 2026-09-22, BEFORE THE RUN.**
+
+### Why it matters
+
+The standing objection to Q1 is *"you are just measuring recency"*. It deserves a direct
+answer, and the two halves of it are not the same claim.
+
+**Position within one response** is the weak version: if the interpretation block works
+better last than first, response *ordering* becomes part of interface design. Today
+`inline` spreads `interpretation` after the profile fields, so it is already last, by
+accident rather than decision.
+
+**Distance across turns** is the strong version, and the one that decides whether a
+bootstrap channel (Q8) is durable: guidance delivered once has to survive whatever the
+agent does before it reaches the data.
+
+### The arms
+
+- `inline-head` — the identical block, emitted as the **first** key of the JSON instead
+  of the last. One-line change, zero bytes different.
+- Distance is tested without a new arm, by protocol: `guidance-recipe` (Q8) followed by
+  0, 1 and 3 intervening `get_weather_context` calls before the building lookup.
+
+### Prediction
+
+> **Position within a response does not matter (`inline-head` within 2 of `inline`
+> on 30 runs). Distance across turns does (≥5 lost between 0 and 3 intervening calls).**
+>
+> The reasoning: this file has measured volume three times and found it inert — 37–50%
+> pruned, then 67% pruned, zero answers changed — while every effect it *has* found came
+> from a channel change or a wrong sentence. A few hundred tokens of reordering inside
+> one response is the smallest perturbation yet attempted. Turn distance is a different
+> mechanism: the guidance stops being adjacent to anything and starts competing with
+> everything the intervening calls returned.
+>
+> **Falsified if** `inline-head` differs from `inline` by ≥3, which would make ordering
+> a real design surface and would partially rescue the recency objection — or if the
+> distance curve is flat, which would make guidance-once-per-session a safe pattern and
+> materially cheapen every recommendation in `research-frame.md`.
+
+### Cost
+
+Position: 1 question × 2 arms × 1 model × n=10 = **20 runs**, one trivial arm.
+Distance: 3 distances × 1 arm × 1 model × n=10 = **30 runs**, no new arm, but it needs
+Q8's arm deployed first.
+
+---
+
+## Q10 — Field addressability: can `relates_to_fields` beat a misleading name?
+
+> **REGISTERED 2026-09-22, BEFORE THE RUN. This is the one this repo already has
+> evidence AGAINST — see Q6.**
+
+### Why it matters
+
+Q5 and Q6 together are the hardest thing in this file for the *put interpretation next to
+the value* principle. On `overheating` the threshold sentence is present in every prose
+arm, adjacent to the value, and **every prose arm ignores it**: 8/10 and 7/10 asserting
+no-or-low risk against a ground truth of *significant*, reading
+`temperatuuroverschrijding = 3.59` as degrees or hours and inventing thresholds to match.
+Q6 then tested the obvious culprit — the name — and **falsified it**: a neutral field
+code plus an explicit *unitless, threshold 1.5* scored **0 of 7**, worse than the
+readable name's 2 of 7, because three runs lost the field altogether and answered from
+`ahe`, the renewable share.
+
+So: adjacency does not bind, and renaming does not rescue it. **2 correct in 21.** Q6's
+conclusion was that prose will not fix this and the repair is server-side computation.
+
+That is the state Q10 walks into, and it is why the question is worth running rather than
+assuming. The draft proposes two primitives that are neither prose nor renaming — they
+make the link between rule and field **machine-explicit** instead of spatial:
+
+- `relates_to_fields` — *which returned values does this knowledge interpret?*
+- `triggered_by` — *which value made the server decide it applies?* (the activating field
+  need not be the explained field: `berekeningstype` activates the reading of `ep2`)
+
+The claim under test is that an explicit edge routes attention where adjacency only
+hopes to. If it holds, structure is a third mechanism alongside prose and naming, and the
+first one to survive this question. If it does not, then **nothing short of computing the
+verdict works here**, and the guidance for server authors is blunt: do not annotate your
+way out of a value the model will misread.
+
+### The arm
+
+`inline-addressed` — as `inline`, but the interpretation block becomes a list of objects
+carrying `relates_to_fields`, `triggered_by` and `meaning`, with the same sentences.
+Byte count will rise slightly; per Q2 and Q9 that is not expected to matter on its own,
+and `inline` is the control that says so.
+
+### Questions to run it on
+
+`overheating` and `benchmark-trap` — the two where a field name actively lies about what
+it holds — plus `gas-estimate` as a null case where no name is misleading.
+
+### Prediction
+
+> **It does not work. `inline-addressed` stays at or below 4/10 on `overheating` —
+> within noise of `inline` — and is flat on the other two.**
+>
+> The reasoning, stated against the draft's own hypothesis: the failure Q6 documented is
+> not the model failing to find which rule goes with which field. In `words` it reaches
+> the right field and then **overrides the stated threshold with an invented one**. An
+> explicit edge answers *which field does this rule explain* — a question the model was
+> already answering correctly. It does not make a rule more believed, and belief is what
+> is missing.
+>
+> Registering the null is the point: `relates_to_fields` is an appealing primitive and
+> this file's record is that appealing mechanisms measure at zero more often than not.
+>
+> **Falsified if** `overheating` reaches ≥7/10. That would be the most interesting single
+> result available in this file — it would mean structure succeeds where identical prose
+> failed, that the model treats a machine-readable edge as a stronger commitment than a
+> sentence, and that the layered model gains a real primitive rather than a vocabulary.
+
+### Why the outcome is useful either way
+
+A win gives the layered model its missing primitive and the first mechanism that beats a
+name. A null retires `relates_to_fields` before it reaches a guide, and leaves Q6's much
+less glamorous conclusion standing: **for a value the model will misread, compute the
+verdict server-side — do not annotate your way out.** Either way, run the
+`overheating` alert fix separately; it is a shipped defect, not an experiment.
+
+### Cost
+
+3 questions × 2 arms × 2 models × n=10 = **120 runs**, one new arm to build and deploy.
+
+---
+
+## Q11 — Does `outputSchema` reach the model at all?
+
+> **REGISTERED 2026-09-22, BEFORE THE RUN.**
+
+### Why it matters
+
+The root `README.md` states, as fact, that the output schema is *"deliberately shape-only
+— the model never sees this"*, and records that interpretation was moved out of it and
+into the description for that reason. **That assertion has never been measured.** The
+schema is registered on the tool and therefore goes over the wire in `tools/list`;
+whether the host surfaces it at the post-tool step is a host property, and this repo has
+been asserting the answer instead of testing it.
+
+It is the cleanest instance in the whole file of *protocol-visible ≠ model-effective*. It
+also decides a real architectural question: whether `outputSchema` can serve as the
+**canonical** home for stable field semantics — units, types, invariant meaning — that the
+response then **projects**, or whether canonical and delivered have to be the same place.
+
+### The arms
+
+- `schema-semantic` — the existing minimal arm, plus full `.describe()` interpretation on
+  every output field: units, stable meaning, the calculated-vs-measured distinction. The
+  description and the response stay bare.
+- `words` and `inline` as the already-measured comparisons for the same sentences in the
+  other two channels.
+
+### Prediction
+
+> **No measurable effect. `schema-semantic` scores within 2 of the bare arm on every
+> question, i.e. it behaves like `thin`, not like `words`.**
+>
+> The reasoning: the existing `schema` arm moved 0/18 → 18/18 on the one question where
+> the correct call cannot be **expressed** without the parameter, and ≈0 on everything
+> else. Schemas have bought expressibility here and never meaning. Note this prediction
+> agrees with the README's assumption — which is exactly why it needs a run rather than a
+> re-reading.
+>
+> **Falsified if** `schema-semantic` scores within 3 of `words` on any interpretation
+> question. That would mean the canonical/projection split is buildable as stated, that
+> a stable-semantics layer costs nothing to place correctly, and that the README's claim
+> — and the refactor it justified — need revisiting.
+
+### Cost
+
+3 questions × 2 arms × 2 models × n=10 = **120 runs**, one new arm. Cheap to build: the
+`.describe()` strings already exist in git history, from before they were moved out.
+
+---
+
+## Q12 — A second domain
+
+> **REGISTERED 2026-09-22. THE GATE, NOT AN EXPERIMENT.**
+
+### Why it matters
+
+Everything in this file is one domain, one register pair, one tool shape, and one author
+for the metadata, the questions, the ground truth and the scoring. No result here becomes
+an MCP design rule until the central one — **the same bytes, moved from description to
+response, change the answer** — reproduces somewhere with no shared vocabulary, no shared
+ground truth and, ideally, no shared author.
+
+### The test
+
+The narrowest useful replication, not a second research programme:
+
+- one existing production server with a genuine record-conditional rule **and no personal
+  data** — the Artikelbeheer sentinel date (`0001-01-01` means *not set*, not a date in
+  year 1) or the Ketenstandaard cross-table code collision. Both are the right shape: a
+  value that reads as valid, with a rule that applies only to some records. The HR and
+  fleet servers hold better traps and are **not** eligible: an eval publishes its
+  records, and those records are colleagues;
+- byte-identical guidance in description and in response;
+- one question, two arms, two models, n=10.
+
+Q1's shape, nothing more.
+
+### Prediction
+
+> **The direction replicates; the magnitude does not. Response placement wins, by
+> noticeably less than 4/30 → 29/30.**
+>
+> The reasoning: `gas-estimate` is close to a best case — a constant the payload cannot
+> contain, needed by every model, with a single correct road. Most real rules are less
+> load-bearing than that, so the gap should compress.
+>
+> **Falsified if** the description arm matches or beats the response arm. That would
+> localise the entire finding to this domain or this tool shape, and every general
+> sentence in `research-frame.md` would have to be rewritten as a statement about Dutch
+> building data.
+
+### Cost
+
+1 question × 2 arms × 2 models × n=10 = **40 runs**, plus the work of writing a second
+domain's ground truth — which is the real cost, and the reason this is last.
+
+---
+
 ## Suggested order
 
 ~~1. **Q1b first.**~~ ~~2. **Q1a** next.~~ **Both run on 2026-09-21 and both
@@ -957,18 +1345,37 @@ failure mode uncovered.
 > [`results/2026-09-21-benchmark-trap-calculated-vs-measured.json`](results/2026-09-21-benchmark-trap-calculated-vs-measured.json)
 > (`newly_possible`) and in the Q4 results file and PR #44.
 
-1. **Q4 first.** It is the highest-value open question, the cheapest build in the file
-   (two response variants of one line), and it is the only one that could reframe the
-   argument rather than refine it. Build it with `metered-vs-model` in scope so the same
-   deploy also closes Q2's untested cross-record half.
-2. **Harder questions before bigger n.** Both `derived_number` questions and now
-   `benchmark-trap` are at or near ceiling for the arms that matter (see
-   `_measured_ceilings`). More repeats on them measure nothing; the set needs questions
-   the top arms can still fail.
-3. **Re-baseline the ladder.** The 2026-09-21 block change moved six prose arms, so the
-   readable-ladder files are stale on any `ep1`/`ep2`/`berekend` question. Anything that
-   quotes those numbers needs re-running before it can be quoted again.
+~~1. **Q4 first.**~~ **Answered 2026-09-22 — prediction falsified on both limbs.**
 
-**Q3 is free to run alongside any of them** — it needs no new arm and no deploy, only
-instrumentation of the harness and an audit against `get_tool_call_log`. Do it on the
-next run of anything, whatever that run is for.
+**The order for Q7–Q12, added 2026-09-22:**
+
+1. **Q7 first, and before anything is quoted.** It is nearly free — one description edit
+   and 20 runs — and it decides how every other result in this file may be worded. If the
+   description turns out to be present and read, "weakened" and "forgot" come out of the
+   prose and the claim gets stronger, not weaker.
+2. **Q10 next.** The highest-value open question now that Q4 has landed: it is the only
+   untried mechanism aimed at this repo's most stubborn failure — 2 correct in 21 on
+   `overheating`, with both prose and renaming already falsified (Q5, Q6) — and it is
+   registered as a null, so a win would be the surprise and a loss retires a fashionable
+   primitive before it reaches a guide.
+3. **Q8, then Q9's distance half.** Q8 builds the arm that Q9's distance protocol needs,
+   so one deploy serves both. Q9's position half (`inline-head`) can ride along with
+   anything; it is a one-line arm.
+4. **Q11 whenever there is spare batch capacity.** Cheap, and it tests an assertion the
+   root `README.md` currently states as fact.
+5. **Q12 last, and only if Q7–Q10 hold.** A second domain is the gate on generalising,
+   not a way to learn more about this one.
+
+**Standing rules for any run, whatever it is for:**
+
+- **Harder questions before bigger n.** Both `derived_number` questions and now
+  `benchmark-trap` are at or near ceiling for the arms that matter (see
+  `_measured_ceilings`). More repeats on them measure nothing; the set needs questions
+  the top arms can still fail.
+- **Re-baseline the ladder.** The 2026-09-21 block change moved six prose arms, so the
+  readable-ladder files are stale on any `ep1`/`ep2`/`berekend` question. Anything that
+  quotes those numbers needs re-running before it can be quoted again.
+- **Record the model-facing request while you are in there.** Q7 aside, every run from
+  now on should note whether the description, input schema, output schema and prior tool
+  results were present in the post-tool request. Inferring visibility from the protocol
+  objects is the error `research-frame.md` exists to prevent.
