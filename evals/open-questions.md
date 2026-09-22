@@ -553,6 +553,44 @@ call repeatedly, and the claim has to be narrowed accordingly.
 
 ## Q4 — Is the operative ingredient the FACT or the INSTRUCTION?
 
+> **ANSWERED 2026-09-22 — THE PREDICTION BELOW IS FALSIFIED ON BOTH OF ITS OWN
+> CRITERIA.** 180 runs, three arms, three models, two questions. See
+> [`results/2026-09-22-q4-fact-vs-instruction.json`](results/2026-09-22-q4-fact-vs-instruction.json).
+> The prediction is left exactly as registered.
+>
+> | `benchmark-trap` | haiku | sonnet | opus | total |
+> |---|---|---|---|---|
+> | `inline` (both) | 10 | 10 | 10 | **30/30** |
+> | `inline-fact` | 5 | 10 | 10 | **25/30** |
+> | `inline-instruction` | 0 | 0 | 10 | **10/30** |
+>
+> `metered-vs-model`: **30/30 for all three arms.** 0 confidently-wrong and 0
+> fabricated across all 180 runs.
+>
+> Both registered falsification criteria fired: fact-only came within 3 of both on
+> TWO models (0 apart on each), and instruction-only scored below fact-only on TWO
+> models. The second prediction inverted too — instruction-only was predicted to WIN
+> on `benchmark-trap` and LOSE on `metered-vs-model`; it lost the first and tied the
+> second.
+>
+> **Why.** The instruction is conditional: *"where a question asks how a building
+> compares to a METERED BENCHMARK, say the comparison cannot be made."* Its trigger
+> condition is the very fact that was withheld — to fire it on `benchmark-trap` the
+> model must already know Paris Proof is defined on measured final energy. The
+> control settles it: on `metered-vs-model` the question itself contains the word
+> "metered", the trigger is visible in the prompt with no domain fact needed, and the
+> same arm scores 30/30. **An instruction is not executable without the semantics
+> that say when it applies.** The "tool metadata must specify BEHAVIOUR, not
+> SEMANTICS" reframing this question was registered to test gets no support here.
+>
+> **Tokens.** `instruction-only` is the cheapest arm — by 112 tokens, 0.4% — and also
+> the worst. Quality and cost still do not point the same way.
+>
+> **Caveats that matter.** `instruction-only` also lost the two-word label by design,
+> so fact and label cannot be separated by this run. opus scored 10/10 on all three
+> arms, so a third of the matrix measures nothing. Q2's cross-record half was NOT
+> run: it needs `inline-conditional`, which was not in this arm set.
+
 > **REGISTERED 2026-09-21. ARMS BUILT AND DEPLOYED; NOT YET RUN.** The prediction
 > below was written before the arms existed and is left exactly as registered.
 >
