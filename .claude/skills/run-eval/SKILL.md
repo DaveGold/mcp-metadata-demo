@@ -20,7 +20,16 @@ description: Run the eval set in evals/questions.json against the arm servers (t
    run that looks like a result and is an artefact of the harness.
 
    Skills reload mid-session. The agent registry can reload mid-session. **MCP
-   connections do not.** A session that began before an arm's server was added to
+   connections do not.**
+
+   **Reproduced again on 2026-09-22, both halves visible in one session.** The
+   `eval-inline-oneline` arm was built, deployed and verified on the wire by raw
+   HTTP. Minutes later the harness announced the new **agent** as available — and
+   a `ToolSearch` for `mcp__eval-inline-oneline__get_building_profile` returned
+   **no matching tool** in the same session. Agent present, tools absent,
+   simultaneously. Spawning it there would have produced 60 runs of a subagent
+   with no tools, declining every question, and the output would have looked like
+   a result. The endpoint was fine the whole time; the session was the problem. A session that began before an arm's server was added to
    `.mcp.json` will never reach it, and no amount of retrying fixes it.
 
    The only check that counts: can you call
