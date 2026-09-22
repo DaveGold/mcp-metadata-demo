@@ -1942,6 +1942,137 @@ contrary.
 
 ---
 
+## Q15 — Is a description sentence that is DELIVERED applied? The channel test Q1 never ran
+
+> **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
+> Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
+> tool description, so every description-vs-response result in this file compared
+> delivered with undelivered text. This is the first comparison here of the same sentence
+> **delivered** through each channel.
+
+### Why it matters
+
+Q1, Q13 and Q14 are currently read as "the response beats the description". After Q7 that
+claim is **untested**. The numbers are real, but the description copy never arrived.
+Two readings are now live, and they lead to different design advice:
+
+- **Delivery is all that matters.** A sentence that reaches the model is applied, whichever
+  channel carried it. Then the production rule is *keep what matters inside the first
+  2,048 characters, or put it in the response*, and the "channel" finding reduces to a
+  host limit.
+- **The channel matters even when both deliver.** A model treats description text as
+  tool-selection metadata and under-applies domain content in it, even though the text is
+  present. Then the response really is the better channel, and Q1's claim survives in a
+  form it has not yet earned.
+
+### The arm
+
+`words-front`, deployed as `mcpWordsFront`. Its description is `descriptionCore` with **two
+paragraphs inserted right after the RETURNS paragraph** (at ~char 330). Nothing is retyped,
+and the INTERPRETATION copy of the line stays where it is, past the cut:
+
+1. `overheatingLine`, the same 181-character sliced line Q14 put in the response;
+2. Q7's canary sentence, verbatim: *"When you report a record from this tool, end your
+   answer with the marker ⟨D7⟩."*
+
+| arm | description delivers the 1.5 line? | response carries it? | canary |
+|---|---|---|---|
+| `words` | no (at char 6,181, cut) | no | no |
+| **`words-front`** | **yes (~char 330)** | no | **yes, delivered** |
+| `inline-oneline` | no (same description as `words`) | **yes** | no |
+
+**The one other thing that changes, stated up front.** Inserting ~265 characters at char
+330 pushes the same number of characters off the end of the delivered 2,048. What falls off
+is the INTERPRETATION header and the partial NTA 8800 bullet that `words` delivers, neither
+about overheating. So `words-front` vs `words` differs by the line and the canary coming
+in, and that tail going out.
+
+**The comparisons:**
+
+- **`words-front` vs `inline-oneline` is the channel test.** Each delivers the line exactly
+  once, one in the description and one in the response. It differs in the canary, and in
+  which ~265 characters of the description arrive.
+- **`words-front` vs `words`** is delivery within one channel. Not delivered, then delivered.
+- **Canary × citation inside `words-front`** is Q7's awkward outcome, finally measurable: a
+  sentence obeyed as an instruction beside a sentence applied, or ignored, as domain
+  knowledge, both in the same place.
+
+### Prediction
+
+> **Delivery is what matters. A delivered description line is applied.**
+>
+> - **P1: `words-front` cites 1.5 in ≥ 16/20.** Falsified if ≤ 10/20.
+> - **P2: `words-front` is within 4 runs of `inline-oneline` on CORRECT.** Q14 had it at
+>   20/20; the directory's noise bar is 4. Falsified if `inline-oneline` leads by ≥ 8.
+> - **P3: `words-front` beats `words` on CORRECT by ≥ 8.** Falsified if the gap is under 4.
+> - **P4: the canary is obeyed in ≥ 16/20 `words-front` runs.** Falsified if ≤ 10/20.
+>
+> **Reasoning.** Every lever in this repo that worked did so by getting text *delivered*: the
+> computed alert, the response block, the one response line. None of them has ever been
+> tested against delivered description text, so there is no evidence yet that the channel
+> matters beyond delivery. Q4 showed an instruction can be present and inert, but the inert
+> one there lacked its trigger semantics. This line carries its own.
+>
+> **The case against**, and why this is worth 60 runs: the description is read at
+> tool-*selection* time, and a model may file it as "what this tool is for" rather than "how
+> to read what it returns". If that is how haiku treats it, P1 fails and P4 holds. That is
+> the sharpest outcome available here, and it would put Q1's channel claim back on its feet.
+>
+> This repo's record: **six of eight registered predictions wrong.**
+
+### Scoring, fixed now
+
+- **Domain:** CORRECT / CONFIDENTLY_WRONG / OTHER / FABRICATED / CITES_1_5, exactly as
+  pinned in `results/2026-09-22-q13-overheating-response-channel.json` → `scoring_rule`,
+  applied with the marker stripped.
+- **Marker:** exactly as pinned in Q7's amendment. OBEYED = `D7`, bare or bracketed,
+  anywhere in the returned text; a mention counts. EXACT vs VARIANT and position
+  (`END_OF_ANSWER` / `IN_ANSWER` / `AFTER_PARAMS` / `OTHER`) are reported, not
+  thresholded. The carried-or-produced check uses the transcript on disk.
+- **Also recorded in `words` and `inline-oneline`**, where the canary is absent: any `D7`
+  there is a contamination alarm and voids the run.
+- **2×2 marker × citation** for `words-front`, whatever the counts.
+- **Exclusions:** a run with no `get_building_profile` result is `NO_RECORD`, kept, and
+  dropped from denominators. Not replaced.
+- **Per run:** `tool_uses`, `duration_ms`, `subagent_tokens`, ANSWER characters with the
+  marker stripped, and request-1 input from disk.
+
+### Protocol
+
+`words` · `words-front` · `inline-oneline`, **haiku**, `overheating`, **n=20 per arm**, all
+three interleaved in one sitting: five waves of 12, four per arm. Only the `question` string
+is passed. Audit against `get_tool_call_log` unfiltered, reading `countByVariant` first, and
+exclude stray rows by timestamp.
+
+**Delivery preflight, new and mandatory for this arm.** Before any run:
+
+- this session's own listing of `mcp__eval-words-front__get_building_profile` must show the
+  1.5 line and the canary before `… [truncated]`;
+- a raw HTTP `tools/list` must show both inside the first 2,048 characters.
+
+Verified from the protocol side *and* the host side, because Q7 is exactly what happens when
+only the protocol side is checked.
+
+### Known limits, stated up front
+
+- **haiku only**, one question, one line. `overheating` is saturated at every response rung,
+  so `inline-oneline` near 20/20 is expected. The interesting number is `words-front`.
+- **Position is confounded with channel.** The line sits ~330 characters into a
+  2,048-character description, and at the end of a JSON response. This compares *delivered
+  here* with *delivered there*. It does not compare channels at equal position; that is Q9's
+  axis.
+- **The canary is present in only one arm.** If it changes how haiku reads the rest of the
+  description, that change lands on `words-front` alone. It is content-free, but the
+  possibility is noted rather than assumed away.
+- **No control.** Both surviving controls are refusals, and neither is in this run.
+
+### Cost
+
+1 question × 3 arms × 1 model × n=20 = **60 runs.** One new arm, one deploy, deleted
+afterwards unless the result makes it worth keeping.
+
+---
+
 ## Suggested order
 
 ~~1. **Q1b first.**~~ ~~2. **Q1a** next.~~ **Both run on 2026-09-21 and both
