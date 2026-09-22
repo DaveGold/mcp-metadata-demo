@@ -5,6 +5,8 @@ server deployed at different metadata tiers. Same data, same questions — the
 arms differ only in how much the tool explains itself.
 
 - **[`questions.json`](questions.json)** — the set. Start here.
+- [`research-frame.md`](research-frame.md) — why these experiments: the axes, the
+  coverage, the claim boundaries
 - [`addresses.json`](addresses.json) — the frozen profiles every answer derives from
 - [`ground-truth.test.ts`](ground-truth.test.ts) — proves it, under `npm test`
 - [`results/`](results/) — what happened when it was run
@@ -102,11 +104,19 @@ own caveats. The picture changed substantially on 2026-09-21/22: the early
 findings were n=2–3 and mostly Haiku, and have since been re-run at **n=10–20 per
 cell across three models**. Where a claim has been superseded it says so.
 
-**Four questions were registered in [`open-questions.md`](open-questions.md)
-before they were run. All four are now answered — and every one of the four
-registered predictions was wrong.** That pattern is itself the most reliable
-thing here: the effects are large and legible, and intuitions about *why* were
-wrong four times out of four.
+**Six questions were registered in [`open-questions.md`](open-questions.md)
+before they were run. All six are now answered — and five of the six registered
+predictions were wrong.** That pattern is itself the most reliable thing here:
+the effects are large and legible, and intuitions about *why* were wrong five
+times out of six.
+
+**Six more are registered and open (Q7–Q12).** They come from
+[`research-frame.md`](research-frame.md), which is the map the register is drawn
+on: the six axes a placement effect could run along — channel, timing, distance,
+conditionality, addressability, activation — which of them the answered questions
+actually cover, and which design principles remain unfalsified. Read it before
+quoting any result here as a general MCP rule; it says plainly what this repo can
+and cannot support.
 
 ### 1 · Semantics and computation buy different things
 
