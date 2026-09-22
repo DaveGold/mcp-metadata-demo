@@ -43,6 +43,21 @@
     "the_question_itself": "Answered, and in the direction the prediction bet AGAINST: the guidance was ABSENT at interpretation time. Not because the host drops definitions after the tool-selection turn, which is what the registration's falsifier imagined, but because it never sends more than the first 2,048 characters of any of them. 'The model never saw it' is TRUE for every line past character 2,048, on every turn."
   },
 
+  "where_the_limit_comes_from": {
+    "in_the_binary": "Claude Code 2.1.275 hard-codes `tx=2048`. Server instructions are cut with `slice(0,tx) + '… [truncated]'`, and a line '<name> truncated from N to 2048 chars' is written ONLY to the debug log. Tool descriptions are sliced to the same constant.",
+    "changelog": "The only CHANGELOG entry that mentions it is 2.1.280: 'Added CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH to change the 2,048-character cap on MCP tool descriptions and server instructions for every MCP server in the session.' So the cap existed BEFORE 2.1.280. The version that introduced it is not established here.",
+    "docs": "The Claude Code MCP docs page (checked 2026-09-23) does not mention the cap. It documents only the 25,000-token limit on tool OUTPUT.",
+    "did_it_change_during_this_project": "No. 952 of the eval runs on disk ran on 2.1.275 and 60 on 2.1.280. The `words` − `thin` request-1 delta is an identical +3,727 tokens (haiku) / +4,879 (sonnet, opus) in every session, from the first run on 2026-09-21 06:13 onward. Every live-tool-call run in this repo was truncated.",
+    "why_nobody_saw_it": "Every check in this repo was protocol-side. Raw HTTP tools/list, the unit tests and the log audit all see the full description, because the cut happens inside the client after tools/list. The only host-side trace is a debug-log line. research-frame.md warned about exactly this gap ('protocol-visible is not model-effective'); Q7 was the first run to look at the model-facing context.",
+    "now_configurable": "From 2.1.280, CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH raises the cap per session. That makes a direct re-run of the description arms with the full text possible, in a session started with the variable set."
+  },
+
+  "runs_affected": {
+    "method": "Live eval subagent transcripts on disk (1,014; earlier runs recorded in results files are not all on disk), by arm × question, against where the question's guidance sits relative to char 2,048.",
+    "affected_guidance_never_delivered": "words: gas-estimate 61, total-vs-per-m2 61, overheating 43 (165 of its 188). words-recipe: all 30 (the recipe sits at char 6,781). opaque-words: gas-estimate 13 plus the overheating runs among its 26 others. rich: its overheating runs from before the computed alert. ≈ 250 runs in all.",
+    "unaffected": "Every response-channel arm (inline, inline-oneline, inline-conditional, inline-recipe, inline-fact, inline-instruction; ≈ 390 runs). thin and schema, which carry no prose. rich wherever its answer came from computed alerts, which ride in the response. wrong-unit and building-size on words, whose guidance sits in QUERY STRATEGY, before the cut. All payload-in-prompt files, where the prose was pasted into the prompt in full."
+  },
+
   "what_was_past_the_cut": {
     "words_rich_words-recipe": "Visible: RETURNS, WHEN TO USE, WHEN NOT TO USE, QUERY STRATEGY, the INTERPRETATION header and part of its first bullet (NTA 8800). CUT: every other INTERPRETATION line — the NEN 7120 and Nader Voorschrift unit warnings, matchStatus, energielabel null, the ep1 Paris Proof line (3,194), CALCULATED vs MEASURED (3,377), energie_index, thermal-zone vs BAG area (4,229), co2 units, warmtebehoefte, temperatuuroverschrijding (6,181), compactheid; `rich`'s ALERTS paragraph; `words-recipe`'s DERIVED FIGURES recipe (6,781). 70–72% of each description.",
     "opaque-words": "Visible: RETURNS and the FIELD GUIDE through st, n_c, adr, opp, f_ga, n_vbo, gbd/gk, bj, vbo_st, lbl, calc_t and most of the NEN 7120 bullet. CUT: Nader Voorschrift, ei, ep1, ep2, wb bands, `to` (the overheating threshold, 3,105), cmp, the DERIVED FIGURES recipe (4,025), QUERY STRATEGY, WHEN NOT TO USE. 57%.",
