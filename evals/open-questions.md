@@ -700,6 +700,44 @@ the saving is deliberation about *the answer*, it must vanish here.
 
 ## Q6 — Is the `overheating` failure caused by the FIELD NAME?
 
+> **ANSWERED 2026-09-22 — PREDICTION FALSIFIED. It is not the name.** 21 runs,
+> haiku, n=7 per arm, all three arms in the same batch. See
+> [`results/2026-09-22-q6-overheating-naming.json`](results/2026-09-22-q6-overheating-naming.json).
+>
+> | arm | correct | wrong | declined | other |
+> |---|---|---|---|---|
+> | `words` | **2** | 5 | 0 | 0 |
+> | `opaque-words` | **0** | 6 | 1 | 0 |
+> | `opaque` | **0** | 1 | 3 | 3 |
+>
+> `opaque-words` did not beat `words` — it did **worse**, despite carrying strictly
+> better guidance on both counts: a field name with no connotation *and* an explicit
+> *"unitless"* with the 1.5 threshold spelled out in capitals. **It scored zero.**
+>
+> Three of its seven runs did not use `to` at all and invented a different field
+> instead — *"ahe (Actuele Huisklimaatindex) value of 0, which indicates no risk"*.
+> `ahe` is the renewable share.
+>
+> The two regimes fail **differently**: the readable name gets the model to the right
+> field and then misleads it about units (3.59 read as hours, or as degrees); the
+> terse name loses the model entirely. `words` scores higher only because it at least
+> engages the correct field.
+>
+> **This contradicts `_the_rule`.** `overheating` is interpretation-shape — read one
+> value against a stated threshold. The semantics are present, correct and explicit
+> in two arms, and the combined score is **2 of 21**. Semantics do not handle this
+> interpretation. That is the third failure to replicate the rule and the clearest:
+> the guidance is not absent or ambiguous here, it is spelled out and ignored.
+>
+> **So yes — this is a defect in the shipped tool, and prose will not fix it.** The
+> indicated fix is server-side computation, exactly as for the gas figure:
+> `generateAlerts` computes *"~253 m³/year"* and *"suitable for a heat pump"* but
+> computes **nothing** for `temperatuuroverschrijding`, which is why Q5 found `rich`
+> no better than `words` here. An alert reading *"Overheating risk: SIGNIFICANT
+> (TOjuli 3.59, above the 1.5 threshold)"* is the `benchmark-trap` playbook, which
+> took that question from 0/60 to 59/60. **The live Warmtebouw Duurzaam server
+> exposes the same field and should be checked.**
+
 > **REGISTERED 2026-09-22, BEFORE THE RUN.** Committed before any run was spawned.
 
 ### The defect

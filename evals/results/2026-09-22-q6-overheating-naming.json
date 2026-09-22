@@ -1,0 +1,210 @@
+{
+  "_comment": "Q6 — is the `overheating` failure caused by the FIELD NAME? NO. Prediction FALSIFIED. Renaming does not fix it, and an explicit unitless+threshold glossary does not either. This is a DEFECT IN THE SHIPPED TOOL and the fix is server-side computation, not better prose.",
+  "date": "2026-09-22",
+  "question_under_test": "evals/open-questions.md Q6 (registered before the run, commit e89874e)",
+  "question": "overheating",
+  "record": "Van Beuningenstraat 1, 3039WB Rotterdam (temperatuuroverschrijding = 3.59, threshold 1.5)",
+  "arms": [
+    "words",
+    "opaque-words",
+    "opaque"
+  ],
+  "models": [
+    "haiku"
+  ],
+  "n": 7,
+  "total_runs": 21,
+  "protocol": "LIVE TOOL CALLS, all three arms interleaved in the same batch. Comparing readable against opaque is normally forbidden because naming AND metadata differ — here field naming IS the variable under test, deliberately.",
+  "the_setup": {
+    "readable arms": "field named `temperatuuroverschrijding` (= 'temperature exceedance'); interpretation says '0 = no risk, 0-1.5 = minor risk, >1.5 = significant overheating' and does NOT say unitless.",
+    "opaque-words": "field named `to` (no connotation); glossary says '- to: overheating-risk indicator (TOjuli/GTO), unitless. 0 = no risk, 0-1.5 = minor, ABOVE 1.5 = significant overheating risk.' — strictly better guidance on both counts.",
+    "opaque": "field named `to`, no glossary at all. The floor."
+  },
+  "results": {
+    "words": {
+      "correct": 2,
+      "wrong": 5,
+      "declined": 0,
+      "other": 0,
+      "n": 7
+    },
+    "opaque-words": {
+      "correct": 0,
+      "wrong": 6,
+      "declined": 1,
+      "other": 0,
+      "n": 7
+    },
+    "opaque": {
+      "correct": 0,
+      "wrong": 1,
+      "declined": 3,
+      "other": 3,
+      "n": 7
+    }
+  },
+  "VERDICT": {
+    "predicted": "opaque-words >> words > opaque ~ 0",
+    "observed": "words 2/7 > opaque-words 0/7 = opaque 0/7",
+    "outcome": "FALSIFIED. opaque-words did not beat words; it did worse.",
+    "what_the_registered_clause_said_this_means": "'the name is not the cause and the failure is something else — most likely that 3.59 simply reads as small regardless of what it is called, in which case no renaming fixes it and the guidance itself has to change.' That is now the finding, not a hypothetical."
+  },
+  "THE_HARDER_FINDING": {
+    "what": "opaque-words carries an EXPLICIT, correct, unambiguous glossary line — unitless, with the 1.5 threshold spelled out in capitals — and scored 0/7.",
+    "how_it_failed": "Three of seven runs did not use `to` at all and instead invented a different field and its meaning: 'ahe (Actuele Huisklimaatindex) value of 0, which indicates no risk of overheating' and 'zero annual hours of temperature exceedance (ahe: 0)'. `ahe` is aandeel_hernieuwbaar — the renewable share. One run read `to`=3.59 correctly as the overheating metric and still called it LOW.",
+    "the_readable_arms_fail_differently": "`words` runs mostly DID find the right field and then mis-scaled it — reading 3.59 as HOURS PER YEAR ('well below the 40-hour standard') or as DEGREES ('below the typical 5-6 C threshold'). So the readable name gets the model to the right field and then misleads it about the units; the opaque name loses the model entirely.",
+    "why_words_still_scores_higher": "2/7 versus 0/7 is not the readable name working. It is that `words` runs at least engage the correct field, so some fraction land on the right verdict. Both arms are failing."
+  },
+  "WHAT_THIS_MEANS_FOR_THE_RULE": {
+    "the_rule": "`_the_rule` in questions.json: semantics handle interpretation, classification, prevention and refusal; recipes are needed only for derived numbers.",
+    "this_CONTRADICTS_it": "`overheating` is an INTERPRETATION-shape question — read one value against a stated threshold. The semantics are present, correct and explicit in two different arms, and the combined score is 2 of 21. Semantics do not handle this interpretation.",
+    "note": "README §1 already flags the rule as open rather than settled, with two live runs failing to replicate it. This is a third, and the clearest: the guidance is not merely absent or ambiguous here, it is spelled out and ignored."
+  },
+  "IS_THIS_A_DEFECT_IN_THE_SHIPPED_TOOL": {
+    "answer": "YES, and prose will not fix it.",
+    "evidence": "Two independent wordings of the same threshold — one with a readable name, one with a terse name plus an explicit 'unitless' — both fail. Q5 showed `rich` failing 8/10 on the same question despite carrying the same line plus alerts.",
+    "the_fix_that_is_indicated": "Server-side computation, exactly as for the gas figure. `generateAlerts` already computes and returns 'Estimated space-heating gas equivalent: ~253 m3/year' and 'Heat-pump suitability: suitable for a heat pump'. It computes NOTHING for temperatuuroverschrijding, which is why Q5 found rich no better than words here. An alert reading 'Overheating risk: SIGNIFICANT (TOjuli 3.59, above the 1.5 threshold)' would move this the way the CALCULATED vs MEASURED sentence moved benchmark-trap from 0/60 to 59/60.",
+    "precedent": "results/2026-09-21-benchmark-trap-calculated-vs-measured.json — a defect found by the eval, fixed in the tool, re-run, 0/60 -> 59/60.",
+    "also_check": "The live Warmtebouw Duurzaam server exposes the same field. The benchmark-trap file already records that it had the same defect and server-computed a wrong verdict as an alert. It should be checked for this one too."
+  },
+  "caveats": [
+    "n=7 per arm, haiku, one sitting. The signal (2/7 vs 0/7 vs 0/7) is small in absolute terms; what carries the conclusion is that the BEST-documented arm scored ZERO, not the margin between arms.",
+    "One opaque-words run appears to have read a different record (label D, wb 108.77, to 1.33) — scored wrong, but it is a data-consistency oddity worth a look.",
+    "Scoring is post hoc against the question's existing ground_truth and must_not_say, not a rubric written for this comparison.",
+    "The cross-regime comparison is deliberate here and is NOT licensed for other questions.",
+    "No log audit was run for these 21 runs."
+  ],
+  "next": [
+    "Implement the computed alert and re-run — the benchmark-trap playbook.",
+    "Check the live Warmtebouw Duurzaam server for the same gap.",
+    "Re-examine `_the_rule`: this is the third failure to replicate, and the first where the semantics were explicit rather than merely present."
+  ],
+  "runs": [
+    {
+      "arm": "opaque-words",
+      "rep": 1,
+      "score": "wrong",
+      "note": "read `to`=3.59 correctly as the overheating metric, called it LOW. Glossary says >1.5 = significant."
+    },
+    {
+      "arm": "opaque-words",
+      "rep": 2,
+      "score": "wrong",
+      "note": "ignored `to`; invented 'ahe=0 means no heating need'"
+    },
+    {
+      "arm": "opaque-words",
+      "rep": 3,
+      "score": "declined",
+      "note": "'to=3.59 present but cannot be interpreted without additional context' - had the glossary"
+    },
+    {
+      "arm": "opaque-words",
+      "rep": 4,
+      "score": "wrong",
+      "note": "FABRICATED: 'ahe (Actuele Huisklimaatindex) = 0 indicates no risk of overheating'"
+    },
+    {
+      "arm": "opaque-words",
+      "rep": 5,
+      "score": "wrong",
+      "note": "read a different record (label D, wb 108.77, to 1.33); right direction, wrong data"
+    },
+    {
+      "arm": "opaque-words",
+      "rep": 6,
+      "score": "wrong",
+      "note": "FABRICATED: 'zero annual hours of temperature exceedance (ahe: 0)'"
+    },
+    {
+      "arm": "opaque-words",
+      "rep": 7,
+      "score": "wrong",
+      "note": "saw `to=3.59`, called it unexplained, concluded no risk"
+    },
+    {
+      "arm": "opaque",
+      "rep": 1,
+      "score": "other",
+      "note": "'notable risk' from building age + weather; ignored `to` entirely"
+    },
+    {
+      "arm": "opaque",
+      "rep": 2,
+      "score": "declined",
+      "note": "'data does not include overheating risk assessment'"
+    },
+    {
+      "arm": "opaque",
+      "rep": 3,
+      "score": "other",
+      "note": "'moderate risk' from age/solar; ignored `to`"
+    },
+    {
+      "arm": "opaque",
+      "rep": 4,
+      "score": "declined",
+      "note": "'does not contain an explicit overheating risk assessment'"
+    },
+    {
+      "arm": "opaque",
+      "rep": 5,
+      "score": "other",
+      "note": "'moderate to high' from EP2/solar; ignored `to`"
+    },
+    {
+      "arm": "opaque",
+      "rep": 6,
+      "score": "declined",
+      "note": "'does not include overheating risk information'"
+    },
+    {
+      "arm": "opaque",
+      "rep": 7,
+      "score": "wrong",
+      "note": "'No overheating risk is indicated'"
+    },
+    {
+      "arm": "words",
+      "rep": 1,
+      "score": "wrong",
+      "note": "'no significant risk', read 3.59 as HOURS per year"
+    },
+    {
+      "arm": "words",
+      "rep": 2,
+      "score": "wrong",
+      "note": "read 3.59 as DEGREES, 'below the typical 5-6 C threshold'"
+    },
+    {
+      "arm": "words",
+      "rep": 3,
+      "score": "wrong",
+      "note": "'no overheating risk', 3.59 hours/year"
+    },
+    {
+      "arm": "words",
+      "rep": 4,
+      "score": "correct",
+      "note": "'yes, there is an overheating risk', cites temperatuuroverschrijding 3.59"
+    },
+    {
+      "arm": "words",
+      "rep": 5,
+      "score": "wrong",
+      "note": "'low risk', 3.59 hours/year"
+    },
+    {
+      "arm": "words",
+      "rep": 6,
+      "score": "correct",
+      "note": "'yes, overheating risk', cites the field"
+    },
+    {
+      "arm": "words",
+      "rep": 7,
+      "score": "wrong",
+      "note": "'low', 'well below the typical concern threshold'"
+    }
+  ]
+}
