@@ -1609,6 +1609,126 @@ character count per run, and audits against `get_tool_call_log` unfiltered.
 
 ---
 
+## Q14 — Is ONE line enough? The minimum viable response payload
+
+> **REGISTERED 2026-09-22, BEFORE THE RUN.** The arm is built, wired and deployed;
+> it cannot be *run* from the session that built it, because MCP connections are
+> fixed at process start. Committed before any run is spawned, as usual.
+
+### Why it matters, and why Q13 does not already answer it
+
+Q13 moved the **whole** interpretation block into the response and took
+`overheating` from 5/20 to 20/20. That is a real result and it is **not one a
+production server can act on**, because "put your entire interpretation block in
+every response" is an expensive instruction and nobody has checked whether it is a
+*necessary* one.
+
+Two answered questions say it probably is not:
+
+- **Q2 measured volume twice and found it inert.** Pruning the response block to
+  the record cost **zero** accuracy — 39/90 vs 39/90, then 30/30 vs 30/30 with two
+  thirds of the block cut.
+- **Q5 measured the cost of the rest.** Metadata that does *not* answer the
+  question is charged at list price: `rich` went from 594 tokens cheaper to 1,172
+  dearer the moment its alerts stopped being relevant.
+
+So the payoff should come from **the lines that bear on the question**, not from
+the volume. This is the limit case of that claim: **one line.**
+
+It is also the exact question MCPSER-81 now turns on. The live Warmtebouw Duurzaam
+server carries its threshold in the description and nothing in the response — the
+`words` configuration, verified on the wire. The cheap fix there is to add one line
+to the response, not to relocate a 5,020-character block.
+
+### The arm
+
+`inline-oneline`, deployed as `mcpInlineOneline`:
+
+| | description | response |
+|---|---|---|
+| `words` | full prose, **incl. the threshold line** | nothing |
+| **`inline-oneline`** | **identical, byte for byte** | **that one line, sliced** |
+| `inline` | minimal (`schema`'s one-liner) | the whole block |
+
+**`words` → `inline-oneline` is the single-variable comparison**: one line added to
+the response, nothing else. The description is deliberately **not** stripped — this
+is an ADDITION, not a move, because that is what a real server would ship and it is
+strictly cheaper than relocating.
+
+`inline` is the reference **ceiling**, not an adjacent rung: it differs in both the
+description and the amount of response prose. Do not report `inline-oneline` →
+`inline` as the value of a layer.
+
+The line is sliced from `interpretationBlock` via `overheatingLine` and throws at
+module load if the block is edited out from under it. Six tests pin that the
+description is byte-identical to `words`', that the line is one line, and that it
+carries the 1.5 threshold.
+
+### Prediction
+
+> **One line is enough. `inline-oneline` ≥ 16/20, i.e. it lands with `inline`
+> (20/20) rather than with `words` (5/20).**
+>
+> - **P1 — `inline-oneline` ≥ 16/20.** Falsified if ≤ 10/20.
+> - **P2 — it beats `words` by ≥ 8 runs.** Falsified if the gap is under 4, the
+>   directory's noise bar.
+> - **P3 — the threshold is cited in ≥ 16 of 20 runs**, against `words`' 0 of 20.
+>   This is the mechanism check; falsified if ≤ 8.
+>
+> **Reasoning.** Q2 showed the block's volume does no work, twice. If volume is
+> inert, then what Q13 moved into the response was one useful line and 5,000
+> characters of ballast, and the line should carry the result alone.
+>
+> **The case against it**, which is real and is why this is worth running: nothing
+> here has yet tested whether a response needs enough *substance* to be attended to
+> at all. A single line beside a 40-field payload may simply not be noticed, in
+> which case the effect Q13 found is partly about the block's bulk and "prune
+> aggressively" becomes bad advice. That would also complicate Q2, which only ever
+> pruned down to *several* notes, never to one.
+>
+> Note this repo's record: **six of seven registered predictions have been wrong.**
+
+### What each outcome buys
+
+| if | then |
+|---|---|
+| **≥16/20** | The production rule is cheap and precise: *put the line that answers the question in the response.* MCPSER-81 takes the one-line fix, and Q2's pruning result extends from "free" to "free down to a single line". |
+| **≤10/20** | Bulk matters as well as placement, Q13's result is partly about the block not the line, and the honest advice for a plain MCP server becomes the expensive one. It would also put a floor under how far Q2's pruning can go. |
+| **11–15** | Partial. Report as direction only and re-run at n=40 before anyone quotes it. |
+
+### Protocol
+
+`words` · `inline-oneline` · `inline`, haiku, **n=20 per arm, all three interleaved
+in one batch**, on `overheating`. Same scoring rule as Q13, which is pinned in that
+run's `scoring_rule` — fixed before looking at these answers this time. Record
+`tool_uses`, `duration_ms`, `subagent_tokens` and the ANSWER character count, and
+audit against `get_tool_call_log` unfiltered, `countByVariant` before any filter.
+
+**Read the cost columns too.** If the prediction holds, `inline-oneline` should be
+the cheapest arm in the set — it carries `words`' description plus ~180 characters,
+where `inline` carries a 5,020-character block on every call.
+
+### Known limits, stated up front
+
+- **haiku only**, one question, one defect, one address. `overheating` is
+  saturated at the `inline` and `rich` rungs, so this measures the gap between
+  `words` and `inline-oneline` and nothing above it.
+- **It cannot separate "one line" from "this particular line."** The overheating
+  line is unusually self-contained — a field name, three bands, a threshold. A
+  rule needing two fields to be read together might not survive the same cut.
+- **No control.** Both surviving controls are refusals and neither is in this run.
+- **Same mechanism caveat as Q13**: a citation count measures *use*, not
+  availability. Q7 still gates any claim about why.
+
+### Cost
+
+1 question × 3 arms × 1 model × n=20 = **60 runs.** One new arm, already built and
+deployed. **It needs a fresh session** — a session that predates the `.mcp.json`
+entry can never reach the server, and the agent list is not evidence to the
+contrary.
+
+---
+
 ## Suggested order
 
 ~~1. **Q1b first.**~~ ~~2. **Q1a** next.~~ **Both run on 2026-09-21 and both
