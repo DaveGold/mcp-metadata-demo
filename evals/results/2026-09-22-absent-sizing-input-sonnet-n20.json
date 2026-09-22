@@ -722,5 +722,6 @@
         "note": "60-75% of energy is heating -> 1.6-1.9 MWh/yr"
       }
     ]
-  }
+  },
+  "LADDER_COMPLETED_2026_09_22": "Opus has since been run at n=20 per arm as well: 20/20 both arms, zero fabrications — identical to sonnet. The caveat in this file that opus was 'only ever run at n=3' is resolved. The full ladder is haiku 18/20-v-10/20, sonnet 20/20-v-20/20, opus 20/20-v-20/20, 120 runs. See results/2026-09-22-absent-sizing-input-opus-n20.json."
 }
