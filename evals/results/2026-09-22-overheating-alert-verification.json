@@ -1,0 +1,188 @@
+{
+  "_comment": "Deployed the computed overheating alert and re-ran. rich 2/10 -> 10/10. The words column moved too, with no code change, and that caution is reported alongside.",
+  "date": "2026-09-22",
+  "question": "overheating",
+  "record": "Van Beuningenstraat 1, 3039WB (temperatuuroverschrijding 3.59, threshold 1.5)",
+  "the_change": "generateAlerts now computes the verdict: 'Overheating risk: SIGNIFICANT — 3.59 is above the 1.5 threshold (TOjuli/GTO). This is a unitless index — not °C and not hours per year. Relevant for cooling load and heat pump sizing.' interpretationBlock was deliberately NOT touched.",
+  "deployed": "firebase deploy, all 12 functions, 2026-09-22. Verified live before re-running: the alert is present on rich for 3039WB/1 and for 1086ZJ/433 (to 1.81), and absent from words, which carries no alerts at all.",
+  "protocol": "LIVE TOOL CALLS, rich and words interleaved in the same batch, haiku, n=10 per arm. Same question string, same scoring standard as the pre-fix run.",
+  "scoring": "The question's pre-registered must_not_say is 'No risk, or ignoring temperatuuroverschrijding entirely'. correct = affirms risk at moderate or above AND cites the field. Applied identically before and after.",
+  "RESULT": {
+    "rich": {
+      "before": "2/10",
+      "after": "10/10",
+      "delta": "+8"
+    },
+    "words": {
+      "before": "3/10",
+      "after": "7/10",
+      "delta": "+4",
+      "code_changed": false
+    }
+  },
+  "the_mechanism_is_visible_in_the_answers": "All ten rich runs use the alert's own framing — 'significant', 'exceeds the 1.5 threshold' — several name TOjuli/GTO, and two echo the 'not degrees Celsius' clause. The wording did not exist in any arm before this deploy. That is the strongest available evidence that the alert, and not chance, moved the rich column.",
+  "THE_CAUTION_THAT_MATTERS": {
+    "what": "`words` moved from 3/10 to 7/10 with NO code change. Its description is untouched and it carries no alerts.",
+    "so": "Part of the rich improvement could be the same drift. rich's +8 is twice the size of the unexplained +4 and its answers carry language that only exists post-deploy, so the effect is real — but the honest reading is 'rich moved decisively and words also moved', not 'the alert is worth exactly 8 runs'.",
+    "consistent_with": "the n=10 instability recorded in results/2026-09-22-absent-sizing-input-haiku-n20.json, where four passes at n<=10 on one question gave four different answers.",
+    "what_would_settle_the_magnitude": "n=20+ per arm, or a paired before/after in one sitting, which is not possible across a deploy boundary."
+  },
+  "what_this_does_and_does_not_show": {
+    "does": "A computed alert fixes a failure that two independent prose wordings could not. That is the benchmark-trap playbook reproducing on a second, harder defect — harder because there the prose fix worked and here it demonstrably did not.",
+    "does_not": "It does not fix `words`, `opaque-words` or any arm without alerts, and it was never going to: the change is in generateAlerts, which only rich carries. Callers of the readable-but-alertless tiers still mis-scale the number.",
+    "and_it_does_not_rescue_the_control": "`overheating` is still not usable as a control. It now separates rich from the rest, which is the opposite of what a control should do. The set needs it re-designated or replaced."
+  },
+  "caveats": [
+    "haiku only, n=10 per arm, one sitting, one address.",
+    "The before/after cannot be run in one batch — a deploy sits between them — so batch effects cannot be excluded. The words column is the visible size of that problem.",
+    "No log audit on these 20 runs.",
+    "Scoring counts 'moderate' as correct, since the must_not_say is about asserting NO or LOW risk. A stricter rule requiring the word 'significant' would give rich 10/10 and words roughly 0-2/10, a larger gap; the looser rule was chosen because it is the pre-registered one."
+  ],
+  "next": [
+    "Re-designate or replace `overheating` in the set — it is no longer a control.",
+    "MCPSER-81 carries the same fix for the live Warmtebouw Duurzaam server, still in refine.",
+    "n=20 per arm if the magnitude needs to be quotable rather than directional."
+  ],
+  "runs": [
+    {
+      "arm": "rich",
+      "rep": 1,
+      "score": "correct",
+      "note": "significant — exceeds the 1.5 threshold",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "rich",
+      "rep": 2,
+      "score": "correct",
+      "note": "significant — exceeds the 1.5 threshold",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "rich",
+      "rep": 3,
+      "score": "correct",
+      "note": "significant — exceeds the 1.5 threshold",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "rich",
+      "rep": 4,
+      "score": "correct",
+      "note": "significant — exceeds the 1.5 threshold",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "rich",
+      "rep": 5,
+      "score": "correct",
+      "note": "significant — exceeds the 1.5 threshold",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "rich",
+      "rep": 6,
+      "score": "correct",
+      "note": "significant — exceeds the 1.5 threshold",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "rich",
+      "rep": 7,
+      "score": "correct",
+      "note": "significant — exceeds the 1.5 threshold",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "rich",
+      "rep": 8,
+      "score": "correct",
+      "note": "significant — exceeds the 1.5 threshold",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "rich",
+      "rep": 9,
+      "score": "correct",
+      "note": "significant — exceeds the 1.5 threshold",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "rich",
+      "rep": 10,
+      "score": "correct",
+      "note": "significant — exceeds the 1.5 threshold",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "words",
+      "rep": 1,
+      "score": "correct",
+      "note": "moderate, cites 3.59",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "words",
+      "rep": 2,
+      "score": "correct",
+      "note": "yes, overheating risk, cites field",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "words",
+      "rep": 3,
+      "score": "correct",
+      "note": "yes + 'current weather no immediate risk'",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "words",
+      "rep": 4,
+      "score": "wrong",
+      "note": "LOW — 'well below concerning thresholds'",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "words",
+      "rep": 5,
+      "score": "wrong",
+      "note": "MINIMAL — '3.59 degree-days'",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "words",
+      "rep": 6,
+      "score": "correct",
+      "note": "yes, measurable risk",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "words",
+      "rep": 7,
+      "score": "correct",
+      "note": "no risk now, moderate seasonal",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "words",
+      "rep": 8,
+      "score": "correct",
+      "note": "moderate potential",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "words",
+      "rep": 9,
+      "score": "wrong",
+      "note": "MINIMAL — 'only 3.59 degrees'",
+      "phase": "post-fix"
+    },
+    {
+      "arm": "words",
+      "rep": 10,
+      "score": "correct",
+      "note": "moderate, 3.59 K",
+      "phase": "post-fix"
+    }
+  ]
+}

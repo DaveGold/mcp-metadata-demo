@@ -198,6 +198,36 @@ export function generateAlerts(profile: ProfileCore): string[] {
     }
   }
 
+  // Overheating risk — computed, not left to the reader.
+  //
+  // WHY THIS IS COMPUTED RATHER THAN DESCRIBED. The interpretation block already
+  // states the thresholds ("0 = no risk, 0-1.5 = minor risk, >1.5 = significant"),
+  // and evals/results/2026-09-22-q6-overheating-naming.json shows that is not
+  // enough: across three arms and 21 runs on a record with temperatuuroverschrijding
+  // 3.59, only 2 answers were correct. Models read 3.59 as degrees ("below the
+  // typical 5-6 C threshold") or as hours per year ("well below the 40-hour
+  // standard") and conclude the risk is low. Renaming does not help — the arm with
+  // a neutral field name AND an explicit "unitless" glossary scored 0 of 7.
+  //
+  // So the verdict is stated here, in words, the same way the gas figure and the
+  // heat-pump indicatie are. The "not °C, not hours" clause is not padding: those
+  // are the two misreadings actually observed.
+  //
+  // Applies to any record carrying the field, not residential only — the NTA 8800
+  // thresholds are not tenure-specific.
+  if (profile.temperatuuroverschrijding !== null) {
+    const to = profile.temperatuuroverschrijding;
+    const verdict =
+      to > 1.5
+        ? `SIGNIFICANT — ${to} is above the 1.5 threshold`
+        : to > 0
+          ? `minor — ${to} is between 0 and the 1.5 threshold`
+          : `none — ${to}`;
+    alerts.push(
+      `Overheating risk: ${verdict} (TOjuli/GTO). This is a unitless index — not °C and not hours per year. Relevant for cooling load and heat pump sizing.`
+    );
+  }
+
   // Residential-specific consumer insights (only for woning use)
   const isWoning = profile.gebruiksdoel?.toLowerCase().includes('woonfunctie');
   if (isWoning) {
