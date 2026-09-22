@@ -244,5 +244,6 @@
       "tok": 25512,
       "note": "FABRICATED: 250,000-300,000 kWh, 200-350 kW"
     }
-  ]
+  ],
+  "SUPERSEDED_2026_09_22": "This file OVERSTATED its evidence. Its 9/10-vs-4/10 headline came from 20 runs scored across two unequal, non-interleaved batches (3 then 7), so arm and batch were partly confounded. A same-batch n=20 per arm re-run gives inline 18/20 vs inline-conditional 10/20 — the DIRECTION here is confirmed, the MAGNITUDE was not supportable. The re-run also found that the two same-batch halves of itself disagreed (8v7 then 10v3), i.e. this question has run-to-run variance large enough that n=10 cannot size the effect. See results/2026-09-22-absent-sizing-input-haiku-n20.json."
 }

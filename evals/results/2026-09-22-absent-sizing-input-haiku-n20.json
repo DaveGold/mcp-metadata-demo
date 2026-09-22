@@ -1,0 +1,738 @@
+{
+  "_comment": "absent-sizing-input, haiku n=20 per arm, same-batch. CONFIRMS that conditional pruning can remove something load-bearing — and shows the effect has batch variance large enough that n=10 cannot size it.",
+  "date": "2026-09-22",
+  "question": "absent-sizing-input",
+  "record": "Middenwetering 1, 3543AR Utrecht — NEN 7120",
+  "arms": [
+    "inline",
+    "inline-conditional"
+  ],
+  "model": "haiku",
+  "n": 20,
+  "total_runs": 40,
+  "protocol": "LIVE TOOL CALLS. Both arms interleaved in the SAME batch throughout — 2 batches of 20 (10 reps x 2 arms each). Fresh subagent per run, given ONLY the question string. haiku only: this is the cell where the effect was ever claimed; sonnet and opus were at ceiling on both arms in earlier passes.",
+  "scoring": {
+    "_provenance": "Rule fixed in the questions.json record BEFORE this run and before any answer was read.",
+    "correct": "ANSWER line declines to give a heat demand or capacity figure and says the sizing input is absent.",
+    "other": "ANSWER line asserts a heat demand or capacity figure.",
+    "fabricated": "an invented constant anywhere in the output — a heating-fraction split, a W/m2 rate, a kWh/m2 rate — or a figure derived from one. Scored over the whole output, so a run can be correct AND fabricated."
+  },
+  "headline": {
+    "inline": "18/20 correct, 3 fabrications",
+    "inline-conditional": "10/20 correct, 10 fabrications",
+    "statement": "At n=20 the separation is real and large: 8 runs of accuracy and a 3x difference in fabrication rate. Conditional pruning IS worse here. This is the first confirmed case in the repo."
+  },
+  "results": {
+    "inline": {
+      "correct": 18,
+      "other": 2,
+      "fabricated": 3,
+      "n": 20
+    },
+    "inline-conditional": {
+      "correct": 10,
+      "other": 10,
+      "fabricated": 10,
+      "n": 20
+    }
+  },
+  "THE_METHODOLOGICAL_FINDING": {
+    "what": "The two same-batch halves of this very run disagree sharply.",
+    "batch_A_reps_1_10": {
+      "inline": "8/10 correct, 3 fab",
+      "inline-conditional": "7/10 correct, 3 fab",
+      "reading": "level — no effect visible"
+    },
+    "batch_B_reps_11_20": {
+      "inline": "10/10 correct, 0 fab",
+      "inline-conditional": "3/10 correct, 7 fab",
+      "reading": "very large effect"
+    },
+    "why_it_matters": "Both halves used identical protocol, identical prompts, interleaved arms, minutes apart. So this is NOT an arm/batch confound — it is genuine run-to-run variance. On this question n=10 in a single sitting can show anything from level to 3x, and FOUR separate passes at n<=10 this session produced four different answers: pilot 9v4, matrix n=3 2v2, batch A 8v7, batch B 10v3.",
+    "consequence_for_this_repo": "Every result in results/ at n=10 per cell inherits this risk. Where a finding rests on a gap of a few runs in one sitting, it is not safe. The large, stable results here — benchmark-trap 0/60 -> 59/60, Q4's instruction-only 10/30 vs 30/30 — are far outside this noise band; the small ones are not.",
+    "what_would_settle_it": "n>=40 per cell, or repeated sittings. Not more questions."
+  },
+  "what_the_conditional_arm_invents": [
+    "'heating typically represents 35-40% of total consumption' -> 130-150 kWh/m2 -> 820,000-940,000 kWh -> 100-150 kW",
+    "'roughly 60-75% of your energy use is heating' -> 1.6-1.9 MWh/year",
+    "'80-120 kWh/m2' -> 510-760 MWh/year -> 100-150 kW",
+    "'15-25 kWh/m2' -> 100,000-150,000 kWh -> 'Size your heat pump for approximately 90-100 kW'",
+    "'35-45 kWh/m2' -> 225,000-280,000 kWh -> 80-110 kW"
+  ],
+  "the_mechanism_and_its_limit": {
+    "mechanism": "Every note in the interpretation block is gated on its own field being non-null, so on this NEN 7120 record the notes for warmtebehoefte, temperatuuroverschrijding and compactheid — all null, all heat-pump sizing inputs — are pruned together. inline keeps 'warmtebehoefte_kwh_m2 (net heat demand): the key input for heat pump sizing' and mostly declines by naming it; inline-conditional has no such steer and substitutes an invented rate.",
+    "limit": "Pruning removes the NOTE but not the FIELD. `warmtebehoefte_kwh_m2: null` is in the payload under both arms, so the model can still see the absence — it is simply not told that this absent field is the one that matters. That is why inline-conditional still scores 10/20 rather than 0.",
+    "narrowing_of_Q2s_fear": "Not 'the model never learns what it is not being told', but 'the model is not told which of the absent fields was load-bearing'."
+  },
+  "log_audit": {
+    "method": "get_tool_call_log UNFILTERED at limit 500; countByVariant read before filtering.",
+    "run_window": "timestamp >= 2026-09-22T06:26:00Z, tool = get_building_profile",
+    "server_side": {
+      "inline": 20,
+      "inline-conditional": 20,
+      "total": 40
+    },
+    "reconciled": "YES — exactly 20 per arm, matching the 40 runs. Every run made exactly one get_building_profile call; the get_weather_context calls (inline 13, conditional 17) are additional and not part of the reconciliation.",
+    "status": "0 non-success, all rowCount=1, queryIntent on 40/40.",
+    "unknown_bucket": "ZERO unknown-variant rows on the whole page.",
+    "excluded": "The 06:08-06:12Z window (inline 8, conditional 9) belongs to the interrupted 46-run matrix attempt and is excluded. Note conditional shows 9 there against 8 recorded results — one interrupted run fired its tool call before being cut."
+  },
+  "supersedes": "results/2026-09-22-absent-sizing-input-pilot.json overstated its evidence. Its 9/10-vs-4/10 was one of four possible readings at that n, and it was scored across two unequal non-interleaved batches. The DIRECTION it reported is confirmed here; the MAGNITUDE it reported was not supportable from 20 runs.",
+  "caveats": [
+    "haiku only. sonnet and opus were at or near ceiling on both arms in the earlier passes (sonnet 2/2 and 3/3, opus 3/3 both arms), so this effect is UNCONFIRMED above the weakest model and may not exist there.",
+    "One question, one record, one sitting.",
+    "This question was built to exercise a known failure mode. It shows the arm CAN be broken this way; it does not show conditional pruning is unsafe in general — the 60-run metered-vs-model comparison found it free.",
+    "The correct/other line is the ANSWER line. Two inline runs decline in ANSWER while inventing a range in the body; they score correct and fabricated. A stricter whole-output rule would move inline to 16/20 and narrow the gap.",
+    "Between-batch variance is large enough that these very totals could move by several runs on a repeat. 18-vs-10 is outside the observed noise band; a gap of 2-3 runs would not be."
+  ],
+  "next": [
+    "Run sonnet at n=20 before treating this as anything but a small-model result. That is the cell that decides whether conditional pruning needs a floor in practice.",
+    "If it holds on sonnet: invert the gate so a note is kept when its field is NULL and dropped when populated-and-unremarkable. One-line change to the GATES table.",
+    "Re-examine any finding in results/ that rests on a few-run gap at n=10 in one sitting."
+  ],
+  "runs": {
+    "haiku_n20": [
+      {
+        "arm": "inline",
+        "rep": 1,
+        "score": "correct",
+        "fab": false,
+        "tok": 24334
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 1,
+        "score": "correct",
+        "fab": false,
+        "tok": 23406
+      },
+      {
+        "arm": "inline",
+        "rep": 2,
+        "score": "correct",
+        "fab": false,
+        "tok": 24357
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 2,
+        "score": "correct",
+        "fab": false,
+        "tok": 23159
+      },
+      {
+        "arm": "inline",
+        "rep": 3,
+        "score": "correct",
+        "fab": false,
+        "tok": 25380
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 3,
+        "score": "correct",
+        "fab": false,
+        "tok": 24413
+      },
+      {
+        "arm": "inline",
+        "rep": 4,
+        "score": "correct",
+        "fab": false,
+        "tok": 24271
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 4,
+        "score": "correct",
+        "fab": false,
+        "tok": 24651
+      },
+      {
+        "arm": "inline",
+        "rep": 5,
+        "score": "other",
+        "fab": true,
+        "tok": 25665,
+        "note": "40-60 kWh/m2 -> 250-380 kW in ANSWER"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 5,
+        "score": "correct",
+        "fab": false,
+        "tok": 22930
+      },
+      {
+        "arm": "inline",
+        "rep": 6,
+        "score": "correct",
+        "fab": true,
+        "tok": 25557,
+        "note": "ANSWER declines; body invents 30-50 kWh/m2 -> 190-320 kW"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 6,
+        "score": "other",
+        "fab": true,
+        "tok": 24745,
+        "note": "30-40 kWh/m2 -> 200-250 MWh -> 25-35 kW"
+      },
+      {
+        "arm": "inline",
+        "rep": 7,
+        "score": "correct",
+        "fab": false,
+        "tok": 25607
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 7,
+        "score": "correct",
+        "fab": false,
+        "tok": 22956
+      },
+      {
+        "arm": "inline",
+        "rep": 8,
+        "score": "other",
+        "fab": true,
+        "tok": 25834,
+        "note": "40-70 kWh/m2 -> 250-450 kW in ANSWER"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 8,
+        "score": "other",
+        "fab": true,
+        "tok": 24777,
+        "note": "25 kWh/m2 -> 159,000 kWh -> 80 kW"
+      },
+      {
+        "arm": "inline",
+        "rep": 9,
+        "score": "correct",
+        "fab": false,
+        "tok": 25478
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 9,
+        "score": "other",
+        "fab": true,
+        "tok": 25278,
+        "note": "50-100 kWh/m2 -> 317,000-636,000 kWh -> 60-120 kW"
+      },
+      {
+        "arm": "inline",
+        "rep": 10,
+        "score": "correct",
+        "fab": false,
+        "tok": 25542
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 10,
+        "score": "correct",
+        "fab": false,
+        "tok": 24643
+      },
+      {
+        "arm": "inline",
+        "rep": 11,
+        "score": "correct",
+        "fab": false,
+        "tok": 26103,
+        "batch": "B"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 11,
+        "score": "correct",
+        "fab": false,
+        "tok": 23232,
+        "batch": "B"
+      },
+      {
+        "arm": "inline",
+        "rep": 12,
+        "score": "correct",
+        "fab": false,
+        "tok": 25561,
+        "batch": "B"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 12,
+        "score": "other",
+        "fab": true,
+        "tok": 24472,
+        "batch": "B",
+        "note": "80-120 kWh/m2 -> 510-760 MWh -> 100-150 kW"
+      },
+      {
+        "arm": "inline",
+        "rep": 13,
+        "score": "correct",
+        "fab": false,
+        "tok": 25571,
+        "batch": "B"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 13,
+        "score": "other",
+        "fab": true,
+        "tok": 24528,
+        "batch": "B",
+        "note": "30-50 kWh/m2 -> 190-320 MWh -> 75-120 kW"
+      },
+      {
+        "arm": "inline",
+        "rep": 14,
+        "score": "correct",
+        "fab": false,
+        "tok": 25576,
+        "batch": "B"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 14,
+        "score": "correct",
+        "fab": false,
+        "tok": 24935,
+        "batch": "B"
+      },
+      {
+        "arm": "inline",
+        "rep": 15,
+        "score": "correct",
+        "fab": false,
+        "tok": 24300,
+        "batch": "B"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 15,
+        "score": "other",
+        "fab": true,
+        "tok": 25080,
+        "batch": "B",
+        "note": "35-45 kWh/m2 -> 225,000-280,000 kWh -> 80-110 kW"
+      },
+      {
+        "arm": "inline",
+        "rep": 16,
+        "score": "correct",
+        "fab": false,
+        "tok": 24289,
+        "batch": "B"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 16,
+        "score": "other",
+        "fab": true,
+        "tok": 24998,
+        "batch": "B",
+        "note": "35-40% split -> 130-150 kWh/m2 -> 820,000-940,000 kWh -> 100-150 kW"
+      },
+      {
+        "arm": "inline",
+        "rep": 17,
+        "score": "correct",
+        "fab": false,
+        "tok": 25517,
+        "batch": "B"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 17,
+        "score": "other",
+        "fab": true,
+        "tok": 24617,
+        "batch": "B",
+        "note": "40-60 kWh/m2 -> 254-381 MWh"
+      },
+      {
+        "arm": "inline",
+        "rep": 18,
+        "score": "correct",
+        "fab": false,
+        "tok": 24370,
+        "batch": "B"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 18,
+        "score": "correct",
+        "fab": false,
+        "tok": 24279,
+        "batch": "B"
+      },
+      {
+        "arm": "inline",
+        "rep": 19,
+        "score": "correct",
+        "fab": false,
+        "tok": 24083,
+        "batch": "B"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 19,
+        "score": "other",
+        "fab": true,
+        "tok": 24956,
+        "batch": "B",
+        "note": "15-25 kWh/m2 -> 100,000-150,000 kWh -> 'size for 90-100 kW'"
+      },
+      {
+        "arm": "inline",
+        "rep": 20,
+        "score": "correct",
+        "fab": false,
+        "tok": 25667,
+        "batch": "B"
+      },
+      {
+        "arm": "inline-conditional",
+        "rep": 20,
+        "score": "other",
+        "fab": true,
+        "tok": 24918,
+        "batch": "B",
+        "note": "60-75% of energy is heating -> 1.6-1.9 MWh/yr"
+      }
+    ],
+    "earlier_interrupted_matrix_16_runs": [
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 1,
+        "score": "correct",
+        "fab": false,
+        "tok": 24429,
+        "note": "declined, no number"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 1,
+        "score": "correct",
+        "fab": false,
+        "tok": 24427,
+        "note": "declined, no number"
+      },
+      {
+        "arm": "inline",
+        "model": "sonnet",
+        "rep": 1,
+        "score": "correct",
+        "fab": false,
+        "tok": 31366,
+        "note": "declined"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "sonnet",
+        "rep": 1,
+        "score": "correct",
+        "fab": false,
+        "tok": 30015,
+        "note": "declined; flags 369 inflated"
+      },
+      {
+        "arm": "inline",
+        "model": "opus",
+        "rep": 1,
+        "score": "correct",
+        "fab": false,
+        "tok": 30815,
+        "note": "declined; names warmtebehoefte null"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "opus",
+        "rep": 1,
+        "score": "correct",
+        "fab": false,
+        "tok": 30995,
+        "note": "declined"
+      },
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 2,
+        "score": "other",
+        "fab": true,
+        "tok": 25876,
+        "note": "FABRICATED: 20-40 kWh/m2 -> 127,000-254,000 kWh in ANSWER"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 2,
+        "score": "correct",
+        "fab": false,
+        "tok": 24823,
+        "note": "declined"
+      },
+      {
+        "arm": "inline",
+        "model": "sonnet",
+        "rep": 2,
+        "score": "correct",
+        "fab": false,
+        "tok": 31709,
+        "note": "declined"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "sonnet",
+        "rep": 2,
+        "score": "correct",
+        "fab": false,
+        "tok": 30156,
+        "note": "'do not size off this label data at all'"
+      },
+      {
+        "arm": "inline",
+        "model": "opus",
+        "rep": 2,
+        "score": "correct",
+        "fab": false,
+        "tok": 30799,
+        "note": "declined"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "opus",
+        "rep": 2,
+        "score": "correct",
+        "fab": false,
+        "tok": 29420,
+        "note": "declined"
+      },
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 3,
+        "score": "correct",
+        "fab": true,
+        "tok": 24699,
+        "note": "ANSWER declines; body invents 50-80 kWh/m2"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 3,
+        "score": "other",
+        "fab": true,
+        "tok": 24520,
+        "note": "FABRICATED: 30-50% split -> 750-1,100 MWh in ANSWER"
+      },
+      {
+        "arm": "inline",
+        "model": "opus",
+        "rep": 3,
+        "score": "correct",
+        "fab": false,
+        "tok": 30824,
+        "note": "declined"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "opus",
+        "rep": 3,
+        "score": "correct",
+        "fab": false,
+        "tok": 30941,
+        "note": "declined"
+      }
+    ],
+    "original_pilot_20_runs": [
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 1,
+        "score": "correct",
+        "fab": false,
+        "tok": 25800,
+        "note": "declined; named warmtebehoefte missing"
+      },
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 2,
+        "score": "correct",
+        "fab": false,
+        "tok": 25575,
+        "note": "declined"
+      },
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 3,
+        "score": "correct",
+        "fab": false,
+        "tok": 25758,
+        "note": "declined"
+      },
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 4,
+        "score": "correct",
+        "fab": false,
+        "tok": 24230,
+        "note": "declined"
+      },
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 5,
+        "score": "other",
+        "fab": true,
+        "tok": 25656,
+        "note": "FABRICATED: invented 40-50% heating split -> 150-180 kWh/m2"
+      },
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 6,
+        "score": "correct",
+        "fab": false,
+        "tok": 24249,
+        "note": "declined"
+      },
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 7,
+        "score": "correct",
+        "fab": false,
+        "tok": 25498,
+        "note": "'cannot be derived from label data alone'"
+      },
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 8,
+        "score": "correct",
+        "fab": false,
+        "tok": 25688,
+        "note": "declined"
+      },
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 9,
+        "score": "correct",
+        "fab": false,
+        "tok": 24438,
+        "note": "declined"
+      },
+      {
+        "arm": "inline",
+        "model": "haiku",
+        "rep": 10,
+        "score": "correct",
+        "fab": false,
+        "tok": 25680,
+        "note": "declined"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 1,
+        "score": "correct",
+        "fab": false,
+        "tok": 23602,
+        "note": "declined"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 2,
+        "score": "correct",
+        "fab": false,
+        "tok": 23150,
+        "note": "declined"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 3,
+        "score": "other",
+        "fab": true,
+        "tok": 24682,
+        "note": "FABRICATED: invented 60-100 kWh/m2 -> 380,000-635,000 kWh"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 4,
+        "score": "other",
+        "fab": true,
+        "tok": 24975,
+        "note": "FABRICATED: invented 50-80 W/m2 -> 350-500 kW"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 5,
+        "score": "other",
+        "fab": true,
+        "tok": 24357,
+        "note": "FABRICATED: invented 40-50% split -> 950,000-1,175,000 kWh, 300-500 kW"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 6,
+        "score": "correct",
+        "fab": false,
+        "tok": 24392,
+        "note": "declined"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 7,
+        "score": "other",
+        "fab": true,
+        "tok": 25579,
+        "note": "FABRICATED: 40-60 kWh/m2 -> 254-381 MWh, 20-35 kW"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 8,
+        "score": "correct",
+        "fab": true,
+        "tok": 24442,
+        "note": "ANSWER declines but body invents 20-50 kW range"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 9,
+        "score": "other",
+        "fab": true,
+        "tok": 24843,
+        "note": "FABRICATED: 100,000-150,000 kWh -> 300-320 kW"
+      },
+      {
+        "arm": "inline-conditional",
+        "model": "haiku",
+        "rep": 10,
+        "score": "other",
+        "fab": true,
+        "tok": 25512,
+        "note": "FABRICATED: 250,000-300,000 kWh, 200-350 kW"
+      }
+    ]
+  }
+}
