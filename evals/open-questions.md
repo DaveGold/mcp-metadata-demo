@@ -1121,6 +1121,32 @@ agent does before it reaches the data.
 - Distance is tested without a new arm, by protocol: `guidance-recipe` (Q8) followed by
   0, 1 and 3 intervening `get_weather_context` calls before the building lookup.
 
+### AMENDED 2026-09-22 — the instrument changes, and it should have from the start
+
+Both halves above are weak on `get_building_profile`, for the same reason: **its response
+is too small for distance to exist in.** One record is ~1,400 chars. Moving a block from
+the first key to the last moves it a few hundred tokens, which is not a distance, and
+three intervening calls are the only way to open a gap at all.
+
+`get_weather_context` has a payload dial and the building tool does not. Measured on the
+wire (`weather-fixtures.json`, `payload_dial`):
+
+| call | response |
+|---|---|
+| `summaryOnly=true` | ~1,300 chars (~330 tokens) |
+| 366 days, `select` to 3 fields | ~20,000 chars (~5,000 tokens) |
+| 366 days, full records | ~73,000 chars (~18,000 tokens) |
+
+A **55× range on one tool, one question, one guidance block** — and the block can sit
+before 18,000 tokens of daily records or after them. That is the position experiment the
+building tool cannot run. It also costs no new arm for the range itself: the prose and
+one-sentence weather descriptions are already wired (`opts.minimal`).
+
+Run Q9 on `weather-partial-normalization` (`questions-weather.json`), which needs the
+guidance — the HDD-ratio rule — and returns as much or as little data as the call asks
+for. **Revise the prediction's threshold when it runs at this scale:** "within 2 of
+`inline`" was written for a 1,400-char response and is not the same test at 73,000.
+
 ### Prediction
 
 > **Position within a response does not matter (`inline-head` within 2 of `inline`
@@ -1268,10 +1294,50 @@ response then **projects**, or whether canonical and delivered have to be the sa
 > a stable-semantics layer costs nothing to place correctly, and that the README's claim
 > — and the refactor it justified — need revisiting.
 
+### AMENDED 2026-09-22 — a sharper version of this question exists, in `select`
+
+The version above asks whether schema semantics help the model *interpret*. There is a
+harder case where schema knowledge is not an aid but a **precondition**, and this repo
+already ships it: `get_weather_context`'s `select` is the only mechanism here where the
+model must supply **output** field names as an **input** parameter.
+
+Two things make it the sharper test:
+
+**The failure is silent.** Captured on the wire (`weather-fixtures.json`,
+`select_probe`): `select: ["date","maxTemperature","weather"]` — plausible guesses, both
+wrong — returns **HTTP success, `recordCount` unchanged, three well-formed records
+carrying only `date`**. Every requested value is gone. Nothing errors; one alert says so.
+A model that guesses field names does not fail loudly, it reports an empty projection as
+an answer. So "can the model name the fields" has a real consequence, not a stylistic one.
+
+**The repo has already answered it by construction, and never admitted that it did.** The
+valid field list is spelled out **in the `select` input-schema description** — identically
+on every arm, including `minimal` and `opaque`. The output schema was not trusted to carry
+those names; they were **copied to the place they are used**. That is this whole file's
+thesis applied silently inside the tool, and it was never measured.
+
+`select-blind` is the arm that measures it: identical in every respect except that the
+`select` input description loses its field list, leaving the names only in `outputSchema`.
+Question: `select-blind` in `questions-weather.json`.
+
+> **Prediction: the model guesses, and the guess is not recoverable from `outputSchema`.
+> ≤3 of 10 runs send a fully valid `select` array, and of those that do not, at least half
+> report the empty projection without noticing the alert.**
+>
+> **Falsified if** ≥8 of 10 send valid names, which would mean `outputSchema` does reach
+> the model, that the duplication into the input description is dead weight, and that the
+> main prediction of this question is wrong too.
+
+Record a **third outcome** separately: a run that guesses, notices the alert, and
+re-queries without `select` is *safe but expensive*. It is the behaviour you would want,
+and it costs a full-payload round trip — which is the whole saving `select` exists to
+provide.
+
 ### Cost
 
 3 questions × 2 arms × 2 models × n=10 = **120 runs**, one new arm. Cheap to build: the
 `.describe()` strings already exist in git history, from before they were moved out.
+`select-blind` is a second arm and 20 more runs, and is worth more than the other three.
 
 ---
 

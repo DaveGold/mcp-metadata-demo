@@ -1,0 +1,63 @@
+{
+  "_what_this_is": "Frozen get_weather_context responses, captured live on 2026-09-22 from the eval-rich arm. The weather questions in questions-weather.json derive every number from these, and ground-truth-weather.test.ts re-derives them under `npm test`. Same discipline as addresses.json: nothing in a ground_truth is recalled or invented.",
+  "_why_these_are_stable": "All four captures are HISTORICAL ranges (2023-2024) served by the Open-Meteo ARCHIVE api, measuredDays == days and forecastDays == 0 in each. Archive values for a closed year do not move. A capture that included today would NOT be stable, which is exactly why the forecast question below is scored on BEHAVIOUR and carries no frozen number.",
+  "_captured_from": "mcp__eval-rich__get_weather_context, default coordinates (Utrecht 52.09 / 5.11). The DATA is identical on every arm — only the tool description differs — so a fixture captured from one arm is valid for all of them.",
+  "_capture_date": "2026-09-22",
+
+  "year_2024": {
+    "_query": { "dateFrom": "2024-01-01", "dateTo": "2024-12-31", "summaryOnly": true },
+    "days": 366,
+    "measuredDays": 366,
+    "forecastDays": 0,
+    "totalHDD": 2440.9,
+    "totalWeightedHDD": 2479.9,
+    "totalCDD": 115,
+    "referenceAnnualHDD": 2800,
+    "gasNormalizationFactor": 1.13,
+    "totalGHI_kWhM2": 1113.43,
+    "avgDailyGHI_kWhM2": 3.04,
+    "totalSunshineDurationHours": 2615.2,
+    "periodMeanTemp": 11.6
+  },
+
+  "q1_2024": {
+    "_query": { "dateFrom": "2024-01-01", "dateTo": "2024-03-31", "summaryOnly": true },
+    "days": 91,
+    "measuredDays": 91,
+    "forecastDays": 0,
+    "totalHDD": 1032.1,
+    "totalWeightedHDD": 1106.3,
+    "gasNormalizationFactor": 2.53,
+    "periodMeanTemp": 6.7,
+    "_note": "gasNormalizationFactor 2.53 is the trap. It is 2800 / 1106.3 — a full-year reference divided by a quarter's degree-days — and it is returned, prominently, on a 91-day query. On the rich arm a conditional alert says so in the response; on the prose arms the same warning is in the description; on minimal/opaque it is nowhere."
+  },
+
+  "q1_2023": {
+    "_query": { "dateFrom": "2023-01-01", "dateTo": "2023-03-31", "summaryOnly": true },
+    "days": 90,
+    "measuredDays": 90,
+    "forecastDays": 0,
+    "totalHDD": 1093.8,
+    "totalWeightedHDD": 1167.9,
+    "gasNormalizationFactor": 2.4,
+    "periodMeanTemp": 5.8
+  },
+
+  "select_probe": {
+    "_query": { "dateFrom": "2024-01-01", "dateTo": "2024-01-03", "select": ["date", "maxTemperature", "weather"] },
+    "_why": "Establishes the failure mode the select question is built on. `maxTemperature` and `weather` are plausible guesses and both are WRONG — the fields are `tempMax` and `weatherLabel`.",
+    "records_returned": [{ "date": "2024-01-01" }, { "date": "2024-01-02" }, { "date": "2024-01-03" }],
+    "alert": "select: ignored unknown field(s) [maxTemperature, weather]. Returned only: date.",
+    "_what_this_means": "recordCount stays 3. The response still looks well-formed. Every requested VALUE is gone and only the alert says so. This is a silent-content failure, not an error — which is why guessing field names is unsafe rather than merely unlucky."
+  },
+
+  "payload_dial": {
+    "_why": "open-questions.md Q9 needs a response big enough for distance to exist. get_building_profile cannot supply one; this tool can, over a 55x range, with the guidance held constant.",
+    "full_record_chars": 200,
+    "measured_on": "2024-01-01 and 2024-01-02, no select — 12 fields per record",
+    "summaryOnly_true": "~1,300 chars (~330 tokens)",
+    "select_3_fields_over_366_days": "~20,000 chars (~5,000 tokens)",
+    "full_records_over_366_days": "~73,000 chars (~18,000 tokens)",
+    "_caveat": "The last two are extrapolations from the measured per-record size, not captures. Measure them on the wire before quoting them in a result file."
+  }
+}
