@@ -1310,6 +1310,28 @@ carrying only `date`**. Every requested value is gone. Nothing errors; one alert
 A model that guesses field names does not fail loudly, it reports an empty projection as
 an answer. So "can the model name the fields" has a real consequence, not a stylistic one.
 
+**And names are the WEAKER half of the problem.** Knowing the names lets you filter at
+all. Knowing what the fields *mean* is what stops you projecting to a, b, c when the
+conclusion needed d — and that failure leaves **no trace at all**, because nothing
+invalid happened. Two questions in `questions-weather.json` isolate it:
+
+| | the field that carries the answer | what a plausible smaller projection does |
+|---|---|---|
+| `select-hides-the-evidence` | `tempMin` **and** `tempMax` jointly | `tempMean` loses the phenomenon *and inverts the ranking*: the 11 qualifying days average 15.8–18.3 °C, and the two warmest days by mean are not qualifying days at all |
+| `select-wrong-degree-day` | `weightedHdd` | `hdd` is 6.7% lower over the same quarter and silently wrong for a Dutch normalization |
+
+In both, every name is valid, every record is well-formed, **no alert fires**, and the
+response is indistinguishable from a correct one. That is a strictly worse failure than
+the guessed-name case, and it is the one that actually bears on whether output-field
+*semantics* have to be model-visible at call time.
+
+**It also exposes a tension this file has not met before.** `select` exists to save
+tokens, and *"keep the response small"* sits in both question prompts on purpose — that
+instruction is exactly what pushes a model to drop a field. Everywhere else in this repo
+pruning was free (Q2: −67% of the block, zero answers changed). Here pruning is the
+mechanism of the error. **Measure tokens and correctness together on these two, or the
+result means nothing.**
+
 **The repo already ASSUMES the answer, and has never tested it.** The twelve record field
 names are declared twice: in `outputSchema.records`, each with its own `.describe()`, and
 again in the **`select` input-schema description** — identically on every arm, including
@@ -1327,13 +1349,27 @@ knowledge is in the context, therefore the model has it*.
 `select` input description loses its field list, leaving the names only in `outputSchema`.
 Question: `select-blind` in `questions-weather.json`.
 
-> **Prediction: the model guesses, and the guess is not recoverable from `outputSchema`.
-> ≤3 of 10 runs send a fully valid `select` array, and of those that do not, at least half
-> report the empty projection without noticing the alert.**
+> **Prediction, names: the model guesses, and the guess is not recoverable from
+> `outputSchema`. ≤3 of 10 runs send a fully valid `select` array, and of those that do
+> not, at least half report the empty projection without noticing the alert.**
 >
 > **Falsified if** ≥8 of 10 send valid names, which would mean `outputSchema` does reach
 > the model, that the duplication into the input description is dead weight, and that the
 > main prediction of this question is wrong too.
+
+> **Prediction, meanings — registered separately because it is the real claim.
+> `select-hides-the-evidence` ≤4 of 10 on the prose arms, and the failures are SILENT:
+> a well-formed answer, no alert, no hedge. `select-wrong-degree-day` ≤5 of 10, with
+> `hdd` chosen over `weightedHdd` in most misses.**
+>
+> The reasoning: `tempMean` is the obvious compact choice for a temperature question and
+> `hdd` is the obvious name for a degree day. Nothing in the response corrects either.
+> The only thing that can is knowing what the fields mean *before* the projection is
+> chosen — which is the claim under test, stated as a prediction rather than assumed.
+>
+> **Falsified if** either clears 8 of 10 on an arm whose description carries the
+> semantics, which would mean prose at call time is sufficient and the semantics do not
+> need to travel with the record.
 
 Record a **third outcome** separately: a run that guesses, notices the alert, and
 re-queries without `select` is *safe but expensive*. It is the behaviour you would want,

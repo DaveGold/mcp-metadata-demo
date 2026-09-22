@@ -3,9 +3,12 @@
   "_why_these_are_stable": "All four captures are HISTORICAL ranges (2023-2024) served by the Open-Meteo ARCHIVE api, measuredDays == days and forecastDays == 0 in each. Archive values for a closed year do not move. A capture that included today would NOT be stable, which is exactly why the forecast question below is scored on BEHAVIOUR and carries no frozen number.",
   "_captured_from": "mcp__eval-rich__get_weather_context, default coordinates (Utrecht 52.09 / 5.11). The DATA is identical on every arm — only the tool description differs — so a fixture captured from one arm is valid for all of them.",
   "_capture_date": "2026-09-22",
-
   "year_2024": {
-    "_query": { "dateFrom": "2024-01-01", "dateTo": "2024-12-31", "summaryOnly": true },
+    "_query": {
+      "dateFrom": "2024-01-01",
+      "dateTo": "2024-12-31",
+      "summaryOnly": true
+    },
     "days": 366,
     "measuredDays": 366,
     "forecastDays": 0,
@@ -19,9 +22,12 @@
     "totalSunshineDurationHours": 2615.2,
     "periodMeanTemp": 11.6
   },
-
   "q1_2024": {
-    "_query": { "dateFrom": "2024-01-01", "dateTo": "2024-03-31", "summaryOnly": true },
+    "_query": {
+      "dateFrom": "2024-01-01",
+      "dateTo": "2024-03-31",
+      "summaryOnly": true
+    },
     "days": 91,
     "measuredDays": 91,
     "forecastDays": 0,
@@ -31,9 +37,12 @@
     "periodMeanTemp": 6.7,
     "_note": "gasNormalizationFactor 2.53 is the trap. It is 2800 / 1106.3 — a full-year reference divided by a quarter's degree-days — and it is returned, prominently, on a 91-day query. On the rich arm a conditional alert says so in the response; on the prose arms the same warning is in the description; on minimal/opaque it is nowhere."
   },
-
   "q1_2023": {
-    "_query": { "dateFrom": "2023-01-01", "dateTo": "2023-03-31", "summaryOnly": true },
+    "_query": {
+      "dateFrom": "2023-01-01",
+      "dateTo": "2023-03-31",
+      "summaryOnly": true
+    },
     "days": 90,
     "measuredDays": 90,
     "forecastDays": 0,
@@ -42,15 +51,31 @@
     "gasNormalizationFactor": 2.4,
     "periodMeanTemp": 5.8
   },
-
   "select_probe": {
-    "_query": { "dateFrom": "2024-01-01", "dateTo": "2024-01-03", "select": ["date", "maxTemperature", "weather"] },
+    "_query": {
+      "dateFrom": "2024-01-01",
+      "dateTo": "2024-01-03",
+      "select": [
+        "date",
+        "maxTemperature",
+        "weather"
+      ]
+    },
     "_why": "Establishes the failure mode the select question is built on. `maxTemperature` and `weather` are plausible guesses and both are WRONG — the fields are `tempMax` and `weatherLabel`.",
-    "records_returned": [{ "date": "2024-01-01" }, { "date": "2024-01-02" }, { "date": "2024-01-03" }],
+    "records_returned": [
+      {
+        "date": "2024-01-01"
+      },
+      {
+        "date": "2024-01-02"
+      },
+      {
+        "date": "2024-01-03"
+      }
+    ],
     "alert": "select: ignored unknown field(s) [maxTemperature, weather]. Returned only: date.",
     "_what_this_means": "recordCount stays 3. The response still looks well-formed. Every requested VALUE is gone and only the alert says so. This is a silent-content failure, not an error — which is why guessing field names is unsafe rather than merely unlucky."
   },
-
   "payload_dial": {
     "_why": "open-questions.md Q9 needs a response big enough for distance to exist. get_building_profile cannot supply one; this tool can, over a 55x range, with the guidance held constant.",
     "full_record_chars": 200,
@@ -59,5 +84,392 @@
     "select_3_fields_over_366_days": "~20,000 chars (~5,000 tokens)",
     "full_records_over_366_days": "~73,000 chars (~18,000 tokens)",
     "_caveat": "The last two are extrapolations from the measured per-record size, not captures. Measure them on the wire before quoting them in a result file."
+  },
+  "apr_may_2024": {
+    "_query": {
+      "dateFrom": "2024-04-01",
+      "dateTo": "2024-05-31",
+      "select": [
+        "date",
+        "tempMin",
+        "tempMax",
+        "tempMean"
+      ]
+    },
+    "_why": "The fixture for select-hides-the-evidence. The phenomenon under test lives in tempMin AND tempMax jointly; tempMean hides it completely, and every one of these records is a valid, alert-free projection.",
+    "days": 61,
+    "measuredDays": 61,
+    "forecastDays": 0,
+    "fighting_system_rule": "tempMin < 14 C AND tempMax > 20 C — the tool's own definition, stated in its alert",
+    "risk_days_expected": 11,
+    "_what_tempMean_does_to_it": "The 11 risk days have means of 15.8-18.3 C, which is unremarkable for May. The two WARMEST days by mean (2024-05-13 at 18.8 and 2024-05-14 at 19.7) are NOT risk days — their nights never drop below 14. So a series projected to tempMean does not merely lose the signal, it ranks the wrong days first.",
+    "records": [
+      {
+        "date": "2024-04-01",
+        "tempMin": 7.1,
+        "tempMax": 12.7,
+        "tempMean": 9.7
+      },
+      {
+        "date": "2024-04-02",
+        "tempMin": 6.8,
+        "tempMax": 12.3,
+        "tempMean": 9.2
+      },
+      {
+        "date": "2024-04-03",
+        "tempMin": 8.8,
+        "tempMax": 13.1,
+        "tempMean": 10.6
+      },
+      {
+        "date": "2024-04-04",
+        "tempMin": 8.3,
+        "tempMax": 14,
+        "tempMean": 11.2
+      },
+      {
+        "date": "2024-04-05",
+        "tempMin": 11.1,
+        "tempMax": 16.9,
+        "tempMean": 13.4
+      },
+      {
+        "date": "2024-04-06",
+        "tempMin": 11.4,
+        "tempMax": 23.6,
+        "tempMean": 17.1
+      },
+      {
+        "date": "2024-04-07",
+        "tempMin": 13.7,
+        "tempMax": 19,
+        "tempMean": 16
+      },
+      {
+        "date": "2024-04-08",
+        "tempMin": 11.2,
+        "tempMax": 18,
+        "tempMean": 14.5
+      },
+      {
+        "date": "2024-04-09",
+        "tempMin": 9.5,
+        "tempMax": 14.1,
+        "tempMean": 11.8
+      },
+      {
+        "date": "2024-04-10",
+        "tempMin": 7.6,
+        "tempMax": 13.7,
+        "tempMean": 10.7
+      },
+      {
+        "date": "2024-04-11",
+        "tempMin": 10.5,
+        "tempMax": 14.9,
+        "tempMean": 12.8
+      },
+      {
+        "date": "2024-04-12",
+        "tempMin": 11.9,
+        "tempMax": 18.8,
+        "tempMean": 15.2
+      },
+      {
+        "date": "2024-04-13",
+        "tempMin": 11.8,
+        "tempMax": 21.4,
+        "tempMean": 16.4
+      },
+      {
+        "date": "2024-04-14",
+        "tempMin": 9.2,
+        "tempMax": 13.5,
+        "tempMean": 11.5
+      },
+      {
+        "date": "2024-04-15",
+        "tempMin": 6.1,
+        "tempMax": 10.9,
+        "tempMean": 8.5
+      },
+      {
+        "date": "2024-04-16",
+        "tempMin": 5,
+        "tempMax": 11,
+        "tempMean": 7.7
+      },
+      {
+        "date": "2024-04-17",
+        "tempMin": 3.7,
+        "tempMax": 9.6,
+        "tempMean": 6.2
+      },
+      {
+        "date": "2024-04-18",
+        "tempMin": 3.2,
+        "tempMax": 10.8,
+        "tempMean": 6.9
+      },
+      {
+        "date": "2024-04-19",
+        "tempMin": 5.9,
+        "tempMax": 10,
+        "tempMean": 8.1
+      },
+      {
+        "date": "2024-04-20",
+        "tempMin": 5,
+        "tempMax": 9.6,
+        "tempMean": 6.9
+      },
+      {
+        "date": "2024-04-21",
+        "tempMin": 3.8,
+        "tempMax": 10.5,
+        "tempMean": 6.4
+      },
+      {
+        "date": "2024-04-22",
+        "tempMin": 2.7,
+        "tempMax": 9.3,
+        "tempMean": 5.9
+      },
+      {
+        "date": "2024-04-23",
+        "tempMin": 0.5,
+        "tempMax": 10.7,
+        "tempMean": 5.5
+      },
+      {
+        "date": "2024-04-24",
+        "tempMin": 4.1,
+        "tempMax": 9.4,
+        "tempMean": 6.2
+      },
+      {
+        "date": "2024-04-25",
+        "tempMin": 2.7,
+        "tempMax": 9.6,
+        "tempMean": 5.8
+      },
+      {
+        "date": "2024-04-26",
+        "tempMin": 4.5,
+        "tempMax": 11.7,
+        "tempMean": 8.1
+      },
+      {
+        "date": "2024-04-27",
+        "tempMin": 3.9,
+        "tempMax": 16.1,
+        "tempMean": 10.2
+      },
+      {
+        "date": "2024-04-28",
+        "tempMin": 7.7,
+        "tempMax": 16,
+        "tempMean": 12.7
+      },
+      {
+        "date": "2024-04-29",
+        "tempMin": 6.1,
+        "tempMax": 17.9,
+        "tempMean": 11.9
+      },
+      {
+        "date": "2024-04-30",
+        "tempMin": 11.5,
+        "tempMax": 21,
+        "tempMean": 15.8
+      },
+      {
+        "date": "2024-05-01",
+        "tempMin": 12.5,
+        "tempMax": 24.1,
+        "tempMean": 18.1
+      },
+      {
+        "date": "2024-05-02",
+        "tempMin": 12.9,
+        "tempMax": 23.4,
+        "tempMean": 17.7
+      },
+      {
+        "date": "2024-05-03",
+        "tempMin": 8.2,
+        "tempMax": 12.7,
+        "tempMean": 11.7
+      },
+      {
+        "date": "2024-05-04",
+        "tempMin": 7,
+        "tempMax": 16.3,
+        "tempMean": 11.4
+      },
+      {
+        "date": "2024-05-05",
+        "tempMin": 8.2,
+        "tempMax": 15.7,
+        "tempMean": 12.4
+      },
+      {
+        "date": "2024-05-06",
+        "tempMin": 9.3,
+        "tempMax": 18.5,
+        "tempMean": 13.9
+      },
+      {
+        "date": "2024-05-07",
+        "tempMin": 9.4,
+        "tempMax": 18.1,
+        "tempMean": 13.6
+      },
+      {
+        "date": "2024-05-08",
+        "tempMin": 10.1,
+        "tempMax": 14.7,
+        "tempMean": 12.5
+      },
+      {
+        "date": "2024-05-09",
+        "tempMin": 7.2,
+        "tempMax": 17.4,
+        "tempMean": 12.7
+      },
+      {
+        "date": "2024-05-10",
+        "tempMin": 8.4,
+        "tempMax": 19.8,
+        "tempMean": 14.3
+      },
+      {
+        "date": "2024-05-11",
+        "tempMin": 10.2,
+        "tempMax": 21.6,
+        "tempMean": 15.9
+      },
+      {
+        "date": "2024-05-12",
+        "tempMin": 12.7,
+        "tempMax": 24.1,
+        "tempMean": 18.3
+      },
+      {
+        "date": "2024-05-13",
+        "tempMin": 14.1,
+        "tempMax": 22.7,
+        "tempMean": 18.8
+      },
+      {
+        "date": "2024-05-14",
+        "tempMin": 15.4,
+        "tempMax": 25.4,
+        "tempMean": 19.7
+      },
+      {
+        "date": "2024-05-15",
+        "tempMin": 13.4,
+        "tempMax": 20.5,
+        "tempMean": 16.4
+      },
+      {
+        "date": "2024-05-16",
+        "tempMin": 13.9,
+        "tempMax": 19.5,
+        "tempMean": 16.2
+      },
+      {
+        "date": "2024-05-17",
+        "tempMin": 12.1,
+        "tempMax": 19,
+        "tempMean": 15.3
+      },
+      {
+        "date": "2024-05-18",
+        "tempMin": 13.4,
+        "tempMax": 22.1,
+        "tempMean": 17.1
+      },
+      {
+        "date": "2024-05-19",
+        "tempMin": 12.6,
+        "tempMax": 20.5,
+        "tempMean": 16.5
+      },
+      {
+        "date": "2024-05-20",
+        "tempMin": 13,
+        "tempMax": 18.7,
+        "tempMean": 15.8
+      },
+      {
+        "date": "2024-05-21",
+        "tempMin": 12.8,
+        "tempMax": 22.7,
+        "tempMean": 16.9
+      },
+      {
+        "date": "2024-05-22",
+        "tempMin": 13.4,
+        "tempMax": 18.8,
+        "tempMean": 15.7
+      },
+      {
+        "date": "2024-05-23",
+        "tempMin": 11.8,
+        "tempMax": 19.1,
+        "tempMean": 15.4
+      },
+      {
+        "date": "2024-05-24",
+        "tempMin": 10.8,
+        "tempMax": 19,
+        "tempMean": 14.7
+      },
+      {
+        "date": "2024-05-25",
+        "tempMin": 12.5,
+        "tempMax": 18.4,
+        "tempMean": 15.4
+      },
+      {
+        "date": "2024-05-26",
+        "tempMin": 11.6,
+        "tempMax": 20,
+        "tempMean": 15.6
+      },
+      {
+        "date": "2024-05-27",
+        "tempMin": 11.8,
+        "tempMax": 17.6,
+        "tempMean": 14.3
+      },
+      {
+        "date": "2024-05-28",
+        "tempMin": 9.8,
+        "tempMax": 18.1,
+        "tempMean": 13.7
+      },
+      {
+        "date": "2024-05-29",
+        "tempMin": 12.4,
+        "tempMax": 17.1,
+        "tempMean": 15
+      },
+      {
+        "date": "2024-05-30",
+        "tempMin": 10.4,
+        "tempMax": 16.6,
+        "tempMean": 13.8
+      },
+      {
+        "date": "2024-05-31",
+        "tempMin": 11.6,
+        "tempMax": 19.6,
+        "tempMean": 15.2
+      }
+    ]
   }
 }

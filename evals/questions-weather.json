@@ -90,11 +90,62 @@
       "_the_arm_this_needs": "select-blind — identical in every respect except that the `select` input description loses its field list, leaving those names only in outputSchema. If the model still selects correctly, outputSchema reaches it and open-questions.md Q11's prediction is wrong. If it guesses, and especially if it then reports the empty projection as an answer, the duplication is load-bearing and the claim that output-field knowledge is a PRECONDITION for safe selective retrieval is measured rather than asserted.",
       "route": "MANDATORY to score. Record the exact select array the run sent, whether the ignored-fields alert fired, and whether the run noticed it. A run that recovers by re-querying without select is a THIRD outcome — safe but expensive — and should be recorded as such, with its token cost.",
       "fabrication_watch": "reporting values for a field the run never successfully selected"
+    },
+    {
+      "id": "select-hides-the-evidence",
+      "shape": "prevention",
+      "asks": "Whether the model keeps the two fields that jointly carry the phenomenon, when a summary field looks like it would do and is smaller.",
+      "question": "For our Utrecht office, which days in April and May 2024 could have had heating and cooling fighting each other — a cold night followed by a warm afternoon? Give me the dates. Keep the response small.",
+      "correct_tool": "get_weather_context",
+      "required_params": {
+        "dateFrom": "2024-04-01",
+        "dateTo": "2024-05-31",
+        "select": [
+          "date",
+          "tempMin",
+          "tempMax"
+        ]
+      },
+      "ground_truth": "11 days: 2024-04-06, 04-13, 04-30, 05-01, 05-02, 05-11, 05-12, 05-15, 05-18, 05-19, 05-21. The rule is the tool's own — tempMin < 14 C AND tempMax > 20 C — and it needs BOTH fields. Reaching it requires either selecting tempMin and tempMax, or reading the alert, which gives the count and the first five dates and truncates the rest with '(+6 more)'.",
+      "must_not_say": "A list built from tempMean, or any statement that the warmest days are the risky ones. The 11 risk days have means of 15.8-18.3 C; the two warmest days by mean (05-13 at 18.8, 05-14 at 19.7) are NOT risk days because their nights stay above 14 C. A tempMean projection does not merely lose the signal, it ranks the wrong days first — and NO alert fires, because tempMean is a perfectly valid field to select.",
+      "scoring": "judge",
+      "_judge_note": "Score the DATE LIST against the 11. A run that gives the count but only the five dates the alert names has not answered the question — record it as `partial (alert only)`, which is its own finding: it means the alert was read and the records were not.",
+      "route": "MANDATORY to score. Record the exact select array. The three outcomes worth telling apart: selected tempMin+tempMax (correct road), selected tempMean (silent failure), or read the alert without selecting anything (right answer, truncated).",
+      "fabrication_watch": "a fighting-system threshold other than the tool's tempMin<14 / tempMax>20, or dates presented without the min/max that qualify them"
+    },
+    {
+      "id": "select-wrong-degree-day",
+      "shape": "derived_number",
+      "asks": "Whether the model can tell two same-sounding fields apart. Both are degree-days, both are valid, only one is the Dutch convention.",
+      "question": "Give me a compact day-by-day degree-day series for Utrecht for January to March 2024, so I can weather-correct our gas use the way it is done in the Netherlands.",
+      "correct_tool": "get_weather_context",
+      "required_params": {
+        "dateFrom": "2024-01-01",
+        "dateTo": "2024-03-31",
+        "select": [
+          "date",
+          "weightedHdd"
+        ]
+      },
+      "ground_truth": "The weightedHdd series, summing to 1,106.3 for the quarter. The Dutch convention applies seasonal weights (Nov-Feb x1.1, Mar/Oct x1.0, Apr-Sep x0.8) to account for solar gain, and the tool's own gasNormalizationFactor is built on totalWeightedHDD, not on raw HDD.",
+      "must_not_say": "Presenting the raw `hdd` series as the Dutch degree-day series. It is 1,032.1 for the same quarter — 6.7% lower — and a normalization built on it is wrong by roughly that much, with nothing in the response to say so. Both fields exist, both are named plausibly, neither selection produces an alert.",
+      "scoring": "exact_value",
+      "expected_value": 1106.3,
+      "tolerance": 1,
+      "_tolerance_note": "1.0 on a sum of 1,106.3 admits rounding only. The wrong field lands at 1,032.1, 74 away — again the roads discriminate, not the tolerance.",
+      "route": "MANDATORY to score. Which field did the run select: weightedHdd, hdd, or both?",
+      "fabrication_watch": "seasonal weights other than the 1.1 / 1.0 / 0.8 in the description, or a degree-day base other than 18 C"
     }
   ],
   "_measure_on_every_run": [
     "tokens — this is the tool with a payload dial, so token cost is a first-class result here, not a footnote",
     "the select array actually sent, verbatim",
     "whether interpretation.alerts were read: each of these four questions has an alert that answers it, and Q5 measured what happens when an alert is present and irrelevant. Here they are present and RELEVANT."
-  ]
+  ],
+  "_two_kinds_of_select_failure": {
+    "names": "You cannot filter at all without knowing the field NAMES. Guess them and the call still succeeds, returning records that carry only whatever happened to be valid — see select-blind, and select_probe in weather-fixtures.json. One alert says so.",
+    "meanings": "You cannot filter SAFELY without knowing what the fields MEAN. Here every name is valid, every record is well-formed, NO alert fires, and the conclusion is wrong because the field carrying the evidence was not asked for. See select-hides-the-evidence and select-wrong-degree-day.",
+    "which_matters_more": "The second. The first failure leaves a trace in interpretation.alerts; the second leaves none at all, because nothing invalid happened. A projection to a,b,c when the answer needed d is indistinguishable, in the response, from a correct one.",
+    "the_tension_this_exposes": "`select` is sold as a token-efficiency mechanism, and 'keep the response small' is in two of these question prompts on purpose. That instruction is exactly what pushes a model to drop fields. This is the first place in the repo where progressive disclosure and correctness pull in OPPOSITE directions — everywhere else, pruning was free (open-questions.md Q2). Measure tokens and correctness together here, or the result is meaningless."
+  }
 }

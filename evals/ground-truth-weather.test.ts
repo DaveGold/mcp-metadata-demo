@@ -101,6 +101,58 @@ describe('weather eval candidates — ground truth follows from the frozen captu
     });
   });
 
+  it('select-hides-the-evidence: the rule needs BOTH fields, and gives exactly 11 days', () => {
+    const records = fixtures.apr_may_2024.records;
+    const risky = records.filter((r) => r.tempMin < 14 && r.tempMax > 20);
+
+    expect(records).toHaveLength(61);
+    expect(risky).toHaveLength(fixtures.apr_may_2024.risk_days_expected);
+    expect(risky.map((r) => r.date)).toEqual([
+      '2024-04-06',
+      '2024-04-13',
+      '2024-04-30',
+      '2024-05-01',
+      '2024-05-02',
+      '2024-05-11',
+      '2024-05-12',
+      '2024-05-15',
+      '2024-05-18',
+      '2024-05-19',
+      '2024-05-21',
+    ]);
+
+    // Neither field alone finds them: drop either half of the rule and the set changes.
+    expect(records.filter((r) => r.tempMax > 20)).not.toHaveLength(risky.length);
+    expect(records.filter((r) => r.tempMin < 14)).not.toHaveLength(risky.length);
+  });
+
+  it('select-hides-the-evidence: tempMean does not just lose the signal, it inverts the ranking', () => {
+    const records = fixtures.apr_may_2024.records;
+    const risky = records.filter((r) => r.tempMin < 14 && r.tempMax > 20);
+    const warmestMean = Math.max(...risky.map((r) => r.tempMean));
+
+    // The risky days are unremarkable by mean...
+    expect(warmestMean).toBeLessThan(19);
+
+    // ...and the days a tempMean projection would put FIRST are not risky at all.
+    const warmerThanAnyRiskDay = records.filter((r) => r.tempMean > warmestMean);
+    expect(warmerThanAnyRiskDay.length).toBeGreaterThan(0);
+    for (const day of warmerThanAnyRiskDay) {
+      expect(day.tempMin < 14 && day.tempMax > 20).toBe(false);
+    }
+  });
+
+  it('select-wrong-degree-day: the two degree-day fields differ by enough to matter', () => {
+    const q1 = fixtures.q1_2024;
+    expect(q1.totalWeightedHDD).toBe(q('select-wrong-degree-day').expected_value);
+
+    const tolerance = q('select-wrong-degree-day').tolerance as number;
+    expect(Math.abs(q1.totalHDD - q1.totalWeightedHDD)).toBeGreaterThan(tolerance * 50);
+
+    // Winter weighting is UP (x1.1 for Nov-Feb), so the Dutch series must exceed the raw one.
+    expect(q1.totalWeightedHDD).toBeGreaterThan(q1.totalHDD);
+  });
+
   it('forecast-normalization carries no frozen number, on purpose', () => {
     const question = q('forecast-normalization');
     expect(question.expected_value).toBeUndefined();
