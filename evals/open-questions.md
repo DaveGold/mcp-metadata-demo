@@ -747,6 +747,15 @@ the saving is deliberation about *the answer*, it must vanish here.
 > interpretation. That is the third failure to replicate the rule and the clearest:
 > the guidance is not absent or ambiguous here, it is spelled out and ignored.
 >
+> **CORRECTED 2026-09-22 BY Q13 — "prose will not fix it" is TOO GENERAL.** Every arm
+> Q6 tested (`words`, `opaque-words`, `opaque`) carries its guidance in the
+> **DESCRIPTION**. The response channel was never tested. It fixes the defect
+> completely: `inline`, carrying the byte-identical threshold line in the RESPONSE,
+> scores **20/20** where `words` scores 5/20 and cites the threshold in **0 of 20**
+> runs. What Q6 measured is a delivery failure, not a failure of prose. The original
+> text is left below as written. See
+> [`results/2026-09-22-q13-overheating-response-channel.json`](results/2026-09-22-q13-overheating-response-channel.json).
+>
 > **So yes — this is a defect in the shipped tool, and prose will not fix it.** The
 > indicated fix is server-side computation, exactly as for the gas figure:
 > `generateAlerts` computes *"~253 m³/year"* and *"suitable for a heat pump"* but
@@ -1438,6 +1447,54 @@ domain's ground truth — which is the real cost, and the reason this is last.
 ---
 
 ## Q13 — Can the ALERTLESS tiers be fixed at all? Prose in the RESPONSE vs computation
+
+> **ANSWERED 2026-09-22 — ALL THREE PREDICTIONS FALSIFIED. The channel is the whole
+> story.** 60 runs, haiku, n=20 per arm, one batch. See
+> [`results/2026-09-22-q13-overheating-response-channel.json`](results/2026-09-22-q13-overheating-response-channel.json).
+>
+> | arm | where the threshold sits | correct | confidently wrong | fabricated | **cited the 1.5 threshold** |
+> |---|---|---|---|---|---|
+> | `words` | DESCRIPTION | **5** | 10 | 9 | **0 of 20** |
+> | `inline` | **RESPONSE** | **20** | 0 | 0 | **20 of 20** |
+> | `rich` | computed verdict | **20** | 0 | 0 | 20 of 20 |
+>
+> The 1.5 threshold is present verbatim in **both** `words` and `inline`. `words`
+> cited it **zero times in twenty**; `inline` cited it **twenty times in twenty**.
+> Same sentence, same model, same question, same sitting — only the channel differs.
+>
+> - **P1** (`inline` ≤ 10/20) → **20/20.** Falsified.
+> - **P2** (`rich` − `inline` ≥ 8) → **0.** Falsified.
+> - **P3** (`inline` − `words` < 4) → **+15.** Falsified.
+>
+> **The registered reasoning was wrong in a specific, legible way.** It assumed the
+> failure was a *prior* that survived the guidance — that 3.59 "sounds small"
+> whatever you tell the model. Placement alone refutes that. Zero of twenty `words`
+> runs cited the threshold against twenty of twenty for `inline`; when they do not
+> use it they invent a unit, always one that makes 3.59 negligible — hours a year,
+> degrees, percent — and 10 of 20 then conclude low or no risk.
+>
+> **But WHY placement mattered is not settled here, and an earlier draft of this
+> banner overclaimed it.** It said the runs "never retrieved" the threshold. That is
+> an inference about what was in context, and **Q7 is registered to test exactly
+> it** — Q5 already charged `rich`'s tool-definition bytes *per call*, which points
+> at the description being present the whole time. If it was, this result is the
+> stronger one: the knowledge was available and placement decided whether it was
+> applied. What this run measured is **use**, not availability.
+>
+> **And it is cheaper.** `inline` costs **9.7% fewer tokens than `words`** and
+> **12.3% fewer than `rich`**, while tying for best. **This is the first arm measured
+> in this repo that is simultaneously the cheapest and the best** — every previous
+> cost/quality finding has them pointing in opposite directions.
+>
+> **Q6's conclusion is corrected.** Q6 said this was "a defect prose will not fix".
+> True of prose in the DESCRIPTION, which is all Q6 tested. Prose in the RESPONSE
+> fixes it completely. So **#48's computed alert was not wrong, but it was not
+> necessary** — it is the expensive fix to a defect that had a free one. Check the
+> channel before writing a computation.
+>
+> **And the interpretation block should not be edited for this.** The sequencing
+> argument below was the point of running Q13 first, and it paid: the wording was
+> never the problem, so the six-arm comparability cost stays unpaid.
 
 > **REGISTERED 2026-09-22, BEFORE THE RUN.** Committed before any run was spawned.
 > No new arm, no deploy, no change to any shipped byte — all three arms already

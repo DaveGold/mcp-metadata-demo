@@ -132,13 +132,13 @@ own caveats. The picture changed substantially on 2026-09-21/22: the early
 findings were n=2–3 and mostly Haiku, and have since been re-run at **n=10–20 per
 cell across three models**. Where a claim has been superseded it says so.
 
-**Six questions were registered in [`open-questions.md`](open-questions.md)
-before they were run. All six are now answered — and five of the six registered
+**Seven questions were registered in [`open-questions.md`](open-questions.md)
+before they were run. All seven are now answered — and six of the seven registered
 predictions were wrong.** That pattern is itself the most reliable thing here:
-the effects are large and legible, and intuitions about *why* were wrong five
-times out of six.
+the effects are large and legible, and intuitions about *why* keep missing.
 
-**Six more are registered and open (Q7–Q12).** They come from
+**Six more are registered and open (Q7–Q12).** (Q13 is the seventh answered one,
+registered after them and run the same day — see §9.) They come from
 [`research-frame.md`](research-frame.md), which is the map the register is drawn
 on: the six axes a placement effect could run along — channel, timing, distance,
 conditionality, addressability, activation — which of them the answered questions
@@ -268,6 +268,38 @@ Sonnet and opus read the null field, know unaided what it is for, and decline �
 | model capability | honest refusal as a floor | **yes** — only Opus had it |
 
 §7 is the sharpest instance: an 8-run gap on haiku, zero on sonnet and opus.
+
+### 9 · The channel finding is not about recipes — and it can be free
+
+**Q13, 60 runs, haiku.** `temperatuuroverschrijding` 3.59 against a stated 1.5
+threshold. The threshold line is present **verbatim** in two arms:
+
+| arm | where the line sits | correct | **cited the 1.5 threshold** | tokens vs `words` |
+|---|---|---|---|---|
+| `words` | DESCRIPTION | 5/20 | **0 of 20** | — |
+| `inline` | **RESPONSE** | **20/20** | **20 of 20** | **−9.7%** |
+| `rich` | computed verdict | 20/20 | 20 of 20 | +1.5% |
+
+Zero against twenty on whether the sentence was **used** at all. Where it goes
+unused the model invents a unit for 3.59 — 9 of 20 runs — and every invented unit
+(hours a year, K, °C, %) makes the number sound negligible, so 10 of 20 concluded
+low or no risk.
+
+**Why placement mattered is not established.** This measures use, not availability,
+and tool definitions are re-sent every turn on most hosts — so the description may
+have been present and simply not applied. That is [`open-questions.md`](open-questions.md)
+**Q7**, and until it lands no "the model never saw it" sentence here is quotable.
+
+Two things follow. **§4 was measured on a recipe; this is the same effect on a bare
+fact** — one threshold, one comparison, no arithmetic. And **`inline` is the
+cheapest arm as well as the best**, the first in this repo where quality and cost
+point the same way.
+
+> **A defect that prose "cannot fix" may just be prose in the wrong channel. Check
+> that before you write a computation.**
+
+The computed overheating alert was not wrong — it scores 20/20 — but it was the
+expensive fix to a defect that had a free one.
 
 ### The strongest single result
 

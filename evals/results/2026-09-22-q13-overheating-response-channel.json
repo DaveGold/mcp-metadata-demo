@@ -1,0 +1,173 @@
+{
+  "_comment": "Q13 — can the ALERTLESS tiers be fixed at all? The overheating fix (#48) lives in generateAlerts, so it reaches `rich` and nothing else. Q6 concluded prose could not carry this threshold. Q13 tests the one variable Q1 showed to be dominant — the CHANNEL — using arms that already existed. ALL THREE REGISTERED PREDICTIONS FALSIFIED. The same threshold line that scores 5/20 in the DESCRIPTION scores 20/20 in the RESPONSE, at LOWER cost than either other arm.",
+  "date": "2026-09-22",
+  "question": "overheating",
+  "shape": "interpretation",
+  "model": "haiku",
+  "n_per_arm": 20,
+  "total_runs": 60,
+  "protocol": "Live tool calls through the deployed endpoints via the eval-* subagents. All three arms interleaved in four balanced waves of 5+5+5 in a single sitting. Only the `question` string was passed; no ground truth, no must_not_say, no shape.",
+  "registered": "evals/open-questions.md Q13 (registered as Q7 and renumbered when main merged a different Q7 in #49), committed in 3a2243c BEFORE any subagent was spawned.",
+  "preflight": {
+    "step_1_connectivity": "mcp__eval-words__, mcp__eval-inline__ and mcp__eval-rich__get_building_profile each called live and returned the Van Beuningenstraat record. The agent list was NOT used as evidence.",
+    "step_2_variant_stamping": "get_tool_call_log called UNFILTERED; summary.countByVariant showed words, inline and rich each under their own name. No `unknown` bucket. No stale deploy.",
+    "step_3_the_alert_is_live": "rich's response carries `Overheating risk: SIGNIFICANT — 3.59 is above the 1.5 threshold (TOjuli/GTO). This is a unitless index — not °C and not hours per year.` So #48 is deployed and this run measures the post-#48 world.",
+    "step_4_the_line_is_where_it_should_be": "Verified on the wire: `words` carries `temperatuuroverschrijding (TOjuli/GTO overheating-risk indicator): 0 = no risk, 0–1.5 = minor risk, >1.5 = significant overheating` in its DESCRIPTION; `inline` carries the byte-identical line inside the `interpretation` string in its RESPONSE. Neither arm has alerts."
+  },
+  "arms": {
+    "words": "prose in the DESCRIPTION, no alerts. Readable field names.",
+    "inline": "the same prose in the RESPONSE (description byte-identical to `schema`'s), no alerts. Readable field names.",
+    "rich": "prose in the description PLUS the server-computed verdict in `alerts`. Readable field names."
+  },
+  "comparison_validity": "All three arms are in the READABLE regime, so the cross-regime prohibition is not engaged. `inline` vs `words` is the clean single-variable comparison: same bytes, different channel. `inline` vs `rich` crosses the channel AND the computation and is reported as prose-vs-computation, never as the value of one layer.",
+  "scoring_rule": {
+    "rule": "judge. CORRECT = asserts a real overheating risk without downgrading it. CONFIDENTLY_WRONG = asserts no risk, or low/minor/modest/negligible risk (the must_not_say direction: the 0–1.5 band applied to a 3.59 value). OTHER = engages the field and asserts 'moderate'/'elevated' without either naming it significant or downgrading it. FABRICATED = invented a unit or a threshold for the indicator, scored over the whole output independently of correctness.",
+    "_provenance_warning": "HONEST PROVENANCE: the three-way correct/other/wrong rule was written after waves 1 and 2 were visible, because the answers turned out to cluster on a severity spectrum the question's binary must_not_say did not anticipate. It was then applied unchanged to all 60 runs including the two waves already seen. It cannot have manufactured the headline: `inline` and `rich` are 20/20 under ANY reading, and `words` scores 5 under the most generous reading available (counting every run that asserts risk at all, including two that invented a unit to get there).",
+    "note_on_generosity": "The rule is deliberately generous to `words`. Under a stricter reading requiring the answer to reach SIGNIFICANT — which is the ground truth — `words` scores 0 of 20, because not one of its runs names the 1.5 threshold."
+  },
+  "headline": {
+    "words_description_channel": {
+      "correct": 5,
+      "confidently_wrong": 10,
+      "other": 5,
+      "declined": 0,
+      "fabricated": 9,
+      "cited_the_1_5_threshold": 0
+    },
+    "inline_response_channel": {
+      "correct": 20,
+      "confidently_wrong": 0,
+      "other": 0,
+      "declined": 0,
+      "fabricated": 0,
+      "cited_the_1_5_threshold": 20
+    },
+    "rich_computed_verdict": {
+      "correct": 20,
+      "confidently_wrong": 0,
+      "other": 0,
+      "declined": 0,
+      "fabricated": 0,
+      "cited_the_1_5_threshold": 20
+    }
+  },
+  "the_single_cleanest_number": "The 1.5 threshold is present, verbatim, in BOTH `words` and `inline`. `words` runs cited it 0 times in 20. `inline` runs cited it 20 times in 20. Same sentence, same model, same question, same sitting — only the channel differs.",
+  "predictions_all_three_falsified": {
+    "P1": {
+      "registered": "inline does not fix it: <= 10/20. Falsified if inline >= 16/20.",
+      "measured": "20/20",
+      "verdict": "FALSIFIED"
+    },
+    "P2": {
+      "registered": "rich - inline >= 8 runs. Falsified if under 4.",
+      "measured": "0 runs",
+      "verdict": "FALSIFIED"
+    },
+    "P3": {
+      "registered": "inline - words < 4 runs. Falsified if >= 4.",
+      "measured": "+15 runs",
+      "verdict": "FALSIFIED"
+    },
+    "the_reasoning_that_was_wrong": "The registered reasoning was that Q6's failure mode is not that the guidance goes UNREAD — three arms reached the right field and then misread it — so moving the same sentence nearer the data would repeat a rule rather than contradict a prior. That is wrong: placement changed the outcome completely. WHY it changed is NOT settled by this run — see mechanism_claim_withdrawn.",
+    "what_this_makes_the_record": "Six of seven registered predictions in this repo have now been falsified."
+  },
+  "corrects_an_earlier_claim": {
+    "claim": "results/2026-09-22-q6-overheating-naming.json concluded: 'a defect in the shipped tool that prose will not fix', and open-questions.md Q6 repeats it.",
+    "status": "TOO GENERAL, and corrected by this run.",
+    "what_is_true": "Prose in the DESCRIPTION will not fix it. Q6 tested `words`, `opaque-words` and `opaque` — all three carry their guidance in the DESCRIPTION. It never tested the response channel.",
+    "what_is_false": "That no prose fixes it. Prose in the RESPONSE fixes it completely, 20/20, with zero fabrications.",
+    "consequence_for_48": "The computed alert is not WRONG — it scores 20/20 and it is robust. But it was not NECESSARY for this defect, and it is the more expensive of the two fixes: +12.3% tokens against `inline`. A one-line channel move would have done the same job for less."
+  },
+  "cost": {
+    "subagent_tokens_mean": {
+      "words": 34530,
+      "inline": 31195,
+      "rich": 35042
+    },
+    "subagent_tokens_median": {
+      "words": 33519,
+      "inline": 31104,
+      "rich": 33765
+    },
+    "vs_words": {
+      "inline": "-9.66%",
+      "rich": "+1.48%"
+    },
+    "vs_inline": {
+      "rich": "+12.33%"
+    },
+    "duration_ms_mean": {
+      "words": 16428,
+      "inline": 12708,
+      "rich": 14730
+    },
+    "duration_ratio": {
+      "words_over_inline": "1.29x",
+      "rich_over_inline": "1.16x"
+    },
+    "answer_chars_mean": {
+      "words": 423,
+      "inline": 425,
+      "rich": 446
+    },
+    "tool_uses_total": {
+      "words": 29,
+      "inline": 23,
+      "rich": 31
+    },
+    "the_result_that_has_no_precedent_here": "`inline` is the CHEAPEST arm AND tied for the best. Every previous cost/quality finding in this directory has them pointing in opposite directions — Q4's cheapest arm (-0.4%) was also its worst. This is the first arm measured here that is both.",
+    "consistent_with_Q3": "Q3's mechanism was 'less to THINK'. Here `words` takes 1.29x longer than `inline` on an identical call profile and lands 15 fewer correct answers: the extra time is spent improvising a unit for 3.59 rather than retrieving the threshold. The two same-question observations agree.",
+    "caveat_on_rich_mean": "rich's MEAN is pulled up by two 45k-token outliers; its MEDIAN (33,765) is within 250 tokens of `words`' (33,519). Quote the median for the rich-vs-words comparison. The inline gap is not outlier-driven: its max (32,590) is below both other arms' minima."
+  },
+  "how_words_fails": {
+    "it_invents_a_unit": "9 of 20 `words` runs attached a unit to 3.59 that is nowhere in the payload: 'hours per year' (x2), 'K' (x2), 'degrees C' (x2), 'K.h/m2' with an invented 4.6 threshold, '%', and one that invented whole bands ('below 10 acceptable, concern only above 20').",
+    "every_invented_unit_makes_3_59_sound_small": "3.59 hours a year, 3.59 degrees, 3.59 percent — each is a plainly negligible quantity. That is why 10 of 20 runs concluded low or no risk. The number is not misread at random; it is misread in one direction.",
+    "two_of_its_five_correct_answers_are_accidents": "Runs 11 and 17 invented a unit (degrees C, K) and still concluded there was a risk. Scoring only the verdict credits them. `words`' clean correct count — right verdict, no invented unit — is 3 of 20.",
+    "the_compensating_search": "9 of 29 `words` tool calls were get_weather_context, against 3 of 23 for `inline`. When the payload does not settle the question the model goes looking outside it, and three of those searches errored. This is the same compensating-search behaviour first noted in the 2026-09-21 first-harness-run."
+  },
+  "log_audit": {
+    "method": "get_tool_call_log called with limit=200, read UNFILTERED via summary.countByVariant before any filter, then bounded to the run window (timestamp > 2026-09-22T19:37:30Z, which is after the words and rich preflight calls and just before the inline one).",
+    "unfiltered_page_spans": "2026-09-22T10:04:13Z to 19:44:57Z, 200 rows, and contains `opaque` (13) and `opaque-words` (8) rows from earlier runs today. Those fall outside the window and are excluded by timestamp, not by assumption.",
+    "window_totals": {
+      "rows": 84,
+      "words": 29,
+      "inline": 24,
+      "rich": 31
+    },
+    "reconciliation": "EXACT. Harness-reported tool_uses: words 29, inline 23, rich 31. Log: words 29, inline 24, rich 31. The single extra inline row is its own preflight call at 19:37:43, which falls inside the window. Every other row is accounted for. Zero unexplained rows, zero stray rows from outside the run.",
+    "profile_calls": "Exactly 20 get_building_profile calls per arm (21 for inline including preflight), every one rowCount 3, every one with paramsPresent ['queryIntent']. So all 60 runs made exactly one successful profile call and none of them passed huisletter or toevoeging.",
+    "errors": "10 errors in the window, ALL on get_weather_context (rich 5, words 3, inline 2), none on get_building_profile. Failed compensating searches, not failed data lookups.",
+    "self_report_vs_harness_vs_log": "7 of 60 runs self-reported a CALLS count BELOW the harness tool_uses (words 2, inline 2, rich 3); none overstated. The harness totals reconcile exactly with the server log, so on this run the self-report is the only one of the three accounts that is wrong. This is the third recorded instance and the first where the self-report is checked against BOTH the harness and the log at once. Continue treating the log as authoritative."
+  },
+  "what_this_changes": {
+    "1_the_alertless_tiers_have_a_free_fix": "The population this run was commissioned for — a plain MCP tool with a description, a typed payload and no computed layer — is fixable without computing anything. Move the guidance from the description into the response. On this defect that is worth +15 of 20 and costs 9.7% FEWER tokens than leaving it in the description.",
+    "2_Q1_generalises_from_procedures_to_facts": "Q1 measured the channel on a RECIPE (a procedure for deriving a number): 29/30 in the response against 4/30 in the description. This is the same effect on a plain FACT — one threshold, one comparison, no arithmetic — at 20/20 against 5/20. The channel finding is not specific to multi-step derivations. NOTE: this says placement changed the outcome, not why. See mechanism_claim_withdrawn.",
+    "3_it_bounds_the_compute_it_playbook_rather_than_extending_it": "The `benchmark-trap` playbook (0/60 to 59/60 by adding a sentence) and #48 (2/10 to 10/10 by computing a verdict) both worked. This says the second was reaching for the expensive tool: on this defect the cheap fix was available and untried. Check the channel BEFORE writing a computation.",
+    "4_the_interpretation_block_should_not_be_edited_for_this": "The sequencing argument registered with Q13 holds and now pays. Editing `interpretationBlock` moves six arms and invalidates comparability with everything scored before. This run says the wording was never the problem, so that cost should not be paid."
+  },
+  "what_this_does_NOT_establish": [
+    "That the channel fixes every defect. One question, one interpretation-shape failure, one threshold.",
+    "Anything above haiku. Per README section 8 semantics scale inversely with model size, so haiku is the model where this effect should be LARGEST. sonnet and opus are unmeasured here and `rich` was already at ceiling on this question. The direction of the limit is known; the size is not.",
+    "That `words` is 5/20 as a stable level. The same cell measured 2/7 (Q6), 3/10 and 7/10 (alert verification) and 5/20 here, across four sittings. The DIRECTION of the inline-vs-words gap is same-batch and safe; the exact level of `words` is not.",
+    "That `rich` and `inline` are equivalent in general. They are tied at 20/20 because the question is SATURATED at both rungs. A tie at ceiling is not a measurement of equality.",
+    "Anything about the opaque regime. Not run.",
+    "WHY the channel matters. This run cannot distinguish 'the description was absent at interpretation time' from 'it was present and not applied'. open-questions.md Q7 is registered to settle exactly that, and until it lands no mechanism sentence from this run is quotable."
+  ],
+  "caveats": [
+    "haiku only, one question, 60 runs.",
+    "NO CONTROL. `overheating` was the set's only non-separation control and was re-designated in this same commit; both survivors are refusals and neither was run. A control failure could not have been detected in this run.",
+    "`overheating` is now SATURATED at both the inline and rich rungs on haiku (20/20 each). It can no longer separate those two, and further runs on it at those rungs measure nothing.",
+    "The correct/other/wrong rule was fixed after two of four waves were visible. Stated in full under scoring_rule._provenance_warning.",
+    "Answer character counts were computed from the ANSWER lines as transcribed into the scoring script, not extracted programmatically from the transcript.",
+    "subagent_tokens does not split input from output, so the cost comparison is a total, not a decomposition.",
+    "Two rich runs returned ~45k tokens against a ~33.5k median; the rich MEAN is not a good summary and the median is reported alongside it."
+  ],
+  "does_it_match__the_rule": "`_the_rule` says semantics handle interpretation and recipes are needed only for derived numbers. `overheating` is interpretation-shape. Q6 recorded this question as the rule's THIRD failure to replicate, on the grounds that the semantics were explicit and still produced 2 of 21. This run REVERSES that reading: the semantics do handle it — 20/20 — provided they are delivered in the response. Q6's arms all carried the semantics in a channel the model did not read, so what it measured was a delivery failure, not a failure of semantics. On the corrected reading `_the_rule` SURVIVES this question, and gains a rider: semantics only handle a shape if they are in a channel the model actually reads.",
+  "mechanism_claim_withdrawn": {
+    "what_this_file_first_said": "An earlier draft of this file and of the Q13 banner said the `words` runs 'never retrieved' the threshold — 'they did not reject it; they never had it.'",
+    "why_it_is_withdrawn": "That is an unsupported inference about what was in the model's context, and open-questions.md Q7 (registered in #49, the same day) is specifically about it. Most hosts re-send tool definitions on EVERY inference request, and Q5's accounting already charged `rich`'s +725 bytes of tool definition PER CALL — which only works if the definition is present every turn. If it was present, the description was available at interpretation time and the `words` runs had the threshold and did not apply it.",
+    "what_this_run_actually_measured": "That the threshold was CITED in 0 of 20 description-channel runs and 20 of 20 response-channel runs, and that accuracy went 5/20 to 20/20. That is a statement about USE, not about availability. It stands either way.",
+    "which_reading_is_live": "UNDECIDED, and it is Q7's job to decide it. If Q7's canary probe shows the description is present and read, then this result is the stronger and stranger one — the knowledge was available and placement changed whether it was applied — and it lines up with Q4, where an instruction was present and inert without its semantics.",
+    "do_not_quote": "Any sentence in this repo of the form 'the model never saw it' or 'the description had weakened by then', including the ones this run originally wrote. Q7 gates all of them."
+  }
+}
