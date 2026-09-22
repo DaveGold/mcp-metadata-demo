@@ -481,6 +481,49 @@ too, or it is a sales pitch rather than a measurement.
 
 ## Q3 — Why does `rich` cost LESS than `words`?
 
+> **ANSWERED 2026-09-22 — AND THE MECHANISM IS NEITHER OF THE TWO BELOW.** 40 runs,
+> two arms, two models, n=10, plus a zero-run measurement of the fixed input cost.
+> See [`results/2026-09-22-q3-cost-decomposition.json`](results/2026-09-22-q3-cost-decomposition.json).
+> The prediction is left exactly as registered.
+>
+> **First, with no runs at all:** `rich` pays **MORE** on input, on both counts — a
+> tool definition 725 chars larger and a response 788 chars larger (the alerts), so
+> **+1,513 chars (~378 tokens) every call**. The saving therefore has to exceed the
+> observed gap, not equal it.
+>
+> | | haiku | sonnet |
+> |---|---|---|
+> | token gap (rich cheaper by) | **594** | **505** |
+> | + rich's extra input | +378 | +378 |
+> | = must be saved elsewhere | **972** | **883** |
+> | explained by shorter ANSWER | 11 | 40 |
+> | **residual** | **961 (99%)** | **843 (95%)** |
+>
+> **(a) fewer round trips — CONFIRMED as a rounding error.** Call counts differ in
+> **1 of 20 pairs** (5%), under the registered 15% threshold. The one difference is a
+> `words` run retrying with a huisletter.
+>
+> **(b) less to say — NOT SUPPORTED.** The ANSWER *is* shorter for `rich` (by 44
+> chars on haiku, 160 on sonnet), so the literal falsification criterion — "output
+> length is equal while total tokens still differ" — does not fire. But it accounts
+> for **2% of the saving on haiku and 8% on sonnet**. Real, and small.
+>
+> **The actual mechanism is a third one this question never named: LESS TO THINK.**
+> The arm without the computed figure does not write a longer essay — it deliberates
+> longer to produce one of similar length. With identical call counts and comparable
+> answer lengths, `words` takes **1.63× longer on haiku and 2.01× on sonnet**. The
+> duration observation cited below replicates almost exactly (measured 9.3s vs 18.6s
+> on sonnet); what it was taken to *mean* does not.
+>
+> **What can now be quoted:** richer metadata can be cheaper per run even though it
+> is strictly larger on the wire, because the dominant cost is the model working out
+> what it was not told. That is broader than (b), and it survives `rich` paying ~378
+> tokens more in input on every single call.
+>
+> **Caveat that matters:** `subagent_tokens` does not split input from output — as
+> this question itself flagged. The residual is an *inference*, not a measurement.
+> Duration corroborates it independently but is also a proxy.
+
 ### The observation to be explained
 
 `rich` carries strictly more than `words` — identical description **plus** the alerts
