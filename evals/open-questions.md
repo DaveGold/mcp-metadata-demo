@@ -1310,11 +1310,18 @@ carrying only `date`**. Every requested value is gone. Nothing errors; one alert
 A model that guesses field names does not fail loudly, it reports an empty projection as
 an answer. So "can the model name the fields" has a real consequence, not a stylistic one.
 
-**The repo has already answered it by construction, and never admitted that it did.** The
-valid field list is spelled out **in the `select` input-schema description** — identically
-on every arm, including `minimal` and `opaque`. The output schema was not trusted to carry
-those names; they were **copied to the place they are used**. That is this whole file's
-thesis applied silently inside the tool, and it was never measured.
+**The repo already ASSUMES the answer, and has never tested it.** The twelve record field
+names are declared twice: in `outputSchema.records`, each with its own `.describe()`, and
+again in the **`select` input-schema description** — identically on every arm, including
+`minimal` and `opaque`. Someone wrote them into the input side because the output schema
+alone was not trusted to make them usable at call time.
+
+Note precisely what that is and is not. It is a **design choice**, so it is evidence about
+what its author believed — not about what a model does. The duplication is load-bearing
+only if removing it makes the model guess, and that has never been run. Reading the code
+as confirmation would be this repo's own signature error, one register up: *the names are
+in the input description, therefore they were needed there* is the same move as *the
+knowledge is in the context, therefore the model has it*.
 
 `select-blind` is the arm that measures it: identical in every respect except that the
 `select` input description loses its field list, leaving the names only in `outputSchema`.

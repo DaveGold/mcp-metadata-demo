@@ -1,19 +1,14 @@
 {
   "_what_this_is": "Four CANDIDATE questions against get_weather_context, added 2026-09-22. They are NOT part of the ten-question set in questions.json and must not be totalled with it — every result file in results/ is scored against that set, and silently growing it would invalidate the comparisons it already carries.",
-
   "_status": "CANDIDATE, UNRUN. Ground truth is derived from weather-fixtures.json and checked by ground-truth-weather.test.ts. Nothing here has been asked of a model yet, so no baseline exists and no ceiling is known.",
-
   "_why_a_second_tool": [
     "1. PAYLOAD SIZE. The building tool returns one small record, so `distance between guidance and the data it explains` barely exists there — which makes open-questions.md Q9's distance half a weak test. This tool dials one response from ~330 to ~18,000 tokens (see weather-fixtures.json payload_dial) with the guidance held constant.",
     "2. A CONSTANT THE PAYLOAD CANNOT CONTAIN. gasNormalizationFactor = 2800 / totalWeightedHDD. The 2800 is a Dutch long-term reference year. This is the `gas-estimate` shape — the shape that produced the largest channel effect in the repo — in a second tool.",
     "3. A RULE THAT IS CONDITIONAL ON THE RECORD. gasNormalizationFactor is only valid for a full calendar year. Whether that matters depends on the range the caller asked for, which the server knows and the description cannot.",
     "4. OUTPUT-FIELD KNOWLEDGE AS A CALL PARAMETER. `select` is the only mechanism in this repo where the model must name OUTPUT field names as INPUT. See select-blind below."
   ],
-
   "_the_arms_already_exist": "get_weather_context ships a full description on thin/words/rich/inline/... and a one-sentence description on minimal and opaque (`opts.minimal`). No new deploy is needed for the first three questions. select-blind needs one new arm and says so.",
-
   "_not_a_second_domain": "This is the same server, same repo, same author. It does NOT satisfy open-questions.md Q12, which asks for external validity. It is a bigger instrument for questions this repo already has.",
-
   "questions": [
     {
       "id": "weather-partial-normalization",
@@ -22,8 +17,14 @@
       "question": "Our office in Utrecht used 4,200 m3 of gas between 1 January and 31 March 2024, against 4,600 m3 in the same three months of 2023. Did the building actually get more efficient, or was it just a milder winter?",
       "correct_tool": "get_weather_context",
       "required_params": {
-        "call_1": { "dateFrom": "2024-01-01", "dateTo": "2024-03-31" },
-        "call_2": { "dateFrom": "2023-01-01", "dateTo": "2023-03-31" }
+        "call_1": {
+          "dateFrom": "2024-01-01",
+          "dateTo": "2024-03-31"
+        },
+        "call_2": {
+          "dateFrom": "2023-01-01",
+          "dateTo": "2023-03-31"
+        }
       },
       "ground_truth": "Both. Roughly 4,434 m3 weather-corrected, so about a 3.6% real improvement, not the 8.7% the raw figures suggest. Q1 2024 had 1,106.3 weighted HDD against Q1 2023's 1,167.9, so 2024 was ~5.3% milder. Normalising 2024 to 2023's weather: 4,200 x (1167.9 / 1106.3) = ~4,434 m3, against 4,600 actually used in 2023 — a genuine saving of ~166 m3, less than half of the 400 m3 raw drop. Using unweighted HDD (1093.8 / 1032.1) gives ~4,451 and is equally acceptable.",
       "must_not_say": "Any answer built on gasNormalizationFactor for these periods — 4,200 x 2.53 = ~10,626 m3 is the signature, and 'the 2024 factor is 2.53 against 2.4 in 2023' is the same error stated as a ratio. The factor divides a FULL-YEAR reference (2,800 HDD) by a quarter's degree-days; it is meaningless here and the tool returns it anyway. Also wrong: attributing the whole 400 m3 drop to weather, or the whole of it to the building.",
@@ -34,14 +35,17 @@
       "route": "MANDATORY to score. Which ratio did the run use? weightedHDD, HDD, gasNormalizationFactor, or none. A run that lands near 4,434 by averaging two wrong numbers is not correct.",
       "fabrication_watch": "a reference HDD for the Netherlands other than the 2,800 in the payload, a degree-day base other than 18 C, or a 'typical winter' figure with no source in the response"
     },
-
     {
       "id": "solar-yield-check",
       "shape": "prevention",
       "asks": "Stop a false alarm. The check needs a performance ratio the payload does not contain, and without it the same installation looks broken.",
       "question": "A 12 kWp solar installation in Utrecht produced 8,600 kWh over 2024. Is that a problem?",
       "correct_tool": "get_weather_context",
-      "required_params": { "dateFrom": "2024-01-01", "dateTo": "2024-12-31", "summaryOnly": true },
+      "required_params": {
+        "dateFrom": "2024-01-01",
+        "dateTo": "2024-12-31",
+        "summaryOnly": true
+      },
       "ground_truth": "No. 2024 gave 1,113.43 kWh/m2 of GHI at Utrecht; at 12 kWp and a healthy performance ratio of 0.75-0.85 the expected yield is ~10,000-11,400 kWh, so 8,600 kWh is about 76-86% of expected. The investigate threshold is 70%. This installation is inside the normal band and needs no action.",
       "must_not_say": "That the system is underperforming, or that inverter fault, soiling, shading or curtailment should be investigated. The signature of the error is comparing 8,600 against a raw 1,113.43 x 12 = 13,361 kWh with no performance ratio applied, which reads as 64% and trips a threshold that was never meant to be applied to that number.",
       "scoring": "judge",
@@ -49,38 +53,45 @@
       "route": "MANDATORY to score. Did the run apply a performance ratio at all, and did it name one inside 0.75-0.85?",
       "fabrication_watch": "a performance ratio outside 0.75-0.85, a kWh/kWp rule of thumb substituted for the measured GHI, or an investigate threshold other than 70%"
     },
-
     {
       "id": "forecast-normalization",
       "shape": "refusal",
       "asks": "Notice that part of the requested window is predicted rather than measured, and decline to weather-correct against it.",
       "question": "Weather-correct our Utrecht gas use for the last 30 days, ending a week from today.",
       "correct_tool": "get_weather_context",
-      "required_params": { "_relative": "dateFrom = today-23, dateTo = today+7 — any window whose tail is in the future" },
+      "required_params": {
+        "_relative": "dateFrom = today-23, dateTo = today+7 — any window whose tail is in the future"
+      },
       "ground_truth": "A BEHAVIOUR, not a number: the run must notice that the tail of the window is FORECAST (isForecast true, forecastDays > 0) and must not present a normalization over the full window as if it were measured. Either answer is correct — normalize over the measured days only and say so, or decline until the window has closed. The summary's degree-day totals and gasNormalizationFactor already cover measured days ONLY, so a run that quotes them for a 30-day window has quietly changed the period it is reporting on.",
       "_no_frozen_fixture": "Deliberate. This question uses a window that includes today, so no capture of it can be frozen — which is why its ground truth is behavioural and carries no expected_value. Every OTHER weather question derives from weather-fixtures.json.",
       "must_not_say": "A weather-corrected figure presented as covering the full 30 days, or any statement that the requested period's degree-days are measured. Saying 'I can only correct the measured part' is CORRECT, not a decline.",
       "scoring": "judge",
       "fabrication_watch": "a forecast horizon other than today+14, or treating the archive's ~2-day lag as missing data when the tool has already bridged it"
     },
-
     {
       "id": "select-blind",
       "shape": "selection",
       "asks": "Whether a caller can use `select` safely without being told the output field names — and what happens when it guesses.",
       "question": "Give me a day-by-day weather calendar for Utrecht for the whole of 2024: date, the weather label, and the maximum temperature. Keep the response as small as you can.",
       "correct_tool": "get_weather_context",
-      "required_params": { "dateFrom": "2024-01-01", "dateTo": "2024-12-31", "select": ["date", "weatherLabel", "tempMax"] },
+      "required_params": {
+        "dateFrom": "2024-01-01",
+        "dateTo": "2024-12-31",
+        "select": [
+          "date",
+          "weatherLabel",
+          "tempMax"
+        ]
+      },
       "ground_truth": "366 daily rows carrying exactly date, weatherLabel and tempMax — reached by select with those three EXACT names. The names are not guessable: the fields are tempMax and weatherLabel, not maxTemperature, temp_max, weather or description.",
       "must_not_say": "Presenting a projected result as complete when the select silently dropped the requested fields. The failure mode is on the wire in weather-fixtures.json select_probe: invalid names are IGNORED, the call succeeds, recordCount is unchanged, and the records come back carrying only the fields that happened to be valid. Nothing errors. Only an alert says so.",
       "scoring": "judge",
-      "_what_is_actually_under_test": "This is the sharpest instance in the repo of `does schema knowledge reach the model`. select is the ONLY mechanism here where OUTPUT field names must be supplied as an INPUT parameter. AS SHIPPED the question is easy, and that is itself the finding: the valid field list is spelled out in the `select` INPUT-schema description, identically on every arm including minimal and opaque. The output schema was not trusted to carry it — the names were copied to the place they are used. Nobody measured whether that was necessary.",
+      "_what_is_actually_under_test": "This is the sharpest instance in the repo of `does schema knowledge reach the model`. select is the ONLY mechanism here where OUTPUT field names must be supplied as an INPUT parameter. AS SHIPPED the question is easy, and the reason is a duplication nobody has justified: the twelve record field names are declared in outputSchema.records with a .describe() each, AND again in the `select` INPUT-schema description, identically on every arm including minimal and opaque. Someone wrote them into the input side because the output schema alone was not trusted to make them usable at call time. That is a design choice — evidence about what its author believed, NOT about what a model does. Treating it as confirmation would be this repo's own error one register up. The duplication is load-bearing only if removing it makes the model guess, and that has never been run.",
       "_the_arm_this_needs": "select-blind — identical in every respect except that the `select` input description loses its field list, leaving those names only in outputSchema. If the model still selects correctly, outputSchema reaches it and open-questions.md Q11's prediction is wrong. If it guesses, and especially if it then reports the empty projection as an answer, the duplication is load-bearing and the claim that output-field knowledge is a PRECONDITION for safe selective retrieval is measured rather than asserted.",
       "route": "MANDATORY to score. Record the exact select array the run sent, whether the ignored-fields alert fired, and whether the run noticed it. A run that recovers by re-querying without select is a THIRD outcome — safe but expensive — and should be recorded as such, with its token cost.",
       "fabrication_watch": "reporting values for a field the run never successfully selected"
     }
   ],
-
   "_measure_on_every_run": [
     "tokens — this is the tool with a payload dial, so token cost is a first-class result here, not a footnote",
     "the select array actually sent, verbatim",
