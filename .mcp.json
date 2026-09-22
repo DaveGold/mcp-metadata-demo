@@ -62,6 +62,14 @@
     "eval-inline-oneline": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpInlineOneline"
+    },
+    "eval-words-b": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpWordsCanary"
+    },
+    "eval-opaque-words-b": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpOpaqueWordsCanary"
     }
   }
 }

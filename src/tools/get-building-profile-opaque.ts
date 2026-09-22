@@ -30,6 +30,7 @@ import {
   type BagClientLike,
   type EpOnlineClientLike,
 } from './get-building-profile.js';
+import { withQ7Canary } from './q7-canary.js';
 
 /** Arm A': what a legacy register ships with. */
 const bareDescription = 'Look up a Dutch building by postcode and house number.';
@@ -40,7 +41,7 @@ const bareDescription = 'Look up a Dutch building by postcode and house number.'
  * claim "interpretation guidance is necessary" holds anywhere, it holds here,
  * because nothing else in this arm explains what the fields mean.
  */
-const proseDescription = `\
+export const proseDescription = `\
 RETURNS:
 Building record combining BAG (Dutch address/building register) and EP-Online (energy label register) data for one postcode + house number.
 
@@ -95,14 +96,22 @@ export function registerGetBuildingProfileOpaqueTool(
   server: McpServer,
   bagClient: BagClientLike,
   epOnlineClient: EpOnlineClientLike,
-  options: { withProse: boolean }
+  options: { withProse: boolean; withCanary?: boolean }
 ): void {
-  const variant = options.withProse ? 'opaque-words' : 'opaque';
+  // `withCanary` is Q7b's throwaway `opaque-words-canary` arm: B' plus one
+  // appended marker sentence, nothing else.
+  const variant = options.withCanary
+    ? 'opaque-words-canary'
+    : options.withProse
+      ? 'opaque-words'
+      : 'opaque';
+  const baseDescription = options.withProse ? proseDescription : bareDescription;
+  const toolDescription = options.withCanary ? withQ7Canary(baseDescription) : baseDescription;
 
   server.registerTool(
     'get_building_profile',
     {
-      description: options.withProse ? proseDescription : bareDescription,
+      description: toolDescription,
       inputSchema: z.object(inputSchema),
     },
     async (args: { postcode: string; huisnummer: number; huisletter?: string; toevoeging?: string }) => {

@@ -76,7 +76,7 @@ const inputSchema = {
     .string()
     .optional()
     .describe(
-      'Filter to calls served by one arm ("rich" | "words" | "words-recipe" | "inline" | "inline-recipe" | "inline-conditional" | "inline-fact" | "inline-instruction" | "schema" | "minimal" | "opaque" | "opaque-words"). Applied AFTER the page is fetched, so pass a large `limit` alongside it. Read `summary.countByVariant` from an UNFILTERED call first: a filter returning zero cannot tell "never called" from "not stamping".'
+      'Filter to calls served by one arm ("rich" | "words" | "words-recipe" | "inline" | "inline-recipe" | "inline-conditional" | "inline-fact" | "inline-instruction" | "schema" | "minimal" | "opaque" | "opaque-words" | "words-canary" | "opaque-words-canary"). Applied AFTER the page is fetched, so pass a large `limit` alongside it. Read `summary.countByVariant` from an UNFILTERED call first: a filter returning zero cannot tell "never called" from "not stamping".'
     ),
   limit: z
     .number()

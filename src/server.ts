@@ -71,7 +71,9 @@ export type ServerVariant =
   | 'schema'
   | 'minimal'
   | 'opaque'
-  | 'opaque-words';
+  | 'opaque-words'
+  | 'words-canary'
+  | 'opaque-words-canary';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -164,14 +166,17 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     return server;
   }
 
-  if (variant === 'opaque' || variant === 'opaque-words') {
+  if (variant === 'opaque' || variant === 'opaque-words' || variant === 'opaque-words-canary') {
     // A' and B'. Identical but for the tool description — see get-building-profile-opaque.ts.
-    const withProse = variant === 'opaque-words';
+    // `opaque-words-canary` is Q7b's throwaway: B' plus one appended marker sentence.
+    // It reports B''s server name so that nothing but the description differs.
+    const withProse = variant !== 'opaque';
+    const withCanary = variant === 'opaque-words-canary';
     const server = new McpServer(
-      { name: `metadata-demo-${variant}`, version: VERSION },
+      { name: `metadata-demo-${withCanary ? 'opaque-words' : variant}`, version: VERSION },
       { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
     );
-    registerGetBuildingProfileOpaqueTool(server, bagClient, epOnlineClient, { withProse });
+    registerGetBuildingProfileOpaqueTool(server, bagClient, epOnlineClient, { withProse, withCanary });
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
@@ -274,16 +279,20 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     return server;
   }
 
-  if (variant === 'words' || variant === 'words-recipe') {
+  if (variant === 'words' || variant === 'words-recipe' || variant === 'words-canary') {
     // Arm B: every word the rich tier has, none of the computation. Same
     // instructions, same tool surface — the ONLY difference from 'rich' is the
     // absent `alerts` field and the one bullet that would have promised it.
+    // `words-canary` is Q7b's throwaway: `words` plus one appended marker
+    // sentence. It reports `words`' server name so nothing else differs.
+    const withCanary = variant === 'words-canary';
     const server = new McpServer(
-      { name: `metadata-demo-${variant}`, version: VERSION },
+      { name: `metadata-demo-${withCanary ? 'words' : variant}`, version: VERSION },
       { instructions: buildInstructions(false) }
     );
     registerGetBuildingProfileWordsTool(server, bagClient, epOnlineClient, {
       withRecipe: variant === 'words-recipe',
+      withCanary,
     });
     registerRenderChartTool(server);
     registerRenderTableTool(server);

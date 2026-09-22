@@ -118,3 +118,18 @@ export const mcpWords = onRequest(functionOptions, createHttpApp({ hosted: true,
  */
 export const mcpOpaque = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'opaque' }));
 export const mcpOpaqueWords = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'opaque-words' }));
+
+/**
+ * Q7b CANARY ARMS — THROWAWAY. `mcpWords` and `mcpOpaqueWords` with one
+ * content-free sentence appended to the description: an instruction to end the
+ * answer with a marker, which can only be obeyed after the tool result exists.
+ * Delete both once Q7 is recorded. See evals/open-questions.md Q7.
+ */
+export const mcpWordsCanary = onRequest(
+  functionOptions,
+  createHttpApp({ hosted: true, variant: 'words-canary' })
+);
+export const mcpOpaqueWordsCanary = onRequest(
+  functionOptions,
+  createHttpApp({ hosted: true, variant: 'opaque-words-canary' })
+);
