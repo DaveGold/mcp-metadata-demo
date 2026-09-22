@@ -1623,10 +1623,16 @@ character count per run, and audits against `get_tool_call_log` unfiltered.
 >   under its own name, `paramsPresent: ["queryIntent"]`, `rowCount: 3`. No
 >   `unknown` bucket. **Not a stale deploy.**
 >
-> **It still cannot be RUN from that session** — MCP connections are fixed at process
-> start, so the `.mcp.json` entry added today is unreachable until a fresh session.
-> The agent file exists and is *not* evidence to the contrary; that is precisely the
-> trap. Start a new session, re-run both preflight steps, then spawn.
+> **It could not be RUN from the session that built it — until it could.** For
+> several hours the `.mcp.json` entry added that day was unreachable: the agent file
+> appeared while a `ToolSearch` for its tool returned nothing. Later in the *same*
+> session the MCP client reconnected and picked the arm up, and a live call returned
+> the correct payload. So the rule is **not** "fixed at process start" — it is
+> "established on connect, including reconnect". See the correction in
+> `.claude/skills/run-eval/SKILL.md` step 1. The durable lesson is unchanged and is
+> the one that matters: **the agent registry and the MCP connection move
+> independently, so the agent list is never evidence either way.** Preflight with a
+> real call.
 
 ### Why it matters, and why Q13 does not already answer it
 
