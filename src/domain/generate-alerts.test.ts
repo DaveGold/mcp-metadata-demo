@@ -246,3 +246,52 @@ describe('generateAlerts', () => {
     expect(alerts.some((a) => a.includes('Energy label has expired'))).toBe(false);
   });
 });
+
+describe('overheating alert (evals Q6 — computed because prose did not work)', () => {
+  const base = { ...baseProfile, gebruiksdoel: 'woonfunctie' };
+
+  it('states SIGNIFICANT above the 1.5 threshold, with the value', () => {
+    const alerts = generateAlerts({ ...base, temperatuuroverschrijding: 3.59 });
+    const a = alerts.find((x) => x.startsWith('Overheating risk:'));
+    expect(a).toBeDefined();
+    expect(a).toContain('SIGNIFICANT');
+    expect(a).toContain('3.59');
+    expect(a).toContain('above the 1.5 threshold');
+  });
+
+  it('names the two misreadings the eval actually observed', () => {
+    const a = generateAlerts({ ...base, temperatuuroverschrijding: 3.59 }).find((x) =>
+      x.startsWith('Overheating risk:')
+    );
+    expect(a).toContain('unitless');
+    expect(a).toContain('not °C');
+    expect(a).toContain('not hours');
+  });
+
+  it('says minor between 0 and 1.5, and none at 0', () => {
+    expect(
+      generateAlerts({ ...base, temperatuuroverschrijding: 1.2 }).find((x) =>
+        x.startsWith('Overheating risk:')
+      )
+    ).toContain('minor');
+    expect(
+      generateAlerts({ ...base, temperatuuroverschrijding: 0 }).find((x) =>
+        x.startsWith('Overheating risk:')
+      )
+    ).toContain('none');
+  });
+
+  it('is emitted for non-residential records too — the thresholds are not tenure-specific', () => {
+    const alerts = generateAlerts({
+      ...baseProfile,
+      gebruiksdoel: 'kantoorfunctie',
+      temperatuuroverschrijding: 2.4,
+    });
+    expect(alerts.find((x) => x.startsWith('Overheating risk:'))).toContain('SIGNIFICANT');
+  });
+
+  it('is absent when the field is null', () => {
+    const alerts = generateAlerts({ ...base, temperatuuroverschrijding: null });
+    expect(alerts.find((x) => x.startsWith('Overheating risk:'))).toBeUndefined();
+  });
+});
