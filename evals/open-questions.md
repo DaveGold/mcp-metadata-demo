@@ -594,6 +594,77 @@ call repeatedly, and the claim has to be narrowed accordingly.
 
 ---
 
+## Q5 — Does the deliberation saving survive when the answer is NOT handed over?
+
+> **REGISTERED 2026-09-22, BEFORE THE RUN.** This is an attack on Q3's finding,
+> not a confirmation of it. Written and committed before any run was spawned.
+
+### What Q3 established
+
+`rich` costs ~500–600 tokens less per run than `words` on `gas-estimate`, despite
+paying **~378 tokens more input** on every call. The saving is not round trips
+(call counts identical in 19 of 20 pairs) and not output (a shorter answer explains
+2–8%). The residual is **95–99%**, and `words` takes 1.63×/2.01× longer with the
+same calls. Q3's conclusion: the saving is **deliberation** — the model working out
+what it was not told.
+
+### The obvious objection
+
+`gas-estimate` is `rich`'s best case. Its `alerts` array literally contains the
+answer (*"Estimated space-heating gas equivalent: ~253 m³/year"*). So "rich
+deliberates less" may be nothing more general than "rich was handed the answer and
+words was not". If so, the finding is real but narrow, and the quotable line —
+*richer metadata can be cheaper because the dominant cost is working out what you
+were not told* — overclaims.
+
+### The test
+
+`overheating` on Van Beuningenstraat 1. Verified on the wire before registering:
+
+- `temperatuuroverschrijding` = **3.59** is present in BOTH arms' responses.
+- `rich` returns **5 alerts** on this record — multiple VBOs, Paris Proof, gas
+  estimate, CO₂, heat-pump suitability — and **not one of them mentions
+  overheating**. The question's own `asks` field already says so: *"Control: no
+  alert covers it, so alerts should not help."*
+- `rich` still pays the input penalty: **+1,398 chars (~+350 tokens)** per call
+  (+725 tool definition, +673 response).
+
+So both arms hold identical information about the thing being asked, and `rich`
+carries ~350 tokens of payload irrelevant to it. This isolates the mechanism: if
+the saving is deliberation about *the answer*, it must vanish here.
+
+### Prediction
+
+> **The saving disappears, and reverses. `rich` will be MORE expensive than
+> `words` on this question, by roughly its input penalty (~350 tokens, order of
+> magnitude 200–450). Durations converge to within ~1.2×.**
+>
+> The reasoning: deliberation is driven by uncertainty about the answer. Neither
+> arm is told the answer here, both read the same field against the same
+> threshold, so neither has less to work out. What remains is the payload
+> difference, which `rich` pays and does not recover.
+>
+> **Falsified if** `rich` is still cheaper by more than ~100 tokens on a question
+> its alerts do not answer, **or** if the duration ratio stays above ~1.3×. Either
+> would mean the saving is not about the specific answer — that carrying more
+> context makes the model cheaper in general — which is a *larger* claim than Q3
+> made and would need its own explanation.
+
+### Why the outcome is useful either way
+
+- **Prediction holds** → Q3's finding is real but must be stated narrowly: the
+  saving comes from metadata that answers *the question being asked*, not from
+  richer metadata as such. The quotable line needs that qualifier.
+- **Prediction fails** → the effect is more general than Q3 claimed and the
+  mechanism is not yet understood. That is the more interesting result and should
+  be reported as such.
+
+### Cost
+
+1 question × 2 arms × 2 models × n=10 = **40 runs**. No new arm, no deploy.
+
+---
+
 ## Q4 — Is the operative ingredient the FACT or the INSTRUCTION?
 
 > **ANSWERED 2026-09-22 — THE PREDICTION BELOW IS FALSIFIED ON BOTH OF ITS OWN
