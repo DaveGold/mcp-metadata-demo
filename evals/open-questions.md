@@ -2071,6 +2071,61 @@ only the protocol side is checked.
 1 question × 3 arms × 1 model × n=20 = **60 runs.** One new arm, one deploy, deleted
 afterwards unless the result makes it worth keeping.
 
+### Q15b — the same question with the cap RAISED. Registered 2026-09-23, before either half runs
+
+Q7 found that Claude Code 2.1.280 lets a session change the 2,048-character cap:
+`CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH`. That makes the channel test Q1 and Q13 meant to
+run possible with **no new arm and no edited description**. Deliver the whole block by
+each channel, and compare.
+
+**Session.** A fresh Claude Code session, **started with
+`CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=20000`**, on this repo. It cannot run from a
+session started without the variable, because the cap applies to every MCP server in the
+session and is read when the session starts.
+
+**Arms.** haiku, `overheating`, n=20 per arm, one batch, interleaved:
+
+| arm | the 5,020-char INTERPRETATION block arrives via | 1.5 line delivered in |
+|---|---|---|
+| **`words`** | **DESCRIPTION** (full 6,779 chars, uncut) | description |
+| **`inline`** | **RESPONSE** (description = `schema`'s one-liner) | response |
+| `inline-oneline` | description (full) + one line in the response | both |
+
+**`words` vs `inline` is the channel test.** It is the same comparison as Q13, whose
+description copy never arrived. Now both channels deliver the same block.
+
+**Delivery preflight, mandatory.**
+
+- This session's listing of `mcp__eval-words__get_building_profile` must show
+  `temperatuuroverschrijding` and must **not** end in `… [truncated]`.
+- Request-1 input of `words` minus `inline` on disk must be larger than Q7 measured in a
+  default session (+3,727-ish against `thin` on haiku), by roughly the uncut remainder of
+  every long description.
+
+If either check fails, stop.
+
+**Prediction.**
+
+> **Delivery is what matters, here too.**
+>
+> - **P1: uncut `words` cites 1.5 in ≥ 16/20.** Falsified if ≤ 10/20.
+> - **P2: `words` is within 4 runs of `inline` on CORRECT.** Falsified if `inline` leads by
+>   ≥ 8. That would put the channel claim back on its feet, measured properly.
+> - **P3: `inline-oneline` ≥ 16/20** (both channels). A sanity check, not a test.
+>
+> **Why this could fail.** With the cap raised, `words` also delivers its full render-tool
+> descriptions (`render_chart` alone is 7,977 chars). `inline` carries the minimal render
+> tools. So `words` puts the 1.5 line inside ~30k characters of tool definitions, where
+> `inline` puts it beside the data. If haiku drowns, P1 fails for a reason that is about
+> volume and distance, not channel. That is reported as such, not as a channel effect.
+
+**Scoring** as Q15 above. There is no canary in these arms, so any `D7` voids the run.
+**Record, and do not compare across sessions:** Q15 and Q15b run in different sessions
+with different caps, so their cells are never subtracted from each other. Each is read
+within its own batch.
+
+**Cost:** 60 runs, no deploy.
+
 ---
 
 ## Suggested order
