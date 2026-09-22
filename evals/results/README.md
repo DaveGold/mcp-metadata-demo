@@ -1,7 +1,15 @@
 # Results
 
-What happened when the set was run. Each file records its own caveats; none of
-these are measurements yet — n is 2–3 per cell and mostly Haiku.
+What happened when the set was run. Each file records its own caveats.
+
+**This header used to say "none of these are measurements yet — n is 2–3 per cell
+and mostly Haiku." That stopped being true on 2026-09-21 and was not updated.** The
+files now split into two tiers: the 2026-09-21/22 runs are **n=10–20 per cell across
+up to three models with server-side call audits**, and the earlier sweeps are still
+n=1–3 and directional. Which tier a claim sits in, and whether its gap is large
+enough to quote as a size, is settled file-by-file in
+[`2026-09-22-variance-audit-of-prior-results.json`](2026-09-22-variance-audit-of-prior-results.json).
+Read that before quoting any number from this directory.
 
 | file | what it answers |
 |---|---|
