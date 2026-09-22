@@ -1,0 +1,106 @@
+{
+  "_comment": "A re-reading of every file in this directory against the sitting-to-sitting variance warning, which was written on 2026-09-22 and then never applied backwards. No new runs. Nothing here re-scores a run; it classifies each load-bearing claim by whether its GAP is large enough to survive the observed noise. Three claims are downgraded, one is already-retracted-and-confirmed-so, and the large effects hold.",
+  "date": "2026-09-22",
+  "type": "audit, not a run",
+  "runs_performed": 0,
+
+  "why_this_was_needed": "The variance warning in README.md was derived from two files and then stated as a general bar ('treat a per-cell difference of fewer than ~4 runs as noise unless the two cells were run in the same batch'). It was never carried back through the directory. Several older files rest on exactly the kind of gap it warns about, and one of them is quoted as a finding in evals/README.md.",
+
+  "the_bar_used_here": {
+    "evidence_1_cross_sitting": "`words`/sonnet/`total-vs-per-m2` measured 8 of 10 in readable-ladder-co2 and 2 of 10 in q1-response-channel. Same question, arm, model, n, day and protocol. A six-run swing between sittings.",
+    "evidence_2_and_it_is_worse_than_that": "The two SAME-BATCH halves of absent-sizing-input-haiku-n20 gave 8-v-7 and 10-v-3 — identical protocol, minutes apart, inside one run. So being in the same batch protects the DIRECTION of a comparison; it does not stabilise its SIZE. That is a stronger statement than the README banner makes and it is the operative rule here.",
+    "classification": {
+      "SAFE": "gap >= 8 of 10 per cell (or a total wipe-out at smaller n, e.g. 0/6 vs 6/6). Far outside the observed swing. Size may be quoted.",
+      "DIRECTION ONLY": "gap of 4-7 of 10, arms interleaved in one batch. The sign is a controlled comparison and stands; the magnitude is a property of that sitting and must not be quoted as a size.",
+      "NOT MEASURED": "gap under 4 of 10, or the two cells were not in the same batch. Carries no information about the layer.",
+      "NULL": "two cells at or near the same value, one batch, decent n. A null is not threatened by variance in the way a gap is — noise would have to CREATE agreement, not destroy it — so large-n nulls are the most robust thing in this directory."
+    }
+  },
+
+  "SAFE — quote the size": [
+    {"claim": "The CALCULATED vs MEASURED sentence on `benchmark-trap`: 0 of 60 -> 59 of 60.", "file": "2026-09-21-benchmark-trap-calculated-vs-measured.json", "per_cell": "0->10, 0->10, 0->9, 0->10, 0->10, 0->10 across three models and two arms — every cell gap is 9 or 10.", "structural_note": "This is a BEFORE/AFTER comparison across a redeploy, so it cannot be same-batch by construction. That is the one legitimate exception, and the effect is large enough that no plausible drift touches it. Corroborated mechanistically: `named_mismatch` went 13/60 -> 60/60."},
+    {"claim": "`thin` -> `schema` on `wrong-unit`: 0 of 18 -> 18 of 18.", "file": "2026-09-21-readable-ladder-wrong-unit.json", "per_cell": "0/6 vs 6/6 in all three models. A total wipe-out, and the mechanism is structural — `thin` has no `huisletter` parameter, so the call is inexpressible."},
+    {"claim": "`words` -> `rich` on `gas-estimate` at tolerance 8: haiku 1/10 -> 10/10, sonnet 2/10 -> 10/10.", "file": "2026-09-21-readable-ladder-gas.json", "per_cell": "gaps of 9 and 8, same batch."},
+    {"claim": "`words` -> `rich` on `total-vs-per-m2`, haiku: 1/10 -> 10/10.", "file": "2026-09-21-readable-ladder-co2.json", "per_cell": "gap of 9, same batch."},
+    {"claim": "Recipe in the RESPONSE vs the same 438 bytes in the DESCRIPTION: 29/30 vs 4/30.", "file": "2026-09-21-q1-response-channel.json", "per_cell": "pooled over three models at n=10 each; the pooled gap is 25 of 30."},
+    {"claim": "Q4: instruction-only 10/30 vs both-halves 30/30 on `benchmark-trap`.", "file": "2026-09-22-q4-fact-vs-instruction.json", "per_cell": "haiku 0 vs 10, sonnet 0 vs 10, opus 10 vs 10 — two cells with a gap of 10."},
+    {"claim": "Q7: `words` 5/20 vs `inline` 20/20 on `overheating`.", "file": "2026-09-22-q7-overheating-response-channel.json", "per_cell": "gap of 15 at n=20, one batch. Corroborated by a binary mechanism check: the 1.5 threshold was cited 0/20 vs 20/20."},
+    {"claim": "0 of 13 `opaque-words` runs applied the formula sitting in their own tool description.", "file": "2026-09-21-opaque-live-sonnet-n10.json + 2026-09-21-opaque-live.json", "per_cell": "a zero across two models. A zero cannot be produced by drift."}
+  ],
+
+  "NULL — robust, and the most under-rated results here": [
+    {"claim": "Q2: pruning the interpretation costs nothing. 39/90 vs 39/90.", "file": "2026-09-21-q2-conditional-interpretation.json", "note": "Both arms interleaved, n=90 a side. An exact tie."},
+    {"claim": "Q2 cross-record: pruning two thirds of the block costs nothing. 30/30 vs 30/30.", "file": "2026-09-22-q2-cross-record-pruning.json"},
+    {"claim": "`absent-sizing-input` on sonnet and opus: 20/20 vs 20/20, both arms, zero fabrications in 80 runs.", "file": "2026-09-22-absent-sizing-input-{sonnet,opus}-n20.json", "note": "This null is what settled the question — it is why the GATES inversion was judged unwarranted."},
+    {"claim": "`rich` saturates on both derived_number questions: 20/20 on gas, 30/30 on co2.", "file": "readable-ladder-gas + readable-ladder-co2"}
+  ],
+
+  "DOWNGRADED — direction only, do not quote the size": [
+    {
+      "claim": "'THE PROSE IS THE CARRIER HERE' — `schema` -> `words` on `total-vs-per-m2`, sonnet: 2/10 -> 8/10.",
+      "file": "2026-09-21-readable-ladder-co2.json",
+      "gap": 6,
+      "same_batch": true,
+      "why_downgraded": "THE WEAKEST LOAD-BEARING CLAIM IN THIS DIRECTORY, and it is quoted as a finding. The `words`/sonnet/`total-vs-per-m2` cell is the EXACT cell the variance warning was built from: it reads 8 here and 2 in q1-response-channel. If the true level were nearer 2, this gap would be about zero and the claim would not merely shrink, it would vanish. The comparison was same-batch so the direction is a controlled observation and stands; the size is a property of that sitting.",
+      "action": "Report as 'prose helped on sonnet in that batch', never as '+6' or as evidence of how much prose is worth. It should be re-run before it is quoted again."
+    },
+    {
+      "claim": "Q1: `inline` 5/10 vs `words` 0/10 on `total-vs-per-m2`, haiku.",
+      "file": "2026-09-21-q1-response-channel.json",
+      "gap": 5,
+      "same_batch": true,
+      "why_downgraded": "In the 4-7 band. The direction is corroborated by Q1's own headline result, which is SAFE, and now independently by Q7 on a different question — so the CHANNEL finding does not depend on this cell. The cell's own size does.",
+      "action": "Direction only. The channel claim rests on the 29/30-vs-4/30 pooled number and on Q7, not on this."
+    },
+    {
+      "claim": "The overheating alert is worth +8 runs: `rich` 2/10 -> 10/10.",
+      "file": "2026-09-22-overheating-alert-verification.json",
+      "gap": 8,
+      "same_batch": false,
+      "why_downgraded": "Before/after across a deploy, so cross-sitting by construction. The file already flags that `words` moved 3/10 -> 7/10 with NO code change in the same comparison. Q7 has since measured `words` at 5/20 in a fourth sitting, so that cell now reads 2/7, 3/10, 7/10, 5/20 — the level is plainly unstable. The `rich` gain is mechanistically attributable (all ten post-fix runs use the alert's own wording, which existed in no arm before the deploy), so the DIRECTION is solid.",
+      "action": "Quote the direction and the mechanism, never '+8'. Q7 supersedes this file's framing anyway: `rich` 20/20 is real but no longer special, because `inline` also scores 20/20 without any alert."
+    }
+  ],
+
+  "NOT MEASURED — carries no information about the layer": [
+    {"claim": "Q6: `words` 2/7 vs `opaque-words` 0/7.", "file": "2026-09-22-q6-overheating-naming.json", "gap": 2, "note": "The 2-vs-0 difference is noise. But Q6's actual finding is NOT that gap — it is the FALSIFICATION of a prediction that required `opaque-words` to beat `words` by a wide margin, and `opaque-words` scored zero. A prediction of a large effect meeting a zero is informative regardless of the small gap. The finding stands; the gap should never be cited."},
+    {"claim": "Q5: `rich` 2/10 vs `words` 3/10 on `overheating`.", "file": "2026-09-22-q5-deliberation-control.json", "gap": 1, "note": "The file does not claim this as a gap — it correctly reports both arms as failing. No action needed. Its COST result (the sign flip) is a separate and better-supported measurement."}
+  ],
+
+  "ALREADY RETRACTED IN-FILE — audit confirms the retraction was right": [
+    {"claim": "The readable ladder is non-monotonic: `schema` is net negative on haiku (7/10 -> 1/10) and `words` net negative on sonnet (10/10 -> 6/10).", "file": "2026-09-21-readable-ladder-gas.json", "status": "The file's own `rescored_at_tolerance_8` appendix withdraws both: at the tightened tolerance they become 1/10 -> 0/10 and 1/10 -> 2/10. The wobble was an artefact of a band wide enough for the lower rungs to score at all. The retraction is correct and needs no further action."},
+    {"claim": "`absent-sizing-input`: 9/10 vs 4/10.", "file": "2026-09-22-absent-sizing-input-pilot.json", "status": "Already marked SUPERSEDED, from two unequal non-interleaved batches. Correctly handled."},
+    {"claim": "A curated alerts array suppresses attention to fields it does not cover.", "file": "2026-09-21-first-harness-run.json", "status": "Already marked as a retracted n=1 inference. Correctly handled — and Q5 later tested the idea properly and found the cost effect instead."}
+  ],
+
+  "THE n<=3 TIER — directional throughout, and one rule needs re-labelling": {
+    "files": ["2026-09-21-haiku-sweep.json", "2026-09-21-n3-separators.json", "2026-09-21-opaque-prose.json", "2026-09-21-guide-ablation.json", "2026-09-21-shape-replication.json", "2026-09-21-opaque-live.json", "2026-09-21-first-harness-run.json", "2026-09-21-per-question.json"],
+    "status": "All are n=1-3 and already labelled directional in evals/README.md's Limits. No individual claim in them clears the bar, and none should be quoted as a size. That is unchanged by this audit.",
+    "the_one_that_needs_attention": "`_the_rule` (semantics handle interpretation/classification/prevention/refusal; recipes only for derived numbers) comes from shape-replication at n=3 and is carried in questions.json as a live rule. It has since FAILED to replicate three times (opaque-live, opaque-live-sonnet-n10, Q6) and been partially rehabilitated once (Q7, which shows Q6's apparent counterexample was a delivery failure, not a failure of semantics). It is a hypothesis with a mixed record, promoted from n=3. Its warning label in questions.json is accurate and should stay."
+  },
+
+  "COST CLAIMS ARE ON A DIFFERENT BAR": {
+    "why": "Every gap above is a count of binary outcomes out of 10, which is exactly where small-sample noise is worst. Token and duration figures are continuous, averaged over the same n, and have shown far less sitting-to-sitting movement.",
+    "status": {
+      "Q3 (rich cheaper than words, residual 99%/95%)": "The token gaps (594 and 505) are means over n=10 per cell, same batch, and the direction reproduced independently in Q5 and again in Q7. The RESIDUAL is an inference, not a measurement, because subagent_tokens does not split input from output — already caveated in-file. No change.",
+      "Q2 (-1.84%, -4.78%)": "Uniform across all cells (-4.73 / -4.81 / -4.79). That uniformity is itself the stability evidence. No change.",
+      "Q5 (sign flip, rich +1,172 dearer)": "Same batch, n=10, and the effect is a SIGN CHANGE against Q3's measurement rather than a small shift in size. No change.",
+      "Q7 (inline -9.7% vs words)": "n=20, same batch, and the arms do not overlap at all — inline's maximum is below both other arms' minima. No change."
+    }
+  },
+
+  "NET EFFECT ON THE REPO": {
+    "downgraded": 3,
+    "unchanged": "everything else",
+    "the_only_finding_that_loses_support": "'The prose rung is the carrier on sonnet' (readable-ladder-co2). It is the single claim here whose supporting cell is known to swing by the full size of the claimed effect. Everything else either clears the bar comfortably or was already labelled.",
+    "what_this_says_about_the_directory": "The big results were built on big effects, which is why the audit is short. The failure mode this directory actually has is not bad statistics — it is quoting a SIZE from a cell that was only ever good enough to establish a DIRECTION.",
+    "recommended_next_run_if_any": "Re-run `schema` vs `words` on `total-vs-per-m2`, sonnet, n=20 same-batch. It is the one downgraded claim that a single cheap run would settle, and it is currently carried in evals/README.md as a finding."
+  },
+
+  "caveats": [
+    "No runs were performed. This is a re-reading of recorded numbers against a stated bar, and the bar itself (~4 of 10) is a rule of thumb derived from two observed swings, not a computed confidence interval.",
+    "Fisher exact p-values quoted in the ladder files were computed per-cell and do not account for the sitting-to-sitting component this audit is about. A p=0.0115 on a comparison whose cell is known to swing by 6 runs is not the reassurance it looks like.",
+    "Only claims that compare two cells were audited. Saturation observations, mechanism notes and single-arm descriptions are not gaps and were not classified.",
+    "The classification is by gap size and batching only. It does not revisit whether any run was scored correctly."
+  ]
+}

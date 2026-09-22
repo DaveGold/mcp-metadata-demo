@@ -324,9 +324,15 @@ strong model safe.
   directional; §4–§7 are measured.
 - **Run-to-run variance is larger than it looks.** On one question, four passes
   at n≤10 gave four different answers (9-v-4, 2-v-2, 8-v-7, 10-v-3) — anything
-  from level to 3×. Large effects (0/60→59/60, 10/30 vs 30/30) sit far outside
-  that band; **findings resting on a few-run gap at n=10 in one sitting do not**,
-  and several older files in `results/` are sized exactly that way.
+  from level to 3×. Two of those were **same-batch halves of a single run**, so
+  being in one batch protects a comparison's *direction* but not its *size*.
+  Large effects (0/60→59/60, 10/30 vs 30/30, 5/20 vs 20/20) sit far outside that
+  band; few-run gaps do not. **This bar has now been applied backwards through
+  every file** — see
+  [`results/2026-09-22-variance-audit-of-prior-results.json`](results/2026-09-22-variance-audit-of-prior-results.json).
+  Three claims are downgraded to direction-only; the rest hold. The weakest is
+  *"the prose rung is the carrier on sonnet"*, whose supporting cell is the very
+  one the variance warning was built from.
 - **Self-reported call counts are not trustworthy on their own.** One run
   reported `CALLS: 3` against a server log that accounted for fewer. Every recent
   file reconciles against `get_tool_call_log` instead.
