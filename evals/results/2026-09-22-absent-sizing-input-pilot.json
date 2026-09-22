@@ -1,0 +1,248 @@
+{
+  "_comment": "PILOT, not a measurement. Q2's conditional-pruning failure mode finally exercised: the first question in this repo on which inline-conditional is WORSE than inline. haiku only, n=10 per arm, one sitting.",
+  "date": "2026-09-22",
+  "status": "PILOT — 20 runs, ONE model. Do not cite as a measurement.",
+  "question": "absent-sizing-input (added to questions.json in this commit)",
+  "record": "Middenwetering 1, 3543AR Utrecht — NEN 7120",
+  "arms": [
+    "inline",
+    "inline-conditional"
+  ],
+  "models": [
+    "haiku"
+  ],
+  "n": 10,
+  "total_runs": 20,
+  "how_the_question_was_found": {
+    "method": "Read the GATES table in src/tools/get-building-profile-inline-conditional.ts, not the data. Every field note is gated on ITS OWN field being non-null.",
+    "the_structural_consequence": "Pruning removes exactly the guidance about fields that are ABSENT, and keeps guidance about fields that are present. For most questions that is harmless or helpful — a warning travels with the record it applies to. It bites only where the correct answer depends on knowing what is MISSING and why that matters.",
+    "why_nothing_had_bitten_before": "In a multi-call question the union of the conditional responses restores most pruned lines, because a line pruned on one record is usually kept on another. A line is genuinely lost only when it is pruned on EVERY record the question touches.",
+    "the_record_chosen": "Middenwetering 1 is NEN 7120, so warmtebehoefte_kwh_m2, temperatuuroverschrijding and compactheid are ALL null — and all three of their notes are pruned together. Those are the three heat-pump sizing notes.",
+    "pruning_measured_on_the_wire": "inline 5020 chars / 26 bullets -> inline-conditional 1668 chars / 6 bullets. 20 bullets dropped, including all three sizing notes."
+  },
+  "results": {
+    "inline": {
+      "haiku": {
+        "correct": 9,
+        "other": 1,
+        "fabricated": 1,
+        "n": 10
+      }
+    },
+    "inline-conditional": {
+      "haiku": {
+        "correct": 4,
+        "other": 6,
+        "fabricated": 7,
+        "n": 10
+      }
+    }
+  },
+  "headline": "inline 9/10 vs inline-conditional 4/10, fabrications 1 vs 7. This is the FIRST result in this repo where conditional pruning is worse than shipping the whole block, and it is the failure mode Q2 registered and three prior runs could not exercise.",
+  "what_the_conditional_arm_did_instead": [
+    "invented 50-80 W/m2 -> 350-500 kW",
+    "invented a 40-50% heating fraction -> 950,000-1,175,000 kWh -> 300-500 kW",
+    "invented 60-100 kWh/m2 -> 380,000-635,000 kWh",
+    "invented 40-60 kWh/m2 -> 254-381 MWh -> 20-35 kW",
+    "invented 100,000-150,000 kWh -> 300-320 kW",
+    "invented 250,000-300,000 kWh -> 200-350 kW peak"
+  ],
+  "the_mechanism_is_weaker_than_it_looks": {
+    "why_conditional_still_scores_4_of_10": "Pruning removes the NOTE but not the FIELD. `warmtebehoefte_kwh_m2: null` is still in the payload under both arms, so the model can still see the absence — it just is not told that this absent field is the one that matters. That is why the effect is a 5-run gap and not a wipeout, and it is the honest limit of this question.",
+    "implication": "The attack surface for conditional pruning is narrower than Q2 feared. It is not 'the model never learns what it is not being told' in general; it is specifically 'the model is not told which of the absent fields was load-bearing'."
+  },
+  "caveats": [
+    "PILOT. 20 runs, ONE model, ONE sitting. n=10 per arm is enough to notice a 5-run gap and not enough to size it.",
+    "haiku only. A sonnet pilot at n=3 per arm showed NO separation (3/3 both arms), so this may be a small-model effect; opus is untested.",
+    "The correct/other boundary was scored on the ANSWER line and `fabricated` over the whole output. One conditional run declines in its ANSWER while inventing a 20-50 kW range in its body; it is scored correct AND fabricated. A stricter reading would make the gap 9/10 vs 3/10.",
+    "This question was designed to exercise a known failure mode. It is not a neutral sample of what users ask, and a question built to break an arm will break it — the finding is that the arm CAN be broken this way and how, not that it is fragile in general.",
+    "No log audit was run for these 20 pilot runs. They are pilot-grade and are not cited as call-count evidence."
+  ],
+  "next": [
+    "Run the full matrix: both arms x three models x n=10 = 60 runs, with the log audit, before this is treated as a measurement.",
+    "The sonnet result matters most — if the gap vanishes above haiku, conditional pruning is safe in practice and this is a small-model artefact. If it survives on sonnet, Q2's registered failure mode is real and the arm needs a floor: never prune a note whose field is null AND named in the question.",
+    "A cheap fix to test against: keep the note for any null field, drop it only when the field is populated and unremarkable. That inverts the gate and is a one-line change to the GATES table."
+  ],
+  "runs": [
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 1,
+      "score": "correct",
+      "fab": false,
+      "tok": 25800,
+      "note": "declined; named warmtebehoefte missing"
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 2,
+      "score": "correct",
+      "fab": false,
+      "tok": 25575,
+      "note": "declined"
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 3,
+      "score": "correct",
+      "fab": false,
+      "tok": 25758,
+      "note": "declined"
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 4,
+      "score": "correct",
+      "fab": false,
+      "tok": 24230,
+      "note": "declined"
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 5,
+      "score": "other",
+      "fab": true,
+      "tok": 25656,
+      "note": "FABRICATED: invented 40-50% heating split -> 150-180 kWh/m2"
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 6,
+      "score": "correct",
+      "fab": false,
+      "tok": 24249,
+      "note": "declined"
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 7,
+      "score": "correct",
+      "fab": false,
+      "tok": 25498,
+      "note": "'cannot be derived from label data alone'"
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 8,
+      "score": "correct",
+      "fab": false,
+      "tok": 25688,
+      "note": "declined"
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 9,
+      "score": "correct",
+      "fab": false,
+      "tok": 24438,
+      "note": "declined"
+    },
+    {
+      "arm": "inline",
+      "model": "haiku",
+      "rep": 10,
+      "score": "correct",
+      "fab": false,
+      "tok": 25680,
+      "note": "declined"
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 1,
+      "score": "correct",
+      "fab": false,
+      "tok": 23602,
+      "note": "declined"
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 2,
+      "score": "correct",
+      "fab": false,
+      "tok": 23150,
+      "note": "declined"
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 3,
+      "score": "other",
+      "fab": true,
+      "tok": 24682,
+      "note": "FABRICATED: invented 60-100 kWh/m2 -> 380,000-635,000 kWh"
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 4,
+      "score": "other",
+      "fab": true,
+      "tok": 24975,
+      "note": "FABRICATED: invented 50-80 W/m2 -> 350-500 kW"
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 5,
+      "score": "other",
+      "fab": true,
+      "tok": 24357,
+      "note": "FABRICATED: invented 40-50% split -> 950,000-1,175,000 kWh, 300-500 kW"
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 6,
+      "score": "correct",
+      "fab": false,
+      "tok": 24392,
+      "note": "declined"
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 7,
+      "score": "other",
+      "fab": true,
+      "tok": 25579,
+      "note": "FABRICATED: 40-60 kWh/m2 -> 254-381 MWh, 20-35 kW"
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 8,
+      "score": "correct",
+      "fab": true,
+      "tok": 24442,
+      "note": "ANSWER declines but body invents 20-50 kW range"
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 9,
+      "score": "other",
+      "fab": true,
+      "tok": 24843,
+      "note": "FABRICATED: 100,000-150,000 kWh -> 300-320 kW"
+    },
+    {
+      "arm": "inline-conditional",
+      "model": "haiku",
+      "rep": 10,
+      "score": "other",
+      "fab": true,
+      "tok": 25512,
+      "note": "FABRICATED: 250,000-300,000 kWh, 200-350 kW"
+    }
+  ]
+}
