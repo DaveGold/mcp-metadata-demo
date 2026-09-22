@@ -71,7 +71,8 @@ export type ServerVariant =
   | 'schema'
   | 'minimal'
   | 'opaque'
-  | 'opaque-words';
+  | 'opaque-words'
+  | 'words-front';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -274,16 +275,21 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     return server;
   }
 
-  if (variant === 'words' || variant === 'words-recipe') {
+  if (variant === 'words' || variant === 'words-recipe' || variant === 'words-front') {
     // Arm B: every word the rich tier has, none of the computation. Same
     // instructions, same tool surface — the ONLY difference from 'rich' is the
     // absent `alerts` field and the one bullet that would have promised it.
+    // `words-front` is Q15's throwaway: `words` with the overheating line and a
+    // canary moved inside the host's 2,048-char cut. It reports `words`' server
+    // name so nothing else differs.
+    const withFront = variant === 'words-front';
     const server = new McpServer(
-      { name: `metadata-demo-${variant}`, version: VERSION },
+      { name: `metadata-demo-${withFront ? 'words' : variant}`, version: VERSION },
       { instructions: buildInstructions(false) }
     );
     registerGetBuildingProfileWordsTool(server, bagClient, epOnlineClient, {
       withRecipe: variant === 'words-recipe',
+      withFront,
     });
     registerRenderChartTool(server);
     registerRenderTableTool(server);
