@@ -734,5 +734,6 @@
         "note": "FABRICATED: 250,000-300,000 kWh, 200-350 kW"
       }
     ]
-  }
+  },
+  "RESOLVED_2026_09_22": "The deciding cell named in `next` has been run. Sonnet n=20 per arm, same-batch: 20/20 for BOTH arms, zero fabrications in 40 runs. The haiku effect does NOT survive above the weakest model, so the proposed GATES inversion is NOT warranted — it would fix a defect only haiku exhibits, at the cost of the 66.8% prose saving on every record for every model. See results/2026-09-22-absent-sizing-input-sonnet-n20.json."
 }
