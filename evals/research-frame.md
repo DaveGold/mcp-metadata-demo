@@ -107,6 +107,19 @@ growth.
 So the efficiency argument for projection is real, and it is about **relevance**, not
 about size. That is a sharper claim than the draft makes.
 
+**And there is a counterweight the draft does not have, added 2026-09-22.** Everywhere
+measured so far, pruning was free — which is why *project only what is relevant* reads as
+costless. `get_weather_context`'s `select` is the first case where **projection is the
+mechanism of the error**: a model told to keep the response small drops `tempMax`, or
+picks `hdd` over `weightedHdd`, and returns a well-formed answer with no alert and a wrong
+conclusion. Nothing in the response distinguishes it from a correct one.
+
+That puts a condition on principle 8. Projecting away what the *server* knows is
+irrelevant is safe; letting the *caller* project on a guess about what matters is not —
+and the caller can only avoid the guess if it knows what the fields mean before it
+chooses. Questions `select-hides-the-evidence` and `select-wrong-degree-day` in
+`questions-weather.json` measure it; see `open-questions.md` Q11.
+
 ## Candidate design principles, with status
 
 The draft lists eight principles to falsify. Here is where each one actually stands in
@@ -121,7 +134,7 @@ The draft lists eight principles to falsify. Here is where each one actually sta
 | 5 | Data-dependent semantics should travel with the data | **Supported structurally, not economically** (Q2: free, not cheap) |
 | 6 | Domain knowledge should be addressable to the fields it explains | **Open (Q10), with a live counter-signal**: Q6 shows adjacency failing and renaming failing too — 2 of 21 across both |
 | 7 | Resolve conditional domain logic server-side | **Strongest effect and worst failure mode.** 78/78 when right; one plausible-looking computed line produced 59 of 60 wrong answers |
-| 8 | Project only the semantics relevant to the current response and intent | **Supported on cost** (Q5), **null on accuracy** (Q2) |
+| 8 | Project only the semantics relevant to the current response and intent | **Supported on cost** (Q5), **null on accuracy** (Q2), **and newly conditional**: caller-side projection via `select` can silently drop the field the conclusion needed (Q11, amended) |
 
 ### The rule that outranks all eight
 

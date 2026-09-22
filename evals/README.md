@@ -8,7 +8,10 @@ arms differ only in how much the tool explains itself.
 - [`research-frame.md`](research-frame.md) — why these experiments: the axes, the
   coverage, the claim boundaries
 - [`addresses.json`](addresses.json) — the frozen profiles every answer derives from
-- [`ground-truth.test.ts`](ground-truth.test.ts) — proves it, under `npm test`
+- [`questions-weather.json`](questions-weather.json) — four **candidate** questions
+  against `get_weather_context`, unrun, deliberately kept out of the set below
+- [`weather-fixtures.json`](weather-fixtures.json) — the frozen captures those derive from
+- [`ground-truth.test.ts`](ground-truth.test.ts) · [`ground-truth-weather.test.ts`](ground-truth-weather.test.ts) — prove it, under `npm test`
 - [`results/`](results/) — what happened when it was run
 
 ---
@@ -27,6 +30,15 @@ arms differ only in how much the tool explains itself.
 | **refusal** | `metered-vs-model` | the server has no meter data |
 | | `invented-label` | a 1653 building with no registered label |
 | | `absent-sizing-input` | the field the answer needs is null, and only one arm says which |
+
+**The set is ten questions and stays ten.** Four candidates against a second tool live
+in [`questions-weather.json`](questions-weather.json) and are **not** part of it: every
+file in [`results/`](results/) is scored against the set above, and growing it silently
+would invalidate comparisons already recorded. They exist because `get_weather_context`
+supplies two things this tool cannot — a response that dials from ~330 to ~18,000 tokens
+(so `open-questions.md` Q9's distance half becomes a real test), and `select`, the only
+mechanism here where **output** field names must be passed as an **input** parameter, and
+where guessing them fails *silently*. See Q9 and Q11, both amended 2026-09-22.
 
 `metered-vs-model` and `invented-label` are **controls**. `overheating` was
 designed as one — it is covered by no alert, so the rich arm should have no
