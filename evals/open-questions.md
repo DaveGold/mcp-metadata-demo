@@ -2746,7 +2746,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**. Q16 ✓ (fetching is the barrier): **twelve of twenty**. Q17 ✓ (volume inert, addressing null): **twelve of twenty-one**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**. Q16 ✓ (fetching is the barrier): **twelve of twenty**. Q17 ✓ (volume inert, addressing null): **twelve of twenty-one**. Q16b (not falsified): **twelve of twenty-two**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -3118,6 +3118,39 @@ RULE as `interpretation.guidance`. They differ ONLY in what the server adds to
 
 **Cost:** 60 runs, two new arms.
 
+### Q16b — Does shipping the data also save the STRONG models work? Registered 2026-09-23, BEFORE the run
+
+> **ANSWERED 2026-09-23 — yes: same accuracy, a fraction of the work.** See
+> [`results/2026-09-23-q16b-strong-models-cost.json`](results/2026-09-23-q16b-strong-models-cost.json). Audit exact, 210/210.
+>
+> | | tool calls (median) | tokens | wall time | answer |
+> |---|---|---|---|---|
+> | sonnet, rule only | 7 | 53.1k | 65 s | 4,490–4,800 |
+> | sonnet + reference | **1** (−86%) | **40.7k** (−23%) | **16 s** (−75%) | **4,675**, 10/10 |
+> | opus, rule only | 7.5 | 52.2k | 36 s | 4,670–4,970 |
+> | opus + reference | **1** (−87%) | **39.9k** (−24%) | **10.6 s** (−71%) | **4,675**, 10/10 |
+>
+> All six cells were 10/10 correct. P1 and P3 are **confirmed**. P2 is **partial**: calls fell
+> far past the 30% bar, tokens only 23–24%. The haiku fix is a cost and consistency fix for
+> sonnet and opus.
+>
+> The last three throwaway arms (`mcpQ10Prose`, `mcpQ16Ref`, `mcpQ16Computed`) were deleted afterwards (2026-09-23; code in git history). No research arms from this round remain deployed.
+
+On `weather-single-quarter` sonnet and opus were already correct from the rule alone, but
+they paid for it: 4–11 (sonnet) and 6–31 (opus) extra weather calls to build a reference
+quarter themselves (Q12). If the server ships that reference, the fix Q16 found for haiku
+should be a **cost** fix for the models actually in use.
+
+- **Run:** the same three arms (`q10-prose`, `q16-ref`, `q16-computed`), `weather-single-quarter`,
+  **sonnet and opus, n=10 per cell**, 60 runs, default cap.
+- **Measured:** correctness (scored as Q16); per run `tool_uses`, `subagent_tokens` and
+  `duration_ms` from the harness, and weather calls from the transcript.
+- **P1:** correctness stays high in every arm, ≥ 8/10 per cell. Falsified if any cell ≤ 6/10.
+- **P2:** `q16-ref` cuts median `tool_uses` and median `subagent_tokens` against `q10-prose` by
+  ≥ 30% on both models. Falsified if either median falls by < 10% on either model.
+- **P3:** `q16-computed` is within 10% of `q16-ref` on both medians (the finished factor saves
+  nothing further).
+
 ## Q17 — Does addressing help when the relevant rule is ONE AMONG A HUNDRED?
 
 > **ANSWERED 2026-09-23 — no, and 100 rules did not hurt either. All three predictions
@@ -3133,7 +3166,7 @@ RULE as `interpretation.guidance`. They differ ONLY in what the server adds to
 >
 > haiku found the overheating rule at position 41 of 100 in every run. There is no dilution
 > up to ~16k chars of response guidance, so there is nothing for addressing to win back, and
-> it won nothing back. Caveat: haiku's area cells are at a floor this sitting (2/10 with the
+> it won nothing back. (The four Q17 arms were deleted afterwards, 2026-09-23; the frozen rule list is in git history.) Caveat: haiku's area cells are at a floor this sitting (2/10 with the
 > rule alone), which can hide dilution there; the overheating cells carry the result.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARMS EXIST.**

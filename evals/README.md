@@ -147,7 +147,7 @@ findings were n=2–3 and mostly Haiku, and have since been re-run at **n=10–2
 cell across three models**. Where a claim has been superseded it says so.
 
 **Every question in [`open-questions.md`](open-questions.md) carries a prediction
-registered before its run. As of 2026-09-23, twelve of the twenty-one scored so far were
+registered before its run. As of 2026-09-23, twelve of the twenty-two scored so far were
 wrong.** That pattern is itself the most reliable thing here: the effects are large and
 legible, and intuitions about *why* keep missing.
 
@@ -161,18 +161,33 @@ conditionality, addressability, activation), which of them the answered question
 and which design principles remain unfalsified. Read it before quoting any result here as
 a general MCP rule; it says plainly what this repo can and cannot support.
 
-**The one-paragraph version, as of 2026-09-23.** Guidance works when it **reaches the
-model**, and on Claude Code three things decide that:
+**The short version, as of 2026-09-23.** Guidance works when it **reaches the model**. On
+Claude Code, three things decide that:
 
 - a tool description is cut at 2,048 characters (Q7);
 - a tool result over ~25k tokens is replaced by a "saved to file" notice (Q9);
-- `outputSchema` is never sent at all (Q11).
+- `outputSchema` is never sent (Q11).
 
-Once delivered, the channel does not matter: description and response tie (Q15, Q15b,
-Q8). Distance does not matter much either: a recipe was applied after ~62k chars of other
-output (Q9). What still decides outcomes is whether the model **fetches** guidance that is
-only behind a call (Q8/Q8b: soft pointer 0/10 on haiku, "REQUIRED" pointer 10/10), and
-whether the sentence that answers the question exists at all.
+Once it arrives, **where it arrives does not matter** (description and response tie: Q15,
+Q15b, Q12). **Nor does its form** (prose = `relates_to_fields` = computed trigger: Q10). **Nor
+how much else is around it** (one rule among 100 was found as easily as alone: Q17).
+
+What still decides outcomes:
+
+1. **whether a sentence that answers the question exists at all**;
+2. **whether the data a rule needs is in the response.** For haiku that took 2/20 to 15/20. For
+   sonnet and opus it cut tool calls by ~87% and wall time by ~3/4 at the same accuracy
+   (Q16, Q16b);
+3. **whether a pointer to guidance is worded as an instruction** (Q8b: haiku 0/10 → 10/10).
+
+**For a sonnet/opus user** the practical advice is short:
+- put what matters in the first 2,048 characters or in the response;
+- ship the reference data your rules depend on;
+- keep responses under the output limit, or put guidance under a fixed key;
+- don't spend effort on the delivered form of the guidance.
+
+Keep the **source** of every rule per field, with provenance. That is for the agent that
+improves the server, not for the model that calls it (design guidance 2c; unmeasured).
 
 ### 1 · Semantics and computation buy different things
 
@@ -501,7 +516,7 @@ carrier" (sonnet, `total-vs-per-m2`, n=20): **4/20 → 11/20**, direction only. 
 credited sat at char 4,311 and was never delivered, so the mechanism is withdrawn. Whatever
 helps sonnet sits in the first 2,048 characters.
 
-### 15 · Round 3: structure, the rest of the cap, and the model split
+### 15 · Rounds 3 and 4: structure, the rest of the cap, the model split, and cost
 
 Four runs registered together, 230 runs:
 
@@ -521,9 +536,20 @@ Four runs registered together, 230 runs:
 in the response, haiku goes from **2/20 to 15/20**. The barrier was *fetching* the data, not
 *applying* the rule. Handing over the finished factor added nothing beyond that (11/20).
 
-> **If a rule needs data the payload lacks, ship the data. Prose alone works only for
-> models that go and get it (sonnet, opus). For a strong model most rules are
-> redundant.**
+**Q16b showed the same fix pays for the strong models too.** Sonnet and opus were already
+correct from the rule alone, but they built their own reference with 4–16 weather calls and
+landed anywhere between 4,490 and 4,970 m³. With the server's reference they made **one
+call**: **−87% calls, −23% tokens, −3/4 wall time**, and the same answer in 20/20.
+
+**And Q17 closed the addressing question at scale.** Two relevant rules alone, among 10, or
+among 100 real distractor rules (~16k chars), with or without `relates_to_fields`. Haiku found
+the overheating rule at position 41 of 100 in every run, and sonnet was 10/10 on the area
+rule in every arm. Response guidance does not dilute at this scale, so targeting has nothing
+to recover at runtime. Its value is on the authoring side (design guidance 2c).
+
+> **If a rule needs data the payload lacks, ship the data: it makes the weak model right
+> and the strong ones fast. The form and the volume of the guidance do not matter at
+> runtime; keep its source structured per field for whoever improves the server.**
 
 ### The strongest single result
 

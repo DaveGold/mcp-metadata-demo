@@ -19,8 +19,6 @@ import { registerGetBuildingProfileWordsTool } from './tools/get-building-profil
 import { registerGetBuildingProfileInlineTool } from './tools/get-building-profile-inline.js';
 import { registerGetBuildingProfileInlineOnelineTool } from './tools/get-building-profile-inline-oneline.js';
 import { registerGetBuildingProfileGuidanceTool } from './tools/get-building-profile-guidance.js';
-import { registerGetBuildingProfileQ10Tool } from './tools/get-building-profile-q10.js';
-import { registerGetBuildingProfileQ17Tool } from './tools/get-building-profile-q17.js';
 import { registerGetBuildingProfileInlineConditionalTool } from './tools/get-building-profile-inline-conditional.js';
 import { registerGetBuildingProfileInlineAblationTool } from './tools/get-building-profile-inline-ablation.js';
 import { registerGetBuildingProfileSchemaTool } from './tools/get-building-profile-schema.js';
@@ -75,16 +73,7 @@ export type ServerVariant =
   | 'minimal'
   | 'opaque'
   | 'opaque-words'
-  | 'guidance-recipe'
-  | 'q10-prose'
-  | 'q10-addressed'
-  | 'q10-triggered'
-  | 'q16-ref'
-  | 'q16-computed'
-  | 'q17-one'
-  | 'q17-ten'
-  | 'q17-many'
-  | 'q17-many-addressed';
+  | 'guidance-recipe';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -173,60 +162,6 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
     registerGetWeatherContextTool(server, { minimal: true });
-    registerGetToolCallLogTool(server, { minimal: true });
-    return server;
-  }
-
-  if (variant === 'q17-one' || variant === 'q17-ten' || variant === 'q17-many' || variant === 'q17-many-addressed') {
-    // Q17. Two target rules in the RESPONSE: alone, among 98 real distractors as prose,
-    // or the same 100 with relates_to_fields. Minimal neighbours.
-    const form = variant === 'q17-one' ? 'one' : variant === 'q17-ten' ? 'ten' : variant === 'q17-many' ? 'many' : 'many-addressed';
-    const server = new McpServer(
-      { name: 'metadata-demo-minimal', version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
-    );
-    registerGetBuildingProfileQ17Tool(server, bagClient, epOnlineClient, form);
-    registerRenderChartTool(server, { minimal: true });
-    registerRenderTableTool(server, { minimal: true });
-    registerRenderMapTool(server, { minimal: true });
-    registerGetWeatherContextTool(server, { minimal: true });
-    registerGetToolCallLogTool(server, { minimal: true });
-    return server;
-  }
-
-  if (variant === 'q16-ref' || variant === 'q16-computed') {
-    // Q16. `q10-prose` byte for byte, plus a server-computed reference-quarter HDD
-    // (and, for q16-computed, the period factor) in summary.degreeDays.
-    const server = new McpServer(
-      { name: 'metadata-demo-minimal', version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
-    );
-    registerGetBuildingProfileQ10Tool(server, bagClient, epOnlineClient, 'prose');
-    registerRenderChartTool(server, { minimal: true });
-    registerRenderTableTool(server, { minimal: true });
-    registerRenderMapTool(server, { minimal: true });
-    registerGetWeatherContextTool(server, {
-      minimal: true,
-      q10Form: 'prose',
-      q16Extra: variant === 'q16-ref' ? 'ref' : 'computed',
-    });
-    registerGetToolCallLogTool(server, { minimal: true });
-    return server;
-  }
-
-  if (variant === 'q10-prose' || variant === 'q10-addressed' || variant === 'q10-triggered') {
-    // Q10 (reopened). One sentence per tool in the RESPONSE, byte-identical across the
-    // three arms; only its form varies. Minimal neighbours, `schema`'s one-liners.
-    const form = variant === 'q10-prose' ? 'prose' : variant === 'q10-addressed' ? 'addressed' : 'triggered';
-    const server = new McpServer(
-      { name: 'metadata-demo-minimal', version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
-    );
-    registerGetBuildingProfileQ10Tool(server, bagClient, epOnlineClient, form);
-    registerRenderChartTool(server, { minimal: true });
-    registerRenderTableTool(server, { minimal: true });
-    registerRenderMapTool(server, { minimal: true });
-    registerGetWeatherContextTool(server, { minimal: true, q10Form: form });
     registerGetToolCallLogTool(server, { minimal: true });
     return server;
   }

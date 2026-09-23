@@ -75,17 +75,30 @@ Not a conclusion. The hypothesis the axes above are meant to break.
 
 | stage | surface | what belongs there | this repo's evidence |
 |---|---|---|---|
-| **WHEN** | tool description | what the capability does, when to pick it, stable preconditions | Q1: guidance placed here scored 4/30 at interpretation time |
-| **INPUT** | input schema | valid inputs, required fields, formats | `thin` 0/18 → `schema` 18/18 where the call cannot be *expressed* without the parameter; ≈0 elsewhere |
-| **HOW** | guidance / bootstrap response | parameter strategy, sequencing, recipes, examples | guide ablation: the DERIVED FIGURES recipe is what produces the answer, for every model — **untested as a channel (Q8)** |
-| **CONTRACT** | output schema | types, units, stable field meaning, invariants | asserted here to be invisible to the model; **never measured (Q11)** |
-| **WHAT** | returned data | the instance | — |
-| **MEANING** | runtime projection in the response | activated conditional interpretation, cross-field semantics, caveats | Q1: 29/30 · Q2: pruning is free · Q5: irrelevant projection is charged in full |
+| **WHEN** | tool description | what the capability does, when to pick it, stable preconditions | **Only the first 2,048 chars arrive on Claude Code (Q7).** Q1's 4/30 was text past that cut. Inside it, a domain line is applied as often as in the response: 20/20 = 20/20 (Q15); uncut, `words` 20/20 (Q15b) and `schema` 1/10 → `words` 10/10 (RB3) |
+| **INPUT** | input schema | valid inputs, required fields, formats | `thin` 0/18 → `schema` 18/18 where the call cannot be *expressed* without the parameter; ≈0 elsewhere. Input schemas ARE delivered; the `select` field list there is load-bearing for haiku (2/10 without it, sonnet 8/10 guessing from the question; Q11) |
+| **HOW** | guidance / bootstrap response | parameter strategy, sequencing, recipes, examples | **Works when the call is made (Q8):** sonnet made it 10/10 and was 10/10. Whether it is made depends on the pointer's wording: haiku 0/10 behind a hint, 10/10 behind *"REQUIRED: … before any lookup"* or as its own tool (Q8b) |
+| **CONTRACT** | output schema | types, units, stable field meaning, invariants | **Not delivered on Claude Code (Q11, by accounting):** a 7,659-char schema difference costs +181–336 tokens. Stable meaning placed here never reaches the model; keep it canonical for the server, and project it into the description head or the response |
+| **WHAT** | returned data | the instance, **and the data a rule needs** | **Ship the data a rule depends on (Q16, Q16b):** a server-computed reference period took haiku 2/20 → 15/20. It also cut sonnet's and opus's calls by ~87% and wall time by ~3/4, with the answer converging. A result over ~25k tokens is replaced by a file notice (Q9) |
+| **MEANING** | runtime projection in the response | activated conditional interpretation, cross-field semantics, caveats | Delivered here it works (Q13/Q14: 20/20; one line suffices), and it ties a delivered description (Q15). Q2: pruning is free · Q5: irrelevant projection is charged in full · **the form does not matter** (Q10: prose = `relates_to_fields` = computed trigger) · **volume does not matter up to 100 rules** (Q17) |
 
-Compact form, to be falsified rather than quoted:
+Compact form, as originally written, to be falsified rather than quoted:
 
 > Discover with the description. Operate with guidance. Define stable meaning in the
 > schema. Interpret the instance in the response.
+
+**Where it stands (2026-09-23):**
+- *"Define stable meaning in the schema"* is **falsified on this host**: the output schema is
+  not delivered (Q11).
+- *"Discover with the description"* holds, but only for its first 2,048 characters (Q7).
+- *"Operate with guidance"* holds only if the pointer to that guidance is an instruction
+  (Q8b).
+
+Revised form:
+
+> **Discover with the first 2,048 characters. Operate with guidance you REQUIRE to be
+> fetched. Ship the data your rules need. Interpret the instance in the response. Keep the
+> source of all of it per field, for whoever improves the server.**
 
 ## The token hypothesis
 
