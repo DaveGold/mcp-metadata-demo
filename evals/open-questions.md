@@ -2223,6 +2223,27 @@ the expected result with both copies delivered is a **tie**, and this registrati
 tie as **falsified**. `wx-none` shows whether the question has headroom without the rule. If
 `wx-none` is also near ceiling, the run measured nothing, and it will say so.
 
+### AMENDED 2026-09-23 (third) — a question WITH headroom, registered BEFORE it runs
+
+The weather run above had no headroom: a two-period comparison routes around the factor.
+This re-runs Q12 with the same three arms (`wx-none`, `wx-desc`, `wx-resp`, still deployed
+and unchanged) on **`weather-single-quarter`**, added to `questions-weather.json` in this
+commit with its ground truth tested against the fixtures. It asks for ONE quarter in an
+*"average year"*, which is exactly the job `gasNormalizationFactor` looks built for, and the
+one the rule forbids.
+
+- **Run:** haiku and sonnet, n=10 per cell, 60 runs, default cap, one batch, only the
+  question string passed.
+- **Scoring:** the question's `_judge_note`. CORRECT means no factor-based figure presented
+  as the answer, plus saying the factor is full-year-only or that a reference period is
+  needed. CONFIDENTLY_WRONG means ~10,626 m³ presented. FABRICATED means an invented
+  reference quarter.
+- **Headroom gate, fixed now:** the comparison is scored only if `wx-none` is ≤ 14/20
+  correct. Above that, it is recorded as no headroom, like the run above.
+- **Prediction: unchanged.** Response wins by less than Q1's margin; falsified if the
+  description matches or beats it. After Q15, a tie (within 2 of 20) is again the expected
+  outcome, and is recorded now as the registered falsification.
+
 ## Q13 — Can the ALERTLESS tiers be fixed at all? Prose in the RESPONSE vs computation
 
 > **ANSWERED 2026-09-22 — ALL THREE PREDICTIONS FALSIFIED. The channel is the whole
