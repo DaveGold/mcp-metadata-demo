@@ -144,3 +144,9 @@ export const mcpQ10Triggered = onRequest(functionOptions, createHttpApp({ hosted
  */
 export const mcpQ16Ref = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q16-ref' }));
 export const mcpQ16Computed = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q16-computed' }));
+
+/** Q17 arms — THROWAWAY. Two target rules alone / among 98 distractors / the same 100 addressed. */
+export const mcpQ17One = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q17-one' }));
+export const mcpQ17Ten = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q17-ten' }));
+export const mcpQ17Many = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q17-many' }));
+export const mcpQ17ManyAddressed = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q17-many-addressed' }));

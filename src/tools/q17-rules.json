@@ -1,0 +1,627 @@
+{
+ "_provenance": "Q17 distractors: guidance bullets from this server's live tool descriptions (eval-words, 2026-09-23), example-question lines and any line naming temperatuuroverschrijding / thermische_zone / co2_emissie / per-m² / whole-building / gebruiksoppervlakte removed; round-robin across tools; relates_to_fields = identifiers each line names. Frozen so the arms are reproducible.",
+ "targetPositions": [
+  41,
+  63
+ ],
+ "distractors": [
+  {
+   "source": "get_building_profile",
+   "text": "Before starting an energy analysis — get building context first (bouwjaar, label, oppervlakte)",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Daily records: date, temperatures (mean/min/max), HDD, CDD, weightedHdd, GHI (kWh/m²), sunshine hours, weatherCode + weatherLabel (Dutch pictogram label for calendars), and isForecast (true = predicted).",
+   "relates_to_fields": [
+    "weightedHdd",
+    "kWh",
+    "weatherCode",
+    "weatherLabel",
+    "isForecast"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "The answer is a single number or short list → respond with text",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "User asks for a table, overview, or list view of data",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_map",
+   "text": "Vehicle/fleet positions → render_map with type=car",
+   "relates_to_fields": [
+    "render_map"
+   ]
+  },
+  {
+   "source": "get_tool_call_log",
+   "text": "Before enriching a tool's description or schema — read a batch of real queryIntent values first, the same way production usage drives the Encode step of the Introspective Context Engineering loop.",
+   "relates_to_fields": [
+    "queryIntent"
+   ]
+  },
+  {
+   "source": "get_building_profile",
+   "text": "You already have the building profile and need energy meter data (this server does not provide that — see the Energiepartners / Priva ecosystem separately).",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Period summary: degree-day totals, gasNormalizationFactor, solar radiation totals, temperature stats, plus measuredDays / forecastDays counts.",
+   "relates_to_fields": [
+    "gasNormalizationFactor",
+    "measuredDays",
+    "forecastDays"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "User wants to browse/sort/filter individual records → use render_table",
+   "relates_to_fields": [
+    "render_table"
+   ]
+  },
+  {
+   "source": "render_table",
+   "text": "Displaying individual records with multiple fields",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_map",
+   "text": "Project locations → render_map with type=project",
+   "relates_to_fields": [
+    "render_map"
+   ]
+  },
+  {
+   "source": "get_tool_call_log",
+   "text": "You want the actual response data from a past call — this log stores interaction *shape* only (tool name, queryIntent, status, duration, which arm, which parameter NAMES were supplied, row count), never parameter values or response payloads. `paramsPresent` says that `huisletter` was passed, never that it was \"A\".",
+   "relates_to_fields": [
+    "queryIntent",
+    "paramsPresent"
+   ]
+  },
+  {
+   "source": "get_building_profile",
+   "text": "Postcode must be 4 digits + 2 uppercase letters, no space (e.g. \"3543AR\"). Huisnummer is the integer only — no letter.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_weather_context",
+   "text": "gasNormalizationFactor (KEY METRIC): multiply heating energy use by this to normalize to an average Dutch year.",
+   "relates_to_fields": [
+    "gasNormalizationFactor"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "You need to fetch data first → call the appropriate data source THEN pass the result here",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "User needs to sort, filter, or browse through records",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_map",
+   "text": "Building locations → get_building_profile → render_map with type=building",
+   "relates_to_fields": [
+    "get_building_profile",
+    "render_map"
+   ]
+  },
+  {
+   "source": "get_tool_call_log",
+   "text": "Results differ by environment, and the summary tells you which one you got:",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_building_profile",
+   "text": "If matchStatus = 'multiple_vbos': retry with huisletter (e.g. \"A\") or toevoeging (e.g. \"I\", \"bis\") to get the specific unit.",
+   "relates_to_fields": [
+    "multiple_vbos",
+    "matchStatus"
+   ]
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Week/day outlook: per-day weather icon + max temperature for recent AND upcoming days → query e.g. dateFrom=today-2, dateTo=today+7; read weatherLabel/weatherCode + tempMax per day, isForecast tells measured vs predicted.",
+   "relates_to_fields": [
+    "dateFrom",
+    "dateTo",
+    "weatherLabel",
+    "weatherCode",
+    "tempMax",
+    "isForecast"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "More than 3000 data points per dataset (line), 500 (most types), 2000 cells (matrix), or 200 flows/nodes (sankey/graph) → pre-aggregate first",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "Data has mixed types (text + numbers + dates + statuses) in one view",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_map",
+   "text": "Multiple locations for comparison (\"show all projects in Amsterdam on the map\")",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_tool_call_log",
+   "text": "An empty result with environment \"local\" usually just means no other tool has been called yet in this process — not a broken log.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_building_profile",
+   "text": "If matchStatus = 'not_found': verify postcode format (no spaces, uppercase). Some addresses use toevoeging instead of huisletter.",
+   "relates_to_fields": [
+    "not_found",
+    "matchStatus"
+   ]
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Weather-normalized energy comparison: fetch weather for two periods, compare gasNormalizationFactor and totalWeightedHDD to judge whether a raw consumption difference reflects usage or just weather.",
+   "relates_to_fields": [
+    "gasNormalizationFactor",
+    "totalWeightedHDD"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "Is the x-axis continuous (time/numeric) or categorical? Continuous → line / scatter / matrix / bubble. Categorical → bar / pie / treemap / radar / sankey / funnel / graph / boxplot / polarArea.",
+   "relates_to_fields": [
+    "polarArea"
+   ]
+  },
+  {
+   "source": "render_table",
+   "text": "Follow-up to a chart: \"show the underlying data\" → render_table with the same dataset",
+   "relates_to_fields": [
+    "render_table"
+   ]
+  },
+  {
+   "source": "render_map",
+   "text": "Any question that benefits from geographic/spatial context",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_tool_call_log",
+   "text": "Read consecutive queryIntent values as a narrative, not as isolated rows: three calls whose intent drifts from a broad question to a narrower one usually names an exact gap in the tool's description.",
+   "relates_to_fields": [
+    "queryIntent"
+   ]
+  },
+  {
+   "source": "get_building_profile",
+   "text": "EP-Online coverage: most labeled utility buildings (kantoor, industrie) have data. Residential without recent certification often lacks a label — energielabel null is normal for pre-2008 homes.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Solar-yield estimation: totalGHI_kWhM2 × installed kWp × performance ratio (0.75–0.85) gives an expected solar yield to compare actual production against.",
+   "relates_to_fields": [
+    "kWp"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "How many series / categories / datapoints? Pie hard-caps at 5, radar at 3 overlays, line at 5 series, sankey at 10 flows per tier, matrix sweet spots 7×24 / 12×N / 52×N.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "Presenting structured key-value pairs or compact summaries — even 5-10 rows benefit from proper formatting (currency, dates, percentages, badges) over plain markdown tables",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_map",
+   "text": "Use this tool when the user mentions a map, location, or position in combination with data",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_tool_call_log",
+   "text": "START UNFILTERED and read `summary.countByVariant`. That is the only view that shows an arm going missing. A `variant` filter returning zero looks identical whether the arm was never called or is failing to stamp its rows — on 2026-09-21 it was the latter, and the filter alone reported clean.",
+   "relates_to_fields": [
+    "countByVariant"
+   ]
+  },
+  {
+   "source": "get_building_profile",
+   "text": "Large panden (aantal_verblijfsobjecten > 10, e.g. shopping centers, office parks, care complexes): the returned VBO is the first match — it may be an individual unit with a small oppervlakte_m2. The energielabel and bouwjaar are pand-level and reliable; oppervlakte_m2 is VBO-level and may represent only one unit. For the full-building area, query by huisletter/toevoeging or use BAG directly.",
+   "relates_to_fields": [
+    "aantal_verblijfsobjecten",
+    "oppervlakte_m2"
+   ]
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Fighting-system risk: check daily tempMin/tempMax during shoulder months (Apr–May, Sep–Oct) for wide swings that can trigger simultaneous heating and cooling.",
+   "relates_to_fields": [
+    "tempMin",
+    "tempMax"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "Is the total meaningful, just proportions, or both? Total → stacked. Proportions only → 100% stacked or percentage bars. Both → grouped bar or small multiples (multiple render_chart calls).",
+   "relates_to_fields": [
+    "render_chart"
+   ]
+  },
+  {
+   "source": "render_table",
+   "text": "ALWAYS prefer render_table over markdown tables. Markdown tables lack number formatting, sorting, and visual hierarchy. Use render_table for ANY structured data presentation.",
+   "relates_to_fields": [
+    "render_table"
+   ]
+  },
+  {
+   "source": "render_map",
+   "text": "Single address without visual context → respond with text",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_tool_call_log",
+   "text": "Every arm writes to ONE log. `variant` is the only field that attributes a row to an arm — filter on it, and pass a large `limit`, since the filter narrows the fetched page rather than searching deeper.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_building_profile",
+   "text": "NEN 7120 / ISSO 75.3 (commercial buildings, labels before Dec 2021): energie_index populated; ep1/ep2/warmtebehoefte = null. berekend_energieverbruik inflated (200–1200+ kWh/m²). EMG forfaitair = null. sbi_code = full-text sector description.",
+   "relates_to_fields": [
+    "energie_index",
+    "berekend_energieverbruik",
+    "sbi_code",
+    "kWh"
+   ]
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Full daily detail over a long range (e.g. a year-long calendar or chart), where summaryOnly=true would drop the per-day rows you need: use select=[...] to project records to only the fields you need.",
+   "relates_to_fields": [
+    "summaryOnly"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "What is the purpose — ranking, distribution, flow, correlation, composition, deviation, trend? This is the primary trigger for the `type` rules.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "Data has 1-2 columns only → respond with a text list",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_map",
+   "text": "User wants tabular data with coordinates → use render_table",
+   "relates_to_fields": [
+    "render_table"
+   ]
+  },
+  {
+   "source": "get_tool_call_log",
+   "text": "A persistent bucket of `variant: \"unknown\"` in environment \"cloud\" means AN ARM IS RUNNING A STALE DEPLOY, not that the log is broken. Code deployed before variant stamping writes \"unknown\", an empty `paramsPresent` and `rowCount` 0 on every call, forever, while the repo source looks correct. Redeploy that arm before trusting any count from it.",
+   "relates_to_fields": [
+    "paramsPresent",
+    "rowCount"
+   ]
+  },
+  {
+   "source": "get_building_profile",
+   "text": "BENG eisen (eis_*): only for new-build BENG certification permits. Almost always null for existing buildings.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Energy normalization on forecast days — forecast values are predictions (isForecast=true); degree-days and gasNormalizationFactor use MEASURED days only.",
+   "relates_to_fields": [
+    "isForecast",
+    "gasNormalizationFactor"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "Are units consistent across series? No → no radar, no dual-axis line+bar unless there's a mechanistic link.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "Visual trends or comparisons → use render_chart",
+   "relates_to_fields": [
+    "render_chart"
+   ]
+  },
+  {
+   "source": "render_map",
+   "text": "No coordinates available yet → fetch data first, THEN call render_map",
+   "relates_to_fields": [
+    "render_map"
+   ]
+  },
+  {
+   "source": "get_tool_call_log",
+   "text": "Size `limit` to the whole batch. The default of 20 and the old cap of 100 are both smaller than a single eval run, which is why the 2026-09-21 audit could only cover its last third.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_building_profile",
+   "text": "gebouwtype/gebouwsubtype: only populated for Woningbouw (residential). Null for all Utiliteitsbouw.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Dates more than 14 days ahead — forecast horizon is today+14 (queries beyond it are rejected).",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_chart",
+   "text": "Is there a target/baseline/SLA? Yes → add an `options.annotations` overlay.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "Single aggregate answer (\"total hours?\") → respond with text + call render_chart if visualization helps",
+   "relates_to_fields": [
+    "render_chart"
+   ]
+  },
+  {
+   "source": "render_map",
+   "text": "Extract lat/lng, names, and relevant details",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_tool_call_log",
+   "text": "`sessionId` is per-REQUEST, not per-run: this server is stateless, so a subagent that made three calls produced three different sessionIds. Correlate a run by (variant + timestamp window), and count calls per arm per batch rather than trying to reconstruct individual runs.",
+   "relates_to_fields": [
+    "sessionId",
+    "sessionIds"
+   ]
+  },
+  {
+   "source": "get_building_profile",
+   "text": "matchStatus 'exact': single VBO found, high confidence",
+   "relates_to_fields": [
+    "matchStatus"
+   ]
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Sub-daily / hourly weather — this tool is daily-granularity only.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_chart",
+   "text": "Pie for a ranking question → horizontal bar, sorted desc",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "You need to fetch data first → call the appropriate data tool THEN pass results here",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_map",
+   "text": "Transform into markers[] with lat, lng, label, description, type",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_tool_call_log",
+   "text": "`paramsPresent` is the highest-value field for scoring: it says whether the caller supplied `huisletter` at all, which no answer text reliably reveals and which a subagent's self-reported PARAMS line can simply get wrong.",
+   "relates_to_fields": [
+    "paramsPresent"
+   ]
+  },
+  {
+   "source": "get_building_profile",
+   "text": "matchStatus 'multiple_vbos': multiple verblijfsobjecten at this address. Profile shows the first match — use huisletter/toevoeging to target a specific unit.",
+   "relates_to_fields": [
+    "multiple_vbos",
+    "matchStatus"
+   ]
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Locations outside the Netherlands — lat/lon validation enforces NL bounds (50.75–53.55 / 3.36–7.23).",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_chart",
+   "text": "Radar with mixed units or >3 overlays → matrix or small multiples (normalize to 0-100 if you must use radar)",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "More than 500 rows → pre-aggregate (group by, top-N) or filter before calling",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_map",
+   "text": "Call render_map — NEVER pass raw API responses, always reshape first",
+   "relates_to_fields": [
+    "render_map"
+   ]
+  },
+  {
+   "source": "get_tool_call_log",
+   "text": "Every other tool on this server writes to this same log — this tool only reads it back.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_building_profile",
+   "text": "matchStatus 'not_found': no BAG match — check postcode format (4 digits + 2 uppercase letters) and huisnummer",
+   "relates_to_fields": [
+    "not_found",
+    "matchStatus"
+   ]
+  },
+  {
+   "source": "get_weather_context",
+   "text": "For annual normalization: query full year (dateFrom=YYYY-01-01, dateTo=YYYY-12-31), summaryOnly=true → use gasNormalizationFactor and totalWeightedHDD from summary.",
+   "relates_to_fields": [
+    "dateFrom",
+    "dateTo",
+    "summaryOnly",
+    "gasNormalizationFactor",
+    "totalWeightedHDD"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "Treemap with one item >80% → horizontal bar with log scale",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "Limit to ≤500 rows (use filters, take/skip, or small date ranges)",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_map",
+   "text": "Pass the markers directly as the \"markers\" argument. Do NOT print/echo the JSON to chat or to stdout in an analysis step first.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_building_profile",
+   "text": "energielabel null: no registered label in EP-Online (common for older or unlabeled buildings)",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Location: pass coordinaten.lat / coordinaten.lon from get_building_profile as latitude/longitude. If unsure, omit them — default is Utrecht (52.09°N, 5.11°E), suitable for most NL locations.",
+   "relates_to_fields": [
+    "get_building_profile"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "Matrix with a dense continuous dimension (365 daily dates on one axis) → aggregate to week/month, or line",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "Extract the specific fields you need into columns[] + data[]",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_map",
+   "text": "Prefer POSITIONAL marker rows over keyed objects for any dataset >10 markers. \"markers\" accepts TWO shapes: Positional (preferred): [[lat, lng, label, description?, type?, color?], ...]  — values in this fixed order Keyed objects (fine for small sets): [{lat, lng, label, description, type, color}, ...] Positional cuts ~40-50% off per-marker tokens by omitting the repeated keys. Use it by default; fall back to keyed objects only when you have <5 markers and prefer the self-documenting shape.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_building_profile",
+   "text": "ep1_energiebehoefte_kwh_m2 (NTA 8800 only): Paris Proof 2040 targets — kantoor: 70 kWh/m², woningbouw: 100 kWh/m². No standardized target for onderwijs, gezondheidszorg, industrie.",
+   "relates_to_fields": [
+    "ep1_energiebehoefte_kwh_m2",
+    "kWh"
+   ]
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Max range: 730 days per query. For multi-year analysis, make two queries.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_chart",
+   "text": "Boxplot with n<5 per category → dot plot (scatter with individual points)",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "Choose column types for proper formatting (currency for money, date for timestamps, badge for statuses)",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_map",
+   "text": "Omit trailing fields you don't need. In the positional form a marker can be as short as [lat, lng, label] — description/type/color default to undefined.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_building_profile",
+   "text": "CALCULATED vs MEASURED — ep1_energiebehoefte, ep2_fossiel and berekend_energieverbruik are all CALCULATED NTA 8800 figures, not meter readings: ep1 is net energy DEMAND, ep2 is PRIMARY FOSSIL energy, berekend is modelled total use. Paris Proof and other metered benchmarks are defined on MEASURED FINAL energy at the meter, and this server holds NO metered data, so none of these three can be ranked against such a target as though it were measured consumption — the unit (kWh/m²) matches and the quantity does not. Where a question asks how a building compares to a metered benchmark, say that the comparison cannot be made from this data and why, rather than producing a ratio.",
+   "relates_to_fields": [
+    "ep1_energiebehoefte",
+    "ep2_fossiel",
+    "berekend_energieverbruik",
+    "kWh"
+   ]
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Week/day outlook: query dateFrom=today-2, dateTo=today+7 (or up to today+14). The tool auto-bridges the archive lag — no need to split archive vs forecast.",
+   "relates_to_fields": [
+    "dateFrom",
+    "dateTo"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "Funnel with stages that can grow (non-subset) → bar",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "Enable features based on data size: filtering/globalSearch for >50 rows, compact density for >10 columns",
+   "relates_to_fields": [
+    "globalSearch"
+   ]
+  },
+  {
+   "source": "render_map",
+   "text": "Only set \"type\" when it differs from the marker's natural domain (car / building / project). Omit for generic pins.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_building_profile",
+   "text": "energie_index (pre-NTA 8800): the main performance metric for most existing buildings. EI < 1.2 = A or better; 1.4–1.8 = C; >2.7 = G. No Paris Proof kWh/m² equivalent.",
+   "relates_to_fields": [
+    "energie_index",
+    "kWh"
+   ]
+  },
+  {
+   "source": "get_weather_context",
+   "text": "Full daily detail over a long range where summaryOnly=true would drop rows you need: use select=['date','weatherLabel','tempMax'] (or similar) to project records to only the fields you need instead of fetching all 12 fields per day. Ignored when summaryOnly=true (no records either way).",
+   "relates_to_fields": [
+    "summaryOnly",
+    "weatherLabel",
+    "tempMax"
+   ]
+  },
+  {
+   "source": "render_chart",
+   "text": "Stacked bar with >5 segments → grouped bar, or aggregate to \"top-N + other\"",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_table",
+   "text": "Pass the records directly as the \"data\" argument. Do NOT print/echo the JSON to chat or to stdout in an analysis step first — that doubles the tokens for no gain.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "render_map",
+   "text": "Only set \"color\" to override the default type color. Leave it off when the default is fine.",
+   "relates_to_fields": []
+  },
+  {
+   "source": "get_building_profile",
+   "text": "label_geldig_tot in the past: label expired, heropname may be needed for Label C obligation compliance",
+   "relates_to_fields": [
+    "label_geldig_tot"
+   ]
+  }
+ ]
+}

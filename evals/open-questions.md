@@ -210,6 +210,22 @@ alone: haiku 2/20. The same rule plus a server-computed reference-period figure:
 Handing over the finished factor did not add to that (11/20). Strong models fetch the data
 themselves (sonnet 10/10, opus 9/10); weak ones do not.
 
+**2c. Keep semantics per FIELD at the source, even though the model does not need it that
+way** (Q10, Q17). At runtime the form did not matter: prose, `relates_to_fields`, or a
+computed trigger scored the same, and one relevant rule among 100 was found as easily as
+alone. The case for structure is on the **authoring side**, and above all for the agent in
+the improvement loop (Examine → Flag → Validate → Encode → Iterate). Rules stored as
+`{ relates_to_fields, meaning, provenance }` make these visible:
+- what earlier rounds decided, and why;
+- which field a failing answer points at, and whether it already has a rule;
+- which fields have no semantics at all;
+- which rules are orphaned after a schema change.
+
+It is also the structure selective projection needs, if a scale is ever found where that
+pays. Keep that source form separate from the delivered form, which can stay short prose in
+the response. *Unmeasured:* whether an improving agent actually edits better from it. That
+would be a design-time experiment, not yet run.
+
 **3. Compute it server-side where the computation is determinate.** 78 of 78 across
 three questions, and the only mechanism that performs IDENTICALLY on all three models —
 which is exactly the property you want when you cannot know the model. But see the
@@ -2730,7 +2746,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**. Q16 ✓ (fetching is the barrier): **twelve of twenty**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**. Q16 ✓ (fetching is the barrier): **twelve of twenty**. Q17 ✓ (volume inert, addressing null): **twelve of twenty-one**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -3101,6 +3117,83 @@ RULE as `interpretation.guidance`. They differ ONLY in what the server adds to
 > ready-made number beside it may just be one more number.
 
 **Cost:** 60 runs, two new arms.
+
+## Q17 — Does addressing help when the relevant rule is ONE AMONG A HUNDRED?
+
+> **ANSWERED 2026-09-23 — no, and 100 rules did not hurt either. All three predictions
+> CONFIRMED.** See [`results/2026-09-23-q17-rules-at-scale.json`](results/2026-09-23-q17-rules-at-scale.json). 160 runs, haiku + sonnet, n=10. Audit exact,
+> 186/186.
+>
+> | question / model | 2 rules | 10 | 100 | 100 addressed |
+> |---|---|---|---|---|
+> | overheating / haiku | 10/10 | 10/10 | 10/10 | 10/10 |
+> | overheating / sonnet | 8/10 | 10/10 | 10/10 | 9/10 |
+> | area / haiku | 2/10 | 3/10 | 0/10 | 2/10 |
+> | area / sonnet | 10/10 | 10/10 | 10/10 | 10/10 |
+>
+> haiku found the overheating rule at position 41 of 100 in every run. There is no dilution
+> up to ~16k chars of response guidance, so there is nothing for addressing to win back, and
+> it won nothing back. Caveat: haiku's area cells are at a floor this sitting (2/10 with the
+> rule alone), which can hide dilution there; the overheating cells carry the result.
+
+> **REGISTERED 2026-09-23, BEFORE THE ARMS EXIST.**
+
+### Why it matters
+
+Q10 put ONE rule next to the data, so there was nothing to route; the answer was that
+labelling it changes nothing. The case `relates_to_fields` exists for is different:
+**many** rules in one response, and the model must find the one that applies. That is the
+production shape, a server that ships all its semantics, and nothing here has measured it.
+It has to be measured on a model that could be misled by volume. **Sonnet, not only haiku:**
+single-rule questions are at ceiling for sonnet, but 100 rules may not be.
+
+### The arms
+
+`get_building_profile`, `schema`'s one-liner description; all guidance is in the RESPONSE
+(`interpretation`). There are two target rules, both sliced from `interpretationBlock`: the
+overheating line and the scopes line.
+
+| arm | `interpretation` carries |
+|---|---|
+| `q17-one` | the 2 target rules, as prose |
+| `q17-many` | the same 2 among **98 real distractors**, 100 lines of prose; targets at fixed positions 41 and 63 |
+| `q17-many-addressed` | the same 100, each as `{ relates_to_fields, meaning }` |
+
+**The distractors** are real guidance bullets from this server's own tool descriptions
+(building, weather, render, log), in a fixed order, frozen in `src/tools/q17-rules.json`.
+Example-question lines are excluded, as is any line that mentions
+`temperatuuroverschrijding`, the thermal zone, `co2_emissie`, per-m² or whole-building
+totals, so no distractor helps or misleads either answer. `relates_to_fields` is extracted
+mechanically: the identifiers each rule names, or `[]`.
+
+### Run
+
+- `overheating` and `total-vs-per-m2`, **haiku and sonnet**, n=10 per cell, 120 runs, default
+  cap.
+- Scoring as Q13 (overheating) and RB1 (lead figure).
+
+### Prediction
+
+> **Volume does not hurt, and addressing adds nothing.** The repo found volume inert every time
+> it looked (Q2 pruning, Q15b 37k chars of definitions).
+>
+> - **P1:** `q17-many` within 3 of `q17-one` in every model × question cell. Falsified if any
+>   cell drops by ≥ 5.
+> - **P2:** `q17-many-addressed` within 3 of `q17-many` in every cell. Falsified if it recovers
+>   ≥ 4 in a cell where `many` dropped.
+> - **The outcome that would matter most:** P1 falsified (the dilution is real) together with P2
+>   falsified (addressing wins it back). That would be the first evidence for addressable
+>   semantics at scale.
+
+### AMENDED 2026-09-23 — a fourth arm, BEFORE ANY RUN
+
+A dose point is added so the curve reads 2 → 10 → 100. If a small selection beats the full
+set, that is the argument for **selective semantics** (project only what applies):
+
+- **`q17-ten`:** the 2 target rules among the FIRST 8 distractors of the same frozen list, as
+  prose, targets at positions 3 and 6. Key `eval-q17d`.
+- **P3: `q17-ten` within 3 of `q17-one` in every cell.** Falsified if any cell drops by ≥ 5.
+- **Run:** 160 runs, all four arms in one batch.
 
 ## RB2 and RB3 — re-baselines with the description cap RAISED. Registered 2026-09-23, BEFORE either runs
 
