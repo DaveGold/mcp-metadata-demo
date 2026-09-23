@@ -42,13 +42,16 @@ const description = 'Look up a Dutch building by postcode and house number.';
 export function registerGetBuildingProfileSchemaTool(
   server: McpServer,
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
+  epOnlineClient: EpOnlineClientLike,
+  // Q8b's `guidance-tool` reuses this tool with a pointer to its guide tool
+  // appended. Every other arm passes nothing and keeps the byte-identical one-liner.
+  opts: { descriptionOverride?: string } = {}
 ): void {
   server.registerTool(
     'get_building_profile',
     {
       title: 'Building Profile (BAG + Energy Label)',
-      description,
+      description: opts.descriptionOverride ?? description,
       inputSchema: z.object(inputSchema),
       outputSchema: outputSchemaWithoutAlerts,
       annotations: {

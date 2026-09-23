@@ -129,3 +129,11 @@ export const mcpGuidanceRecipe = onRequest(
   functionOptions,
   createHttpApp({ hosted: true, variant: 'guidance-recipe' })
 );
+
+/**
+ * Q8b arms — THROWAWAY. Vary only how `guidance-recipe`'s guidance call is pointed
+ * to: an imperative pointer on the same call, or a separate `get_derivation_guide`
+ * tool. See open-questions.md Q8b.
+ */
+export const mcpGuidanceStrong = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'guidance-strong' }));
+export const mcpGuidanceTool = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'guidance-tool' }));
