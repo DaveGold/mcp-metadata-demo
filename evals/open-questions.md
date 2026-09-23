@@ -210,6 +210,22 @@ alone: haiku 2/20. The same rule plus a server-computed reference-period figure:
 Handing over the finished factor did not add to that (11/20). Strong models fetch the data
 themselves (sonnet 10/10, opus 9/10); weak ones do not.
 
+**2c. Keep semantics per FIELD at the source, even though the model does not need it that
+way** (Q10, Q17). At runtime the form did not matter: prose, `relates_to_fields`, or a
+computed trigger scored the same, and one relevant rule among 100 was found as easily as
+alone. The case for structure is on the **authoring side**, and above all for the agent in
+the improvement loop (Examine → Flag → Validate → Encode → Iterate). Rules stored as
+`{ relates_to_fields, meaning, provenance }` make these visible:
+- what earlier rounds decided, and why;
+- which field a failing answer points at, and whether it already has a rule;
+- which fields have no semantics at all;
+- which rules are orphaned after a schema change.
+
+It is also the structure selective projection needs, if a scale is ever found where that
+pays. Keep that source form separate from the delivered form, which can stay short prose in
+the response. *Unmeasured:* whether an improving agent actually edits better from it. That
+would be a design-time experiment, not yet run.
+
 **3. Compute it server-side where the computation is determinate.** 78 of 78 across
 three questions, and the only mechanism that performs IDENTICALLY on all three models —
 which is exactly the property you want when you cannot know the model. But see the
