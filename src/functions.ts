@@ -118,13 +118,3 @@ export const mcpWords = onRequest(functionOptions, createHttpApp({ hosted: true,
  */
 export const mcpOpaque = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'opaque' }));
 export const mcpOpaqueWords = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'opaque-words' }));
-
-/**
- * Q15 arm — THROWAWAY. `mcpWords` with the overheating line and a canary inserted
- * inside the first 2,048 characters of the description, the part Claude Code
- * actually delivers (Q7). Delete once Q15 is recorded.
- */
-export const mcpWordsFront = onRequest(
-  functionOptions,
-  createHttpApp({ hosted: true, variant: 'words-front' })
-);

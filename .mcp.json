@@ -62,10 +62,6 @@
     "eval-inline-oneline": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpInlineOneline"
-    },
-    "eval-words-front": {
-      "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpWordsFront"
     }
   }
 }

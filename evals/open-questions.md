@@ -1958,6 +1958,7 @@ contrary.
 > [`results/2026-09-23-q15-delivered-description.json`](results/2026-09-23-q15-delivered-description.json).
 > haiku, `overheating`, n=20 per arm, one batch at the **default** 2,048 cap, delivery
 > verified host-side and on the wire before any run. Audit exact, 84/84.
+> **`words-front` was deleted after the run** (`mcpWordsFront` removed 2026-09-23; code in commit 481c37b, reverted).
 >
 > | arm | 1.5 line delivered in | CORRECT | cites 1.5 | fabricated | D7 |
 > |---|---|---|---|---|---|
