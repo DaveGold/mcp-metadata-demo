@@ -92,9 +92,11 @@ export async function referencePeriodWeightedHDD(
   const hit = cache.get(key);
   if (hit) return hit;
 
-  let perWindow: DayWeightedHdd[][];
+  // Sequential on purpose: ten parallel requests trip Open-Meteo's concurrency limit
+  // ("Too many concurrent requests", Q19 2026-09-24). The cache makes the latency one-off.
+  const perWindow: DayWeightedHdd[][] = [];
   try {
-    perWindow = await Promise.all(windows.map(({ from, to }) => fetchArchive(from, to)));
+    for (const { from, to } of windows) perWindow.push(await fetchArchive(from, to));
   } catch (error) {
     return { value: null, reason: `reference archive fetch failed: ${error instanceof Error ? error.message : String(error)}` };
   }
