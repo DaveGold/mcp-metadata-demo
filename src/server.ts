@@ -82,6 +82,7 @@ export type ServerVariant =
   | 'q16-ref'
   | 'q16-computed'
   | 'q17-one'
+  | 'q17-ten'
   | 'q17-many'
   | 'q17-many-addressed';
 
@@ -176,10 +177,10 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     return server;
   }
 
-  if (variant === 'q17-one' || variant === 'q17-many' || variant === 'q17-many-addressed') {
+  if (variant === 'q17-one' || variant === 'q17-ten' || variant === 'q17-many' || variant === 'q17-many-addressed') {
     // Q17. Two target rules in the RESPONSE: alone, among 98 real distractors as prose,
     // or the same 100 with relates_to_fields. Minimal neighbours.
-    const form = variant === 'q17-one' ? 'one' : variant === 'q17-many' ? 'many' : 'many-addressed';
+    const form = variant === 'q17-one' ? 'one' : variant === 'q17-ten' ? 'ten' : variant === 'q17-many' ? 'many' : 'many-addressed';
     const server = new McpServer(
       { name: 'metadata-demo-minimal', version: VERSION },
       { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }

@@ -98,6 +98,10 @@
     "eval-q17c": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ17ManyAddressed"
+    },
+    "eval-q17d": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ17Ten"
     }
   }
 }

@@ -32,6 +32,7 @@ export {
   mcpQ16Ref,
   mcpQ16Computed,
   mcpQ17One,
+  mcpQ17Ten,
   mcpQ17Many,
   mcpQ17ManyAddressed,
 } from './functions.js';

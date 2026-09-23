@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { overheatingLine } from './get-building-profile.js';
 import { scopesLine } from './get-building-profile-q10.js';
-import { q17Rules, q17Interpretation } from './get-building-profile-q17.js';
+import { q17Rules, q17Interpretation, q17Ten } from './get-building-profile-q17.js';
 
 describe('Q17 rules', () => {
   it('are 100, with the targets at 41 and 63', () => {
@@ -18,5 +18,10 @@ describe('Q17 rules', () => {
     const addr = q17Interpretation('many-addressed') as Array<{ meaning: string }>;
     expect(prose).toEqual(addr.map((r) => r.meaning));
     expect(q17Interpretation('one')).toBe(overheatingLine + '\n' + scopesLine);
+  });
+  it('the ten-rule dose point holds both targets among 8 distractors', () => {
+    expect(q17Ten).toHaveLength(10);
+    expect(q17Ten[3]).toBe(overheatingLine);
+    expect(q17Ten[6]).toBe(scopesLine);
   });
 });

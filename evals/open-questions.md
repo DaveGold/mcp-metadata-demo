@@ -3153,6 +3153,16 @@ mechanically: the identifiers each rule names, or `[]`.
 >   falsified (addressing wins it back). That would be the first evidence for addressable
 >   semantics at scale.
 
+### AMENDED 2026-09-23 — a fourth arm, BEFORE ANY RUN
+
+A dose point is added so the curve reads 2 → 10 → 100. If a small selection beats the full
+set, that is the argument for **selective semantics** (project only what applies):
+
+- **`q17-ten`:** the 2 target rules among the FIRST 8 distractors of the same frozen list, as
+  prose, targets at positions 3 and 6. Key `eval-q17d`.
+- **P3: `q17-ten` within 3 of `q17-one` in every cell.** Falsified if any cell drops by ≥ 5.
+- **Run:** 160 runs, all four arms in one batch.
+
 ## RB2 and RB3 — re-baselines with the description cap RAISED. Registered 2026-09-23, BEFORE either runs
 
 > **RUN 2026-09-23 — both CONFIRMED.**

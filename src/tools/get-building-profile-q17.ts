@@ -21,7 +21,7 @@ import { outputSchemaWithoutAlerts } from './get-building-profile-words.js';
 import { scopesLine, scopesFields } from './get-building-profile-q10.js';
 import rules from './q17-rules.json' with { type: 'json' };
 
-export type Q17Form = 'one' | 'many' | 'many-addressed';
+export type Q17Form = 'one' | 'ten' | 'many' | 'many-addressed';
 
 type Rule = { relates_to_fields: string[]; meaning: string };
 const targets: Array<[number, Rule]> = [
@@ -39,8 +39,17 @@ export const q17Rules: Rule[] = (() => {
   return out;
 })();
 
+/** The 10-rule dose point: the first 8 distractors with the targets at 3 and 6. */
+export const q17Ten: string[] = (() => {
+  const d = (rules.distractors as Array<{ text: string }>).slice(0, 8).map((x) => x.text);
+  d.splice(3, 0, overheatingLine);
+  d.splice(6, 0, scopesLine);
+  return d;
+})();
+
 export function q17Interpretation(form: Q17Form): unknown {
   if (form === 'one') return [overheatingLine, scopesLine].join('\n');
+  if (form === 'ten') return q17Ten.join('\n');
   if (form === 'many') return q17Rules.map((r) => r.meaning).join('\n');
   return q17Rules;
 }
