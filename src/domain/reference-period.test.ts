@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-import { referencePeriodWeightedHDD, type DayWeightedHdd } from './reference-period.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { clearReferenceCache, referencePeriodWeightedHDD, type DayWeightedHdd } from './reference-period.js';
 
 /** Every day in [s, e] carries weightedHdd 1, so a window's total is its length in days. */
 function unitArchive() {
@@ -12,11 +12,16 @@ function unitArchive() {
 }
 
 describe('referencePeriodWeightedHDD', () => {
-  it('averages the same window over the 10 previous years in ONE archive call', async () => {
+  beforeEach(() => clearReferenceCache());
+
+  it('fetches ONLY the reference windows, never the span between them, and averages them', async () => {
     const archive = unitArchive();
     const r = await referencePeriodWeightedHDD('2024-01-01', '2024-03-31', archive);
-    expect(archive).toHaveBeenCalledTimes(1);
-    expect(archive).toHaveBeenCalledWith('2014-01-01', '2023-03-31');
+    // Open-Meteo weighs by data volume: ten 90-day windows, not one 10-year span (Q19, 2026-09-24).
+    expect(archive).toHaveBeenCalledTimes(10);
+    expect(archive).toHaveBeenCalledWith('2014-01-01', '2014-03-31');
+    expect(archive).toHaveBeenCalledWith('2023-01-01', '2023-03-31');
+    for (const [s, e] of archive.mock.calls) expect(Date.parse(e) - Date.parse(s)).toBeLessThan(100 * 86_400_000);
     // 2014–2023: Q1 is 90 days, 91 in 2016 and 2020.
     expect(r).toMatchObject({ referencePeriodWeightedHDD: 90.2, fromYear: 2014, toYear: 2023, yearsUsed: 10 });
   });
@@ -30,7 +35,8 @@ describe('referencePeriodWeightedHDD', () => {
   it('maps a 29 February end to 28 February in non-leap years', async () => {
     const archive = unitArchive();
     const r = await referencePeriodWeightedHDD('2024-02-01', '2024-02-29', archive);
-    expect(archive).toHaveBeenCalledWith('2014-02-01', '2023-02-28');
+    expect(archive).toHaveBeenCalledWith('2015-02-01', '2015-02-28');
+    expect(archive).toHaveBeenCalledWith('2016-02-01', '2016-02-29');
     // 2014–2023: 28 days, 29 in 2016 and 2020.
     expect(r).toMatchObject({ referencePeriodWeightedHDD: 28.2 });
   });
@@ -46,6 +52,15 @@ describe('referencePeriodWeightedHDD', () => {
       throw new Error('503');
     });
     expect(r).toEqual({ value: null, reason: expect.stringContaining('503') });
+  });
+
+  it('caches per scope: a repeat request for the same location and window fetches nothing', async () => {
+    const archive = unitArchive();
+    await referencePeriodWeightedHDD('2024-01-01', '2024-03-31', archive, 10, '52.09,5.11');
+    await referencePeriodWeightedHDD('2024-01-01', '2024-03-31', archive, 10, '52.09,5.11');
+    expect(archive).toHaveBeenCalledTimes(10);
+    await referencePeriodWeightedHDD('2024-01-01', '2024-03-31', archive, 10, '53.22,6.57');
+    expect(archive).toHaveBeenCalledTimes(20);
   });
 
   it('a window of a year or longer is not a reference period', async () => {

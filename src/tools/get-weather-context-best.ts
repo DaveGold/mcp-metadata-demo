@@ -159,7 +159,7 @@ export async function buildBestWeatherResponse(
   let reference: WeatherCtx['reference'] = null;
   if (!fullYear && !none) {
     const lastMeasured = measured[measured.length - 1].date;
-    reference = await referencePeriodWeightedHDD(measured[0].date, lastMeasured, archive);
+    reference = await referencePeriodWeightedHDD(measured[0].date, lastMeasured, archive, 10, deps.archive ? '' : `${lat.toFixed(2)},${lon.toFixed(2)}`);
   }
   const ref = reference && 'referencePeriodWeightedHDD' in reference ? reference : null;
 
