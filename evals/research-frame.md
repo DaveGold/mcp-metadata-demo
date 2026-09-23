@@ -50,7 +50,7 @@ about "the description weakened" is safe to quote until Q7 lands.
 | axis | tested by | status |
 |---|---|---|
 | channel | **Q1** (description vs response, byte-identical) · **Q1b** · **Q15 / Q15b** | **Answered 2026-09-23: delivery, not channel.** Q1's 4/30 vs 29/30 was undelivered vs delivered (Q7). With the sentence delivered in both channels, they tie: 20/20 vs 20/20 at the default cap (line inside the cut) and with the cap raised (whole block). Haiku, one question. |
-| channel | **Q8** (bootstrap/guidance call) · **Q11** (`outputSchema`) | **Q8 open**, to run with the cap raised. **Q11's main half answered by accounting (2026-09-23): `outputSchema` is not in the model-facing request on Claude Code** — a 7,659-char schema difference shows up as +181–336 tokens. |
+| channel | **Q8** (bootstrap/guidance call) · **Q11** (`outputSchema`) | **Q8 answered 2026-09-23: the guidance call works when it is made, and whether it is made depends on the model.** sonnet 10/10 called and 10/10 correct; haiku 0/10 called and 0/10 route-correct. **Q11's main half answered by accounting (2026-09-23): `outputSchema` is not in the model-facing request on Claude Code** — a 7,659-char schema difference shows up as +181–336 tokens. |
 | timing | **Q7** (is the description still present post-tool?) | **Answered 2026-09-22.** Yes: definitions are re-sent every request. But the description is cut to its first 2,048 chars on every request. |
 | distance | **Q9** (position within a response; turns between guidance and data) | **Open.** |
 | conditionality | **Q2** (prune the block to the record) | **Answered: free, not cheap.** −67% of the block, 0 answers changed, −4.8% tokens. |
@@ -134,7 +134,7 @@ The draft lists eight principles to falsify. Here is where each one actually sta
 | # | principle | status |
 |---|---|---|
 | 1 | Descriptions are for capability discovery | **Falsified as an exclusive rule** (Q15) — a domain sentence inside the first 2,048 chars was applied 20/20, the same as in the response. What holds: on this host a description only carries its first 2,048 chars, so anything past that must go elsewhere. |
-| 2 | Guidance is for operating the capability | **Untested as a channel** (Q8) |
+| 2 | Guidance is for operating the capability | **Conditional** (Q8): a guidance call delivers as well as the response when it is made, but haiku never made it (0/10 against sonnet's 10/10). Usable as an addition, not as the sole carrier. |
 | 3 | Output schemas are the canonical home for stable output semantics | **Not deliverable on Claude Code** (Q11, by accounting): `outputSchema` never reaches the model there. It can be canonical for the SERVER; anything the model needs must be projected into the description's first 2,048 chars or the response. |
 | 4 | Responses are for interpreting returned instances | **Supported as a robust default, not as a better channel** — Q1's 29/30 was against an undelivered description (Q7), and a delivered description ties it (Q15/Q15b). The response is host-independent and can be conditional on the record. |
 | 5 | Data-dependent semantics should travel with the data | **Supported structurally, not economically** (Q2: free, not cheap) |
