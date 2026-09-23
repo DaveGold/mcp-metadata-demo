@@ -2078,6 +2078,21 @@ delivered source for the names** before its first weather response. The model-vi
 
 ## Q12 — A second domain
 
+> **RUN 2026-09-23 (weather amendment) — NO HEADROOM, NOT SCORED.** See
+> [`results/2026-09-23-q12-weather-replication.json`](results/2026-09-23-q12-weather-replication.json). 60 runs, haiku + sonnet, n=10 per cell. Audit exact,
+> 126/126. The weather tool's own partial-period rule was placed in the description
+> (`wx-desc`) or the response (`wx-resp`), with a no-rule control (`wx-none`): **18/20, 19/20,
+> 19/20.** Both channels tie, but the control is at ceiling. Asked to compare two quarters,
+> both models compare their degree-days without being told, and only 1 run in 60 took the
+> `gasNormalizationFactor` road. The question does not need the rule, so where it sits
+> cannot matter. As the amendment fixed before the run, the run measured nothing, and it is
+> not counted in the ledger.
+>
+> **Q12's gate stays open, and cannot be closed from this repo.** Both named candidates are
+> closed APIs, and the public-data version has no headroom on this question. A sharper
+> weather question is recorded in the file but not registered: normalise ONE quarter to an
+> average year, where multiplying by 2.53 is the tempting error.
+
 > **REGISTERED 2026-09-22. THE GATE, NOT AN EXPERIMENT.**
 
 ### Why it matters
@@ -2919,7 +2934,7 @@ failure mode uncovered.
    is Q11's `select-blind`, then Q12. *Superseded text follows.* **Q8, then Q9's distance half.** Q8 builds the arm that Q9's distance protocol needs,
    so one deploy serves both. Q9's position half (`inline-head`) can ride along with
    anything; it is a one-line arm.
-4. **~~Q11~~ DONE 2026-09-23.** Only **Q12** (a second domain) remains open. Q10 is suspended
+4. **~~Q11~~ DONE 2026-09-23. ~~Q12~~ RUN 2026-09-23 on weather: no headroom, not scored.** The register is closed except the external-validity gate, which needs a public second domain. Q10 is suspended
    and Q9's position half is retired.
    *Superseded text follows.* **Q11: the main half is answered by accounting on this host (see its amendment); only
    `select-blind` (built off `minimal`) and the meanings half remain.**
