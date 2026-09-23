@@ -60,6 +60,15 @@ description: Run the eval set in evals/questions.json against the arm servers (t
    subagent transcripts sit under `<child-session-id>/subagents/`. Keep every arm
    of a batch on the same kind of parent session.
 
+   **Two more host and server limits, found in Q9 (2026-09-23).** (a) A tool result
+   over Claude Code's MCP output limit (~25k tokens; a 79k-char full-year weather call is
+   over it) is REPLACED by a "saved to file" notice. The subagent never sees the payload,
+   and it cannot read the file. Check result sizes in the subagent transcript before you
+   build a design on a large response. (b) The hosted endpoint rate-limits at 30
+   requests/minute per IP + user agent per instance. Waves of 6 subagents making 3–5 calls
+   each tripped it. Keep multi-call waves small (3 worked), and treat a "Too many requests"
+   result as NO_RECORD, not as model behaviour.
+
    The only check that counts: can you call
    `mcp__eval-<arm>__get_building_profile` right now — an actual call, not a
    schema lookup? If not, STOP. Do not attempt the run. Re-check later in the

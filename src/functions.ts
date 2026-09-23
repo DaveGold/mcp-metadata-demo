@@ -131,9 +131,13 @@ export const mcpGuidanceRecipe = onRequest(
 );
 
 /**
- * Q8b arms — THROWAWAY. Vary only how `guidance-recipe`'s guidance call is pointed
- * to: an imperative pointer on the same call, or a separate `get_derivation_guide`
- * tool. See open-questions.md Q8b.
+ * Q8b arm — `guidance-recipe` with an imperative pointer to the no-argument call.
+ * Kept for Q9's distance half. (Its sibling `mcpGuidanceTool` was deleted after Q8b.)
  */
 export const mcpGuidanceStrong = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'guidance-strong' }));
-export const mcpGuidanceTool = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'guidance-tool' }));
+
+/**
+ * Q9 position arm — THROWAWAY. `mcpInline` with `interpretation` emitted as the first
+ * key of every response instead of the last. See open-questions.md Q9.
+ */
+export const mcpInlineHead = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'inline-head' }));

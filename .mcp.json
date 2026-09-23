@@ -71,9 +71,9 @@
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpGuidanceStrong"
     },
-    "eval-g3-recipe": {
+    "eval-inline-h": {
       "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpGuidanceTool"
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpInlineHead"
     }
   }
 }

@@ -218,6 +218,11 @@ and lacked "say X rather than producing a ratio". *(Q4 hypothesis — arms built
 one question where the correct call cannot be EXPRESSED without the parameter, and ≈0
 everywhere else. Cheap, so do it — but do not expect a schema to carry meaning.
 
+**5b. Keep every guidance-carrying response under the host's output limit** (Q9). On
+Claude Code a result over ~25,000 tokens is replaced by a *"saved to file"* notice, and the
+guidance inside it is lost with the data. Under the limit, distance barely matters: a recipe
+fetched once was still applied after ~62k chars of other tool output (haiku, 9–10/10).
+
 **6. Do not spend effort on volume.** Cutting 37–50% of the prose changed zero answers
 in 180. And adding it did not hurt: uncut `words` scored 20/20 with the line inside
 ~37.6k characters of tool definitions (Q15b). It did cost tokens (+23.7%).
@@ -1421,6 +1426,7 @@ input.
 
 > **ANSWERED 2026-09-23 — YES, by wording alone. All three predictions CONFIRMED.** See
 > [`results/2026-09-23-q8b-guidance-discovery.json`](results/2026-09-23-q8b-guidance-discovery.json). haiku, n=10 per arm, one batch. Audit exact, 52/52.
+> `guidance-tool` was deleted afterwards (`mcpGuidanceTool`, 2026-09-23; code in git history). `guidance-strong` is kept for Q9.
 >
 > | arm | pointer | made the call | route-correct | fabricated |
 > |---|---|---|---|---|
@@ -1484,6 +1490,33 @@ log, with before/after lookup recorded; value- and route-correct on `gas-estimat
 as in Q8. **Cost:** 30 runs, two new arms, one deploy.
 
 ## Q9 — Position inside the response, and distance across turns
+
+> **ANSWERED 2026-09-23 — distance is FLAT (prediction falsified); position NOT MEASURED AT
+> SCALE.** See [`results/2026-09-23-q9-position-distance.json`](results/2026-09-23-q9-position-distance.json). haiku. Audits exact (38/38, 101/101).
+>
+> **Distance** (`guidance-strong`, `gas-estimate`, n=10 per distance, redesigned run):
+>
+> | intervening quarterly weather calls | route-correct |
+> |---|---|
+> | 0 | 10/10 |
+> | 1 (~21k chars) | 10/10 |
+> | 3 (~62k chars) | 9/10 |
+>
+> Actual distance: 5 of the 6 runs that really had ~62k chars between the guidance and the
+> lookup were correct. The registered **≥ 5 lost** did not happen: one was lost, within the
+> "flat" band fixed before the run, so the prediction is **FALSIFIED**. The registration's own
+> reading of a flat curve applies: *guidance delivered once per session is safe*, here for
+> haiku up to ~15k tokens of intervening, irrelevant tool output.
+>
+> **Position** (`inline-head` vs `inline`, `weather-partial-normalization`): every one of the 20
+> runs asked for `summaryOnly` (~1.2k-char responses), so there was nothing for the block to
+> sit before or after. By the rule fixed before the run, it is **not measured at scale**
+> (10/10 vs 9/10 as numbers).
+>
+> **Host finding from the void first distance run:** a 79k-char result was **replaced** by a
+> 1.7k *"saved to file"* notice (the 25,000-token MCP output limit). Guidance inside an
+> over-limit response never reaches the model, whether it sits first or last. This is the
+> response-side twin of Q7's 2,048-char description cut.
 
 > **REGISTERED 2026-09-22, BEFORE THE RUN.**
 
@@ -1584,6 +1617,92 @@ host description cap touches a tool result.
 - The distance half still needs Q8's arm, which should be deployed first.
 
 ---
+
+### BUILD NOTES, fixed 2026-09-23 — after the arms were built, BEFORE ANY RUN
+
+**Model: haiku** for both halves (the registration says "1 model"). It is the model most
+exposed to both effects, and after Q8b it reliably makes the guidance call.
+
+**Position half — `inline-head` vs `inline`, `weather-partial-normalization`, n=10 each.**
+
+- **`inline-head`** is `inline` byte for byte (tools/list, instructions, server name, payload
+  content), except `interpretation` is emitted as the **first** JSON key of both the building
+  and the weather response instead of the last. Four tests pin this, and the weather order
+  is checked on the wire.
+- **The guidance the question needs reaches both arms only through the response.** The
+  weather description is the 87-char minimal one. The HDD-ratio rule and the
+  `gasNormalizationFactor` warning arrive as computed `interpretation.alerts` lines for any
+  partial-period query.
+- **The distance risk, stated before the run.** The question needs two quarterly calls. The
+  model chooses the payload: `summaryOnly` gives ~1.3k chars with nothing to sit "before",
+  full records give ~90 daily rows (~18k chars). So position can only matter in runs that
+  fetch records. Response size and `summaryOnly`/`select` are recorded per call. The position
+  effect is reported overall and for record-fetching runs. **If fewer than 5 runs per arm
+  fetch records, the position half is reported as *not measured at scale*.**
+- **Scoring:** as the question pins it. Correct = 4,434 ± 60 m³ (the plain-HDD road, ~4,451,
+  is also inside). Route is mandatory: weightedHDD / HDD / gasNormalizationFactor / none, and
+  a gasNormalizationFactor answer (~10,626) is confidently wrong. Fabrication per its watch.
+- **Thresholds as registered:** within 2 of 10 confirms, ≥ 3 apart falsifies.
+
+**Distance half — `guidance-strong`, `gas-estimate`, n=10 per distance, d ∈ {0, 1, 3}.**
+
+- **d=0** is the plain `eval-guidance-strong` agent (Q8b: 10/10 called, 10/10 correct).
+  **d=1 / d=3** are the same agent plus ONE protocol paragraph: after the first tool call,
+  call `get_weather_context` exactly N times for Amsterdam, full year 2024, no other
+  arguments. Each such response is ~73k chars (~18k tokens) of daily records. So the recipe
+  from the guidance call sits ~18k or ~55k tokens before the lookup it must be applied to.
+- **Confound, stated:** d=1/d=3 have a longer system prompt than d=0. A d=0 agent with a
+  zero-call protocol sentence would be stranger, not cleaner.
+- **Order is recorded, not assumed.** If a run does not make the guidance call first, or
+  makes a different number of weather calls, it is scored on its ACTUAL distance and flagged.
+- **Scoring as Q8.** Registered: "≥ 5 lost between 0 and 3" confirms. **"Flat", left
+  undefined at registration, is fixed now: falsified if d=3 is within 2 of d=0.** A loss of
+  3–4 is partial.
+- The session cap is left at the default: every arm here carries minimal descriptions.
+
+**Cost:** 20 + 30 = 50 runs. One new arm (`mcpInlineHead`), two agent files.
+
+### AMENDED 2026-09-23 — the first distance run was VOID; a redesign, fixed BEFORE it runs
+
+The first distance run (30 runs, 15:19–15:25Z) measured nothing about distance. It is kept
+and reported in the results file, and is not scored against the prediction. Three instrument
+failures, all found in the transcripts:
+
+1. **The host does not deliver a large tool result.** A full-year `get_weather_context`
+   response is 79,182 chars. Claude Code replaced every one with a **1,713-char notice**:
+   *"result … exceeds maximum allowed tokens. Output has been saved to …/tool-results/….txt"*.
+   The subagent has no file-reading tool. So the records, and the `interpretation` inside
+   them, never reached the model, and the "~18k tokens of distance" never existed. This is
+   the documented 25,000-token MCP output limit, observed as replacement rather than
+   truncation. **It is also a finding in its own right:** on this host, guidance inside an
+   over-limit response is not delivered at all, whether it sits first or last.
+2. **The protocol paragraph displaced the guidance call.** *"After your FIRST tool call …
+   call get_weather_context"* made haiku do the lookup first. Among runs that got a
+   profile, guidance-first was 8/8 at d=0 (no paragraph) but 2/10 at d=1 and 2/10 at d=3.
+   The run measured instruction competition, not retention.
+3. **The server's own rate limiter** (30 requests / minute per IP + user agent per instance)
+   returned *"Too many requests"* in wave 2. Runs with no profile result are NO_RECORD.
+
+**The redesign, fixed now.**
+
+- **Distance is made of responses the host delivers.** Each intervening call fetches one
+  QUARTER of 2024 with full records (~30k chars, ~8–10k tokens, under the cap). d=1 is
+  Q2 2024; d=3 is Q2, Q3 and Q4 2024. So the recipe sits ~0, ~9k or ~28k tokens before the
+  lookup. The preflight checks, from a subagent transcript, that a quarterly result arrives
+  inline and is not replaced.
+- **The same protocol paragraph at every distance, including d=0**, and it fixes the order:
+  (1) `get_building_profile` with no arguments; (2) the listed weather calls (none at d=0);
+  (3) carry on answering. The guidance call is now protocol-prompted. That is right for this
+  half, which tests retention after delivery, not discovery (Q8b measured discovery). It
+  also removes the prompt-length confound the build notes disclosed.
+- **Waves of 3** (one per distance), ten waves, to stay under the rate limit. A run with no
+  profile result is NO_RECORD, kept, and dropped from its denominator. It is not replaced.
+- **The prediction and thresholds are unchanged:** ≥ 5 lost between d=0 and d=3 confirms,
+  and d=3 within 2 of d=0 falsifies. Scoring as Q8. Runs that do not follow the protocol
+  order are scored on their actual distance and flagged.
+- **Position half, recorded as run:** all 20 runs used `summaryOnly` (~1.2k-char responses),
+  so it is *not measured at scale*, per the build notes. It is not re-run here. Forcing record
+  fetches would need a protocol too, and finding 1 caps the testable window at ~25k tokens.
 
 ## Q10 — Field addressability: can `relates_to_fields` beat a misleading name?
 
@@ -2320,7 +2439,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -2658,7 +2777,8 @@ failure mode uncovered.
    `overheating`, with both prose and renaming already falsified (Q5, Q6) — and it is
    registered as a null, so a win would be the surprise and a loss retires a fashionable
    primitive before it reaches a guide.
-3. **Q8, then Q9's distance half.** Q8 builds the arm that Q9's distance protocol needs,
+3. **~~Q8, then Q9's distance half.~~ DONE 2026-09-23:** Q8, Q8b and Q9 are answered. Next
+   is Q11's `select-blind`, then Q12. *Superseded text follows.* **Q8, then Q9's distance half.** Q8 builds the arm that Q9's distance protocol needs,
    so one deploy serves both. Q9's position half (`inline-head`) can ride along with
    anything; it is a one-line arm.
 4. **Q11: the main half is answered by accounting on this host (see its amendment); only
