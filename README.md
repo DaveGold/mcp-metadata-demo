@@ -2,7 +2,7 @@
 
 From the talk *[Most MCP servers are empty](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)* (MCPCon Europe · Amsterdam · Sep 18 2026) — an extracted demo repo, showing part of this:
 
-1. A skill that runs the loop on **your** server — [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) / [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md)
+1. A skill that builds a new server, or audits an existing one, against the eval evidence in this repo — [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) / [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md). Every rule links to the result behind it in [`references/evidence.md`](.claude/skills/rich-domain-mcp-server/references/evidence.md)
 2. The practitioner paper — [*The Missing Layer*](https://davidgolverdingen.nl/en/the-missing-layer)
 3. Example code — [`get-building-profile.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts)
 4. A thin and a rich MCP server on the same public API — [Try it live](#try-it-live-no-install-no-api-key)
@@ -141,7 +141,9 @@ The two levels use the metadata layer differently, and the difference matters. `
 - `render_map` — Leaflet maps with markers (car, building, project, pin)
 - `fetch_image` — server-side image proxy with SSRF protection (used by `render_table` when the iframe CSP blocks `img-src`)
 
-Also included: standalone [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) and [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md) skills teaching the method behind this repo (Scaffold → Examine → Flag → Validate → Encode → Iterate), generalized so they're useful for building *your own* rich-domain MCP server, not just for maintaining this one.
+Also included: standalone [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) and [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md) skills teaching the method behind this repo (Scaffold or Audit → Examine → Flag → Validate → Encode → Iterate), generalized so they're useful for building *your own* rich-domain MCP server, not just for maintaining this one. Since 2026-09-23 the skill is rewritten on the eval results: what actually reaches the model (the 2,048-char description cut, the undelivered output schema, the response-size limit), field naming, response-side interpretation, shipping the data a rule needs, and provenance per rule.
+
+The **`best`** arm (`/mcpBest`, [`get-building-profile-best.ts`](src/tools/get-building-profile-best.ts), [`get-weather-context-best.ts`](src/tools/get-weather-context-best.ts)) is what that skill produces when run on this repo's own tools — the reference implementation, with its audit written up in [`docs/`](docs/).
 
 ## Run it locally
 

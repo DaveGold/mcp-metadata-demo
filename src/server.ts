@@ -29,6 +29,9 @@ import { registerRenderMapTool } from './tools/render-map.js';
 import { registerFetchImageTool } from './tools/fetch-image.js';
 import { registerGetWeatherContextTool } from './tools/get-weather-context.js';
 import { registerGetToolCallLogTool } from './tools/get-tool-call-log.js';
+import { registerGetBuildingProfileBestTool } from './tools/get-building-profile-best.js';
+import { registerGetWeatherContextBestTool } from './tools/get-weather-context-best.js';
+import { bestInstructions } from './tools/best-instructions.js';
 
 const VERSION = packageJson.version;
 
@@ -73,7 +76,8 @@ export type ServerVariant =
   | 'minimal'
   | 'opaque'
   | 'opaque-words'
-  | 'guidance-recipe';
+  | 'guidance-recipe'
+  | 'best';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -147,6 +151,22 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
   const bagClient = options.bagClient ?? new BagClient();
   const epOnlineClient = options.epOnlineClient ?? new EpOnlineClient();
   const variant = options.variant ?? 'rich';
+
+  if (variant === 'best') {
+    // The reference implementation: every eval lesson applied to BOTH data tools
+    // (rich-domain-mcp-server skill, references/audit.md). A composite, measured
+    // against rich/inline in evals/ — not a one-variable rung. Render and log tools
+    // are the minimal ones: irrelevant metadata is charged on every turn (Q5), and
+    // fetch_image is left out for the same reason.
+    const server = new McpServer({ name: 'metadata-demo-best', version: VERSION }, { instructions: bestInstructions });
+    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
+    registerGetWeatherContextBestTool(server);
+    registerRenderChartTool(server, { minimal: true });
+    registerRenderTableTool(server, { minimal: true });
+    registerRenderMapTool(server, { minimal: true });
+    registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
 
   if (variant === 'minimal') {
     // Deliberately bare: the SAME tool set as the rich tier, but every tool stripped to

@@ -177,6 +177,18 @@ run `metered-vs-model` as well as `benchmark-trap`, because an instruction witho
 reason should be brittle on a case it does not name. That second question is also
 where Q2's untested cross-record half can finally be run.
 
+**`best` is a COMPOSITE, not a rung** — Q19's arm, built 2026-09-23 with the
+`rich-domain-mcp-server` skill's audit flow. It changes many layers at once on BOTH
+data tools: renamed fields (`src/domain/best-field-names.ts`), descriptions under
+2,048 chars, `interpretation`-first responses from a rule registry, computed
+`derived` values, a shipped reference period for weather, no Paris Proof threshold.
+It is a ceiling and a reference, never an attribution: compare it with `rich` (the
+old reference) and `inline` (the fair token baseline — minimal neighbours, like
+`best`), and attribute any gap through the one-variable arms above. Its field names
+differ from every other arm, so a scorer that matches a field name must accept the
+`best` name (e.g. `warmtebehoefte_berekend_kwh_m2` for `warmtebehoefte_kwh_m2`).
+Read `evals/open-questions.md` Q19 for the predictions registered before it ran.
+
 Before scoring, read `results/2026-09-21-shape-replication.json` for `_the_rule`
 (semantics handle interpretation, classification, prevention and refusal; recipes
 are needed only for derived numbers) AND the two live runs that failed to

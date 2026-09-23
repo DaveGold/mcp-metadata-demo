@@ -17,7 +17,7 @@ async function main(): Promise<void> {
   // MCP_VARIANT=minimal serves the metadata-stripped tier (for the ablation demo).
   const rawVariant = process.env.MCP_VARIANT;
   const variant: ServerVariant = (
-    ['minimal', 'schema', 'inline', 'inline-recipe', 'words', 'words-recipe', 'opaque', 'opaque-words'] as const
+    ['minimal', 'schema', 'inline', 'inline-recipe', 'words', 'words-recipe', 'opaque', 'opaque-words', 'best'] as const
   ).includes(rawVariant as never)
     ? (rawVariant as ServerVariant)
     : 'rich';
