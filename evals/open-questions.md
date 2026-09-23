@@ -201,7 +201,8 @@ characters of the description.** 29/30 against 4/30 for the same 438 bytes was d
 against absent (Q7). Delivered in both channels, the same line scores 20/20 either way
 (Q15/Q15b). Prefer the response: no host cut-off applies to it, and later edits above it
 cannot push it out. Free, and it helped all three models. If you change one thing, change
-this one.
+this one. **Not a guidance call on its own** (Q8): sonnet made the no-argument call 10/10,
+haiku 0/10, so what only a bootstrap call returns never reaches a model that skips it.
 
 **3. Compute it server-side where the computation is determinate.** 78 of 78 across
 three questions, and the only mechanism that performs IDENTICALLY on all three models —
@@ -1227,6 +1228,33 @@ per-request usage from disk.
 
 ## Q8 — The bootstrap channel: is the boundary the RESPONSE, or just NOT-THE-DESCRIPTION?
 
+> **ANSWERED 2026-09-23 — the channel works if it is CALLED, and only sonnet called it.**
+> See [`results/2026-09-23-q8-guidance-call.json`](results/2026-09-23-q8-guidance-call.json). 60 runs, haiku + sonnet, n=10
+> per cell, `gas-estimate`, cap raised so the description arm delivers. Audit exact, 80/80.
+>
+> | arm | recipe arrives via | haiku route-correct | sonnet route-correct | made the no-arg call |
+> |---|---|---|---|---|
+> | `words-recipe` | description (uncut) | 7/10 | 10/10 | — |
+> | **`guidance-recipe`** | **no-argument call** | **0/10** | **10/10** | **haiku 0/10 · sonnet 10/10** |
+> | `inline-recipe` | response | 6/10 | 10/10 | — |
+>
+> **The prediction is NOT CONFIRMED, and is recorded as falsified.** `guidance-recipe` scored
+> 10/20 route-correct (15/20 by value). The registration's thresholds are out of 30, but its
+> own design gives 20 per arm (2 models × n=10). The build notes missed that. On the letter,
+> 10 ≤ 10 falsifies; scaled to 20 (≥ 17 / ≤ 6), it is partial. Both readings are in the file.
+>
+> **But the falsifier's stated meaning does not hold.** It said a low score would mean
+> *"proximity to the data is what matters"*. Sonnet made the call first in 10/10 runs and was
+> then 10/10, the same as the response and description arms. The recipe did not need to
+> travel with the record; it needed to be **fetched**. Haiku went straight to the lookup
+> every time, never saw the recipe, and improvised: invented efficiencies, the 41 m² BAG
+> area, one ep2 road. It scored 0/10 route-correct.
+>
+> Two further readings off the same run. **Given the recipe, the channel does not matter**:
+> `words-recipe` 17/20 and `inline-recipe` 17/20 by value, the third tie after Q15/Q15b.
+> And a guidance call is **not safe as the only carrier** of anything a weak model needs.
+> That is exactly the exposure of the shipped `start_duurzaam` pattern.
+
 > **REGISTERED 2026-09-22, BEFORE THE RUN.**
 
 ### Why it matters
@@ -1319,6 +1347,72 @@ often as a response one. So the "role" story is already under pressure before Q8
   would say the guidance call works because it delivers, not because of its role.
 - **Unchanged and still the sharpest part:** whether the model makes the parameterless
   call unprompted. No cap touches that.
+
+---
+
+### BUILD NOTES, fixed 2026-09-23 — after the arm was built, BEFORE ANY RUN
+
+**The arm as built** (`src/tools/get-building-profile-guidance.ts`, pinned by 7 tests):
+
+- **No-argument call → `{ "guidance": derivedFiguresBlock }`.** These are the same imported bytes
+  `words-recipe` appends to its description and `inline-recipe` appends to its response.
+- **Lookup → the profile with no prose**, field for field identical to `schema`'s response.
+- **Description = `schema`'s one-liner + one pointer sentence:** *"Call it once with no
+  arguments first: that returns how to derive figures from the lookup result."* The
+  registration said "minimal" and was silent on discovery. Without a pointer the call
+  cannot be found, and the unprompted-call metric would be zero by construction.
+  `start_duurzaam` carries the same kind of pointer. The pointer names the call, and
+  contains no word of the recipe.
+- **`postcode` and `huisnummer` are optional** in this arm's input schema, which is its
+  one schema difference.
+- **Everything else is `inline-recipe`'s:** the same bare instructions and the same minimal
+  render/weather/log tools.
+- **Model-visible names avoid "guidance".** The `.mcp.json` key is `eval-g-recipe` and
+  the server name is `metadata-demo-g-recipe`, as Q7 kept `canary` out of its keys. The
+  variant, function (`mcpGuidanceRecipe`) and agent (`eval-guidance-recipe`) names are not
+  shown to the model.
+
+**An asymmetry, stated up front.** `words-recipe` and `inline-recipe` deliver the recipe
+**together with** the 5,020-char INTERPRETATION block (in the description and in the
+response respectively). `guidance-recipe` delivers the recipe **alone**. The guide
+ablation found the recipe is what produces the answer on `gas-estimate`, so this is not
+expected to matter. It is a second difference, though, and is reported as one.
+
+**The run, fixed now.**
+
+- **Models: haiku and sonnet** (the registration said "2 models" without naming them).
+  n=10 per arm per model, **60 runs**, one sitting. Waves of 6 are interleaved across the
+  3 arms × 2 models, so ten waves in all.
+- **Session:** every wave in a fresh headless session started with
+  `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=20000`, per the amendment above. Only the
+  `question` string is passed.
+- **Preflight:**
+  - host listing shows `words-recipe` uncut, with the recipe present;
+  - `guidance-recipe`'s listing is the one-liner plus pointer;
+  - one live no-argument call and one live lookup on `guidance-recipe`;
+  - one live lookup on each of the other two arms;
+  - `countByVariant` unfiltered, with `guidance-recipe` stamped under its own name.
+
+**Scoring, fixed now.** As `gas-estimate` and `_scoring` pin it: **correct** = within 253 ± 8
+m³/year (range → midpoint); **declined** in its own column; **confidently_wrong** = the
+headline exceeds ~2× ground truth, or asserts kWh as a gas volume (Q1's precedent);
+**fabricated** = a constant not in the payload *or the recipe*. **Route is mandatory**: `wb`
+(warmtebehoefte 52.73 × 40.02 m² thermal zone ÷ 0.95 ÷ 8.79) vs `ep2`, plus the
+disqualifying steps in `_scoring.route`. The headline number is **route-correct**, reported
+beside value-correct.
+
+**The unprompted-call metric, fixed now.**
+
+- **MADE_GUIDANCE_CALL** = the run's transcript shows a `get_building_profile` call with no
+  `postcode` and no `huisnummer`, cross-checked against the log (rowCount 0, no address in
+  `queryIntent`).
+- **Also reported:** whether that call came BEFORE the first lookup, and whether a run that
+  skipped it still got the answer.
+- **The registered ≥ 25/30 threshold counts every `guidance-recipe` run**, called or not,
+  because "the channel is worthless if it is not called" is part of what it tests.
+
+**Record per run:** `tool_uses`, `duration_ms`, `subagent_tokens`, ANSWER chars, request-1
+input.
 
 ---
 
@@ -2159,7 +2253,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right).
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP

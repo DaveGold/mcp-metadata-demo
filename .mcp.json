@@ -62,6 +62,10 @@
     "eval-inline-oneline": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpInlineOneline"
+    },
+    "eval-g-recipe": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpGuidanceRecipe"
     }
   }
 }
