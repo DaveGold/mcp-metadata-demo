@@ -3025,6 +3025,64 @@ The preflight is the Q15 one: the host listing for both arms, one live call per 
 
 ---
 
+## Q16 — Is the weak model's barrier FETCHING the data, or APPLYING the rule?
+
+> **REGISTERED 2026-09-23, BEFORE THE ARMS EXIST.**
+
+### Why it matters
+
+On `weather-single-quarter` haiku failed in every channel (Q12: 0/10) and in every form (Q10:
+1 / 0 / 1 of 20), while sonnet and opus built a reference quarter from 4–31 prior years and
+got it right. In all of those arms, following the rule required **fetching data the payload
+does not contain** (a reference quarter). Q12 and Q10 cannot tell two explanations apart:
+
+- **(a) Fetching is the barrier.** haiku reads and applies a rule, but does not go and get
+  the data it needs. Give it the data and it succeeds.
+- **(b) Applying is the barrier.** Even with the reference in hand, haiku reaches for the
+  ready-made `gasNormalizationFactor`.
+
+This decides the design advice for weak callers: *ship the reference data*, *ship the
+computed factor*, or *neither is enough*.
+
+### The arms
+
+All of them are `q10-prose`: minimal descriptions, the Note stripped, and the partial-period
+RULE as `interpretation.guidance`. They differ ONLY in what the server adds to
+`summary.degreeDays` for a partial period inside one calendar year:
+
+| arm | adds | key |
+|---|---|---|
+| `q10-prose` (**A**, reused) | nothing (rule only) | `eval-q10a` |
+| `ref-data` (**B**) | `referencePeriodWeightedHDD`: the mean weighted HDD of the SAME calendar window over the 10 previous years (server-computed from Open-Meteo), with `referencePeriodNote` naming the years | `eval-q16b` |
+| `ref-computed` (**C**) | B + `periodNormalizationFactor` = referencePeriodWeightedHDD / totalWeightedHDD, with a one-line formula | `eval-q16c` |
+
+`gasNormalizationFactor` (2.53) stays in every arm, so the trap is always on offer.
+
+### Run and scoring
+
+- **Run:** `weather-single-quarter`, **haiku, n=20 per arm**, 60 runs, default cap, one batch.
+- **CORRECT:** 4,200 × (reference-quarter HDD / 1,106.3), ≈ 4,675 m³ with the 2014–2023 mean,
+  accepted within ± 100. A reference the run built itself from tool data also counts, as
+  before.
+- **CONFIDENTLY_WRONG:** a factor-based ~10,600 m³.
+- **FABRICATED:** an unsourced reference quarter.
+
+### Prediction
+
+> **Fetching is the barrier.**
+> - **P1: A ≤ 3/20** (a replication of Q10's 1/20).
+> - **P2: B ≥ 10/20.** Falsified if B ≤ 4/20: then the reference in hand is ignored, and
+>   (b) holds.
+> - **P3: C ≥ 16/20.** Falsified if C ≤ 10/20: then even a computed, ready-to-multiply factor
+>   loses to `gasNormalizationFactor`.
+>
+> **Reasoning.** Haiku applied delivered reading rules 20/20 (Q15) and failed only where the
+> rule sent it to get more data (Q12, Q10). The case against: haiku reached for 2.53 even
+> when told, for this very record, that the period is not a full year (Q10's trigger). A
+> ready-made number beside it may just be one more number.
+
+**Cost:** 60 runs, two new arms.
+
 ## RB2 and RB3 — re-baselines with the description cap RAISED. Registered 2026-09-23, BEFORE either runs
 
 > **RUN 2026-09-23 — both CONFIRMED.**
