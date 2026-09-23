@@ -219,11 +219,17 @@ one question where the correct call cannot be EXPRESSED without the parameter, a
 everywhere else. Cheap, so do it — but do not expect a schema to carry meaning.
 
 **5b. Do not rely on an over-limit response to deliver guidance** (Q9). On Claude Code a
-result over ~25,000 tokens is replaced by a *"saved to file"* notice. An agent with no
-file tools (a subagent, many SDK agents) never sees the data or the guidance in it. One
-with Read or jq has to read the file back, in chunks, and may never reach a block at the
-end. Whether it does is unmeasured. Keeping responses under the limit works for every
-client. Under the limit, distance barely matters: a recipe
+result over ~25,000 tokens is replaced by a *"saved to file"* notice.
+
+- **Without file tools** (a subagent, many SDK agents), neither the data nor the guidance
+  reaches the model.
+- **With Read or jq** it can be recovered. In a manual main-session test (Opus 5.5, n=1), the
+  model ran `jq '{summary, interpretation, …}'` on the saved file. It picked up guidance
+  placed after 274 records **by its key**, and was faster and cheaper than when the data came
+  back inline.
+
+So: keep responses under the limit when the client may lack file tools, and **always put
+guidance under a fixed, named key** (e.g. `interpretation`), so a targeted read finds it. Under the limit, distance barely matters: a recipe
 fetched once was still applied after ~62k chars of other tool output (haiku, 9–10/10).
 
 **6. Do not spend effort on volume.** Cutting 37–50% of the prose changed zero answers
@@ -1831,6 +1837,24 @@ place in *Suggested order* below.
 
 ### REOPENED 2026-09-23 — two questions with headroom exist now. Registered BEFORE any arm is built
 
+> **RUN 2026-09-23 — structure is not a lever for haiku.** See [`results/2026-09-23-q10-addressed-semantics.json`](results/2026-09-23-q10-addressed-semantics.json). 120 runs,
+> haiku, n=20 per arm per question, all in the response. Audit exact, 170/170.
+>
+> | question | prose | addressed | addressed + triggered |
+> |---|---|---|---|
+> | `weather-single-quarter` | 1/20 | 0/20 | 1/20 |
+> | `total-vs-per-m2` | 11/20 | 14/20 | 14/20 |
+>
+> - **P1 (addressing alone does nothing): CONFIRMED.**
+> - **P2 (activation fixes the weather rule): FALSIFIED.** The trigger said, computed for this
+>   record, *"requested period is 91 days … not a full calendar year"*. haiku multiplied by 2.53
+>   anyway, in 14 of 20 runs.
+> - **P3 (activation helps the area rule, ≥ +4): PARTIAL.** It moved +3, inside the noise bar.
+>
+> For haiku on this rule, no FORM (here) and no CHANNEL (Q12) of guidance works. The levers
+> left are computation, which the alerts showed, and an imperative instruction to *do*
+> something, which Q8b showed.
+
 Q10 was suspended because every known question had response-channel prose at ceiling.
 Two now have room, and in both the sentence **is delivered in the response and still
 not applied**:
@@ -2163,6 +2187,8 @@ delivered source for the names** before its first weather response. The model-vi
 >   data domain only.
 >
 > Ledger: **ten of fifteen** registered predictions wrong.
+>
+> The three `wx-*` arms were deleted after the opus run and the manual test (2026-09-23; code in git history).
 
 > **REGISTERED 2026-09-22. THE GATE, NOT AN EXPERIMENT.**
 
@@ -2316,6 +2342,12 @@ one the rule forbids.
   outcome, and is recorded now as the registered falsification.
 
 ### AMENDED 2026-09-23 (fourth) — the single-quarter run on OPUS, registered BEFORE it runs
+
+> **RUN 2026-09-23 — FALSIFIED: opus does not need the rule.** See [`results/2026-09-23-q12c-weather-single-quarter-opus.json`](results/2026-09-23-q12c-weather-single-quarter-opus.json).
+> `wx-none` **9/10**, `wx-desc` 9/9 (plus 1 NO_RECORD), `wx-resp` 10/10. Without the rule opus
+> builds a reference quarter from 4–31 prior years itself, and no run took the factor road.
+> Across models the rule is worth 0 on haiku (it doesn't act on it), 7/10 on sonnet, and 0 on
+> opus (it doesn't need it). Two manual main-session runs on Opus 5.5 agree.
 
 The same three `wx-*` arms and `weather-single-quarter`, **opus, n=10 per arm**, 30 runs,
 default cap. The prediction for opus: **both rule arms ≥ `wx-none` + 5, and within 2 of each
@@ -2693,7 +2725,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -2994,6 +3026,18 @@ The preflight is the Q15 one: the host listing for both arms, one live call per 
 ---
 
 ## RB2 and RB3 — re-baselines with the description cap RAISED. Registered 2026-09-23, BEFORE either runs
+
+> **RUN 2026-09-23 — both CONFIRMED.**
+>
+> - **RB2** ([`results/2026-09-23-rb2-opaque-naming-uncut.json`](results/2026-09-23-rb2-opaque-naming-uncut.json)): uncut `opaque-words` **20/20**, every run citing 1.5
+>   via the neutral name `TO`; `opaque` 6/20, none of them via the indicator. **Q6's "the name
+>   is the problem / prose will not fix it" was absence.** Delivered, the glossary fixes it
+>   completely. Audit exact, 54/54.
+> - **RB3** ([`results/2026-09-23-rb3-ladder-words-uncut.json`](results/2026-09-23-rb3-ladder-words-uncut.json)): on `total-vs-per-m2`, `schema` 1/10 vs uncut `words`
+>   **10/10**. The scopes sentence arrives, and *"the prose is the carrier"* is restored,
+>   mechanism included. On `gas-estimate`, route-correct is 0 vs 0: `schema` takes the EP2 road
+>   7/10, while uncut `words` **declines 10/10** ("no meter data; calculated, not measured").
+>   Audits exact, 25/25 and 20/20.
 
 Both re-measure results whose description copy never arrived (Q7). Every session is
 started with `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=20000`, so the whole description is

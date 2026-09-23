@@ -232,7 +232,6 @@ export const partialPeriodNote =
   ' Note: gasNormalizationFactor is designed for full-year (Jan 1–Dec 31) normalization. ' +
   'For same-period year-over-year comparison, use the HDD ratio directly: ' +
   'normalizedEnergy = actualEnergy × (periodHDD_referenceYear / periodHDD_thisYear).';
-export type Q12Rule = 'none' | 'description' | 'response';
 /** open-questions.md Q10 (reopened): the same RULE in the response, as prose / addressed / addressed + triggered. */
 export type Q10Form = 'prose' | 'addressed' | 'triggered';
 
@@ -745,14 +744,13 @@ export async function executeWeatherQuery(args: Record<string, unknown>): Promis
 
 export function registerGetWeatherContextTool(
   server: McpServer,
-  opts: { minimal?: boolean; q12Rule?: Q12Rule; q10Form?: Q10Form } = {}
+  opts: { minimal?: boolean; q10Form?: Q10Form } = {}
 ): void {
-  const baseDescription = opts.minimal ? minimalDescription : description;
   server.registerTool(
     'get_weather_context',
     {
       title: 'Weercondities & Graaddagen (Open-Meteo)',
-      description: opts.q12Rule === 'description' ? baseDescription + ' ' + partialPeriodRule : baseDescription,
+      description: opts.minimal ? minimalDescription : description,
       inputSchema,
       outputSchema,
       annotations: {
@@ -778,12 +776,11 @@ export function registerGetWeatherContextTool(
           interpretation.alerts.push(...selected.alerts);
         }
 
-        if (opts.q12Rule || opts.q10Form) {
-          // Q12 / Q10: no computed text may carry the rule, in any arm.
+        if (opts.q10Form) {
+          // Q10: no computed text may carry the rule, in any arm (as in Q12's deleted wx arms).
           interpretation.alerts = interpretation.alerts.map((a) => a.replace(partialPeriodNote, ''));
         }
-        let interp: Record<string, unknown> =
-          opts.q12Rule === 'response' ? { ...interpretation, guidance: partialPeriodRule } : interpretation;
+        let interp: Record<string, unknown> = interpretation;
         if (opts.q10Form) {
           const p = (summary as { period: { dateFrom: string; dateTo: string; days: number } }).period;
           const edge = { relates_to_fields: ['summary.degreeDays.gasNormalizationFactor'], meaning: partialPeriodRule };

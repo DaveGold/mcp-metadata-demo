@@ -75,9 +75,6 @@ export type ServerVariant =
   | 'opaque'
   | 'opaque-words'
   | 'guidance-recipe'
-  | 'wx-none'
-  | 'wx-desc'
-  | 'wx-resp'
   | 'q10-prose'
   | 'q10-addressed'
   | 'q10-triggered';
@@ -186,24 +183,6 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
     registerGetWeatherContextTool(server, { minimal: true, q10Form: form });
-    registerGetToolCallLogTool(server, { minimal: true });
-    return server;
-  }
-
-  if (variant === 'wx-none' || variant === 'wx-desc' || variant === 'wx-resp') {
-    // Q12 (weather amendment). `minimal` byte for byte, except get_weather_context:
-    // the computed partial-period Note is removed, and the tool's own rule is placed
-    // nowhere / in the description / in the response. Same server name as `minimal`.
-    const q12Rule = variant === 'wx-desc' ? 'description' : variant === 'wx-resp' ? 'response' : 'none';
-    const server = new McpServer(
-      { name: 'metadata-demo-minimal', version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
-    );
-    registerGetBuildingProfileMinimalTool(server, bagClient, epOnlineClient);
-    registerRenderChartTool(server, { minimal: true });
-    registerRenderTableTool(server, { minimal: true });
-    registerRenderMapTool(server, { minimal: true });
-    registerGetWeatherContextTool(server, { minimal: true, q12Rule });
     registerGetToolCallLogTool(server, { minimal: true });
     return server;
   }
