@@ -137,7 +137,7 @@ export const mcpGuidanceRecipe = onRequest(
 export const mcpGuidanceStrong = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'guidance-strong' }));
 
 /**
- * Q9 position arm — THROWAWAY. `mcpInline` with `interpretation` emitted as the first
- * key of every response instead of the last. See open-questions.md Q9.
+ * Q11 arm — THROWAWAY. `mcpMinimal` with get_weather_context's `select` field list
+ * removed, so output field names are declared only in outputSchema. See Q11.
  */
-export const mcpInlineHead = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'inline-head' }));
+export const mcpSelectBlind = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'select-blind' }));

@@ -75,7 +75,7 @@ export type ServerVariant =
   | 'opaque-words'
   | 'guidance-recipe'
   | 'guidance-strong'
-  | 'inline-head';
+  | 'select-blind';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -168,6 +168,22 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     return server;
   }
 
+  if (variant === 'select-blind') {
+    // Q11. `minimal` byte for byte, except get_weather_context's `select` input
+    // description loses its field list. Same server name as `minimal`.
+    const server = new McpServer(
+      { name: 'metadata-demo-minimal', version: VERSION },
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+    );
+    registerGetBuildingProfileMinimalTool(server, bagClient, epOnlineClient);
+    registerRenderChartTool(server, { minimal: true });
+    registerRenderTableTool(server, { minimal: true });
+    registerRenderMapTool(server, { minimal: true });
+    registerGetWeatherContextTool(server, { minimal: true, blindSelect: true });
+    registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
   if (variant === 'opaque' || variant === 'opaque-words') {
     // A' and B'. Identical but for the tool description — see get-building-profile-opaque.ts.
     const withProse = variant === 'opaque-words';
@@ -198,23 +214,6 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
     registerGetWeatherContextTool(server, { minimal: true });
-    registerGetToolCallLogTool(server, { minimal: true });
-    return server;
-  }
-
-  if (variant === 'inline-head') {
-    // Q9's position arm. `inline` byte for byte, except `interpretation` is the
-    // FIRST key of both the building and the weather response instead of the last.
-    // Server name is `inline`'s, so nothing else differs.
-    const server = new McpServer(
-      { name: 'metadata-demo-inline', version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
-    );
-    registerGetBuildingProfileInlineTool(server, bagClient, epOnlineClient, { interpretationFirst: true });
-    registerRenderChartTool(server, { minimal: true });
-    registerRenderTableTool(server, { minimal: true });
-    registerRenderMapTool(server, { minimal: true });
-    registerGetWeatherContextTool(server, { minimal: true, interpretationFirst: true });
     registerGetToolCallLogTool(server, { minimal: true });
     return server;
   }
