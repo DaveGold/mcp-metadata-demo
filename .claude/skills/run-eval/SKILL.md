@@ -48,6 +48,18 @@ description: Run the eval set in evals/questions.json against the arm servers (t
    > window where an agent exists and its tools do not is real and was observed
    > twice today. Do not infer either state from the other, in either direction.
 
+   **A way round it, used for Q15/Q15b on 2026-09-23.** A session that cannot
+   reach an arm can still run it: start a fresh headless session per wave from
+   Bash (`claude -p "<spawn these N Agent calls, foreground, with this exact
+   prompt>" --allowedTools "Agent,ToolSearch,mcp__eval-<arm>,..."`, run in the
+   worktree). It loads the CURRENT `.mcp.json` when it starts. It is also the only
+   way to control the host's description cap per run: the environment it starts
+   with (`CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH` set or unset) is the cap for
+   that whole session. The harness metrics are in the child's transcript
+   (`toolUseResult.totalToolUseCount / totalDurationMs / totalTokens`), and the
+   subagent transcripts sit under `<child-session-id>/subagents/`. Keep every arm
+   of a batch on the same kind of parent session.
+
    The only check that counts: can you call
    `mcp__eval-<arm>__get_building_profile` right now — an actual call, not a
    schema lookup? If not, STOP. Do not attempt the run. Re-check later in the

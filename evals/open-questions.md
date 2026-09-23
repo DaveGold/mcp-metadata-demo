@@ -10,6 +10,11 @@
 > [`results/2026-09-22-q7-description-truncation.json`](results/2026-09-22-q7-description-truncation.json).
 > Every "description vs response" result below compares **delivered with undelivered**
 > text. Read each one that way until it is re-run with the sentence inside the cut.
+>
+> **Re-run 2026-09-23 — Q15 and Q15b.** Delivered in both channels, the same sentence scores
+> the same: 20/20 description vs 20/20 response (Q15, line inside the cut), and 20/20 vs
+> 20/20 with the cap raised and the whole block uncut (Q15b). Haiku, one question. On this
+> evidence the variable is **delivery**, not channel.
 
 Twelve experiments. Each carries a **prediction registered before the run** and the
 result that would **falsify** it — written down in advance precisely because this repo
@@ -26,6 +31,11 @@ and which design principles are still unfalsified.
 
 **Q13 and Q14 are ANSWERED** — registered and run on 2026-09-22, after Q7–Q12 were filed.
 Q14's prediction was **confirmed**: one line in the response does what the whole block did.
+
+**Q15 and Q15b are ANSWERED** — registered and run on 2026-09-23, after Q7. All seven of
+their predictions were **confirmed**: a description sentence that is DELIVERED is applied
+exactly as often as the same sentence in the response. That turns Q1/Q13/Q14's channel
+finding into a delivery finding.
 
 Q13 asks whether the ALERTLESS tiers can be fixed at all, and all three of its
 predictions were falsified. **Read it together with Q7**: Q13 measured the same
@@ -1944,6 +1954,38 @@ contrary.
 
 ## Q15 — Is a description sentence that is DELIVERED applied? The channel test Q1 never ran
 
+> **ANSWERED 2026-09-23 — YES. All four predictions CONFIRMED.** See
+> [`results/2026-09-23-q15-delivered-description.json`](results/2026-09-23-q15-delivered-description.json).
+> haiku, `overheating`, n=20 per arm, one batch at the **default** 2,048 cap, delivery
+> verified host-side and on the wire before any run. Audit exact, 84/84.
+>
+> | arm | 1.5 line delivered in | CORRECT | cites 1.5 | fabricated | D7 |
+> |---|---|---|---|---|---|
+> | `words` | nowhere (past the cut) | **1/20** (5 OTHER, 14 CW) | 0/20 | 17/20 | 0/20 |
+> | **`words-front`** | **description, char 330** | **20/20** | **20/20** | 1/20 | **20/20** |
+> | `inline-oneline` | response | **20/20** | **20/20** | 0/20 | 0/20 |
+>
+> - **P1 CONFIRMED** — `words-front` cites 1.5 in 20/20 (needed ≥ 16).
+> - **P2 CONFIRMED** — `words-front` 20 vs `inline-oneline` 20 on CORRECT, gap 0 (needed within 4).
+> - **P3 CONFIRMED** — `words-front` 20 vs `words` 1, gap 19 (needed ≥ 8).
+> - **P4 CONFIRMED** — the canary obeyed in 20/20 (needed ≥ 16). 18 exact `⟨D7⟩`, 2 `<D7>`;
+>   17 after PARAMS, 3 on their own line before ANSWER, **never** at the end of the answer.
+>   On visible text it is produced at the final request only; thinking is redacted on disk.
+>
+> **2×2 marker × citation: 20 / 0 / 0 / 0.** Q7's awkward outcome, an instruction obeyed beside
+> a domain sentence ignored, did not occur. The *case against* (the description is filed as
+> tool-selection metadata) is falsified on haiku for this line. `words-front` also made exactly
+> **one call in every run**; `words` made 39, 19 of them weather detours.
+>
+> **What it changes:** the channel claim in Q1/Q13/Q14 reduces to delivery. The rule is
+> *keep what matters inside the first 2,048 characters, or put it in the response*. The
+> response stays the host-independent option. Position is still confounded with channel (Q9).
+> One side note: the **Opus** parent session that made the preflight calls read the canary
+> and declined it as a tool-description instruction. A canary on stronger models must score
+> mentions, as Q7's rule already does.
+>
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right).
+
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
 > tool description, so every description-vs-response result in this file compared
@@ -2072,6 +2114,30 @@ only the protocol side is checked.
 afterwards unless the result makes it worth keeping.
 
 ### Q15b — the same question with the cap RAISED. Registered 2026-09-23, before either half runs
+
+> **ANSWERED 2026-09-23 — delivery is what matters, here too. All three predictions CONFIRMED.**
+> See [`results/2026-09-23-q15b-uncapped-channel.json`](results/2026-09-23-q15b-uncapped-channel.json).
+> Every session started with `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=20000`. Preflight: no
+> `[truncated]` in any listing, `temperatuuroverschrijding` and the 1.5 line present, and every
+> tail matching the raw text. Request-1 input `words` − `inline` = **+11,282** tokens (Q7's
+> default-cap figure was about +3.7k). Audit exact, 63/63.
+>
+> | arm | block delivered via | CORRECT | cites 1.5 | fabricated |
+> |---|---|---|---|---|
+> | `words` (uncut, 37.6k chars of descriptions) | description | **20/20** | **20/20** | 0 |
+> | `inline` | response | **20/20** | **20/20** | 0 |
+> | `inline-oneline` | both | **20/20** | **20/20** | 0 |
+>
+> - **P1 CONFIRMED** — uncut `words` cites 1.5 in 20/20.
+> - **P2 CONFIRMED** — `words` 20 vs `inline` 20, gap 0.
+> - **P3 CONFIRMED** — `inline-oneline` 20/20.
+>
+> The registered volume risk did not fire. The cost did: in this batch uncut `words` runs
+> **+23.7% tokens** against `inline`, and the extra is almost all render/weather/log
+> descriptions (request-1 `words` 28,888 vs `inline-oneline` 19,826, and those two share the
+> same uncut profile description). Raising the cap is a client-side fix that every MCP server
+> in the session pays for on every request. `overheating` is saturated at 60/60 here, so a
+> smaller channel effect would be invisible. **Not comparable with any Q15 cell.**
 
 Q7 found that Claude Code 2.1.280 lets a session change the 2,048-character cap:
 `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH`. That makes the channel test Q1 and Q13 meant to

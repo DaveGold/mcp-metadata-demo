@@ -1,0 +1,1926 @@
+{
+  "_comment": "Q15b — the same channel test with the description cap RAISED (CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=20000), so the whole 5,020-char INTERPRETATION block is delivered by the DESCRIPTION in `words` and by the RESPONSE in `inline`. ALL THREE REGISTERED PREDICTIONS CONFIRMED: words 20/20, inline 20/20, inline-oneline 20/20, all citing 1.5, zero fabrications. The registered volume risk (the line inside ~37.6k chars of tool definitions) did not fire. Delivered, the description works; it costs +23.7% tokens against inline in this batch because every long description now ships uncut on every request.",
+  "date": "2026-09-23",
+  "question": "overheating",
+  "shape": "interpretation",
+  "model": "haiku",
+  "n_per_arm": 20,
+  "total_runs": 60,
+  "host_cap": "RAISED: every session of this run was started with CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=20000. NEVER subtract a cell of this file from a cell of the Q15 file — different sessions, different caps.",
+  "protocol": "Live tool calls through the deployed endpoints via the eval-* subagents (haiku, resolved claude-haiku-4-5-20251001 on every run). Only the `question` string was passed, verified from each Agent call's recorded input. Five waves of 12, four per arm per wave, arm order rotated each wave, one sitting. HOW THE SESSIONS WERE STARTED: the interactive session that ran this could not reach `eval-words-front` (it predated the branch's .mcp.json). So each wave was run from a fresh HEADLESS Claude Code 2.1.280 session (`claude -p`, parent model claude-opus-5-5, started in this worktree on this branch), whose only job was to spawn the 12 subagents in one message, foreground, with the fixed prompt. The cap is set per headless session by the environment it is started with — which is exactly the variable Q15 and Q15b turn on — and every wave's session was started the same way within each run. Subagent meta records requestNonInteractive=true. tool_uses / duration_ms / subagent_tokens are the harness's own Agent-result fields (totalToolUseCount / totalDurationMs / totalTokens) copied from the parent transcript; request-1 input is from each subagent transcript (usage of the first message.id: input + cache_creation + cache_read).",
+  "registered": "evals/open-questions.md Q15b, registered 2026-09-23 in commit 5c8e4e6, before either half ran. Predictions and scoring not reopened.",
+  "preflight": {
+    "host_side_listing": "A fresh headless session started with the variable reported (ToolSearch select, JSON of flags and the final 80 chars of each text — a verbatim full copy was stopped by a classifier partway through ~30k chars, so the Q7-style tail check was used instead): eval-words get_building_profile, render_chart, get_weather_context and eval-inline-oneline get_building_profile all contain NO '[truncated]', and both get_building_profile descriptions contain `temperatuuroverschrijding` and '>1.5 = significant'. Every reported tail matches the last 80 chars of the raw description exactly, as does the eval-words server-instructions tail. So the whole text was delivered.",
+    "delivered_lengths_chars": {
+      "words": {
+        "get_building_profile": 6779,
+        "render_chart": 7977,
+        "render_table": 9970,
+        "get_weather_context": 5291,
+        "render_map": 3713,
+        "get_tool_call_log": 3683,
+        "all_descriptions": 37608,
+        "server_instructions": 2647
+      },
+      "inline": {
+        "get_building_profile": 54,
+        "all_descriptions": 276,
+        "server_instructions": 59
+      },
+      "inline_oneline": {
+        "get_building_profile": 6779,
+        "all_descriptions": 7001,
+        "server_instructions": 59
+      }
+    },
+    "request1_check": "Registered: request-1 input of words minus inline must exceed Q7's default-session measure (+3,727-ish vs thin on haiku). Measured in this batch: words 28,888 − inline 17,606 = +11,282 tokens. PASSES. (inline-oneline 19,826: +2,220 over inline = its uncut 6.7k-char gbp description.)",
+    "stamping": "Same arms and log as the Q15 run minutes earlier (words, inline-oneline stamped by name); `inline` confirmed stamping in this run's own window (23 rows under 'inline'). No unknown bucket in the unfiltered page.",
+    "window_opens": "2026-09-23T11:44:17Z (wave 1 start)."
+  },
+  "arms": {
+    "words": "the 5,020-char block in the DESCRIPTION, uncut (6,779 chars); full render/weather descriptions, also uncut. Nothing in the response.",
+    "inline": "schema's one-line description; the WHOLE block in the RESPONSE; minimal render tools.",
+    "inline-oneline": "words' description (uncut) + the one 181-char line in the response; minimal render tools."
+  },
+  "comparison_validity": "One batch, interleaved, all three arms under the same raised cap. words vs inline is the channel test with both channels delivering the same block. The registered confound is volume: words also delivers ~30.8k chars of render/weather/log descriptions that inline and inline-oneline do not carry.",
+  "scoring_rule": "Verbatim from results/2026-09-22-q13-overheating-response-channel.json → scoring_rule, as Q14 applied it. CORRECT = asserts a real risk without downgrading. CONFIDENTLY_WRONG = no / low / minor / modest / marginal / negligible / minimal risk. OTHER = 'moderate' or 'elevated' without naming it significant or downgrading it. FABRICATED = assigns a unit to the 3.59 index or states a threshold for it other than 1.5, anywhere in the output. CITES_1_5 = the output names the 1.5 threshold. Applied with the marker stripped. Fixed at registration; not revised during the run.",
+  "marker_rule": "No canary in any arm. Any D7 voids the run. None found.",
+  "headline": {
+    "words": {
+      "n": 20,
+      "no_record": 0,
+      "correct": 20,
+      "other": 0,
+      "confidently_wrong": 0,
+      "declined": 0,
+      "fabricated": 0,
+      "cited_the_1_5_threshold": 20,
+      "marker_D7_present": 0,
+      "tool_uses": {
+        "median": 1.0,
+        "mean": 1,
+        "sum": 20,
+        "min": 1,
+        "max": 1
+      },
+      "get_weather_context_calls": 0,
+      "duration_ms": {
+        "median": 11148.0,
+        "mean": 11432.0,
+        "sum": 228639,
+        "min": 8984,
+        "max": 14244
+      },
+      "subagent_tokens": {
+        "median": 50136.5,
+        "mean": 50147.4,
+        "sum": 1002949,
+        "min": 49905,
+        "max": 50333
+      },
+      "answer_chars_marker_stripped": {
+        "median": 368.0,
+        "mean": 375.8,
+        "sum": 7515,
+        "min": 261,
+        "max": 519
+      },
+      "request1_input": {
+        "median": 28888.0,
+        "mean": 28889.2,
+        "sum": 577784,
+        "min": 28888,
+        "max": 28892
+      }
+    },
+    "inline": {
+      "n": 20,
+      "no_record": 0,
+      "correct": 20,
+      "other": 0,
+      "confidently_wrong": 0,
+      "declined": 0,
+      "fabricated": 0,
+      "cited_the_1_5_threshold": 20,
+      "marker_D7_present": 0,
+      "tool_uses": {
+        "median": 1.0,
+        "mean": 1.1,
+        "sum": 23,
+        "min": 1,
+        "max": 2
+      },
+      "get_weather_context_calls": 3,
+      "duration_ms": {
+        "median": 11811.0,
+        "mean": 12751.1,
+        "sum": 255023,
+        "min": 9721,
+        "max": 19358
+      },
+      "subagent_tokens": {
+        "median": 40520.0,
+        "mean": 40671.7,
+        "sum": 813434,
+        "min": 40352,
+        "max": 41818
+      },
+      "answer_chars_marker_stripped": {
+        "median": 414.5,
+        "mean": 424.5,
+        "sum": 8490,
+        "min": 269,
+        "max": 605
+      },
+      "request1_input": {
+        "median": 17606.0,
+        "mean": 17607.2,
+        "sum": 352144,
+        "min": 17606,
+        "max": 17610
+      }
+    },
+    "inline-oneline": {
+      "n": 20,
+      "no_record": 0,
+      "correct": 20,
+      "other": 0,
+      "confidently_wrong": 0,
+      "declined": 0,
+      "fabricated": 0,
+      "cited_the_1_5_threshold": 20,
+      "marker_D7_present": 0,
+      "tool_uses": {
+        "median": 1.0,
+        "mean": 1,
+        "sum": 20,
+        "min": 1,
+        "max": 1
+      },
+      "get_weather_context_calls": 0,
+      "duration_ms": {
+        "median": 10815.5,
+        "mean": 11250.1,
+        "sum": 225003,
+        "min": 8718,
+        "max": 19998
+      },
+      "subagent_tokens": {
+        "median": 41111.0,
+        "mean": 41115.9,
+        "sum": 822318,
+        "min": 40952,
+        "max": 41235
+      },
+      "answer_chars_marker_stripped": {
+        "median": 398.5,
+        "mean": 394.6,
+        "sum": 7892,
+        "min": 268,
+        "max": 532
+      },
+      "request1_input": {
+        "median": 19826.0,
+        "mean": 19827.2,
+        "sum": 396544,
+        "min": 19826,
+        "max": 19830
+      }
+    }
+  },
+  "the_single_cleanest_number": "Uncut `words` cites the 1.5 threshold 20 of 20 — the same line that its default-cap self never delivers. The description channel works when the host delivers it.",
+  "predictions_all_three_confirmed": {
+    "P1": {
+      "registered": "uncut words cites 1.5 in >= 16/20; falsified if <= 10/20",
+      "measured": "20/20",
+      "verdict": "CONFIRMED"
+    },
+    "P2": {
+      "registered": "words within 4 runs of inline on CORRECT; falsified if inline leads by >= 8",
+      "measured": "20 vs 20, gap 0",
+      "verdict": "CONFIRMED"
+    },
+    "P3": {
+      "registered": "inline-oneline >= 16/20 (sanity check)",
+      "measured": "20/20",
+      "verdict": "CONFIRMED"
+    },
+    "volume_risk": "Registered as the way this could fail: the line buried in ~30k chars of tool definitions. It did not fire: 20/20, and every words run made exactly one call."
+  },
+  "cost_and_behaviour": {
+    "tokens": "Median subagent_tokens: words 50,137, inline 40,520, inline-oneline 41,111. words costs +23.7% over inline and +22.0% over inline-oneline IN THIS BATCH. Almost all of it is volume, not the block: request-1 input words 28,888 vs inline-oneline 19,826 (+9,062) — those two carry the SAME uncut gbp description and differ only in the render/weather/log descriptions and server instructions.",
+    "tool_calls": "words 20 (1 per run), inline 23 (3 weather), inline-oneline 20.",
+    "duration": "Median duration_ms: words 11,148, inline 11,811, inline-oneline 10,816.",
+    "answer_chars": "Median ANSWER chars: words 368, inline 414.5, inline-oneline 398.5."
+  },
+  "log_audit": {
+    "method": "get_tool_call_log over HTTP from mcpWords, limit 300, UNFILTERED countByVariant first, bounded by timestamp to 11:44:17–11:47:16Z.",
+    "reconciliation": "EXACT. Harness tool_uses: words 20, inline 23, inline-oneline 20 = 63. Log in window: 20 / 23 / 20 = 63. Zero stray rows. Between the Q15 window and this one, a single get_tool_call_log read (11:42:20Z, the Q15 audit), excluded by timestamp.",
+    "profile_calls": "Exactly 20 get_building_profile per arm, all rowCount 3, paramsPresent ['queryIntent'].",
+    "errors": "1 get_weather_context ToolError (inline); none on get_building_profile.",
+    "self_report": "0 of 60 self-reported CALLS disagree with the harness."
+  },
+  "what_this_changes": [
+    "Q13's channel comparison, run properly: with both channels delivering the same 5,020-char block, description and response score the same (20/20 vs 20/20). Q13's 5/20 vs 20/20 was delivery.",
+    "Raising the cap is a working fix on the CLIENT side, but it is paid for on every request of every MCP server in the session: here +9k tokens of request-1 input from long render/weather descriptions alone. The server-side fixes (line inside 2,048, or in the response) do not depend on a client setting and cost less.",
+    "Together with Q15: the channel does not matter once delivered, on haiku, for this line. Delivery is the variable."
+  ],
+  "what_this_does_NOT_establish": [
+    "Anything about sonnet or opus, or other hosts.",
+    "That volume never matters — one question, ~37.6k chars, haiku; a larger or noisier toolset could still drown a line.",
+    "A difference between channels at equal position (Q9)."
+  ],
+  "caveats": [
+    "haiku only, one question, one address, one sitting, 60 runs.",
+    "NO CONTROL.",
+    "overheating is saturated at every arm here — 60/60. It cannot separate these arms further on haiku; that saturation IS the result for P1/P2, and it also means a smaller channel effect would be invisible.",
+    "Runs were spawned from headless `claude -p` parent sessions started with the variable (Opus 5.5 parent). Same for every arm in the batch.",
+    "The host-side check used tails and flags, not a full verbatim copy (a classifier stopped the full copy).",
+    "Never compare a number here with the Q15 file: different caps, different sessions."
+  ],
+  "runs": [
+    {
+      "wave": 1,
+      "slot": 1,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 14244,
+      "subagent_tokens": 50117,
+      "answer_chars_marker_stripped": 455,
+      "request1_input": 28888,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a6d7281a1950d471b",
+      "parent_session": "0b816dad-904c-48f6-a14a-c0994185f59a",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam 3039WB. The building shows a temperatuuroverschrijding (overheating indicator) of 3.59, which exceeds the threshold of 1.5 that indicates significant overheating risk. This apartment, built in 1937 with a \"corner-middle\" configuration, may require attention to cooling capacity and ventilation design, particularly relevant when sizing heat pump systems for this 92 m2 unit.\n\nCALLS: 1\n\nTOOLS: mcp__eval-words__get_building_profile\n\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk indicator (temperatuuroverschrijding) at this address\"}]"
+    },
+    {
+      "wave": 1,
+      "slot": 2,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 13339,
+      "subagent_tokens": 40402,
+      "answer_chars_marker_stripped": 412,
+      "request1_input": 17606,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "abb4853e4fcf89de3",
+      "parent_session": "0b816dad-904c-48f6-a14a-c0994185f59a",
+      "output": "ANSWER: Yes, there is a significant overheating risk at this address. The building's overheating-risk indicator (temperatuuroverschrijding) is 3.59, which exceeds the significant-risk threshold of 1.5. This is a 1937 corner-middle residential unit (100 m²) with relatively poor compactness (0.98), meaning higher heat loss surface area. This risk profile is relevant for cooling load and heat pump sizing considerations.\n\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk at this address\"}"
+    },
+    {
+      "wave": 1,
+      "slot": 3,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 19998,
+      "subagent_tokens": 41170,
+      "answer_chars_marker_stripped": 336,
+      "request1_input": 19826,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "af69448978ff104cf",
+      "parent_session": "0b816dad-904c-48f6-a14a-c0994185f59a",
+      "output": "The building profile data shows a significant overheating risk at Van Beuningenstraat 1 in Rotterdam. The temperature overshoot indicator (temperatuuroverschrijding) is 3.59, which exceeds the threshold for significant overheating risk (values >1.5 indicate significant risk). This is an important consideration for cooling load assessment and heat pump sizing in this 1937 apartment building.\n\nANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The temperature overshoot indicator (temperatuuroverschrijding) is 3.59, which exceeds the 1.5 threshold that defines significant overheating risk. This metric is relevant for assessing cooling load and sizing heat pump systems for the building.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check overheating risk indicator for Van Beuningenstraat 1, Rotterdam\"}"
+    },
+    {
+      "wave": 1,
+      "slot": 4,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10287,
+      "subagent_tokens": 40357,
+      "answer_chars_marker_stripped": 463,
+      "request1_input": 17606,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ad9f4891d98927a68",
+      "parent_session": "0b816dad-904c-48f6-a14a-c0994185f59a",
+      "output": "ANSWER: Yes, there is a significant overheating risk at this address. The building profile shows a temperatuuroverschrijding (overheating-risk indicator TOjuli) of 3.59, which exceeds the threshold of 1.5 for significant risk. This 100 m² apartment from 1937 has an energy label of A but has a warmtebehoefte of 99.12 kWh/m² and a compactheid of 0.98, both factors that can contribute to overheating vulnerability in warmer months despite good overall energy performance.\n\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk at Van Beuningenstraat 1, Rotterdam\"}"
+    },
+    {
+      "wave": 1,
+      "slot": 5,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 12301,
+      "subagent_tokens": 41150,
+      "answer_chars_marker_stripped": 268,
+      "request1_input": 19826,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "aec3447dd7645fb7f",
+      "parent_session": "0b816dad-904c-48f6-a14a-c0994185f59a",
+      "output": "Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam 3039WB. The building's température overschrijding (TOjuli/GTO indicator) is 3.59, which exceeds the 1.5 threshold for significant overheating risk. This corner apartment (built 1937, 100 m²) is part of a three-unit building and despite having an excellent energy label A, the high compactness ratio (0.98) and heat demand profile create substantial summer overheating potential. This indicator is relevant for cooling load estimation and heat pump sizing decisions.\n\nANSWER: Yes, significant overheating risk (TOjuli indicator 3.59, threshold >1.5). This 1937-built corner apartment has high overheating potential despite excellent energy performance, due to its compact form and thermal mass. Relevant for cooling design and heat pump sizing.\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk (TOjuli/GTO indicator) at Van Beuningenstraat 1, 3039WB Rotterdam\"}]"
+    },
+    {
+      "wave": 1,
+      "slot": 6,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10947,
+      "subagent_tokens": 50059,
+      "answer_chars_marker_stripped": 280,
+      "request1_input": 28888,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ae9e257f540e52c73",
+      "parent_session": "0b816dad-904c-48f6-a14a-c0994185f59a",
+      "output": "Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam. The building profile shows a temperatuuroverschrijding (overheating indicator) value of 3.59, which exceeds the threshold of 1.5 that indicates significant risk. This apartment, built in 1937 and classified as a hoekmidden (corner-middle) unit, would benefit from cooling measures such as solar shading, ventilation, or potentially a heat pump with cooling capability to manage summer temperatures and ensure thermal comfort during warm periods.\n\nANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1 (temperatuuroverschrijding = 3.59, threshold >1.5 = significant). The apartment, built in 1937 with energy label A, would benefit from cooling measures like solar shading or a heat pump with cooling capability.\n\nCALLS: 1\n\nTOOLS: mcp__eval-words__get_building_profile\n\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk (temperatuuroverschrijding) at this address\"}]"
+    },
+    {
+      "wave": 1,
+      "slot": 7,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10328,
+      "subagent_tokens": 41094,
+      "answer_chars_marker_stripped": 447,
+      "request1_input": 19826,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a0d8f4b4829b3f5ed",
+      "parent_session": "0b816dad-904c-48f6-a14a-c0994185f59a",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1-01 in Rotterdam (3039WB). The building has a temperatuuroverschrijding (overheating-risk indicator) of 3.59, which exceeds the 1.5 threshold for significant overheating. This 1937 corner apartment with energy label A should be monitored for cooling load and considered when sizing heat pump systems, as it may require additional cooling capacity or thermal mass considerations.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check overheating risk (temperatuuroverschrijding) at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 1,
+      "slot": 8,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10529,
+      "subagent_tokens": 50015,
+      "answer_chars_marker_stripped": 421,
+      "request1_input": 28888,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a820025e6a76a07a9",
+      "parent_session": "0b816dad-904c-48f6-a14a-c0994185f59a",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The building has a temperatuuroverschrijding value of 3.59, which exceeds the 1.5 threshold indicating significant overheating risk. This is a corner apartment (hoekmidden) built in 1937, which may have limited thermal mass and solar shading. This overheating indicator is relevant for cooling load and heat pump sizing decisions.\n\nCALLS: 1\nTOOLS: mcp__eval-words__get_building_profile\nPARAMS: [{\"postcode\": \"3039WB\", \"huisnummer\": 1, \"queryIntent\": \"Check for overheating risk (temperatuuroverschrijding) at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 1,
+      "slot": 9,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11656,
+      "subagent_tokens": 40445,
+      "answer_chars_marker_stripped": 528,
+      "request1_input": 17606,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "aae796d43dde892e1",
+      "parent_session": "0b816dad-904c-48f6-a14a-c0994185f59a",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam (3039WB). The building's overheating risk indicator (temperatuuroverschrijding) is 3.59, which exceeds the significant risk threshold of 1.5. This 1937-built residential apartment has poor heat retention characteristics typical of older buildings, and its corner location compounds the overheating vulnerability. The heat demand of 99.12 kWh/m² suggests active cooling may be needed during warm periods despite the excellent energy label rating.\n\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check overheating risk at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 1,
+      "slot": 10,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 12994,
+      "subagent_tokens": 50277,
+      "answer_chars_marker_stripped": 373,
+      "request1_input": 28888,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a4c15b9840eb686bb",
+      "parent_session": "0b816dad-904c-48f6-a14a-c0994185f59a",
+      "output": "Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam (3039WB). The building's overheating risk indicator (temperatuuroverschrijding) is 3.59, which exceeds the 1.5 threshold for significant risk. This is an apartment built in 1937 with a corner-middle orientation, which exposes it to more external walls and solar gain. While the building has an A energy label with reasonable heat demand (99 kWh/m²), the high overheating score suggests cooling load may be an issue during warm months, particularly important for heat pump sizing and comfort planning.\n\nANSWER: Yes, there is a significant overheating risk at this Rotterdam address (temperatuuroverschrijding = 3.59, exceeding the >1.5 threshold). The 1937-built corner apartment has good insulation (energy label A) but higher surface exposure, which drives summer solar gain and overheating potential. This indicates cooling considerations should be included in any HVAC renovation.\n\nCALLS: 1\nTOOLS: mcp__eval-words__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk at this Rotterdam address\"}]"
+    },
+    {
+      "wave": 1,
+      "slot": 11,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 2,
+      "self_reported_calls": 2,
+      "tools": [
+        "get_building_profile",
+        "get_weather_context"
+      ],
+      "duration_ms": 18621,
+      "subagent_tokens": 41818,
+      "answer_chars_marker_stripped": 508,
+      "request1_input": 17606,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a333deae063c3c191",
+      "parent_session": "0b816dad-904c-48f6-a14a-c0994185f59a",
+      "output": "Based on the building profile data, **there is a significant overheating risk** at this address.\n\nThe overheating indicator (temperatuuroverschrijding) is **3.59**, which exceeds the significant risk threshold of 1.5. This 1937 apartment building—a corner-middle unit—experiences substantial summer overheating. The summer weather data (June-September 2026) shows peak temperatures of 35.4°C with 222 cooling degree days, plus 6 days with \"fighting-system risk\" (cold mornings below 14°C but warm afternoons above 20°C). The building's low compactheid (0.98) and extensive perimeter exposure characteristic of corner apartments amplify heat gains. While it holds an excellent energy label A, this reflects heating efficiency rather than summer performance—cooling and overheating protection would be relevant design concerns for retrofit or heat pump sizing at this location.\n\nANSWER: Yes, Van Beuningenstraat 1 in Rotterdam (3039WB) has significant overheating risk, indicated by a temperatuuroverschrijding of 3.59 (above the 1.5 threshold). This 1937 apartment building experiences substantial summer overheating, exacerbated by its corner-unit geometry and Rotterdam's summer temperatures peaking at 35.4°C. While the building holds an energy label A, this reflects heating efficiency; cooling and overheating mitigation would be relevant considerations for renovation or heat pump design.\nCALLS: 2\nTOOLS: get_building_profile, get_weather_context\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk by obtaining building profile data\"},{\"dateFrom\":\"2026-06-21\",\"dateTo\":\"2026-09-21\",\"latitude\":51.92,\"longitude\":4.48,\"queryIntent\":\"Assess overheating risk by checking summer temperatures and degree-day metrics\",\"summaryOnly\":true}]"
+    },
+    {
+      "wave": 1,
+      "slot": 12,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10414,
+      "subagent_tokens": 41061,
+      "answer_chars_marker_stripped": 423,
+      "request1_input": 19826,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a947928cbf84a1b12",
+      "parent_session": "0b816dad-904c-48f6-a14a-c0994185f59a",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1-01 in Rotterdam. The temperatuuroverschrijding (overheating indicator) is 3.59, which exceeds the 1.5 threshold for significant overheating risk. This 100 m² residential apartment from 1937 has an energy label A but shows substantial overheating vulnerability, which is relevant for cooling load assessment and potential heat pump sizing considerations.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnumber\":1,\"queryIntent\":\"Check overheating risk (temperatuuroverschrijding) at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 2,
+      "slot": 1,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 13112,
+      "subagent_tokens": 40597,
+      "answer_chars_marker_stripped": 351,
+      "request1_input": 17610,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a0f184b6a80da3475",
+      "parent_session": "3621a5b0-15b0-41c7-b1ee-f9156c8d497d",
+      "output": "Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam. The building's temperature overshoot indicator (TOjuli/GTO) is 3.59, which well exceeds the 1.5 threshold that signals significant overheating concern. This 1937-built corner apartment (hoekmidden type) likely experiences elevated indoor temperatures during warm seasons, particularly given its corner orientation which increases solar gain. Despite the building's strong energy label A rating for winter heating efficiency, the summer overheating risk remains substantial and should be considered for cooling or ventilation improvements.\n\nANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam (3039WB). The building's temperature overshoot (TOjuli) of 3.59 indicates substantial summer overheating risk. This 1937 corner apartment has inherent heat-gain vulnerability due to its corner position and may benefit from cooling measures or ventilation improvements.\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 2,
+      "slot": 2,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11377,
+      "subagent_tokens": 41122,
+      "answer_chars_marker_stripped": 406,
+      "request1_input": 19830,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "aed9165f986cd067d",
+      "parent_session": "3621a5b0-15b0-41c7-b1ee-f9156c8d497d",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam (3039WB). The overheating risk indicator (temperatuuroverschrijding) is 3.59, which exceeds the threshold of 1.5 that marks significant risk. This apartment, built in 1937 and located on a corner-middle position, should be evaluated for cooling load requirements and heat pump sizing with this overheating tendency in mind.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk at this residential address in Rotterdam\"}]"
+    },
+    {
+      "wave": 2,
+      "slot": 3,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10369,
+      "subagent_tokens": 50030,
+      "answer_chars_marker_stripped": 435,
+      "request1_input": 28892,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a844e3367eb7d2431",
+      "parent_session": "3621a5b0-15b0-41c7-b1ee-f9156c8d497d",
+      "output": "ANSWER: Yes, there is a significant overheating risk at this apartment in Rotterdam. The building's temperature overshoot indicator (temperatuuroverschrijding) is 3.59, which exceeds the 1.5 threshold for significant overheating risk. This NTA 8800 metric indicates substantial potential for indoor temperatures to exceed comfort bounds, particularly during summer periods, and is relevant for cooling load and heat pump sizing considerations.\n\nCALLS: 1\n\nTOOLS: mcp__eval-words__get_building_profile\n\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check overheating risk indicator for building\"}]"
+    },
+    {
+      "wave": 2,
+      "slot": 4,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11924,
+      "subagent_tokens": 41177,
+      "answer_chars_marker_stripped": 445,
+      "request1_input": 19830,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "acc028de685730fb4",
+      "parent_session": "3621a5b0-15b0-41c7-b1ee-f9156c8d497d",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, 3039WB Rotterdam. The building has a temperatuuroverschrijding (overheating-risk indicator) score of 3.59, which exceeds the threshold of 1.5 that indicates significant overheating. This is a 1937-built, 100 m² corner apartment with good energy performance (label A), but the high overheating indicator is relevant for cooling load assessment and heat pump sizing decisions.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk at Van Beuningenstraat 1, Rotterdam\"}"
+    },
+    {
+      "wave": 2,
+      "slot": 5,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 13662,
+      "subagent_tokens": 50237,
+      "answer_chars_marker_stripped": 310,
+      "request1_input": 28892,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a339dcc94fa377ea8",
+      "parent_session": "3621a5b0-15b0-41c7-b1ee-f9156c8d497d",
+      "output": "Yes, there is a **significant overheating risk** at Van Beuningenstraat 1, Rotterdam 3039WB. The building's overheating indicator (temperatuuroverschrijding) is 3.59, which exceeds the significant-risk threshold of 1.5. This corner-middle apartment, originally built in 1937 and covering 100 m², has an excellent energy label (A) but is vulnerable to summer overheating, especially during warm periods. This is relevant for sizing cooling systems or considering passive cooling measures if the building undergoes renovation.\n\nANSWER: Yes, there is significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The building's overheating indicator is 3.59, which exceeds the threshold of 1.5 for significant risk. This suggests vulnerability to temperature exceedances during summer, relevant for heat pump or cooling system design.\n\nCALLS: 1\n\nTOOLS: mcp__eval-words__get_building_profile\n\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 2,
+      "slot": 6,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 2,
+      "self_reported_calls": 2,
+      "tools": [
+        "get_building_profile",
+        "get_weather_context"
+      ],
+      "duration_ms": 19358,
+      "subagent_tokens": 41288,
+      "answer_chars_marker_stripped": 365,
+      "request1_input": 17610,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "aceea44f8f1d2f75d",
+      "parent_session": "3621a5b0-15b0-41c7-b1ee-f9156c8d497d",
+      "output": "Based on the building profile, **yes, there is a significant overheating risk** at Van Beuningenstraat 1 in Rotterdam.\n\nThe key indicator is the **temperatuuroverschrijding (TOjuli/GTO) value of 3.59**, which is well above the threshold of 1.5 that indicates significant overheating risk. This metric is part of the NTA 8800 energy label calculation and reflects the building's susceptibility to summer overheating based on its thermal properties.\n\nContributing factors to this risk include: the building was constructed in 1937 (pre-war construction with likely limited summer cooling design), it is a corner-middle apartment unit (corners lose more heat, which conversely also gain more summer heat), and it has moderate surface-area-to-volume ratio (compactheid 0.98). The 92 m² apartment lacks the thermal mass or passive cooling measures common in modern designs. Any future cooling interventions (such as a heat pump with cooling capability) should account for this overheating tendency.\n\nANSWER: Yes, Van Beuningenstraat 1 in Rotterdam has a significant overheating risk, indicated by a temperatuuroverschrijding value of 3.59 (above the 1.5 threshold for significant risk). This 1937 corner-middle apartment lacks modern cooling measures and is prone to summer heat accumulation. Heat pump sizing and any cooling design should account for this heightened risk.\n\nCALLS: 2\nTOOLS: get_building_profile, get_weather_context\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check building characteristics to assess overheating risk at Van Beuningenstraat 1, Rotterdam\"},{\"dateFrom\":\"2026-01-01\",\"dateTo\":\"2026-12-31\",\"latitude\":51.92,\"longitude\":4.48,\"summaryOnly\":true,\"queryIntent\":\"Get annual cooling degree days and summer climate data for Rotterdam to assess overheating risk\"}]"
+    },
+    {
+      "wave": 2,
+      "slot": 7,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10338,
+      "subagent_tokens": 50070,
+      "answer_chars_marker_stripped": 362,
+      "request1_input": 28892,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a2cb3d9bb698c69b0",
+      "parent_session": "3621a5b0-15b0-41c7-b1ee-f9156c8d497d",
+      "output": "Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam. The building (a corner apartment built in 1937) has a temperatuuroverschrijding (overheating indicator) of 3.59, which exceeds the 1.5 threshold for significant overheating risk. This metric indicates that the building is susceptible to excessive indoor temperatures, particularly in summer months. The building holds an A energy label despite this risk, suggesting efficient heating performance but limited cooling capacity.\n\nANSWER: Yes, there is significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The temperatuuroverschrijding value of 3.59 exceeds the 1.5 threshold for significant overheating, indicating the building is particularly susceptible to excessive indoor temperatures during warm months, likely due to its 1937 construction and corner apartment orientation.\n\nCALLS: 1\n\nTOOLS: mcp__eval-words__get_building_profile\n\nPARAMS: {\"postcode\": \"3039WB\", \"huisnummer\": 1, \"queryIntent\": \"Check overheating risk (temperatuuroverschrijding) at Van Beuningenstraat 1, Rotterdam\"}"
+    },
+    {
+      "wave": 2,
+      "slot": 8,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 14564,
+      "subagent_tokens": 40720,
+      "answer_chars_marker_stripped": 405,
+      "request1_input": 17610,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a93545cec619bc516",
+      "parent_session": "3621a5b0-15b0-41c7-b1ee-f9156c8d497d",
+      "output": "Based on the building profile data, **yes, there is a significant overheating risk** at this address. The temperatuuroverschrijding (overheating indicator) is 3.59, which exceeds the 1.5 threshold for significant overheating risk.\n\nThis 100 m² apartment (built 1937, energy label A) is a corner unit (hoekmidden) with high thermal compactness (0.98). While excellent insulation reduces winter heating needs, the same characteristics can trap solar heat in summer and lead to uncomfortable indoor temperatures, particularly in July. The heat demand is 99.12 kWh/m², indicating the building responds strongly to temperature changes. Residential buildings of this age typically lack mechanical cooling, so overheating risk management depends on natural ventilation and shading.\n\nANSWER: Yes, there is a significant overheating risk. The temperatuuroverschrijding indicator is 3.59—well above the 1.5 threshold for concern. This 1937 apartment with high thermal compactness and corner orientation can trap solar heat in summer, causing uncomfortable indoor temperatures despite having good winter insulation. Cooling measures (shading, ventilation, or heat pump retrofit) should be considered.\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk at this residential address\"}"
+    },
+    {
+      "wave": 2,
+      "slot": 9,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11012,
+      "subagent_tokens": 41060,
+      "answer_chars_marker_stripped": 398,
+      "request1_input": 19830,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a910267a0f4cc8418",
+      "parent_session": "3621a5b0-15b0-41c7-b1ee-f9156c8d497d",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam (3039WB). The temperatuuroverschrijding (temperature overshoot indicator) is 3.59, which exceeds the 1.5 threshold for significant overheating risk. This is an apartment built in 1937 with an energy label A, and the overheating assessment is relevant for cooling load estimation and heat pump sizing considerations.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check overheating risk (temperatuuroverschrijding) at Van Beuningenstraat 1 Rotterdam\"}]"
+    },
+    {
+      "wave": 2,
+      "slot": 10,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10939,
+      "subagent_tokens": 40473,
+      "answer_chars_marker_stripped": 271,
+      "request1_input": 17610,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "af5507e8a3e482503",
+      "parent_session": "3621a5b0-15b0-41c7-b1ee-f9156c8d497d",
+      "output": "Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The building's temperatuuroverschrijding (overheating indicator) is 3.59, which exceeds the 1.5 threshold that indicates significant overheating risk. This 1937-built residential apartment should be evaluated for cooling needs and heat pump sizing, particularly as overheating risks can affect occupant comfort and energy efficiency during warmer months.\n\nANSWER: Yes, there is significant overheating risk (temperatuuroverschrijding = 3.59, threshold > 1.5 = significant). The 1937-built corner/middle apartment unit shows a notable overheating indicator, which should be considered for cooling load and heat pump sizing calculations.\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: {\"postcode\": \"3039WB\", \"huisnummer\": 1, \"queryIntent\": \"Check for overheating risk at Van Beuningenstraat 1 Rotterdam\"}"
+    },
+    {
+      "wave": 2,
+      "slot": 11,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10284,
+      "subagent_tokens": 41030,
+      "answer_chars_marker_stripped": 373,
+      "request1_input": 19830,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ab6b65b2127429a92",
+      "parent_session": "3621a5b0-15b0-41c7-b1ee-f9156c8d497d",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The building has a temperatuuroverschrijding (overheating indicator) of 3.59, which exceeds the 1.5 threshold for significant risk. This is a 1937-built apartment of 100 m² with an energy label A, and the overheating risk is relevant for cooling load and heat pump sizing decisions.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk (temperatuuroverschrijding) at Van Beuningenstraat 1, Rotterdam\"}"
+    },
+    {
+      "wave": 2,
+      "slot": 12,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 8984,
+      "subagent_tokens": 49905,
+      "answer_chars_marker_stripped": 435,
+      "request1_input": 28892,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "aa15616b1400d4a54",
+      "parent_session": "3621a5b0-15b0-41c7-b1ee-f9156c8d497d",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The building has a temperatuuroverschrijding score of 3.59, which indicates significant overheating risk (values above 1.5 indicate substantial risk). This 1937 apartment building with an energy label A has a relatively low compactheid (0.98) but should consider passive cooling measures or ventilation strategies to manage summer temperatures.\n\nCALLS: 1\nTOOLS: mcp__eval-words__get_building_profile\nPARAMS: [{\"postcode\": \"3039WB\", \"huisnummer\": 1, \"queryIntent\": \"Check for overheating risk (temperatuuroverschrijding) at this building address\"}]"
+    },
+    {
+      "wave": 3,
+      "slot": 1,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 9561,
+      "subagent_tokens": 41049,
+      "answer_chars_marker_stripped": 532,
+      "request1_input": 19826,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ad70d55e44d2e64eb",
+      "parent_session": "fbc2aa9f-495b-496f-aeb3-f720f176d877",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The temperatuuroverschrijding indicator is 3.59, which exceeds the threshold of 1.5 that indicates significant overheating risk. This 1937 apartment (100 m², energy label A) has poor thermal compactness and lacks adequate cooling capacity despite its excellent energy efficiency rating, making it vulnerable to summer temperatures. This overheating risk is relevant for heat pump sizing and cooling load planning if renovation is considered.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnumber\":1,\"queryIntent\":\"Check for overheating risk (temperatuuroverschrijding) at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 3,
+      "slot": 2,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 13155,
+      "subagent_tokens": 50333,
+      "answer_chars_marker_stripped": 340,
+      "request1_input": 28888,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a9f2ff45f8f68b2a0",
+      "parent_session": "fbc2aa9f-495b-496f-aeb3-f720f176d877",
+      "output": "Yes, there is a **significant overheating risk** at this address. The building profile shows a **temperatuuroverschrijding value of 3.59**, which exceeds the threshold of 1.5 that indicates significant overheating risk. This is apartment 01 at Van Beuningenstraat 1-01 (a corner-middle unit built in 1937), despite having an energy label rating of A. The corner orientation and older construction typical of 1930s apartments can contribute to elevated summer temperatures.\n\nANSWER: Yes, there is significant overheating risk (temperatuuroverschrijding = 3.59, threshold >1.5). This apartment at Van Beuningenstraat 1-01 in Rotterdam shows substantial risk of uncomfortable summer temperatures despite its good energy label rating. The corner orientation and older 1937 construction likely contribute to this vulnerability.\n\nCALLS: 1\n\nTOOLS: mcp__eval-words__get_building_profile\n\nPARAMS: [{\"postcode\": \"3039WB\", \"huisnummer\": 1, \"queryIntent\": \"Check for overheating risk (temperatuuroverschrijding indicator) at this address\"}]"
+    },
+    {
+      "wave": 3,
+      "slot": 3,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10959,
+      "subagent_tokens": 40485,
+      "answer_chars_marker_stripped": 417,
+      "request1_input": 17606,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a46dbf6c32c78bf29",
+      "parent_session": "fbc2aa9f-495b-496f-aeb3-f720f176d877",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The building's overheating indicator (temperatuuroverschrijding) is 3.59, which exceeds the threshold of 1.5 that indicates significant overheating risk. This is a 1937-built corner-middle apartment with an otherwise good energy label (A), but the architectural design and age make it vulnerable to excessive summer heat gain.\n\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk at this address\"}"
+    },
+    {
+      "wave": 3,
+      "slot": 4,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11682,
+      "subagent_tokens": 50224,
+      "answer_chars_marker_stripped": 305,
+      "request1_input": 28888,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ab47f6060cd47a6b7",
+      "parent_session": "fbc2aa9f-495b-496f-aeb3-f720f176d877",
+      "output": "Yes, there is a **significant overheating risk** at Van Beuningenstraat 1, Rotterdam. The building's temperatuuroverschrijding (overheating indicator) is 3.59, which exceeds the 1.5 threshold for significant overheating risk. This corner/middle apartment (built 1937, 100 m²) has an excellent energy label (A) but the high overheating value suggests it would require attention for cooling load and heat pump sizing if being retrofitted.\n\nANSWER: Yes, there is significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The temperatuuroverschrijding value is 3.59, which exceeds the 1.5 threshold indicating significant overheating risk. This is relevant for any cooling requirements or heat pump installation planning for the building.\n\nCALLS: 1\nTOOLS: mcp__eval-words__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 3,
+      "slot": 5,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10343,
+      "subagent_tokens": 40539,
+      "answer_chars_marker_stripped": 307,
+      "request1_input": 17606,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ae72fb19ac22a4c2b",
+      "parent_session": "fbc2aa9f-495b-496f-aeb3-f720f176d877",
+      "output": "Yes, there is a significant overheating risk at Van Beuningenstraat 1-01 in Rotterdam (3039WB). The building's overheating risk indicator (temperatuuroverschrijding) is 3.59, which indicates a significant overheating problem according to the Dutch NTA 8800 standard. Values above 1.5 are considered significant, while 0–1.5 indicate minor risk and 0 means no risk. This metric is important for assessing cooling requirements and sizing heat pumps appropriately for the building.\n\nANSWER: Yes, there is significant overheating risk at this address. The building's overheating risk indicator (temperatuuroverschrijding) is 3.59, which exceeds the 1.5 threshold for significant risk. This apartment, built in 1937 with an area of 92 m², requires consideration for cooling load and heat pump sizing.\n\nCALLS: 1\n\nTOOLS: mcp__eval-inline__get_building_profile\n\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk information at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 3,
+      "slot": 6,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10813,
+      "subagent_tokens": 41235,
+      "answer_chars_marker_stripped": 284,
+      "request1_input": 19826,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a8b6afe00e6a8bac9",
+      "parent_session": "fbc2aa9f-495b-496f-aeb3-f720f176d877",
+      "output": "Based on the building profile data, **yes, there is a significant overheating risk** at Van Beuningenstraat 1 in Rotterdam. The temperatuuroverschrijding (overheating-risk indicator) is 3.59, which well exceeds the 1.5 threshold that indicates significant overheating potential. This 1937-built apartment (100 m²) has an energy label A and moderately high heat demand (99.12 kWh/m²), but the overheating score suggests summer thermal comfort or cooling load concerns that are relevant for heat pump sizing or summer ventilation design. The corner-middle building subtype may compound the issue through additional surface exposure to direct solar gain.\n\nANSWER: Yes, there is a significant overheating risk (temperatuuroverschrijding 3.59, threshold >1.5). This 1937 apartment in Rotterdam scores well on energy efficiency (label A) but faces substantial summer overheating potential, which is relevant for cooling strategies or heat pump design.\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk at Van Beuningenstraat 1 Rotterdam\"}]"
+    },
+    {
+      "wave": 3,
+      "slot": 7,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 9806,
+      "subagent_tokens": 40352,
+      "answer_chars_marker_stripped": 605,
+      "request1_input": 17606,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "aac0de02e68beb82d",
+      "parent_session": "fbc2aa9f-495b-496f-aeb3-f720f176d877",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, 3039WB Rotterdam. The building's temperature overheating indicator (temperatuuroverschrijding) is 3.59, which exceeds the threshold of 1.5 that signals significant overheating risk. This 1937-built apartment (100 m², corner unit) has an excellent energy label (A) and low net heat demand (99 kWh/m²), but its building geometry and thermal characteristics create conditions where indoor temperatures could exceed acceptable comfort levels during warm periods, particularly relevant for heat pump sizing and cooling load considerations.\n\nCALLS: 1\n\nTOOLS: mcp__eval-inline__get_building_profile\n\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check building profile to assess overheating risk\"}]"
+    },
+    {
+      "wave": 3,
+      "slot": 8,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 8764,
+      "subagent_tokens": 41048,
+      "answer_chars_marker_stripped": 441,
+      "request1_input": 19826,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "aceed23b7a0f7565c",
+      "parent_session": "fbc2aa9f-495b-496f-aeb3-f720f176d877",
+      "output": "ANSWER: Yes, there is significant overheating risk at Van Beuningenstraat 1 in Rotterdam (postcode 3039WB). The building's temperatuuroverschrijding (overheating-risk indicator) is 3.59, which exceeds the 1.5 threshold for significant overheating. This 1937-built corner apartment (hoekmidden) is classified as residential and holds an energy label A, but the high overheating indicator is important for cooling load assessment and heat pump sizing.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk (temperatuuroverschrijding) at this address\"}]"
+    },
+    {
+      "wave": 3,
+      "slot": 9,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11496,
+      "subagent_tokens": 50206,
+      "answer_chars_marker_stripped": 402,
+      "request1_input": 28888,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a41e00108c80b257e",
+      "parent_session": "fbc2aa9f-495b-496f-aeb3-f720f176d877",
+      "output": "Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam (3039WB). The building profile shows a temperatuuroverschrijding (overheating-risk indicator) of 3.59, which exceeds the threshold of 1.5 that indicates significant overheating risk. This 1937-era corner apartment (100 m²) has an energy label A but registered a notable overheating concern in its NTA 8800 energy assessment from 2022. The risk is likely related to solar gain and thermal inertia characteristics of this older corner-positioned unit.\n\nANSWER: Yes, there is significant overheating risk (temperatuuroverschrijding score 3.59, above the 1.5 threshold for major risk) at Van Beuningenstraat 1, Rotterdam 3039WB. This 1937-built corner apartment was assessed for overheating in its 2022 energy label. The older construction and corner position likely contribute to solar heat gains that can exceed comfort thresholds, especially during warm seasons.\n\nCALLS: 1\n\nTOOLS: mcp__eval-words__get_building_profile\n\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check overheating risk (temperatuuroverschrijding) for Van Beuningenstraat 1 Rotterdam\"}]"
+    },
+    {
+      "wave": 3,
+      "slot": 10,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10818,
+      "subagent_tokens": 41211,
+      "answer_chars_marker_stripped": 455,
+      "request1_input": 19826,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a72c19df3aa1e8757",
+      "parent_session": "fbc2aa9f-495b-496f-aeb3-f720f176d877",
+      "output": "ANSWER: Yes, there is significant overheating risk at Van Beuningenstraat 1, Rotterdam, 3039WB. The building shows a temperatuuroverschrijding (overheating indicator) of 3.59, which exceeds the 1.5 threshold that signals significant summer overheating risk. This is an apartment built in 1937 with a corner-location configuration, which affects solar exposure and ventilation. The overheating risk is relevant for cooling load and heat pump sizing considerations.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk (temperatuuroverschrijding indicator)\"}]"
+    },
+    {
+      "wave": 3,
+      "slot": 11,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11954,
+      "subagent_tokens": 50225,
+      "answer_chars_marker_stripped": 343,
+      "request1_input": 28888,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "aff8e486d9b630fd8",
+      "parent_session": "fbc2aa9f-495b-496f-aeb3-f720f176d877",
+      "output": "Yes, there is a **significant overheating risk** at Van Beuningenstraat 1, Rotterdam. The building's overheating-risk indicator (temperatuuroverschrijding) is 3.59, which exceeds the 1.5 threshold that indicates significant risk. This is a 1937-built corner apartment unit with an excellent energy label (A), but the high overheating risk likely reflects limited natural ventilation and solar exposure typical of older, compact urban dwellings. The risk is particularly relevant during summer months and should inform cooling or ventilation strategies for comfort.\n\nANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam 3039WB, with a temperatuuroverschrijding value of 3.59 (threshold for significant risk is >1.5). This 1937-built corner apartment has strong thermal insulation (energy label A) but limited natural ventilation capacity, making it vulnerable to summer overheating.\nCALLS: 1\nTOOLS: mcp__eval-words__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check overheating risk (temperatuuroverschrijding/GTO indicator) at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 3,
+      "slot": 12,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 9721,
+      "subagent_tokens": 40414,
+      "answer_chars_marker_stripped": 436,
+      "request1_input": 17606,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a77e2abd3db6adb3c",
+      "parent_session": "fbc2aa9f-495b-496f-aeb3-f720f176d877",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1-01 (3039WB Rotterdam). The building's overheating risk indicator (temperatuuroverschrijding) is 3.59, which exceeds the 1.5 threshold that indicates significant risk. This is a corner apartment built in 1937 with energy label A, but the high overheating risk suggests it may need cooling measures or heat pump sizing considerations for summer comfort and efficiency.\n\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk assessment at this Rotterdam building address\"}]"
+    },
+    {
+      "wave": 4,
+      "slot": 1,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 12206,
+      "subagent_tokens": 50320,
+      "answer_chars_marker_stripped": 419,
+      "request1_input": 28888,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ac54e746ab39668e4",
+      "parent_session": "bba7d8be-0729-45f3-a521-2c872118fcfc",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, 3039WB Rotterdam. The building's temperatuuroverschrijding (overheating risk indicator) is 3.59, which exceeds the 1.5 threshold for significant overheating risk. This is a 1937 corner apartment with an energy label A, and the overheating risk is likely amplified by its corner position, which experiences greater solar heat gain and wind exposure.\n\nCALLS: 1\nTOOLS: mcp__eval-words__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check overheating risk at Van Beuningenstraat 1 Rotterdam\"}"
+    },
+    {
+      "wave": 4,
+      "slot": 2,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10624,
+      "subagent_tokens": 41172,
+      "answer_chars_marker_stripped": 280,
+      "request1_input": 19826,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a1bc91497788535fa",
+      "parent_session": "bba7d8be-0729-45f3-a521-2c872118fcfc",
+      "output": "Yes, there is a **significant overheating risk** at Van Beuningenstraat 1, Rotterdam (3039WB). The building has a temperatuuroverschrijding (overheating-risk indicator) score of 3.59, which far exceeds the 1.5 threshold that indicates significant overheating risk. This 1937-built residential apartment (currently energy label A) may require cooling measures or careful ventilation management during warm periods. The warmtebehoefte data (99.12 kWh/m²) and compactheid (0.98) may inform heat pump sizing if cooling or climate adaptation is planned.\n\nANSWER: Yes, there is a significant overheating risk at this address. The temperatuuroverschrijding indicator is 3.59, well above the 1.5 threshold for significant overheating. This 1937-built apartment in Rotterdam should be monitored for summer cooling loads and ventilation strategies.\n\nCALLS: 1\n\nTOOLS: mcp__eval-inline-oneline__get_building_profile\n\nPARAMS: [{\"postcode\": \"3039WB\", \"huisnummer\": 1, \"queryIntent\": \"Check for overheating risk indicators (temperatuuroverschrijding) at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 4,
+      "slot": 3,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11846,
+      "subagent_tokens": 40491,
+      "answer_chars_marker_stripped": 390,
+      "request1_input": 17606,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a9c1cd0bd25740836",
+      "parent_session": "bba7d8be-0729-45f3-a521-2c872118fcfc",
+      "output": "Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam, 3039WB. The building's overheating-risk indicator (temperatuuroverschrijding) is 3.59, which exceeds the 1.5 threshold that indicates significant overheating risk. This 1937 corner-apartment is energy-efficient (label A) but lacks modern cooling systems, making it susceptible to excessive indoor temperatures during warm periods. This metric is particularly relevant for sizing heat pump cooling capacity or adding ventilation measures.\n\nANSWER: Yes, there is a significant overheating risk at this address. The building's overheating indicator is 3.59, well above the 1.5 threshold that signals significant risk. This 1937 apartment, though energy-efficient (label A), has no modern cooling systems and can experience excessive indoor temperatures in summer. This is important to consider for heat pump sizing and ventilation planning.\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 4,
+      "slot": 4,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11647,
+      "subagent_tokens": 40529,
+      "answer_chars_marker_stripped": 533,
+      "request1_input": 17606,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ac9bd5cb7d59c071b",
+      "parent_session": "bba7d8be-0729-45f3-a521-2c872118fcfc",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam. The building's overheating indicator (temperatuuroverschrijding) is 3.59, which exceeds the 1.5 threshold for significant risk. This is a 1937 apartment building with good thermal insulation (energy label A, heat demand 99.12 kWh/m²) but a corner-middle configuration that contributes to summer temperature overshoot. The building may experience uncomfortable indoor temperatures during warm periods without adequate cooling or ventilation measures.\n\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check building characteristics and overheating risk at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 4,
+      "slot": 5,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 9709,
+      "subagent_tokens": 50120,
+      "answer_chars_marker_stripped": 341,
+      "request1_input": 28888,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ad00a8ebc5c84bd28",
+      "parent_session": "bba7d8be-0729-45f3-a521-2c872118fcfc",
+      "output": "Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam (3039WB). The building shows a temperatuuroverschrijding (overheating risk indicator) of 3.59, which exceeds the 1.5 threshold for significant overheating risk. The property is a corner-middle apartment (hoekmidden) built in 1937, and this overheating risk may be related to its architectural orientation and thermal properties despite its current energy label A rating.\n\nANSWER: Yes, there is significant overheating risk at this Rotterdam address with a temperatuuroverschrijding of 3.59 (threshold >1.5 indicates significant risk). This is a 1937-built corner apartment with an otherwise good energy label A, suggesting the overheating risk may be linked to solar exposure and thermal mass rather than poor insulation.\n\nCALLS: 1\n\nTOOLS: mcp__eval-words__get_building_profile\n\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check overheating risk (temperatuuroverschrijding) at this address\"}]"
+    },
+    {
+      "wave": 4,
+      "slot": 6,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 9595,
+      "subagent_tokens": 41039,
+      "answer_chars_marker_stripped": 361,
+      "request1_input": 19826,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ab798171092195470",
+      "parent_session": "bba7d8be-0729-45f3-a521-2c872118fcfc",
+      "output": "Yes, there is a significant overheating risk at this address. The building profile shows a temperatuuroverschrijding (overheating-risk indicator) of 3.59, which exceeds the 1.5 threshold that indicates significant overheating risk. This apartment at Van Beuningenstraat 1 in Rotterdam (built in 1937) is a corner-middle unit with a net heat demand (warmtebehoefte) of 99.12 kWh/m². The overheating risk is relevant for sizing cooling loads and heat pump systems at this location.\n\nANSWER: Yes, there is significant overheating risk (temperatuuroverschrijding = 3.59, above the >1.5 threshold for significant risk) at Van Beuningenstraat 1, Rotterdam. This 1937 apartment with an A energy label has a net heat demand of 99.12 kWh/m² and a compactheid of 0.98, indicating higher heat loss per m2 that would be relevant for cooling and heat pump design.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check overheating risk (temperatuuroverschrijding) at this Rotterdam address\"}]"
+    },
+    {
+      "wave": 4,
+      "slot": 7,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 9642,
+      "subagent_tokens": 41070,
+      "answer_chars_marker_stripped": 389,
+      "request1_input": 19826,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a639682c2eb252841",
+      "parent_session": "bba7d8be-0729-45f3-a521-2c872118fcfc",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The building's temperatuuroverschrijding (overheating-risk indicator) is 3.59, which exceeds the 1.5 threshold for significant overheating. This corner-middle apartment built in 1937 would benefit from cooling load analysis and should be considered when sizing heat pump systems for summer comfort.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk (temperatuuroverschrijding) at this address\"}"
+    },
+    {
+      "wave": 4,
+      "slot": 8,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11776,
+      "subagent_tokens": 40606,
+      "answer_chars_marker_stripped": 417,
+      "request1_input": 17606,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a216137b0e6bac80a",
+      "parent_session": "bba7d8be-0729-45f3-a521-2c872118fcfc",
+      "output": "Based on the building profile data, **yes, there is a significant overheating risk** at Van Beuningenstraat 1, Rotterdam.\n\nThe building's overheating-risk indicator (temperatuuroverschrijding) is **3.59**, which exceeds the threshold of 1.5 that signals significant overheating risk. This pre-war residential apartment (built 1937) has an excellent energy label (A) and good thermal insulation (compactheid 0.98), but these characteristics—combined with its corner/middle position and thermal mass—create conditions where summer overheating becomes problematic. This is typical for older, well-sealed buildings that lack effective solar control or mechanical cooling.\n\nANSWER: Yes, Van Beuningenstraat 1 in Rotterdam (3039WB) has significant overheating risk with a measured indicator of 3.59, well above the 1.5 threshold. This 1937 pre-war residential apartment, despite having an energy label A, is vulnerable to summer overheating due to thermal characteristics common in older buildings. Consider solar shading, natural ventilation, or heat pump cooling capacity when planning renovations.\n\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check building profile for overheating risk assessment at Van Beuningenstraat 1 Rotterdam\"}]"
+    },
+    {
+      "wave": 4,
+      "slot": 9,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10810,
+      "subagent_tokens": 50155,
+      "answer_chars_marker_stripped": 363,
+      "request1_input": 28888,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ae69e528cc6b4192b",
+      "parent_session": "bba7d8be-0729-45f3-a521-2c872118fcfc",
+      "output": "Yes, there is a significant overheating risk at this address. The building at Van Beuningenstraat 1, Rotterdam (3039WB) has a temperatuuroverschrijding (overheating-risk indicator) of 3.59, which exceeds the 1.5 threshold that indicates significant overheating risk. This is a 100 m² corner-middle apartment built in 1937 with an energy label A, and the overheating assessment was conducted during a basic site survey (Basisopname) per NTA 8800:2020 standards. The risk level may be driven by the building's corner location and thermal characteristics, which typically experience greater solar gain and heat accumulation than mid-positioned units.\n\nANSWER: Yes, there is significant overheating risk (temperatuuroverschrijding 3.59, well above the 1.5 threshold). This 1937-built corner apartment has a modern energy label A but shows substantial risk of summer overheating per NTA 8800 calculations. Consider passive cooling measures like ventilation, thermal mass exposure, or shading strategies to mitigate this risk.\n\nCALLS: 1\n\nTOOLS: mcp__eval-words__get_building_profile\n\nPARAMS: {\"postcode\": \"3039WB\", \"huisnummer\": 1, \"queryIntent\": \"Check overheating risk indicator for residential building\"}"
+    },
+    {
+      "wave": 4,
+      "slot": 10,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 8718,
+      "subagent_tokens": 40952,
+      "answer_chars_marker_stripped": 494,
+      "request1_input": 19826,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a36b773dcbc70ffe8",
+      "parent_session": "bba7d8be-0729-45f3-a521-2c872118fcfc",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam. The temperatuuroverschrijding indicator is 3.59, which exceeds the threshold of 1.5 that signals significant overheating risk. This is relevant for cooling load and heat pump sizing considerations. Despite the building's good energy label (A), the corner apartment (gebouwsubtype: Hoekmidden) has notable overheating concerns that would need to be addressed in any climate adaptation or heat pump installation.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk at Van Beuningenstraat 1, Rotterdam\"}"
+    },
+    {
+      "wave": 4,
+      "slot": 11,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11051,
+      "subagent_tokens": 50206,
+      "answer_chars_marker_stripped": 268,
+      "request1_input": 28888,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a6606535454b0c3af",
+      "parent_session": "bba7d8be-0729-45f3-a521-2c872118fcfc",
+      "output": "Based on the building profile data returned, yes, there is a **significant overheating risk** at Van Beuningenstraat 1, Rotterdam 3039WB. The temperatuuroverschrijding (overheating-risk indicator) is 3.59, which exceeds the 1.5 threshold and signals substantial risk of summer overheating. This is a 1937 apartment (corner-middle position) with 100 m², despite holding an energy label A. The high overheating score suggests cooling or natural ventilation measures should be considered, particularly for summer comfort.\n\nANSWER: Yes, there is significant overheating risk at this address (temperatuuroverschrijding = 3.59, well above the 1.5 threshold). The building is a 1937 corner apartment with an energy label A, but the design and orientation create notable summer overheating vulnerability.\nCALLS: 1\nTOOLS: mcp__eval-words__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check overheating risk (temperatuuroverschrijding) at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 4,
+      "slot": 12,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10901,
+      "subagent_tokens": 40511,
+      "answer_chars_marker_stripped": 269,
+      "request1_input": 17606,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "aba59b3bd9ea3cfd9",
+      "parent_session": "bba7d8be-0729-45f3-a521-2c872118fcfc",
+      "output": "Yes, there is a **significant overheating risk** at Van Beuningenstraat 1, Rotterdam 3039WB. The building's overheating-risk indicator (temperatuuroverschrijding) is **3.59**, which exceeds the 1.5 threshold for significant concern.\n\nThis residential apartment (built 1937, corner middle position) has a relatively compact building form (compactheid 0.98), but its high overheating risk suggests poor thermal mass or inadequate ventilation for summer conditions. This is relevant for heat pump sizing: a high cooling load will be required during warm months.\n\nANSWER: Yes, there is a significant overheating risk (3.59) at this Rotterdam address. The building's overheating-risk indicator far exceeds the 1.5 threshold, indicating that summer cooling challenges should be considered in any HVAC design, especially for heat pump capacity.\n\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 5,
+      "slot": 1,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 12230,
+      "subagent_tokens": 40484,
+      "answer_chars_marker_stripped": 441,
+      "request1_input": 17608,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a4e6ee9573a4195f7",
+      "parent_session": "6ccf8bde-9928-4e93-b1ed-20e7347fcaf8",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The building's overheating indicator (temperatuuroverschrijding) is 3.59, which exceeds the 1.5 threshold for significant risk. This 1937 corner-unit apartment (100 m²) with energy label A shows elevated overheating potential despite good energy efficiency, which is important for HVAC design — particularly for heat pump sizing and cooling strategy.\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk for the building at Van Beuningenstraat 1, Rotterdam\"}"
+    },
+    {
+      "wave": 5,
+      "slot": 2,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10687,
+      "subagent_tokens": 50106,
+      "answer_chars_marker_stripped": 476,
+      "request1_input": 28890,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a313f55ef48d522a5",
+      "parent_session": "6ccf8bde-9928-4e93-b1ed-20e7347fcaf8",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam 3039WB. The building's overheating risk indicator (temperatuuroverschrijding) is 3.59, which exceeds the threshold of 1.5 that indicates significant overheating risk. This 1937-built corner apartment with 92 m2 usable floor area has an energy label A overall, but the high overheating indicator suggests it may require cooling measures to maintain summer comfort, particularly in warmer periods.\n\nCALLS: 1\nTOOLS: mcp__eval-words__get_building_profile\nPARAMS: [{\"postcode\": \"3039WB\", \"huisnummer\": 1, \"queryIntent\": \"Check for overheating risk at this address\"}]"
+    },
+    {
+      "wave": 5,
+      "slot": 3,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 12261,
+      "subagent_tokens": 41165,
+      "answer_chars_marker_stripped": 315,
+      "request1_input": 19828,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a038380b5221297a2",
+      "parent_session": "6ccf8bde-9928-4e93-b1ed-20e7347fcaf8",
+      "output": "Yes, there is a significant overheating risk at Van Beuningenstraat 1-01, Rotterdam (3039WB). The building has a temperatuuroverschrijding (overheating indicator) value of 3.59, which exceeds the threshold of 1.5 that defines significant overheating risk. This corner apartment (built 1937) is vulnerable to excessive heat accumulation, which is relevant when sizing cooling systems or heat pumps for the property. The building does carry an energy label A, but this measures annual energy performance, not thermal comfort under summer peak conditions.\n\nANSWER: Yes, there is significant overheating risk (temperatuuroverschrijding = 3.59, threshold for significant risk is >1.5). This corner apartment built in 1937 at Van Beuningenstraat 1 in Rotterdam is vulnerable to excessive heat accumulation. The overheating indicator is relevant for cooling load and heat pump sizing.\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check overheating risk (temperatuuroverschrijding) at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 5,
+      "slot": 4,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11705,
+      "subagent_tokens": 41100,
+      "answer_chars_marker_stripped": 399,
+      "request1_input": 19828,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a21b25b81c7ee4852",
+      "parent_session": "6ccf8bde-9928-4e93-b1ed-20e7347fcaf8",
+      "output": "Yes, there is a **significant overheating risk** at Van Beuningenstraat 1, Rotterdam (3039WB). The temperatuuroverschrijding (overheating risk indicator) is **3.59**, which exceeds the 1.5 threshold for significant overheating concern. This metric is relevant for assessing cooling load and heat pump sizing in this 1937-built corner apartment (100 m²), which otherwise has a good energy label (A).\n\nANSWER: Yes, this building presents significant overheating risk (TOjuli score 3.59, well above the 1.5 threshold). This is an important consideration for any heat pump or cooling system installation at Van Beuningenstraat 1, Rotterdam. The risk reflects the building's corner location and potentially limited thermal mass or shading in its envelope. Heat pump sizing should account for this cooling demand.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk indicator (temperatuuroverschrijding) at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 5,
+      "slot": 5,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 14939,
+      "subagent_tokens": 40735,
+      "answer_chars_marker_stripped": 372,
+      "request1_input": 17608,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "afdb7118ec996ad0b",
+      "parent_session": "6ccf8bde-9928-4e93-b1ed-20e7347fcaf8",
+      "output": "Based on the building profile data I retrieved, **yes, there is a significant overheating risk** at Van Beuningenstraat 1 in Rotterdam (3039WB).\n\nThe building shows a **temperatuuroverschrijding (overheating risk indicator) of 3.59**, which is well above the threshold of 1.5 that indicates significant overheating. The risk is elevated because the property is a 1937 corner apartment (hoekmidden) with a compactheid (surface area ratio) of 0.98, meaning it has substantial exposure on multiple sides. Combined with the building's age and likely older envelope construction, this creates vulnerability to summer heat gain, particularly on warm days. The building carries an energy label A, but this primarily reflects heating efficiency rather than summer cooling performance. For any future HVAC design or renovation, this overheating indicator should inform cooling load calculations or passive cooling strategies.\n\nANSWER: Yes, Van Beuningenstraat 1 (3039WB) has significant overheating risk, with a temperatuuroverschrijding index of 3.59 (threshold for concern is 1.5). The 1937 corner apartment's age, corner orientation, and relatively high surface-area-to-floor-area ratio contribute to vulnerability to summer heat gain. This should be considered in any heat pump or cooling system design.\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: {\"postcode\": \"3039WB\", \"huisnummer\": 1, \"queryIntent\": \"Assess overheating risk at Van Beuningenstraat 1, Rotterdam\"}"
+    },
+    {
+      "wave": 5,
+      "slot": 6,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 12043,
+      "subagent_tokens": 50153,
+      "answer_chars_marker_stripped": 407,
+      "request1_input": 28890,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "abfa47eab36b55255",
+      "parent_session": "6ccf8bde-9928-4e93-b1ed-20e7347fcaf8",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The building has a temperatuuroverschrijding (overheating-risk indicator) of 3.59, which exceeds the 1.5 threshold for significant risk. This is an apartment building from 1937 with a corner/middle orientation that may lack adequate cooling strategies, despite having a good energy label (A) for heating performance.\n\nCALLS: 1\nTOOLS: mcp__eval-words__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk indicator at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 5,
+      "slot": 7,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 11245,
+      "subagent_tokens": 50107,
+      "answer_chars_marker_stripped": 261,
+      "request1_input": 28890,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ab98e98a545ba6454",
+      "parent_session": "6ccf8bde-9928-4e93-b1ed-20e7347fcaf8",
+      "output": "Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam (3039WB). The building has a temperatuuroverschrijding (GTO overheating-risk indicator) of 3.59, which exceeds the 1.5 threshold for significant overheating risk. This is a corner apartment (hoekmidden) built in 1937 with relatively high summer heat risk, which is typical for older buildings with limited thermal buffering. The building currently has an energy label A and a heat demand of 99.12 kWh/m², indicating good energy performance for heating but potential vulnerabilities to summer overheating.\n\nANSWER: Yes, there is significant overheating risk (temperatuuroverschrijding 3.59, threshold for concern is >1.5). This corner apartment in Rotterdam faces material overheating risk during summer months, typical for older buildings with limited summer heat mitigation.\nCALLS: 1\nTOOLS: mcp__eval-words__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk (temperatuuroverschrijding/GTO indicator) at Van Beuningenstraat 1 Rotterdam\"}]"
+    },
+    {
+      "wave": 5,
+      "slot": 8,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 12600,
+      "subagent_tokens": 41195,
+      "answer_chars_marker_stripped": 314,
+      "request1_input": 19828,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "ab71f8713b189adc0",
+      "parent_session": "6ccf8bde-9928-4e93-b1ed-20e7347fcaf8",
+      "output": "Based on the building profile data, **yes, there is a significant overheating risk** at Van Beuningenstraat 1, Rotterdam.\n\nThe temperatuuroverschrijding (overheating-risk indicator) is 3.59, which exceeds the 1.5 threshold for significant overheating. This apartment building, constructed in 1937 and located at a corner position, shows considerable risk of summer temperature exceedance despite having a strong energy label (A). This factor is particularly relevant when sizing heat pump cooling capacity and designing cooling strategies for the building, especially given the historical construction and potential thermal characteristics of the 1937 apartment block.\n\nANSWER: Yes, there is significant overheating risk (temperatuuroverschrijding of 3.59, well above the 1.5 threshold). The 1937 apartment building at Van Beuningenstraat 1 in Rotterdam shows considerable summer overheating potential despite its high energy rating, which is relevant for heat pump sizing and cooling design.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk (temperatuuroverschrijding indicator) at Van Beuningenstraat 1, Rotterdam\"}"
+    },
+    {
+      "wave": 5,
+      "slot": 9,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 13204,
+      "subagent_tokens": 40631,
+      "answer_chars_marker_stripped": 404,
+      "request1_input": 17608,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "af66a5991d95ce5b4",
+      "parent_session": "6ccf8bde-9928-4e93-b1ed-20e7347fcaf8",
+      "output": "Based on the building profile data for Van Beuningenstraat 1, 3039WB Rotterdam, **there is a significant overheating risk at this address**. The building's temperatuuroverschrijding (overheating indicator) is 3.59, well above the threshold of 1.5 that indicates significant overheating. This value suggests the building may experience excessive indoor temperatures, particularly during warm periods. The corner-middle apartment orientation (hoekmidden) and older construction (1937) contribute to this risk despite the building's good energy label (A). This metric is relevant for sizing cooling systems or heat pumps that may need to manage summer comfort conditions.\n\nANSWER: There is a significant overheating risk at Van Beuningenstraat 1, Rotterdam (temperatuuroverschrijding 3.59, well above the 1.5 threshold). The corner-middle apartment orientation and 1937 construction year contribute to this risk. This metric is important for cooling load and heat pump sizing decisions. The building holds a good energy label (A) but still faces elevated summer temperature challenges.\n\nCALLS: 1\nTOOLS: mcp__eval-inline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk at Van Beuningenstraat 1, Rotterdam\"}]"
+    },
+    {
+      "wave": 5,
+      "slot": 10,
+      "arm": "words",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 10534,
+      "subagent_tokens": 50084,
+      "answer_chars_marker_stripped": 519,
+      "request1_input": 28890,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "af1da1f9b260d7c8e",
+      "parent_session": "6ccf8bde-9928-4e93-b1ed-20e7347fcaf8",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1, Rotterdam (3039WB). The building has a temperatuuroverschrijding (overheating-risk indicator) of 3.59, well above the 1.5 threshold that signals significant risk. This corner apartment (built 1937, 92 m² usable area) has an energy label A, but the risk appears related to solar gain and thermal mass typical of older residential buildings. You may want to evaluate passive cooling measures or solar shading to mitigate overheating in warmer months.\n\nCALLS: 1\nTOOLS: mcp__eval-words__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk (temperatuuroverschrijding) at this address\"}]"
+    },
+    {
+      "wave": 5,
+      "slot": 11,
+      "arm": "inline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 2,
+      "self_reported_calls": 2,
+      "tools": [
+        "get_building_profile",
+        "get_weather_context"
+      ],
+      "duration_ms": 15775,
+      "subagent_tokens": 41557,
+      "answer_chars_marker_stripped": 596,
+      "request1_input": 17608,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "a9de3574aadac5742",
+      "parent_session": "6ccf8bde-9928-4e93-b1ed-20e7347fcaf8",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1. The building has a temperatuuroverschrijding (overheating indicator) of 3.59, which exceeds the 1.5 threshold for significant risk. This 1937-built residential apartment, despite having a good energy label (A), has a poor compactheid ratio (0.98) meaning high surface-area heat loss. During summer 2026, Rotterdam's climate showed 230.4 cooling degree days with a peak of 35.4°C, plus six days with simultaneous morning heating and afternoon cooling conflicts, indicating the building struggles with passive heat dissipation.\n\nCALLS: 2\nTOOLS: mcp__eval-inline__get_building_profile, mcp__eval-inline__get_weather_context\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check building profile for overheating risk assessment at Van Beuningenstraat 1, Rotterdam\"},{\"latitude\":51.92,\"longitude\":4.48,\"dateFrom\":\"2026-06-01\",\"dateTo\":\"2026-08-31\",\"summaryOnly\":true,\"queryIntent\":\"Assess overheating risk via summer cooling degree days for Rotterdam area\"}]"
+    },
+    {
+      "wave": 5,
+      "slot": 12,
+      "arm": "inline-oneline",
+      "model": "claude-haiku-4-5-20251001",
+      "domain": "CORRECT",
+      "fabricated": false,
+      "cites_1_5": true,
+      "score_note": "significant, cites 1.5",
+      "tool_uses": 1,
+      "self_reported_calls": 1,
+      "tools": [
+        "get_building_profile"
+      ],
+      "duration_ms": 12264,
+      "subagent_tokens": 41218,
+      "answer_chars_marker_stripped": 532,
+      "request1_input": 19828,
+      "requests": 2,
+      "got_profile_record": true,
+      "marker": {
+        "obeyed": false
+      },
+      "d7_in_nonfinal_visible_text": false,
+      "agent_id": "abc36ac86199b12ab",
+      "parent_session": "6ccf8bde-9928-4e93-b1ed-20e7347fcaf8",
+      "output": "ANSWER: Yes, there is a significant overheating risk at Van Beuningenstraat 1 in Rotterdam. The building has a temperatuuroverschrijding (overheating-risk indicator) value of 3.59, which exceeds the 1.5 threshold for significant overheating risk. This is the apartment at Van Beuningenstraat 1-01, built in 1937, with an energy label rating of A. Despite excellent energy efficiency, older corner-positioned apartment buildings can experience substantial summer overheating, which is relevant for heat pump sizing and cooling load planning.\n\nCALLS: 1\nTOOLS: mcp__eval-inline-oneline__get_building_profile\nPARAMS: [{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Check for overheating risk (temperatuuroverschrijding) at Van Beuningenstraat 1, Rotterdam\"}]"
+    }
+  ]
+}
