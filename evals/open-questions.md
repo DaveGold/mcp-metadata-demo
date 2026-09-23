@@ -219,11 +219,17 @@ one question where the correct call cannot be EXPRESSED without the parameter, a
 everywhere else. Cheap, so do it — but do not expect a schema to carry meaning.
 
 **5b. Do not rely on an over-limit response to deliver guidance** (Q9). On Claude Code a
-result over ~25,000 tokens is replaced by a *"saved to file"* notice. An agent with no
-file tools (a subagent, many SDK agents) never sees the data or the guidance in it. One
-with Read or jq has to read the file back, in chunks, and may never reach a block at the
-end. Whether it does is unmeasured. Keeping responses under the limit works for every
-client. Under the limit, distance barely matters: a recipe
+result over ~25,000 tokens is replaced by a *"saved to file"* notice.
+
+- **Without file tools** (a subagent, many SDK agents), neither the data nor the guidance
+  reaches the model.
+- **With Read or jq** it can be recovered. In a manual main-session test (Opus 5.5, n=1), the
+  model ran `jq '{summary, interpretation, …}'` on the saved file. It picked up guidance
+  placed after 274 records **by its key**, and was faster and cheaper than when the data came
+  back inline.
+
+So: keep responses under the limit when the client may lack file tools, and **always put
+guidance under a fixed, named key** (e.g. `interpretation`), so a targeted read finds it. Under the limit, distance barely matters: a recipe
 fetched once was still applied after ~62k chars of other tool output (haiku, 9–10/10).
 
 **6. Do not spend effort on volume.** Cutting 37–50% of the prose changed zero answers
@@ -1829,6 +1835,71 @@ place in *Suggested order* below.
 
 ---
 
+### REOPENED 2026-09-23 — two questions with headroom exist now. Registered BEFORE any arm is built
+
+> **RUN 2026-09-23 — structure is not a lever for haiku.** See [`results/2026-09-23-q10-addressed-semantics.json`](results/2026-09-23-q10-addressed-semantics.json). 120 runs,
+> haiku, n=20 per arm per question, all in the response. Audit exact, 170/170.
+>
+> | question | prose | addressed | addressed + triggered |
+> |---|---|---|---|
+> | `weather-single-quarter` | 1/20 | 0/20 | 1/20 |
+> | `total-vs-per-m2` | 11/20 | 14/20 | 14/20 |
+>
+> - **P1 (addressing alone does nothing): CONFIRMED.**
+> - **P2 (activation fixes the weather rule): FALSIFIED.** The trigger said, computed for this
+>   record, *"requested period is 91 days … not a full calendar year"*. haiku multiplied by 2.53
+>   anyway, in 14 of 20 runs.
+> - **P3 (activation helps the area rule, ≥ +4): PARTIAL.** It moved +3, inside the noise bar.
+>
+> For haiku on this rule, no FORM (here) and no CHANNEL (Q12) of guidance works. The levers
+> left are computation, which the alerts showed, and an imperative instruction to *do*
+> something, which Q8b showed.
+
+Q10 was suspended because every known question had response-channel prose at ceiling.
+Two now have room, and in both the sentence **is delivered in the response and still
+not applied**:
+
+- **`weather-single-quarter`:** haiku scored 0/10 with the partial-period rule in the response
+  (Q12). It kept multiplying by `gasNormalizationFactor`.
+- **`total-vs-per-m2`:** haiku scored 5/10 on `inline` (Q1). The sentence that settles it,
+  *"gebruiksoppervlakte_thermische_zone_m2 … vs oppervlakte_m2 (BAG): two different scopes …
+  Use the EP-Online area as the denominator for every per-m² NTA value"*, sliced from
+  `interpretationBlock`, is in that response.
+
+That is exactly the case Q10 asks about: delivery equal, only the FORM differs. Three arms,
+all putting ONE sentence in the RESPONSE, byte-identical (the partial-period RULE on
+weather; the scopes line on buildings):
+
+| arm | the sentence ships as | key |
+|---|---|---|
+| `q10-prose` | a plain string | `eval-q10a` |
+| `q10-addressed` | `{ relates_to_fields: [...], meaning: <sentence> }` | `eval-q10b` |
+| `q10-triggered` | the same, plus `triggered_by`: a server-computed line naming the value in THIS record that makes the rule apply (*"requested period is 91 days, not a full calendar year"*; *"oppervlakte_m2 = 100 and gebruiksoppervlakte_thermische_zone_m2 = 92 differ"*) | `eval-q10c` |
+
+- `prose → addressed` measures **addressability** alone.
+- `addressed → triggered` measures **activation** (the server saying *why now*).
+- Descriptions are `schema`'s one-liners, and the weather Note clause is stripped, as in Q12.
+- **Run:** haiku, both questions, **n=20 per arm per question**, 120 runs, default cap.
+- **Headroom gate per question:** the comparison is scored only if `q10-prose` ≤ 14/20.
+
+**Prediction (supersedes the suspended one for these two questions; the original stays on
+record):**
+
+> - **P1: addressing alone does nothing.** `q10-addressed` is within 3 of `q10-prose` on both
+>   questions. Falsified if it leads by ≥ 6 on either.
+> - **P2: activation fixes the weather rule.** `q10-triggered` ≥ `q10-prose` + 6 on
+>   `weather-single-quarter`. Falsified if the lead is < 3.
+> - **P3: activation helps the area rule.** `q10-triggered` ≥ `q10-prose` + 4 on
+>   `total-vs-per-m2`. Falsified if the lead is < 2.
+>
+> **Reasoning.** An explicit field edge answers *which field does this rule explain*. In
+> both failures haiku already has the right field; it does not see that the rule applies
+> *now*. A server-computed trigger says so in terms of the record in hand.
+
+**Scoring:**
+- `weather-single-quarter`: its `_judge_note`, as in Q12.
+- `total-vs-per-m2`: 2,630 ± 60 kg led with, route recorded, as in RB1.
+
 ## Q11 — Does `outputSchema` reach the model at all?
 
 > **ANSWERED 2026-09-23 — no, and the rest of the question falls out differently than
@@ -2116,6 +2187,8 @@ delivered source for the names** before its first weather response. The model-vi
 >   data domain only.
 >
 > Ledger: **ten of fifteen** registered predictions wrong.
+>
+> The three `wx-*` arms were deleted after the opus run and the manual test (2026-09-23; code in git history).
 
 > **REGISTERED 2026-09-22. THE GATE, NOT AN EXPERIMENT.**
 
@@ -2267,6 +2340,21 @@ one the rule forbids.
 - **Prediction: unchanged.** Response wins by less than Q1's margin; falsified if the
   description matches or beats it. After Q15, a tie (within 2 of 20) is again the expected
   outcome, and is recorded now as the registered falsification.
+
+### AMENDED 2026-09-23 (fourth) — the single-quarter run on OPUS, registered BEFORE it runs
+
+> **RUN 2026-09-23 — FALSIFIED: opus does not need the rule.** See [`results/2026-09-23-q12c-weather-single-quarter-opus.json`](results/2026-09-23-q12c-weather-single-quarter-opus.json).
+> `wx-none` **9/10**, `wx-desc` 9/9 (plus 1 NO_RECORD), `wx-resp` 10/10. Without the rule opus
+> builds a reference quarter from 4–31 prior years itself, and no run took the factor road.
+> Across models the rule is worth 0 on haiku (it doesn't act on it), 7/10 on sonnet, and 0 on
+> opus (it doesn't need it). Two manual main-session runs on Opus 5.5 agree.
+
+The same three `wx-*` arms and `weather-single-quarter`, **opus, n=10 per arm**, 30 runs,
+default cap. The prediction for opus: **both rule arms ≥ `wx-none` + 5, and within 2 of each
+other.** Falsified if either rule arm leads `wx-none` by < 3, or if the two rule arms differ
+by ≥ 4. It asks whether sonnet's result (3/10 → 10/10 by either channel) holds on the
+largest model, where `research-frame.md` says metadata matters least. Scoring as amendment
+3. The manual-test rows (`queryIntent` "manual-test") are excluded from the audit.
 
 ## Q13 — Can the ALERTLESS tiers be fixed at all? Prose in the RESPONSE vs computation
 
@@ -2637,7 +2725,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -2936,6 +3024,42 @@ The preflight is the Q15 one: the host listing for both arms, one live call per 
 40 runs, no deploy.
 
 ---
+
+## RB2 and RB3 — re-baselines with the description cap RAISED. Registered 2026-09-23, BEFORE either runs
+
+> **RUN 2026-09-23 — both CONFIRMED.**
+>
+> - **RB2** ([`results/2026-09-23-rb2-opaque-naming-uncut.json`](results/2026-09-23-rb2-opaque-naming-uncut.json)): uncut `opaque-words` **20/20**, every run citing 1.5
+>   via the neutral name `TO`; `opaque` 6/20, none of them via the indicator. **Q6's "the name
+>   is the problem / prose will not fix it" was absence.** Delivered, the glossary fixes it
+>   completely. Audit exact, 54/54.
+> - **RB3** ([`results/2026-09-23-rb3-ladder-words-uncut.json`](results/2026-09-23-rb3-ladder-words-uncut.json)): on `total-vs-per-m2`, `schema` 1/10 vs uncut `words`
+>   **10/10**. The scopes sentence arrives, and *"the prose is the carrier"* is restored,
+>   mechanism included. On `gas-estimate`, route-correct is 0 vs 0: `schema` takes the EP2 road
+>   7/10, while uncut `words` **declines 10/10** ("no meter data; calculated, not measured").
+>   Audits exact, 25/25 and 20/20.
+
+Both re-measure results whose description copy never arrived (Q7). Every session is
+started with `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=20000`, so the whole description is
+delivered. Each result is read within its own batch only.
+
+**RB2: Q6's naming result, uncut.** Q6 scored `opaque-words` (the neutral name `to` plus a
+glossary with *"unitless … ABOVE 1.5 = significant"*) at 0/7. That glossary line sat at
+char 3,105 and was never delivered.
+- **Run:** `opaque` vs `opaque-words` on `overheating`, haiku, n=20 each, 40 runs.
+- **Prediction:** uncut `opaque-words` ≥ 16/20 and `opaque` ≤ 10/20. Falsified if
+  `opaque-words` ≤ 10/20.
+- **Reasoning:** Q15 found delivered description text is applied, and the name was never
+  the problem.
+
+**RB3: the readable ladder's `words` rung, uncut.** The run is `schema` vs `words` on
+`total-vs-per-m2` and `gas-estimate`, sonnet, n=10 each, 40 runs.
+- **P1, `total-vs-per-m2`:** `words` ≥ `schema` + 5. The scopes sentence (char 4,311) now
+  arrives. Falsified if the lead is < 2.
+- **P2, `gas-estimate`:** `words` within 3 of `schema`. `descriptionCore` carries no gas
+  conversion. Falsified if they differ by ≥ 6.
+- **Stated confound:** uncut `words` also carries ~30k chars of render/weather descriptions.
+  Q15b found that did not hurt.
 
 ## Suggested order
 

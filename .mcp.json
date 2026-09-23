@@ -67,17 +67,17 @@
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpGuidanceRecipe"
     },
-    "eval-wx1": {
+    "eval-q10a": {
       "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpWxNone"
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ10Prose"
     },
-    "eval-wx2": {
+    "eval-q10b": {
       "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpWxDesc"
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ10Addressed"
     },
-    "eval-wx3": {
+    "eval-q10c": {
       "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpWxResp"
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ10Triggered"
     }
   }
 }

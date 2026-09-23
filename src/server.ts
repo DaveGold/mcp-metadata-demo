@@ -19,6 +19,7 @@ import { registerGetBuildingProfileWordsTool } from './tools/get-building-profil
 import { registerGetBuildingProfileInlineTool } from './tools/get-building-profile-inline.js';
 import { registerGetBuildingProfileInlineOnelineTool } from './tools/get-building-profile-inline-oneline.js';
 import { registerGetBuildingProfileGuidanceTool } from './tools/get-building-profile-guidance.js';
+import { registerGetBuildingProfileQ10Tool } from './tools/get-building-profile-q10.js';
 import { registerGetBuildingProfileInlineConditionalTool } from './tools/get-building-profile-inline-conditional.js';
 import { registerGetBuildingProfileInlineAblationTool } from './tools/get-building-profile-inline-ablation.js';
 import { registerGetBuildingProfileSchemaTool } from './tools/get-building-profile-schema.js';
@@ -74,9 +75,9 @@ export type ServerVariant =
   | 'opaque'
   | 'opaque-words'
   | 'guidance-recipe'
-  | 'wx-none'
-  | 'wx-desc'
-  | 'wx-resp';
+  | 'q10-prose'
+  | 'q10-addressed'
+  | 'q10-triggered';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -169,20 +170,19 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     return server;
   }
 
-  if (variant === 'wx-none' || variant === 'wx-desc' || variant === 'wx-resp') {
-    // Q12 (weather amendment). `minimal` byte for byte, except get_weather_context:
-    // the computed partial-period Note is removed, and the tool's own rule is placed
-    // nowhere / in the description / in the response. Same server name as `minimal`.
-    const q12Rule = variant === 'wx-desc' ? 'description' : variant === 'wx-resp' ? 'response' : 'none';
+  if (variant === 'q10-prose' || variant === 'q10-addressed' || variant === 'q10-triggered') {
+    // Q10 (reopened). One sentence per tool in the RESPONSE, byte-identical across the
+    // three arms; only its form varies. Minimal neighbours, `schema`'s one-liners.
+    const form = variant === 'q10-prose' ? 'prose' : variant === 'q10-addressed' ? 'addressed' : 'triggered';
     const server = new McpServer(
       { name: 'metadata-demo-minimal', version: VERSION },
       { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
     );
-    registerGetBuildingProfileMinimalTool(server, bagClient, epOnlineClient);
+    registerGetBuildingProfileQ10Tool(server, bagClient, epOnlineClient, form);
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
-    registerGetWeatherContextTool(server, { minimal: true, q12Rule });
+    registerGetWeatherContextTool(server, { minimal: true, q10Form: form });
     registerGetToolCallLogTool(server, { minimal: true });
     return server;
   }

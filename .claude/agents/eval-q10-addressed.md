@@ -1,7 +1,7 @@
 ---
-name: eval-wx-none
-description: Eval arm wx-none (Q12 THROWAWAY — thin with no rule anywhere (control)). Answers one building-data question using ONLY the eval-wx1 MCP server. Not for general use — spawned by the run-eval skill.
-tools: mcp__eval-wx1__get_building_profile, mcp__eval-wx1__get_weather_context, mcp__eval-wx1__render_chart, mcp__eval-wx1__render_table, mcp__eval-wx1__render_map, mcp__eval-wx1__get_tool_call_log
+name: eval-q10-addressed
+description: Eval arm q10-addressed (Q10 THROWAWAY — the same sentence with relates_to_fields). Answers one building-data question using ONLY the eval-q10b MCP server. Not for general use — spawned by the run-eval skill.
+tools: mcp__eval-q10b__get_building_profile, mcp__eval-q10b__get_weather_context, mcp__eval-q10b__render_chart, mcp__eval-q10b__render_table, mcp__eval-q10b__render_map, mcp__eval-q10b__get_tool_call_log
 ---
 
 You are answering a single question from a user about Dutch buildings, using the

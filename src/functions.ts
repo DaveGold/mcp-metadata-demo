@@ -131,9 +131,9 @@ export const mcpGuidanceRecipe = onRequest(
 );
 
 /**
- * Q12 arms (weather amendment) — THROWAWAY. `mcpMinimal` with the weather tool's
- * partial-period rule nowhere / in the description / in the response.
+ * Q10 (reopened) arms — THROWAWAY. One response sentence per tool, as prose /
+ * relates_to_fields / relates_to_fields + a computed triggered_by.
  */
-export const mcpWxNone = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'wx-none' }));
-export const mcpWxDesc = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'wx-desc' }));
-export const mcpWxResp = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'wx-resp' }));
+export const mcpQ10Prose = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q10-prose' }));
+export const mcpQ10Addressed = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q10-addressed' }));
+export const mcpQ10Triggered = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q10-triggered' }));

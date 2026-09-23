@@ -147,12 +147,12 @@ findings were n=2–3 and mostly Haiku, and have since been re-run at **n=10–2
 cell across three models**. Where a claim has been superseded it says so.
 
 **Every question in [`open-questions.md`](open-questions.md) carries a prediction
-registered before its run. As of 2026-09-23, ten of the fifteen scored so far were
+registered before its run. As of 2026-09-23, twelve of the nineteen scored so far were
 wrong.** That pattern is itself the most reliable thing here: the effects are large and
 legible, and intuitions about *why* keep missing.
 
-Status of the register: every question has run or been stopped. **Q10 is suspended**: its
-premise was absence, not misreading. **Q9's position half is retired** as not worth running
+Status of the register: every question has run or been stopped. **Q10** was suspended (its old
+premise was absence), then reopened on two questions with headroom (§15). **Q9's position half is retired** as not worth running
 on this host (§12). **Q12** ran on weather, the only public second data source. The first
 question had no headroom; the second replicated the channel tie (§14). The external-validity gate it stands for is still open. The questions come
 from [`research-frame.md`](research-frame.md), which is the map the register is drawn on:
@@ -418,9 +418,11 @@ been saved to …/tool-results/….txt"*. The subagent cannot read files, so nei
 records nor the guidance inside them arrived. This is the 25,000-token MCP output limit.
 It behaves as replacement, not truncation, and it is the response-side twin of the
 2,048-char description cut. **Scope of that finding:** it is exact for an agent without
-file tools, like these subagents. A main Claude Code session has Read and jq and could read
-the file back. That costs extra round trips, and whether it then reaches guidance placed
-after the records is **unmeasured**.
+file tools, like these subagents. A manual main-session test (Opus 5.5, n=1 per arm)
+recovered it. The model ran `jq '{summary, interpretation, first: .records[0], …}'` on the
+saved file, picked up the guidance by its key despite 274 records in front of it, and
+applied it. That run was also **faster** (1m12 vs 2m48) and used **⅓ of the output tokens**
+of the control, where the data came back inline and the model re-typed 274 CSV rows.
 
 **Position inside a response is retired** as not worth running here. Models keep responses
 small unaided: all 20 position runs chose `summaryOnly`. Forcing large responses needs a
@@ -428,9 +430,9 @@ protocol instruction, and Q9 showed such instructions change behaviour on their 
 window where position could matter (large, but under ~25k tokens) is narrow, and distance
 across turns, the bigger perturbation, was already flat.
 
-> **Do not rely on an over-limit response to carry guidance.** It arrives only if the client
-> can read the spilled file and does read it to the guidance. Keeping responses under the
-> limit (`summaryOnly`, `select`) is the one route that works for every client.
+> **Put guidance under a fixed, named key, and do not let a client without file tools
+> receive an over-limit response.** A spilled response is lost to an agent without file
+> tools. An agent with them can pull the key back with one `jq`.
 
 ### 13 · `outputSchema` never reaches the model — and field names leak from the question
 
@@ -465,7 +467,7 @@ time and still scored **0/20**, misreading boundary values (14.1 °C, 20.5 °C).
 |---|---|---|
 | a tool description | sends the first **2,048 characters**, then `… [truncated]` | Q7 |
 | server instructions | the same 2,048-character cut | Q7 |
-| a tool result | replaces anything over **~25k tokens** with a "saved to file" notice (recoverable only by an agent with file tools; not measured whether it reads to the end) | Q9 |
+| a tool result | replaces anything over **~25k tokens** with a "saved to file" notice: lost without file tools; an agent with jq pulled the named `interpretation` key back (manual test, n=1) | Q9 |
 | `outputSchema` | **not sent** to the model | Q11 |
 | input schemas | sent (the `select` field list, 430 chars, arrives) | Q11 |
 
@@ -498,6 +500,26 @@ this value this way* did (Q15). Every result above is still one server and one a
 carrier" (sonnet, `total-vs-per-m2`, n=20): **4/20 → 11/20**, direction only. The sentence it
 credited sat at char 4,311 and was never delivered, so the mechanism is withdrawn. Whatever
 helps sonnet sits in the first 2,048 characters.
+
+### 15 · Round 3: structure, the rest of the cap, and the model split
+
+Four runs registered together, 230 runs:
+
+- **Targeted semantics (Q10 reopened) does not help haiku.** The same sentence in the
+  response as prose, as `relates_to_fields`, or with a server-computed `triggered_by`:
+  **1 / 0 / 1 of 20** on the single-quarter rule, and **11 / 14 / 14** on the area rule (noise).
+  Where haiku reads the right field and still applies it wrongly, labelling the edge does
+  not change that.
+- **The name was never the problem (RB2).** Delivered uncut, `opaque-words`' glossary takes
+  a neutral field name to **20/20**. Q6's 0/7 was absence.
+- **The prose rung works when delivered (RB3).** `schema` 1/10 → uncut `words` 10/10 on
+  `total-vs-per-m2` (sonnet).
+- **The rule helps only the middle model (Q12, opus).** The single-quarter rule is worth 0
+  on haiku (it does not act on it), 7/10 on sonnet, and 0 on opus (9/10 without it).
+
+> **For a rule a weak model does not act on, neither channel nor form fixes it; compute
+> the result, or give it an imperative to fetch. For a strong model, most rules are
+> redundant.**
 
 ### The strongest single result
 
