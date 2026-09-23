@@ -1,0 +1,77 @@
+{
+  "_provenance": "Q18 tasks, frozen 2026-09-23 before any run. Ground truth is by rule id in rules.json; for T2 and T3 it is COMPUTED from relates_to_fields over the rules present in the size being run (see q18.py), except where 'truth' is given here.",
+  "reps": { "T1": 2, "T2": 2, "T3": 5, "T4": 2 },
+  "tasks": [
+    {
+      "id": "T1a",
+      "type": "T1",
+      "prompt": "Failing trace from the eval log.\nQuestion: \"What is the CO2 emission per m2 of this house?\"\nRecord returned by get_building_profile: berekeningstype \"Nader Voorschrift\", co2_emissie_kg_m2 = 3850, oppervlakte_m2 = 79.\nAgent answered: \"3,850 kg CO2 per m2 per year, which is very high for a house.\"\nReviewer: the answer is wrong by a factor of about 79.\n\nWhich output field(s) does this failure point at? Which existing rules in the semantics source already cover it, if any? Should the fix edit an existing rule, or add a new one?",
+      "shape": "{\"fields\": [\"<output field>\"], \"existing_rules\": [\"<first ten words of each covering rule, verbatim>\"], \"fix\": \"edit_existing\" | \"add_new\"}",
+      "truth": { "primary_fields": ["co2_emissie_kg_m2"], "fix": "edit_existing", "key_rules_any": ["bp21", "bp03"] }
+    },
+    {
+      "id": "T1b",
+      "type": "T1",
+      "prompt": "Failing trace from the eval log.\nQuestion: \"When was the energy-label survey of this building carried out?\"\nRecord returned by get_building_profile: label_opnamedatum = 2019-03-04, label_registratiedatum = 2019-06-18.\nAgent answered: \"The survey was carried out on 18 June 2019.\"\nReviewer: wrong date; the agent took the wrong field.\n\nWhich output field(s) does this failure point at? Which existing rules in the semantics source already cover it, if any? Should the fix edit an existing rule, or add a new one?",
+      "shape": "{\"fields\": [\"<output field>\"], \"existing_rules\": [\"<first ten words of each covering rule, verbatim>\"], \"fix\": \"edit_existing\" | \"add_new\"}",
+      "truth": { "primary_fields": ["label_registratiedatum", "label_opnamedatum"], "fix": "add_new", "key_rules_any": [] }
+    },
+    {
+      "id": "T1c",
+      "type": "T1",
+      "prompt": "Failing trace from the eval log.\nQuestion: \"What is the energie_index of this building?\"\nRecord returned by get_building_profile: berekeningstype \"NTA 8800\", energielabel \"B\", energie_index = null.\nAgent answered: \"The energie_index is missing, which looks like a data error in EP-Online. You should report it to RVO.\"\nReviewer: wrong, this is not a data error.\n\nWhich output field(s) does this failure point at? Which existing rules in the semantics source already cover it, if any? Should the fix edit an existing rule, or add a new one?",
+      "shape": "{\"fields\": [\"<output field>\"], \"existing_rules\": [\"<first ten words of each covering rule, verbatim>\"], \"fix\": \"edit_existing\" | \"add_new\"}",
+      "truth": { "primary_fields": ["energie_index"], "fix": "edit_existing", "key_rules_any": ["bp01", "bp12"] }
+    },
+    {
+      "id": "T1d",
+      "type": "T1",
+      "prompt": "Failing trace from the eval log.\nQuestion: \"Weather-corrected, was our gas use in Q1 2024 higher than in Q1 2023?\"\nThe agent called get_weather_context for 2024-01-01..2024-03-31 and for 2023-01-01..2023-03-31, multiplied each quarter's gas use by that call's gasNormalizationFactor, and compared the two results.\nReviewer: wrong method for a partial period.\n\nWhich output field(s) does this failure point at? Which existing rules in the semantics source already cover it, if any? Should the fix edit an existing rule, or add a new one?",
+      "shape": "{\"fields\": [\"<output field>\"], \"existing_rules\": [\"<first ten words of each covering rule, verbatim>\"], \"fix\": \"edit_existing\" | \"add_new\"}",
+      "truth": { "primary_fields": ["gasNormalizationFactor"], "fix": "edit_existing", "key_rules_any": ["wx03"] }
+    },
+    {
+      "id": "T2a",
+      "type": "T2",
+      "prompt": "Schema change in the next release: the get_building_profile output field gebruiksoppervlakte_thermische_zone_m2 is RENAMED to thermische_zone_m2. Nothing else changes.\n\nList every rule in the semantics source that must be updated because it refers to the old field, directly or indirectly.",
+      "shape": "{\"rules_to_update\": [\"<first ten words of each rule, verbatim>\"]}",
+      "changed_fields": ["gebruiksoppervlakte_thermische_zone_m2"]
+    },
+    {
+      "id": "T2b",
+      "type": "T2",
+      "prompt": "Schema change in the next release: the get_building_profile output fields ep2_fossiel_emg_forfaitair_kwh_m2 and aandeel_hernieuwbaar_emg_forfaitair_pct are REMOVED. Nothing else changes.\n\nList every rule in the semantics source that must be updated because it refers to a removed field, directly or indirectly.",
+      "shape": "{\"rules_to_update\": [\"<first ten words of each rule, verbatim>\"]}",
+      "changed_fields": ["ep2_fossiel_emg_forfaitair_kwh_m2", "aandeel_hernieuwbaar_emg_forfaitair_pct"]
+    },
+    {
+      "id": "T2c",
+      "type": "T2",
+      "prompt": "Schema change in the next release: the get_weather_context output field gasNormalizationFactor is RENAMED to normalizationFactor. Nothing else changes.\n\nList every rule in the semantics source that must be updated because it refers to the old field, directly or indirectly.",
+      "shape": "{\"rules_to_update\": [\"<first ten words of each rule, verbatim>\"]}",
+      "changed_fields": ["gasNormalizationFactor"]
+    },
+    {
+      "id": "T3",
+      "type": "T3",
+      "prompt": "Coverage review. List every get_building_profile output field that NO rule in the semantics source says anything about: fields with no semantics at all.",
+      "shape": "{\"fields_without_rules\": [\"<output field>\"]}",
+      "tool": "get_building_profile",
+      "borderline_excluded": ["gebouwklasse", "gebruiksdoel", "candidateCount", "aantal_verblijfsobjecten", "coordinaten.lat", "coordinaten.lon"]
+    },
+    {
+      "id": "T4a",
+      "type": "T4",
+      "prompt": "A contributor proposes deleting the rule that begins \"CALCULATED vs MEASURED\" to save about 500 characters. Should it go? What does the source record about why this rule exists, and what evidence should decide?",
+      "shape": "{\"recorded_reason\": \"<what the semantics source itself records about why this rule exists, or null if it records nothing>\", \"recommendation\": \"keep\" | \"delete\" | \"test_first\"}",
+      "truth": { "rule": "bp11", "evidence_patterns": ["0 of 60", "0/60", "59 of 60", "59/60", "benchmark-trap", "benchmark trap"] }
+    },
+    {
+      "id": "T4b",
+      "type": "T4",
+      "prompt": "A contributor proposes shortening the floor-area rule (gebruiksoppervlakte_thermische_zone_m2 vs oppervlakte_m2) to: \"EP-Online area is 10-30% lower than BAG; use it for per-m2 benchmarking.\" Should the change be accepted? What does the source record about why the rule reads as it does?",
+      "shape": "{\"recorded_reason\": \"<what the semantics source itself records about why this rule reads as it does, or null if it records nothing>\", \"recommendation\": \"accept\" | \"reject\" | \"test_first\"}",
+      "truth": { "rule": "bp13", "evidence_patterns": ["#33", "earlier wording", "previous wording", "used to say", "was rewritten", "rewritten", "77%", "replaced"] }
+    }
+  ]
+}

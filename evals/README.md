@@ -147,7 +147,7 @@ findings were n=2–3 and mostly Haiku, and have since been re-run at **n=10–2
 cell across three models**. Where a claim has been superseded it says so.
 
 **Every question in [`open-questions.md`](open-questions.md) carries a prediction
-registered before its run. As of 2026-09-23, twelve of the twenty-two scored so far were
+registered before its run. As of 2026-09-23, thirteen of the twenty-three scored so far were
 wrong.** That pattern is itself the most reliable thing here: the effects are large and
 legible, and intuitions about *why* keep missing.
 
@@ -186,8 +186,10 @@ What still decides outcomes:
 - keep responses under the output limit, or put guidance under a fixed key;
 - don't spend effort on the delivered form of the guidance.
 
-Keep the **source** of every rule per field, with provenance. That is for the agent that
-improves the server, not for the model that calls it (design guidance 2c; unmeasured).
+Give every rule a **provenance line**: when it was added, and the eval result or incident
+behind it. That is for the agent that improves the server. With it, that agent cites the
+evidence; without it, it has to re-derive the reason. The source's *form* (prose or
+per-field records) did not matter to that agent either (Q18; design guidance 2c).
 
 ### 1 · Semantics and computation buy different things
 
@@ -545,11 +547,22 @@ call**: **−87% calls, −23% tokens, −3/4 wall time**, and the same answer i
 among 100 real distractor rules (~16k chars), with or without `relates_to_fields`. Haiku found
 the overheating rule at position 41 of 100 in every run, and sonnet was 10/10 on the area
 rule in every arm. Response guidance does not dilute at this scale, so targeting has nothing
-to recover at runtime. Its value is on the authoring side (design guidance 2c).
+to recover at runtime.
+
+**Q18 then tested the authoring side, and found the same.** An improving agent (sonnet,
+opus, one tool-less read of the source, 276 runs) did three things equally well from
+today's prose and from `{ relates_to_fields, meaning, provenance }` records:
+- found the rule a failing trace points at: 100% in every form;
+- listed the rules a schema change orphans: 99.4% vs 100%;
+- listed the fields with no semantics: F1 100 in every form.
+
+Only provenance mattered. Asked whether to delete the CALCULATED vs MEASURED rule, agents
+with its history cited the 0/60 → 59/60 eval every time. Agents without it re-derived the
+rationale and asked for a re-test. None invented a history.
 
 > **If a rule needs data the payload lacks, ship the data: it makes the weak model right
 > and the strong ones fast. The form and the volume of the guidance do not matter at
-> runtime; keep its source structured per field for whoever improves the server.**
+> runtime, and not to the agent that edits it either; record why each rule exists.**
 
 ### The strongest single result
 

@@ -97,8 +97,8 @@ Compact form, as originally written, to be falsified rather than quoted:
 Revised form:
 
 > **Discover with the first 2,048 characters. Operate with guidance you REQUIRE to be
-> fetched. Ship the data your rules need. Interpret the instance in the response. Keep the
-> source of all of it per field, for whoever improves the server.**
+> fetched. Ship the data your rules need. Interpret the instance in the response. Record
+> why each rule exists, for whoever improves the server.**
 
 ## The token hypothesis
 
@@ -151,7 +151,7 @@ The draft lists eight principles to falsify. Here is where each one actually sta
 | 3 | Output schemas are the canonical home for stable output semantics | **Not deliverable on Claude Code** (Q11, by accounting): `outputSchema` never reaches the model there. It can be canonical for the SERVER; anything the model needs must be projected into the description's first 2,048 chars or the response. |
 | 4 | Responses are for interpreting returned instances | **Supported as a robust default, not as a better channel** — Q1's 29/30 was against an undelivered description (Q7), and a delivered description ties it (Q15/Q15b). The response is host-independent and can be conditional on the record. |
 | 5 | Data-dependent semantics should travel with the data | **Supported structurally, not economically** (Q2: free, not cheap) |
-| 6 | Domain knowledge should be addressable to the fields it explains | **Not supported on haiku (Q10):** addressing and a computed trigger moved nothing where prose failed, and +3 (noise) where it half-worked. The old counter-signal (Q6) was absence. **What did move it (Q16):** shipping the DATA the rule needs, 2 → 15 of 20. **At scale (Q17)** one relevant rule among 100 was found as easily as alone, on haiku and sonnet: no dilution, so addressing has nothing to recover at runtime. **Where it does pay is design time**: the agent that improves the server gets an index of which field each rule explains, which round added it, and which fields have none. That is unmeasured, and it is the argument that remains. |
+| 6 | Domain knowledge should be addressable to the fields it explains | **Not supported on haiku (Q10):** addressing and a computed trigger moved nothing where prose failed, and +3 (noise) where it half-worked. The old counter-signal (Q6) was absence. **What did move it (Q16):** shipping the DATA the rule needs, 2 → 15 of 20. **At scale (Q17)** one relevant rule among 100 was found as easily as alone, on haiku and sonnet: no dilution, so addressing has nothing to recover at runtime. **Nor at design time (Q18, sonnet + opus):** an improving agent found the rule a failing trace points at, the rules a schema change orphans, and the fields with no semantics as well from today's prose (99–100%) as from `relates_to_fields` records. Only **provenance** changed anything: the agent then cited why the rule exists, 16/16 against 0/16. **Falsified as a requirement at this scale; field lists remain useful for projection and for links the prose leaves implicit.** |
 | 7 | Resolve conditional domain logic server-side | **Strongest effect and worst failure mode.** 78/78 when right; one plausible-looking computed line produced 59 of 60 wrong answers |
 | 8 | Project only the semantics relevant to the current response and intent | **Supported on cost** (Q5), **null on accuracy** (Q2). **Caller-side projection measured (Q11):** no run silently dropped the field the conclusion needed (0/40 chose `tempMean`). The failures were elsewhere. A weak model that cannot name the fields claims they do not exist (haiku 5/8). A strong model with the right fields misreads the threshold (sonnet 0/20). |
 

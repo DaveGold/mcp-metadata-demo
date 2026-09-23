@@ -210,21 +210,29 @@ alone: haiku 2/20. The same rule plus a server-computed reference-period figure:
 Handing over the finished factor did not add to that (11/20). Strong models fetch the data
 themselves (sonnet 10/10, opus 9/10); weak ones do not.
 
-**2c. Keep semantics per FIELD at the source, even though the model does not need it that
-way** (Q10, Q17). At runtime the form did not matter: prose, `relates_to_fields`, or a
-computed trigger scored the same, and one relevant rule among 100 was found as easily as
-alone. The case for structure is on the **authoring side**, and above all for the agent in
-the improvement loop (Examine → Flag → Validate → Encode → Iterate). Rules stored as
-`{ relates_to_fields, meaning, provenance }` make these visible:
-- what earlier rounds decided, and why;
-- which field a failing answer points at, and whether it already has a rule;
-- which fields have no semantics at all;
-- which rules are orphaned after a schema change.
+**2c. Record WHY each rule exists; the form of the source is free** (Q10, Q17, Q18). At
+runtime the form did not matter: prose, `relates_to_fields` or a computed trigger scored the
+same, and one relevant rule among 100 was found as easily as alone. At design time (Q18) it
+did not matter either. The agent in the improvement loop was measured on sonnet and opus,
+with 112 rules. It did three things as well from today's prose (99–100%) as from
+`{ relates_to_fields, meaning, provenance }` records:
+- found the rule a failing trace points at;
+- listed the rules a schema change orphans;
+- listed the fields with no semantics.
 
-It is also the structure selective projection needs, if a scale is ever found where that
-pays. Keep that source form separate from the delivered form, which can stay short prose in
-the response. *Unmeasured:* whether an improving agent actually edits better from it. That
-would be a design-time experiment, not yet run.
+Only **provenance** changed the outcome. Asked whether to delete a rule, agents that had its
+recorded eval result cited it 16/16, and mostly decided. Without it they re-derived the
+rationale from the rule's text and asked for the test to be re-run. None invented a history.
+
+So keep one provenance line per rule: the date, and the eval result or incident behind it.
+Explicit field lists are cheap and still earn their place:
+- they are what selective projection needs;
+- they carry links the prose leaves implicit. Prose readers called `gebouwklasse` and
+  `gebruiksdoel` uncovered 20/20, labelled readers 0/20 (unscored: coverage there is a
+  judgment).
+
+They are **not** needed for the agent to navigate a source that fits in one read.
+*Untested:* a source too big for one read, haiku, and whether the edits then fix the answer.
 
 **3. Compute it server-side where the computation is determinate.** 78 of 78 across
 three questions, and the only mechanism that performs IDENTICALLY on all three models —
@@ -2746,7 +2754,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**. Q16 ✓ (fetching is the barrier): **twelve of twenty**. Q17 ✓ (volume inert, addressing null): **twelve of twenty-one**. Q16b (not falsified): **twelve of twenty-two**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**. Q16 ✓ (fetching is the barrier): **twelve of twenty**. Q17 ✓ (volume inert, addressing null): **twelve of twenty-one**. Q16b (not falsified): **twelve of twenty-two**. Q18 ✗ (no content effect at design time): **thirteen of twenty-three**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -3263,6 +3271,132 @@ char 3,105 and was never delivered.
   conversion. Falsified if they differ by ≥ 6.
 - **Stated confound:** uncut `words` also carries ~30k chars of render/weather descriptions.
   Q15b found that did not hurt.
+
+## Q18 — Does an IMPROVING agent edit better from field-keyed semantics? Registered 2026-09-23, BEFORE any run
+
+> **ANSWERED 2026-09-23 — no. Only provenance changed anything.** 276 runs, sonnet + opus.
+> See [`results/2026-09-23-q18-authoring-form.json`](results/2026-09-23-q18-authoring-form.json).
+>
+> | pooled | A prose | B structured | C prose + same content |
+> |---|---|---|---|
+> | T1 attribution correct | 100% | 100% | 100% |
+> | T2 orphan recall | 99.4% | 100% | 100% |
+> | T3 coverage F1 | 100% | 100% | 100% |
+> | T4 cites the recorded history | 0/16 | 16/16 | 16/16 |
+>
+> - **T2's one miss:** sonnet, large, arm A, one of the seven `gasNormalizationFactor` rules.
+>   The abbreviated references ("EMG forfaitair", "gebruiksoppervlakte populated") were
+>   found every time, by both models, in every form.
+> - **T4:** every arm-A answer was read in full. **None invented a history.** opus said
+>   explicitly that nothing is recorded (8/8). sonnet gave the rule's own rationale instead.
+>   With the eval result on record, B/C chose "keep" 11/16. A chose "keep" 3/8 and
+>   "test_first" 5/8.
+> - **Predictions:**
+>   - P1 ✗: B leads A by 0.6 pp on T2 recall.
+>   - P2 ✓: B = C.
+>   - P3 ✗: T3 F1 is 100 in every arm.
+>   - P4 ✓: T1 is 100% in every arm.
+>   - P5 ✓: B/C cite 16/16; A fabricates 0/16.
+>   - P6 not confirmed: A dropped 1.2 pp, predicted ≥ 5.
+> - **Decision rule, as registered:** A is within 5 pp of B on T1–T3, so **2c's authoring
+>   case rests on provenance alone**. 2c is rewritten accordingly.
+> - **Unscored:** the borderline fields were excluded before the run. There, prose readers
+>   listed `gebouwklasse` and `gebruiksdoel` as uncovered 20/20, and labelled readers 0/20.
+>   Explicit links carry coverage the author left implicit.
+> - **Cost:** B's input is +29% to +89% over A (median, within model). C carries the same
+>   information and is 6–18% cheaper than B.
+> - **Ceiling:** at ≤ 112 rules and ≤ 42k characters, the whole source fits in one read.
+>   That is the easy case, and it is this server's real case.
+
+Design guidance 2c recommends keeping the source of all semantics as
+`{ relates_to_fields, meaning, provenance }`. The reason given is the authoring side, not
+runtime: Q10 and Q17 found that the form of a delivered rule does not matter to the
+answering model. 2c's claim is marked *unmeasured*. This measures it.
+
+**Design-time, not runtime.** No MCP server is involved. Each run is one headless
+`claude -p` call with no tools, no settings and no MCP config, from an empty directory.
+It gets the output-field list of both data tools, the semantics source in one of three
+forms, and one improvement-loop task. It must answer from that material alone. The
+fixture, the tasks and the harness are frozen in [`q18/`](q18/) before the first run:
+- `rules.json` holds the real `get_building_profile` and `get_weather_context`
+  INTERPRETATION bullets, verbatim. Their `relates_to_fields` are hand-labelled, and their
+  provenance comes from git history where history recorded one; otherwise it says the reason
+  was not recorded.
+- The 80 padding rules are the non-building distractors frozen for Q17.
+- `tasks.json` holds the tasks and `q18.py` the harness.
+
+**Arms** (content identical, only rendering differs):
+
+| arm | form |
+|---|---|
+| **A** prose | the INTERPRETATION bullets as the repo has them today. No field list, no provenance. |
+| **B** structured | one `{ tool, relates_to_fields, meaning, provenance }` record per rule |
+| **C** prose, same content | A's bullets, each followed by B's field list and provenance written as sentences |
+
+B vs C isolates **form**. C vs A isolates **content**: explicit field links plus history.
+
+**Sizes:** `small` has the 32 real rules. `large` adds the 80 padding rules, 112 in all,
+which is the ceiling check.
+
+**Tasks** (ground truth by rule id; T2 and T3 are computed from `relates_to_fields`):
+- **T1, attribution** (4 failing traces): which field the failure points at, whether a rule
+  already covers it, and whether to edit or add. One trace (T1b, the survey-date fields) has
+  no covering rule.
+- **T2, orphans** (3 schema changes): list every rule to update. T2a renames
+  `gebruiksoppervlakte_thermische_zone_m2`. T2b removes the two EMG-forfaitair fields. T2c
+  renames `gasNormalizationFactor`. Half of T2a/T2b's targets name the field only in
+  abbreviated form ("gebruiksoppervlakte populated", "EMG forfaitair = null"). That is this
+  repo's real prose, not a planted trap.
+- **T3, coverage:** list the `get_building_profile` fields no rule says anything about.
+  Six borderline fields whose coverage is a matter of judgment (gebouwklasse, gebruiksdoel,
+  candidateCount, aantal_verblijfsobjecten, coordinaten.lat/lon) are excluded from scoring,
+  so the author's labelling cannot manufacture the effect.
+- **T4, provenance** (2 proposed edits):
+  - T4a: delete the CALCULATED vs MEASURED rule. Its recorded history is benchmark-trap
+    0/60 → 59/60.
+  - T4b: revert the floor-area rule to "10–30% lower". That exact wording was replaced in
+    #33.
+  - Hand-scored. B/C are correct if they cite the recorded history. A is correct if it says
+    nothing is recorded and invents none. **Fabricated** means any arm asserting a history
+    detail the source does not contain.
+
+**Scoring:**
+- T1 is correct only if the field, the edit/add verdict and (where one exists) the covering
+  rule are all right.
+- T2 counts recall and precision over rule ids.
+- T3 counts F1 over the scored fields.
+- Quoted rules are mapped to ids by their first words, and unmatched quotes are counted.
+
+**Run:** sonnet and opus, both sizes, all three arms. Reps: T1 ×2, T2 ×2, T3 ×5, T4 ×2.
+That is 23 runs per cell and **276 runs**. Results are pooled over items and sizes unless
+the size is named.
+
+**Predictions:**
+- **P1, T2 content:** B recall ≥ A recall + 10 pp, pooled. Falsified if the lead is
+  < 5 pp.
+- **P2, form:** |B − C| ≤ 5 pp on T2 recall AND on T3 F1. Falsified if either gap is
+  ≥ 10 pp.
+- **P3, T3 content:** B F1 ≥ A F1 + 15 pp. Falsified if the lead is < 8 pp.
+- **P4, T1:** every arm ≥ 85% correct, spread ≤ 10 pp. Strong models find the rule a trace
+  points at in either form. Falsified if any arm is < 75%, or the spread is ≥ 15 pp.
+- **P5, T4a:** B and C cite the recorded evidence in ≥ 90%, and A fabricates a specific
+  history in ≤ 10%. Falsified if A fabricates in ≥ 25%, or B or C cite in < 75%.
+- **P6, size:** A's T2 recall drops ≥ 5 pp more from small to large than B's. Falsified if
+  A drops no more than B.
+
+**Decision rule, fixed now:**
+- **B ≥ C + 10 pp on T2 or T3:** 2c stands as written. Structure itself helps the improving
+  agent.
+- **C within 5 pp of B, and both ≥ A + 10 pp:** 2c is rewritten as *record field links and
+  provenance per rule, in any form*. The structured form becomes a convenience (it is what
+  projection needs), not the finding.
+- **A within 5 pp of B on T1–T3:** 2c's authoring case rests on provenance (T4) alone.
+
+**Stated limits:**
+- One-shot and without tools. A real improving agent can grep, which narrows the gap on
+  explicitly named fields; the abbreviated references are where grep does not help.
+- The fields were labelled once, by the experimenter, with no second rater.
+- The loop's second half is not measured: whether the edit then fixes the eval answer.
 
 ## Suggested order
 
