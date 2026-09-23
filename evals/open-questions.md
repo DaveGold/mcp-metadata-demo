@@ -205,6 +205,11 @@ this one. **Not a guidance call behind a soft pointer** (Q8): sonnet made the no
 10/10, haiku 0/10. **Word the pointer as a requirement, or give the guidance its own tool**
 (Q8b): haiku then made it 10/10 both ways, and every caller was correct.
 
+**2b. If a rule needs data the payload lacks, SHIP THE DATA** (Q16). The partial-period rule
+alone: haiku 2/20. The same rule plus a server-computed reference-period figure: 15/20.
+Handing over the finished factor did not add to that (12/20). Strong models fetch the data
+themselves (sonnet 10/10, opus 9/10); weak ones do not.
+
 **3. Compute it server-side where the computation is determinate.** 78 of 78 across
 three questions, and the only mechanism that performs IDENTICALLY on all three models —
 which is exactly the property you want when you cannot know the model. But see the
@@ -2725,7 +2730,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**. Q16 ✓ (fetching is the barrier): **twelve of twenty**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -3026,6 +3031,20 @@ The preflight is the Q15 one: the host listing for both arms, one live call per 
 ---
 
 ## Q16 — Is the weak model's barrier FETCHING the data, or APPLYING the rule?
+
+> **ANSWERED 2026-09-23 — FETCHING.** See [`results/2026-09-23-q16-fetch-vs-apply.json`](results/2026-09-23-q16-fetch-vs-apply.json). haiku, n=20 per arm.
+> Audit exact, 101/101.
+>
+> | arm | correct |
+> |---|---|
+> | rule only | **2/20** |
+> | + server-computed reference quarter (1,231.3 HDD) | **15/20** |
+> | + the computed factor (1.113) | **12/20** |
+>
+> P1 and P2 are **confirmed**. P3 is **partial**: 12, when it needed ≥ 16, but not ≤ 10.
+> Give haiku the data it would have had to fetch and it applies the rule. The finished
+> factor adds nothing on top. What still goes wrong in both arms is leading with a full-year
+> extrapolation, which lands on the same 10,600 by another road.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARMS EXIST.**
 
