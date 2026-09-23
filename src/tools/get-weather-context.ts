@@ -219,7 +219,6 @@ composition, fighting-system risk days, select-projection notes, and data qualit
 
 const minimalDescription = 'Look up daily weather and degree-day/solar metrics for a Dutch location and date range.';
 
-
 // ── Input schema ──────────────────────────────────────────────────────────────
 
 const inputSchema = {
