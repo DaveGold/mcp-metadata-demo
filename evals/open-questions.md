@@ -1630,6 +1630,48 @@ exposed to both effects, and after Q8b it reliably makes the guidance call.
 
 **Cost:** 20 + 30 = 50 runs. One new arm (`mcpInlineHead`), two agent files.
 
+### AMENDED 2026-09-23 — the first distance run was VOID; a redesign, fixed BEFORE it runs
+
+The first distance run (30 runs, 15:19–15:25Z) measured nothing about distance. It is kept
+and reported in the results file, and is not scored against the prediction. Three instrument
+failures, all found in the transcripts:
+
+1. **The host does not deliver a large tool result.** A full-year `get_weather_context`
+   response is 79,182 chars. Claude Code replaced every one with a **1,713-char notice**:
+   *"result … exceeds maximum allowed tokens. Output has been saved to …/tool-results/….txt"*.
+   The subagent has no file-reading tool. So the records, and the `interpretation` inside
+   them, never reached the model, and the "~18k tokens of distance" never existed. This is
+   the documented 25,000-token MCP output limit, observed as replacement rather than
+   truncation. **It is also a finding in its own right:** on this host, guidance inside an
+   over-limit response is not delivered at all, whether it sits first or last.
+2. **The protocol paragraph displaced the guidance call.** *"After your FIRST tool call …
+   call get_weather_context"* made haiku do the lookup first. Among runs that got a
+   profile, guidance-first was 8/8 at d=0 (no paragraph) but 2/10 at d=1 and 2/10 at d=3.
+   The run measured instruction competition, not retention.
+3. **The server's own rate limiter** (30 requests / minute per IP + user agent per instance)
+   returned *"Too many requests"* in wave 2. Runs with no profile result are NO_RECORD.
+
+**The redesign, fixed now.**
+
+- **Distance is made of responses the host delivers.** Each intervening call fetches one
+  QUARTER of 2024 with full records (~30k chars, ~8–10k tokens, under the cap). d=1 is
+  Q2 2024; d=3 is Q2, Q3 and Q4 2024. So the recipe sits ~0, ~9k or ~28k tokens before the
+  lookup. The preflight checks, from a subagent transcript, that a quarterly result arrives
+  inline and is not replaced.
+- **The same protocol paragraph at every distance, including d=0**, and it fixes the order:
+  (1) `get_building_profile` with no arguments; (2) the listed weather calls (none at d=0);
+  (3) carry on answering. The guidance call is now protocol-prompted. That is right for this
+  half, which tests retention after delivery, not discovery (Q8b measured discovery). It
+  also removes the prompt-length confound the build notes disclosed.
+- **Waves of 3** (one per distance), ten waves, to stay under the rate limit. A run with no
+  profile result is NO_RECORD, kept, and dropped from its denominator. It is not replaced.
+- **The prediction and thresholds are unchanged:** ≥ 5 lost between d=0 and d=3 confirms,
+  and d=3 within 2 of d=0 falsifies. Scoring as Q8. Runs that do not follow the protocol
+  order are scored on their actual distance and flagged.
+- **Position half, recorded as run:** all 20 runs used `summaryOnly` (~1.2k-char responses),
+  so it is *not measured at scale*, per the build notes. It is not re-run here. Forcing record
+  fetches would need a protocol too, and finding 1 caps the testable window at ~25k tokens.
+
 ## Q10 — Field addressability: can `relates_to_fields` beat a misleading name?
 
 > **REGISTERED 2026-09-22, BEFORE THE RUN. This is the one this repo already has
