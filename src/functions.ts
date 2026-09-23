@@ -137,3 +137,10 @@ export const mcpGuidanceRecipe = onRequest(
 export const mcpQ10Prose = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q10-prose' }));
 export const mcpQ10Addressed = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q10-addressed' }));
 export const mcpQ10Triggered = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q10-triggered' }));
+
+/**
+ * Q16 arms — THROWAWAY. `mcpQ10Prose` plus a server-computed reference-quarter HDD
+ * (and the period factor). See open-questions.md Q16.
+ */
+export const mcpQ16Ref = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q16-ref' }));
+export const mcpQ16Computed = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q16-computed' }));
