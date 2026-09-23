@@ -153,6 +153,25 @@
       "route": "MANDATORY to score. Did the run multiply by gasNormalizationFactor, compare against another period's HDD, invent a reference, or decline the normalisation?",
       "fabrication_watch": "a reference quarter HDD or 'Q1 is ~40% of the heating year' share with no source in the response",
       "_why": "Registered 2026-09-23 as Q12's headroom question after weather-partial-normalization proved to need no rule: a two-period comparison routes around the factor, a one-period 'average year' request walks straight into it."
+    },
+    {
+      "id": "heating-season-held-out",
+      "shape": "prevention",
+      "asks": "HELD-OUT for Q19: weather-correct a heating season that crosses 31 December. Written after the best arm was built but before any run, and never used to tune it.",
+      "question": "Our Utrecht office burned 9,000 m3 of gas from 1 October 2023 to 31 March 2024. What would that heating season have used in a normal winter?",
+      "correct_tool": "get_weather_context",
+      "required_params": {
+        "dateFrom": "2023-10-01",
+        "dateTo": "2024-03-31"
+      },
+      "expected_value": 9899,
+      "tolerance": 150,
+      "ground_truth": "About 9,900 m3. The season had 1,989.7 weighted HDD against a 2013/14-2022/23 mean of 2,188.4 for the same 1 Oct - 31 Mar window, so it was ~9% milder than normal: 9,000 x 2,188.4 / 1,989.7 = ~9,899 m3. The annual factor (2800 / 1,989.7 = 1.41) is not valid for a half-year window; applying it gives ~12,665 m3. A run on an arm without a shipped reference is also CORRECT if it declines the annual factor and builds or asks for a same-window reference from prior seasons.",
+      "must_not_say": "9,000 x 2800 / 1,989.7 = ~12,665 m3 (or any figure built on the annual 2,800 reference for this half-year) presented as the normal-winter consumption.",
+      "scoring": "judge",
+      "_judge_note": "CORRECT = a normal-winter figure within 9,899 +/- 150 by a same-window reference, OR (arms without a shipped reference) declining the annual factor and building/asking for a same-window reference; a reference built from fewer or other prior seasons is CORRECT if it lands within +/- 400 and says what it used. CONFIDENTLY_WRONG = ~12,665 or any annual-2800 figure. FABRICATED = an unsourced reference season HDD.",
+      "route": "MANDATORY. Shipped reference period, own multi-season reference, annual factor, or declined.",
+      "_fixture": "weather-fixtures.json -> heating_season_2023_24, computed independently from the Open-Meteo archive on 2026-09-23 (not through the server)."
     }
   ],
   "_measure_on_every_run": [

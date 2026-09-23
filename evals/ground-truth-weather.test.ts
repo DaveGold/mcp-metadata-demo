@@ -162,6 +162,19 @@ describe('weather eval candidates — ground truth follows from the frozen captu
     expect(q1.totalWeightedHDD).toBeGreaterThan(q1.totalHDD);
   });
 
+  it('heating-season-held-out: normal-winter figure from the same-window reference, not the annual 2800', () => {
+    const f = (fixtures as unknown as Record<string, Record<string, number | number[]>>).heating_season_2023_24;
+    const seasons = f.reference_season_weightedHDD as number[];
+    const mean = seasons.reduce((s, x) => s + x, 0) / seasons.length;
+    // The per-season list is rounded to whole HDD; the recorded mean is from unrounded days.
+    expect(Math.abs(mean - (f.referencePeriodWeightedHDD as number))).toBeLessThan(1);
+    const normalized = ((f.gas_m3 as number) * (f.referencePeriodWeightedHDD as number)) / (f.totalWeightedHDD as number);
+    expect(Math.round(normalized)).toBe(q('heating-season-held-out').expected_value);
+    const trap = ((f.gas_m3 as number) * 2800) / (f.totalWeightedHDD as number);
+    expect(Math.round(trap)).toBe(f.annual_factor_trap_m3);
+    expect(trap - normalized).toBeGreaterThan(2 * (q('heating-season-held-out').tolerance as number));
+  });
+
   it('forecast-normalization carries no frozen number, on purpose', () => {
     const question = q('forecast-normalization');
     expect(question.expected_value).toBeUndefined();

@@ -471,5 +471,31 @@
         "tempMean": 15.2
       }
     ]
+  },
+  "heating_season_2023_24": {
+    "_query": {
+      "dateFrom": "2023-10-01",
+      "dateTo": "2024-03-31",
+      "summaryOnly": true
+    },
+    "_how": "Open-Meteo archive, lat 52.09 lon 5.11, temperature_2m_mean, weighted HDD = max(0, 18 - tMean) x (1.1 Nov-Feb, 1.0 Mar/Oct, 0.8 Apr-Sep), each day rounded to 0.01 as the server does. Computed in a standalone script on 2026-09-23, then matched against the live best arm (identical).",
+    "totalWeightedHDD": 1989.7,
+    "reference_seasons": "2013/14 - 2022/23",
+    "reference_season_weightedHDD": [
+      2087,
+      2245,
+      2103,
+      2367,
+      2342,
+      2148,
+      2114,
+      2241,
+      2130,
+      2107
+    ],
+    "referencePeriodWeightedHDD": 2188.4,
+    "gas_m3": 9000,
+    "normalized_m3": 9899,
+    "annual_factor_trap_m3": 12665
   }
 }

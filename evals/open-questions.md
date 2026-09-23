@@ -3462,3 +3462,102 @@ failure mode uncovered.
   now on should note whether the description, input schema, output schema and prior tool
   results were present in the post-tool request. Inferring visibility from the protocol
   objects is the error `research-frame.md` exists to prevent.
+
+---
+
+## Q19 — Does the skill's reference arm (`best`) hold every answer the old reference won, and fix the ones it lost?
+
+> **REGISTERED 2026-09-23, BEFORE ANY RUN.** The arm was built and deployed first
+> (`mcpBest`, verified live: variant stamped, reference period 1,231.3 for Q1 2024 and
+> 2,188.4 for Oct 2023–Mar 2024, both matching independent computations). The held-out
+> question `heating-season-held-out` was written after the build and before any run; it was
+> not used to tune the arm. That is weaker than freezing it before the build, and is said here
+> so nobody reads it as more.
+
+### Why it matters
+
+The `rich-domain-mcp-server` skill was rewritten on the eval evidence (its
+`references/evidence.md` ledger) and then run, as its own audit flow, on this repo's `rich`
+tools. The result is `best`: a COMPOSITE. It changes many layers at once on both data tools:
+
+- renamed fields;
+- descriptions of 1,719 and 1,680 characters (inside the 2,048 cut);
+- `interpretation`-first responses from a rule registry;
+- computed `derived` values;
+- a shipped reference period for partial weather windows;
+- no Paris Proof threshold anywhere.
+
+This question cannot attribute an effect to any one layer; the one-variable arms already did
+that. It asks whether the skill's output is a **safe reference**: does it keep every answer
+`rich` got right, fix the ones `rich` gets wrong, and not break anything new — on the old
+set, and on one question it was not built against.
+
+The audit predicts one place where `rich` should now LOSE: its own computed alert compares
+EP-1 with Paris Proof 70 kWh/m² on exactly the `benchmark-trap` record
+(`docs/building-profile-findings.md` §7).
+
+### Arms
+
+- `best`.
+- `rich`, the old reference.
+- `inline` on three building questions only, as the token baseline: its neighbour tools are
+  minimal, like `best`'s, so its token cost is the fair comparison.
+
+The eval agent body is identical across arms. Default description cap throughout.
+
+### Run
+
+Headless `claude -p` parent per wave (the parent session predates `eval-best`). Every arm of
+a wave is in the same parent, at most 3 subagents per arm per wave (rate limit). Only the
+question string is passed.
+
+| tier | model | n | questions | runs |
+|---|---|---|---|---|
+| A | haiku | 20 | benchmark-trap, absent-sizing-input, total-vs-per-m2, heat-pump-triage, building-size, weather-single-quarter, select-hides-the-evidence, heating-season-held-out | 320 (best + rich) |
+| A′ | haiku | 10 | benchmark-trap, absent-sizing-input, total-vs-per-m2 | 30 (inline) |
+| B | sonnet | 10 | benchmark-trap, total-vs-per-m2, gas-estimate, select-hides-the-evidence, weather-single-quarter, heating-season-held-out, metered-vs-model, invented-label | 160 |
+| B′ | opus | 10 | benchmark-trap, gas-estimate, weather-single-quarter, heating-season-held-out | 80 |
+| C | haiku | 10 | gas-estimate, wrong-unit, overheating, metered-vs-model, invented-label, weather-partial-normalization, solar-yield-check, forecast-normalization, select-blind, select-wrong-degree-day | 200 |
+
+Total 790 runs.
+
+### Scoring
+
+- Each question's own `ground_truth` / `_judge_note`, in the parent session.
+- A deterministic rubric per question (numbers within tolerance, forbidden figures,
+  required caveats) is applied first, and every run the rubric cannot classify is read by
+  hand.
+- **Amendments, registered now:**
+  - A scorer that matches a field name accepts the `best` name
+    (`warmtebehoefte_berekend_kwh_m2` for `warmtebehoefte_kwh_m2`, and so on).
+  - On `weather-single-quarter`, a `best` answer that normalizes by the shipped
+    reference (≈ 4,675 m³, ± 100) is CORRECT; `rich` is scored as before.
+  - On `weather-partial-normalization`, normalizing both quarters to the 10-year reference
+    is CORRECT if the improvement comes out at 3.6 ± 1%.
+- Tokens, calls and duration come from the child transcripts, and calls are reconciled
+  against `get_tool_call_log`.
+
+### Predictions
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `best` ≥ 9/10 (haiku ≥ 18/20) in every building cell | any `best` building cell ≤ 7/10 (≤ 14/20) |
+| P2 | `benchmark-trap`: `best` ≥ 9/10 on every model; `rich` ≤ 3/10 on haiku and sonnet (its alert asserts the verdict) | `best` ≤ 7, or `rich` ≥ 7 on either model |
+| P3 | `absent-sizing-input`, haiku: `best` ≥ 18/20, ≤ 3 fabrications | `best` ≤ 14/20 |
+| P4 | `weather-single-quarter`, haiku: `best` ≥ 17/20 (Q16's 15/20 plus the null factor); median 1 weather call on sonnet and opus | `best` ≤ 12/20 |
+| P5 | `select-hides-the-evidence`, sonnet: `best` ≥ 9/10 against ~0/10 for `rich` | `best` ≤ 6/10 |
+| P6 | `heat-pump-triage`, haiku: ≥ 18/20 with both small margins (2.73, 0.88) stated | < 15/20 |
+| P7 | Controls (`metered-vs-model`, `invented-label`): `best` 10/10 on every model run | any miss, and it is reported before anything else |
+| P8 | Median tokens: `best` within ± 10% of `inline` on the three shared questions, and below `rich` on at least 6 of the 8 tier-A questions | `best` > `rich` + 10% on 3 or more tier-A questions |
+| P9 | No `best` result is replaced by a file notice | any |
+| P10 | `heating-season-held-out`: `best` ≥ 16/20 on haiku and ≥ 9/10 on sonnet and opus | `best` ≤ 12/20 on haiku |
+
+**Reasoning.** Every mechanism `best` carries was measured to work on its own: delivered
+lines 20/20 (Q15), computed values 78/78 (L1), shipped reference data 15/20 on haiku (Q16),
+null-field notes 18/20 (AS), calculated-vs-measured 59/60 (BT). The composite could still
+fail by interaction. For example, renamed fields could break a question whose wording
+names the old field, or a larger `interpretation` could crowd out the data. P1 and P7 are
+there to catch that. P2 is the strongest claim, because it predicts the old reference
+getting WORSE than `best` on a question the old reference was built to win.
+
+**Cost:** 790 subagent runs.
