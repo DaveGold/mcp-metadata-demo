@@ -4,9 +4,15 @@ Examine and Flag produce observations. Observations are not knowledge until some
 business confirms them, and they stop being true the moment the source system changes. These two
 steps are what keep the metadata honest.
 
-Roughly **90% of AI-discovered metadata holds up under expert review**. The other 10% is exactly the
-part that would otherwise ship as confident, plausible and wrong — and nobody would ever catch it,
-because a wrong description produces a fluent answer, not an error.
+In production practice roughly **90% of AI-discovered metadata holds up under expert review**
+(experience from the Warmtebouw servers, not a measurement in this repo). The other 10% is exactly
+the part that would otherwise ship as confident, plausible and wrong — and nobody would ever catch
+it, because a wrong description produces a fluent answer, not an error.
+
+Validation has two halves. The expert tells you whether the metadata is **true**. A measurement
+tells you whether a model **uses** it — see [`evaluation.md`](evaluation.md). A true sentence past
+the description cut, or a true sentence beside a misleading field name, passes the first and fails
+the second.
 
 ---
 
@@ -70,8 +76,10 @@ method; spend it on intent, history and business rules, never on facts you were 
 
 For each answered marker:
 
-1. **Encode** it (`metadata.md`) — description block, `.meta()`, `transform`, or an alert.
-2. **Record** it in `docs/<name>-api-findings.md` under *Resolved gaps* / *Decisions confirmed*,
+1. **Encode** it (`metadata.md`) — a rename, a description-head rule, an input `.describe()`, a
+   response rule, a computed value or an alert — and put the date + "expert: <name>" in the rule's
+   provenance line.
+2. **Record** it in `docs/<name>-findings.md` under *Resolved gaps* / *Decisions confirmed*,
    **with a date and who answered**. This is what stops the same question being re-litigated next
    quarter.
 3. **Delete the marker** from the tool. What remains inline is always the open edge — never the
@@ -117,6 +125,8 @@ dashboard if you have one):
 | Two tools always called in sequence | An undocumented join | RELATED TOOLS + join key in the field `.meta()` |
 | High `validation_warning` rate | The API changed shape under you | Check any stripped-fields log event |
 | Many 0-row calls on valid input | Empty-result hint sends the agent down the wrong branch | Tool-specific `emptyResultHint` |
+| Many calls to a second tool, or the same tool over many periods | The payload lacks data a rule needs | Ship the data in the first response [Q16b] |
+| Correct-looking answers citing an invented unit/constant | A name or constant is missing | Rename with unit; add to `interpretation.constants` |
 
 **3. User-reported friction** (a feedback tool, a support channel, anything) — the accelerator, not
 the foundation. Agents/users report friction rarely and unreliably; treat every report as

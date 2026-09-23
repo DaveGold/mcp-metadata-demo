@@ -1,13 +1,15 @@
 # Handlers — the tool lifecycle contract
 
-Every tool handler should implement the same six-step lifecycle, whether or not you have a shared
+Every tool handler should implement the same lifecycle, whether or not you have a shared
 factory function for it. A shared factory is what makes permissions, alerts, output validation and
 observability *hard to forget* on any one tool — but direct, hand-rolled logic is perfectly
 acceptable for tools that don't fit the query→transform→summarize shape at all (games, MCP App
 render tools), or for a codebase small enough that a shared factory would be premature. This same
 repo's [get-building-profile.ts](../../../../src/tools/get-building-profile.ts) hand-rolls the
 lifecycle directly (`resolveBuildingProfile` + `generateAlerts`, no shared factory) — that's a
-legitimate, working example of the same steps, not a shortcut.
+legitimate, working example of the same steps, not a shortcut. The reference implementation,
+[get-building-profile-best.ts](../../../../src/tools/get-building-profile-best.ts), hand-rolls it
+too, with the rule registry and size guard described below.
 
 ---
 
@@ -16,11 +18,13 @@ legitimate, working example of the same steps, not a shortcut.
 ```
 checkPermission (if you have an auth layer)
   → execute            tool-specific API call(s), returns TResult[]
-  → transform?         derived fields, sentinel normalisation — mutates in place
-  → summarize?         domain aggregation + interpretation.alerts
-  → inject alerts      empty-result hint, feedback reminder (if you have one)
+  → transform?         renames (upstream → your names), derived fields, sentinel normalisation
+  → summarize?         domain aggregation + computed verdicts (`derived`)
+  → select rules       registry filtered by applies(record) → interpretation.notes / alerts
+  → inject alerts      empty-result branch, feedback reminder (if you have one)
+  → size guard         serialize; over budget → drop bulk rows + alert naming the remedy
   → validate output    Zod safeParse against outputSchema
-  → return             { structuredContent, content }
+  → return             { structuredContent, content } with `interpretation` as the first key
 finally
   → log the call       wherever you keep tool-call history, if anywhere
 ```
@@ -58,7 +62,8 @@ check (if applicable) and a log write.
 ## Non-negotiable invariants
 
 1. **A permission check first, before any API call** — if your server has an auth layer at all.
-2. **`interpretation.alerts` on every response**, even when empty.
+2. **`interpretation` on every response**, even when empty — `{ alerts, notes, constants }`,
+   the same key on every tool, first in insertion order ([`metadata.md`](metadata.md) §4).
 3. **Empty-result hint** — tool-specific, and it must distinguish *"wrong lookup, try something
    else"* from *"valid query, genuinely nothing here"*. Pass a per-tool hint; never let a shared
    generic message name parameters your tool doesn't have.
@@ -76,6 +81,12 @@ check (if applicable) and a log write.
 8. **Log the call in a `finally`**, wrapped in its own try/catch so a logging failure never fails
    the tool call.
 9. **Errors return `{ content, isError: true }`**, never a throw that escapes the handler.
+10. **The response stays under the host limit** (~25k tokens on Claude Code, [`delivery.md`](delivery.md)).
+    A result over it is replaced by a file notice and its `interpretation` is lost to any caller
+    without file tools [Q9]. Guard it in the handler, not in the description.
+11. **A failed secondary fetch degrades, it does not fail the call.** If a rule's supporting data
+    (a reference period, a label lookup) cannot be fetched, return the primary data with that
+    field `null` + `reason`, and say so in an alert.
 
 ## What's worth logging
 
@@ -120,8 +131,11 @@ permission entries — don't conflate the two.
 
 - **`transform`** runs first, mutates rows in place. Use for per-row work: derived labels from flag
   combinations, sentinel → null normalisation, unit enrichment, parsing.
-- **`summarize`** runs after, returns `{ summary, interpretation: { alerts } }`. Use for
-  cross-record aggregation and for alerts that depend on the whole result set.
+- **`summarize`** runs after, returns `{ summary, derived, interpretation }`. Use for
+  cross-record aggregation, computed verdicts, and alerts that depend on the whole result set.
+- **Rule selection** runs last over the finished record: pure `applies(ctx)` gates, sorted by
+  priority (verdicts, then branches, then facts, then null-field notes), each rendered to one line.
+  Keep `provenance` on the rule in source; never serialize it [Q18] [Q5].
 
 Two traps that cost real bugs in practice:
 

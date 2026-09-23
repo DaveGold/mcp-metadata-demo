@@ -1,354 +1,262 @@
 # Encode — writing discoveries back into the tool
 
 The fourth step of the EFVEI loop: everything Examine found and Validate confirmed becomes tool
-metadata here, or it may as well not exist.
+metadata here. **Where** each piece goes is decided by what reaches the model — read
+[`delivery.md`](delivery.md) first. The short version for Claude Code:
 
-Tool descriptions and input-schema annotations are the primary model-facing channels for this
-method. In the clients measured for this project (Claude Code, claude.ai, and OpenAI's Responses
-API), output-schema annotations were not forwarded to the model, although they still did real work
-for *validation* (`outputValidator.safeParse`) and *UI rendering*. Server instructions, Resources,
-and meta-tools are client-dependent too. Therefore, put the guidance an agent must have to choose,
-call, and read a tool in its **description** or input schema — or, for output values, in the
-**returned data itself** (source-side joins + derived fields, §4). Do not rely on output annotations
-as the only source of interpretation unless you have verified delivery in the target client.
+| surface | delivered | use it for |
+|---|---|---|
+| field names | always | what each value is |
+| description | first 2,048 chars | what the tool is/is not, input conventions, record-independent rules |
+| input schema | yes | formats, examples, valid names, misbehaving params |
+| output schema | **no** | validation and UI only |
+| response | yes, < ~25k tokens | interpretation of THIS record, computed verdicts, constants, the data a rule needs |
+
+Tags like `[Q7]` resolve in [`evidence.md`](evidence.md).
 
 ---
 
-## 1. Tool description — the blocks the agent needs
+## 0. Field names — the metadata that is always delivered
 
-Written in English, domain terms kept in the source language with an English gloss (e.g.
-`Voorraadmutatie (stock mutation — inventory in/out events)`). The agent reads it once and reasons with it repeatedly — but
-it now pays a per-call token cost, so every block must carry decision-relevant knowledge.
+A name is read in every response on every host, before any prose. Get it right before writing a
+sentence about it.
 
-**Blocks are EARNED, not templated.** A block exists because the agent *fails* without it and its
-content does not fit an existing block. Default to folding new knowledge into an existing block; open
-a NEW block only when the content is (a) decision-relevant (the agent picks or uses the tool wrong
-without it), (b) genuinely does not fit any block below, and (c) substantial enough for its own
-heading — a single line belongs as a bullet, not a block.
-
-**Canonical core** — reach for these first, in this order:
+**A good name says:** *what* (the quantity) + *scope* (per what, over what) + *provenance*
+(register / calculated / measured / derived) where it is not obvious + *unit*.
 
 ```
-RETURNS:
-<What comes back, in business terms. Name the key fields that drive tool selection, AND the
-field-value knowledge the agent needs to READ the output — glossaries, derivations, caveats.
-Do not tell the agent to "see outputSchema" unless the target client demonstrably exposes it. Include
-real, counted volumes; flag any vendor number known to be a lie.>
-
-WHEN TO USE:
-- <The question this tool answers, phrased the way a user would ask it.>
-
-WHEN NOT TO USE:
-- <Adjacent question> → use <other_tool> instead.
-- <A path the API cannot serve, plus the workaround that does work.>
-
-QUERY STRATEGY:
-- <summaryOnly first, then drill down. Page sizes. Cursor/paging rules. What NOT to walk.
-  Fold pagination / large-dataset / analytical-query guidance in HERE — not as separate blocks.>
-
-INTERPRETATION:
-- <Cross-field rules AND the field-value knowledge needed to read output: type→field-group
-  mappings, conditional population, derivations, code meanings, multi-tool lookup chains. This is
-  where output-field interpretation has a reliable home when output annotations are not delivered.>
-
-RELATED TOOLS:
-- <tool_name>(<join key>) — <what it adds>. Fold routing / cross-reference / prerequisite in here.
+oppervlakte_m2                        → oppervlakte_bag_verblijfsobject_m2      (scope)
+berekend_energieverbruik_kwh_m2       → energieverbruik_berekend_niet_gemeten_kwh_m2  (reads as metered [N2])
+temperatuuroverschrijding             → temperatuuroverschrijding_indicator_eenheidloos (unit invented [N5])
+gasNormalizationFactor                → fullYearGasNormalizationFactor          (only valid for a full year [Q12])
 ```
 
-**Conventions** (server-wide behaviour, not tool knowledge):
+Rules:
+
+- **No name may imply a quantity it is not.** A readable wrong name overrides the prose beside
+  it [N2]; an opaque code is confidently misread to its nearest plausible meaning, never treated
+  as unknown [N3]; letters that look like the answer to a common question make a magnet [N4].
+- **Every numeric field names its unit — or says it has none.** A unitless readable name gets a
+  unit invented for it, and the invented unit usually makes the value look negligible [N5].
+- **Calculated values say so in the name** when a measured value of the same kind exists in the
+  domain (energy use, emissions, temperatures).
+- **Keep established domain and register terms.** Users and experts search in them, and field
+  names leak from the user's own words — sonnet produced the exact `select` names 8/10 by
+  camel-casing the question [N7]. Rename for a *reason* the audit found, not for style [N8].
+- **If the API is not yours, rename in `transform`** and keep a mapping table in source with a
+  reason and provenance per rename (`{ upstream, name, reason, provenance }`). The mapping is
+  where the next maintainer learns why the name differs from the vendor docs.
+- Keep names identical across the tools of one server (`latitude`/`longitude` in the input of
+  one tool should match what another tool returns, or the RELATED TOOLS chain breaks).
+
+## 1. Tool description — 2,048 characters, most important first
+
+The description is truncated at 2,048 characters on Claude Code, and re-sent on every request
+[Q7]. It is also paid for on every turn, relevant or not [Q5]. Treat it as a budget:
+
+- **Hard limit 2,048; working ceiling ~1,800**, enforced by a test on `.length`, so an edit
+  cannot silently push a rule past the cut.
+- **Order by what must be known before the first call.** Anything that interprets returned
+  values can wait for the response.
+- **Pin load-bearing sentences to offsets** in the test (`indexOf('NO metered') < 400`).
+
+A structure that fits the budget:
 
 ```
-FEEDBACK: one line, only if you have a feedback mechanism — e.g. "call report_problem(server=\"<name>\")".
-  Skip this line entirely if your server has no such mechanism; don't invent one just to fill it.
-ALERTS: include ONLY when the tool actually emits interpretation.alerts. A tool that never emits one
-has NO ALERTS block — an empty/example ALERTS block is dead text.
+1. WHAT IT IS — one or two sentences, including what it is NOT
+   ("Registered facts + calculated label figures. This server has NO metered consumption data.")
+   The refusal must be possible before any call.
+2. READ `interpretation` FIRST — one line telling the model the response carries the record's
+   computed values and reading rules, and to quote computed values rather than recompute.
+3. RULES THAT HOLD FOR EVERY RECORD — three or four, each a FACT plus an INSTRUCTION [Q4]:
+   "EP-Online energy figures are CALCULATED (NTA 8800/NEN 7120), never MEASURED. Where a question
+    asks for a comparison with a measured benchmark, say it cannot be made from this data, and why."
+4. INPUT — the conventions a model gets wrong: formats, "28A = huisnummer 28 + huisletter 'A'",
+   what to do on an ambiguous match.
+5. NOT FOR — adjacent questions and the right tool.
 ```
 
-**Earned blocks** — open one only when the test above passes. Seen in practice and justified:
+The classic blocks (RETURNS · WHEN TO USE · WHEN NOT TO USE · QUERY STRATEGY · INTERPRETATION ·
+RELATED TOOLS) are still the right *vocabulary*, but they no longer all fit, and they do not all
+belong here:
 
-- **DATA HORIZON & SCOPE** — why a query returns 0 rows (retention window, coverage limit). Not
-  "when not to use" (the tool is right, the data is absent) and not query strategy — a distinct,
-  high-value caveat. (e.g. a bookings connector that only exposes the last 10 years.)
-- **PRIVACY** — sensitive/regulated-data handling (health data, financial records). Compliance-critical,
-  must be prominent, does not fold cleanly into INTERPRETATION. (e.g. an HR or medical-records server.)
-
-**Two grammars.** The core above is for **read/query** tools. Two variants:
-
-- **Write/action tools** (e.g. a ticket- or record-writing tool): WHEN TO USE / WHEN NOT TO USE /
-  RETURNS(effects) and an **AUTH** note where gating applies; batch / overwrite-guard as bullets, not
-  blocks. No QUERY STRATEGY / INTERPRETATION / ALERTS.
-- **App/render tools** (a chart/table/game-rendering tool): WHEN TO USE / RETURNS(what renders) /
-  **INPUT (data shape)**; field-type / layout details as bullets under INPUT. No QUERY STRATEGY /
-  INTERPRETATION / RELATED TOOLS. (This repo's [render-chart.ts](../../../../src/tools/render-chart.ts)
-  is a worked example.)
-
-Block-by-block, what breaks without it:
-
-| Block | Without it |
+| block | where it goes now |
 |---|---|
-| RETURNS | Agent can't tell whether this tool has the data it needs — or how to read a field |
-| WHEN TO USE | Picks the wrong tool, or misses this one entirely |
-| WHEN NOT TO USE | Tries this tool for queries that belong elsewhere — name the right tool |
-| QUERY STRATEGY | Pulls full records where a summary would do; walks pagination pointlessly |
-| INTERPRETATION | Returns raw numbers without conclusions; misreads codes / derived fields |
-| RELATED TOOLS | Stops after the first call instead of chaining |
+| RETURNS | description, terse — and name the **literal field identifiers** (`tempMean/tempMin/tempMax`), never a paraphrased group label ("temperature stats") |
+| WHEN TO USE / WHEN NOT TO USE | description, one line each; the NOT-TO-USE line is often the most valuable sentence in the budget |
+| QUERY STRATEGY | description (short) + input-schema param descriptions |
+| INTERPRETATION | **response**, as record-conditional rules under `interpretation` (§4). Only the rules that hold for every record stay in the description |
+| RELATED TOOLS | description, one line: `get_x(join key) — what it adds` |
+| ALERTS | not in the description — the alerts are in the response |
 
-**Hygiene rules**
+**Blocks are earned, not templated.** A sentence exists because a model fails without it. Volume
+does not hurt accuracy [Q2] [Q17], but it costs tokens and budget; a wrong sentence can break
+59 answers [BT]. Spend the effort on *which* sentence, not how many.
 
-- **Put output-field interpretation in the description, not only in output `.meta()`.** In the
-  clients measured for this project, output annotations did not reach the model. A field's values,
-  caveats, derivation and null-meaning that the agent needs → RETURNS or INTERPRETATION; keep the
-  output `.meta()` shape-only (§3) unless the target client proves a different contract.
-- **No duplication WITHIN the description.** RETURNS is a terse field inventory; INTERPRETATION holds
-  the knowledge — do not explain the same field in both. When a fact goes into INTERPRETATION, trim
-  the RETURNS entry to a pointer.
-- **Avoid duplication between INTERPRETATION and INPUT `.meta()` when the target client exposes input
-  annotations.** An input param fully documented on itself does not also belong in INTERPRETATION.
-  This does not apply to OUTPUT fields unless their annotations have been verified as model-visible.
-- **No code tables inline.** If a code field has a companion description field, join it (§4 layer 1)
-  and say so; if it doesn't, get one.
-- **Warnings belong where the mistake is made.** A misbehaving *input* parameter is documented on the
-  parameter (model-visible). Output-reading warnings go in the description.
+**Two other grammars.** Write/action tools: WHEN TO USE / WHEN NOT TO USE / RETURNS (effects) /
+AUTH. App/render tools: WHEN TO USE / RETURNS (what renders) / INPUT (data shape) — see
+[render-chart.ts](../../../../src/tools/render-chart.ts).
 
-**Deduplication pass — run EVERY time a description is authored or changed.** Once the full
-description is written or edited, read it end-to-end and check each fact appears **once**:
-- No field explained in both RETURNS and INTERPRETATION — RETURNS is the terse inventory,
-  INTERPRETATION holds the knowledge; when a fact lands in INTERPRETATION, trim the RETURNS entry to
-  a pointer.
-- No INPUT-parameter fact repeated in INTERPRETATION when input `.meta()` reaches the target model.
-- Do not make the description depend on a model opening the output schema.
-- Fold overlapping bullets across blocks (e.g. pagination guidance scattered between QUERY STRATEGY
-  and a stray block) into their single canonical home.
-Do this as a distinct final step — not while drafting — because duplication creeps in during editing
-and drifts apart on the next change.
+**Deduplication pass — every time the description changes.** Each fact once; no fact that the
+input schema already carries; no pointer to the output schema.
 
 ## 2. Input schema
 
+Delivered, and the only place some knowledge can live.
+
 ```ts
 export const inputSchema = {
-  customerId: z.string().regex(/^\d{6}$/).optional().meta({
-    description: 'Customer account number, 6 digits. Known working: 100234 (large account, 400+ orders).',
-    examples: ['100234'],
-  }),
-  summaryOnly: z.boolean().optional().default(false).meta({
-    description: 'If true, returns summary + alerts without the row payload.',
-  }),
-  queryIntent: z.string().optional().meta({
-    description: 'One sentence about the business question you are answering. Used for observability.',
-  }),
+  postcode: z.string().regex(/^\d{4}[A-Z]{2}$/)
+    .describe('Dutch postcode, 4 digits + 2 capitals, no space. Example: "3543AR".'),
+  huisnummer: z.number().int().positive()
+    .describe('House number, integer only. For "28A" pass 28 and huisletter "A".'),
+  select: z.array(z.string()).optional()
+    .describe('Exact, case-sensitive field names to keep: date, tempMean, tempMin, tempMax, …'),
+  summaryOnly: z.boolean().optional().default(false).describe('Summary + interpretation only, no rows.'),
+  queryIntent: z.string().optional().describe('The business question this call answers.'),
 };
 ```
 
-- **`queryIntent` and `summaryOnly` on every query tool.** `queryIntent` is the observability join
-  between a tool call and the user's actual question; `summaryOnly` is what stops agents paginating
-  to hand-aggregate.
-- **`.meta({ description, examples })`** in new code (Zod 4 — `examples` reaches the JSON Schema).
-  `.describe()` is equivalent for description-only and works fine too — match whatever convention
-  the rest of your codebase already uses.
-- **Working example values, not placeholders.** `'100234'` beats `'a customer ID'`.
-- **Formats explicit** — date format including the time component, boolean spelling, regex.
-- **Document misbehaving parameters on the parameter**: *"DO NOT PASS in pre-release: empirically
-  zeroes out the result set."* An agent that reads this once never wastes a call on it.
-- **Defaults save a round trip** — `.default()` wherever a sane default exists.
+- **Typed for expressibility and validation.** A parameter that does not exist cannot be reasoned
+  around by any model: `thin` 0/18 → `schema` 18/18 on the question that needed `huisletter` [L3].
+  A regex stops silent wrong-entity lookups (`"3039 WB"` returned a different building).
+- **List the valid names wherever the model must produce names** (`select`, `fields`, `sortBy`).
+  Without the list haiku got 2/10 and told users the field does not exist [N7].
+- **`queryIntent` and `summaryOnly` on every query tool** — the observability join, and the
+  alternative to paginating to hand-aggregate.
+- **Working example values**, explicit formats, sane defaults.
+- **Document misbehaving parameters on the parameter** ("DO NOT PASS in pre-release: zeroes the
+  result set").
+- An unknown name in `select` must return the valid list and say it is a *naming* error, not
+  missing data.
 
-**If your codebase has a shared factory that builds this from field metadata** (e.g. a
-`createConnectorInputSchema(FIELDS)`-style helper — see `references/scaffolding.md`), it can
-generate `filters[]` (with an operator reference inline), `orderBy`/`orderDirection`, `skip`/`take`,
-`summaryOnly`, `queryIntent`, `select` (server-side projection — a token saver across many rows,
-overhead on single lookups — see [project-fields.ts](../../../../src/domain/project-fields.ts) for a
-worked, standalone version of this pattern), and one `include<Group>` flag per opt-in field group
-kept out of the default response. You only supply the field list:
+## 3. Output schema — shape-only
 
-```ts
-const FIELDS = [
-  { name: 'CustomerName', type: 'string', filterable: false },  // returned, not filterable
-  { name: 'OrderDate', type: 'date' },
-  { name: 'ShippingWeightKg', type: 'number', optInGroup: 'logisticsDetails' },
-] as const satisfies readonly (FieldMeta & { name: keyof OrderRow })[];
-```
+Not delivered to the model on Claude Code [Q11]. Keep it for `safeParse` validation and UI:
+type + `.optional()`/`.nullable()` + a short identity. No value meanings, no null-conditions, no
+pointer to the description. **Identify-before-removing:** before trimming an old annotation,
+confirm every fact it carried now lives in the description head, a field name, or a response rule.
 
-The `satisfies` clause is what makes field names compile-time-checked against the row type. Keep it —
-and even without a generator factory, hand-writing `inputSchema` still benefits from a `FIELDS`-style
-array as the single source of truth for filter/select/row-type field names.
+## 4. The response — interpretation, derived values, constants
 
-## 3. Output schema — shape-only by default (validation + UI; not a guaranteed model channel)
-
-The output schema validates the payload (`outputValidator.safeParse`) and drives UI rendering. In
-the clients measured for this project, its annotations were not model-visible, so keep them
-**shape-only** by default: type + `.optional()`/`.nullable()` + a short field identity. Put domain
-knowledge in the description (§1) and returned data (§4) unless the target client has a verified,
-different delivery contract.
-
-The standard envelope:
+The response is delivered (under ~25k tokens), host-independent, and it is the only surface that
+can be **conditional on the record** [delivery.md]. Standard shape:
 
 ```ts
-export const outputSchema = {
-  recordCount: z.number().meta({ description: 'Rows in this page.' }),
-  summary: z.object({ /* domain aggregation the agent would otherwise paginate for */ }),
-  records: z.array(z.object({ /* one SHAPE-ONLY .meta() per field */ })).optional()
-    .meta({ description: 'Omitted when summaryOnly=true.' }),
-  interpretation: z.object({
-    alerts: z.array(z.string()).meta({ description: 'Attention points; empty if normal.' }),
-  }),
-};
-```
-
-**Shape-only = a short field identity and nothing the type does not already give:** a few words
-naming the field, optionally a bare unit or format token. Optionality/nullability is already carried
-by `.optional()`/`.nullable()`, so do NOT explain WHEN or WHY a field is null. No value legends, no
-value *meanings*, no derivations, no glossaries, no "use this for…", and **no pointer to the
-description** — the default convention is to put output interpretation in the description, where it
-is a more reliable delivery channel:
-
-```ts
-// identity + type; the "null when cancelled" MEANING lives in the description, not here
-CustomerName: z.string().nullable().meta({ description: 'Customer name' }),
-// enum field — name it; Pending=awaiting stock / Shipped=dispatched / Cancelled=voided belongs
-// in the description, not here
-OrderStatus: z.string().meta({ description: 'Order status' }),
-// derived field — name it, no mapping
-FulfillmentStatus: z.string().optional().meta({ description: 'Derived fulfillment label' }),
-```
-
-The knowledge that USED to be crammed here — the null-*meaning*, the join key, the value *semantics*,
-the sentinel rule — now lives in the **description** (RETURNS / INTERPRETATION), where the target
-model can rely on it, or in the **row itself** via §4. **Identify-before-removing:** before trimming a field's
-annotation, confirm every fact it carried is in the description; a mechanical strip loses knowledge.
-Keep the type + `.optional()`/`.nullable()` EXACTLY — validation stays byte-identical; only the
-describe text is trimmed.
-
-`summary` is not decoration — it is the alternative to pagination, and (unlike the schema annotations)
-it IS model-visible, because it is *returned data*. Every dimension an agent would otherwise walk pages
-to compute (`byMonth`, `byEmployee`, `totalHours`, `distinctSuppliers`) belongs there. Its `.meta()`
-stays shape-only too; the "which question it answers" guidance goes in QUERY STRATEGY.
-
-## 4. Two-layer enrichment — make the data self-documenting
-
-**Layer 1 — source-side description joins.** Configure the source (a GetConnector, a SQL view, an
-API include-param) to return `XxxLabel`/`XxxName` next to every `XxxCode`. The agent reads
-`CategoryName: "Express shipping"` from the row instead of consulting a mapping table — this alone
-can remove thousands of tokens of code-legend tables from a description. Add the join field to the
-field list with `filterable: false`, to the output schema, and to the row interface.
-
-**Layer 2 — server-side derived fields.** For interpretations that don't fit a join, compute them in
-`transform`, before `summarize`:
-
-```ts
-function transformOrders(records: OrderRow[]): void {
-  for (const row of records) {
-    if (row.IsPaid && row.IsShipped) row.FulfillmentStatus = 'Shipped';
-    else if (row.IsPaid) row.FulfillmentStatus = 'AwaitingShipment';
-    else if (row.IsShipped) row.FulfillmentStatus = 'ShippedUnpaid';
-    else row.FulfillmentStatus = 'AwaitingPayment';
-  }
+{
+  interpretation: {
+    alerts:    string[],                 // computed verdicts and branch statements, most decision-relevant first
+    notes:     string[],                 // reading rules that apply to THIS record, one line each
+    constants: Record<string, number>,   // every constant a rule refers to (conversion factors, thresholds)
+  },
+  derived: {                             // determinate computations, each self-describing
+    spaceHeatingGas: { value: 253, unit: 'm3/year', basis: 'warmtebehoefte × thermal-zone area ÷ 0.95 ÷ 8.79', provenance: 'calculated' },
+    totalCo2:        { value: null, reason: 'thermal-zone area not registered' },
+  },
+  ...data fields,
 }
 ```
 
-(A fuller worked version of this pattern, in this same repo: `generateAlerts` in
-[get-building-profile.ts](../../../../src/tools/get-building-profile.ts) derives a
-warmtepomp-suitability indication and several other advisory fields from raw BAG/EP-Online values.)
+- **One fixed key** (`interpretation`) on every tool, so a model that only has a spilled file can
+  still read it by key [Q9].
+- **Rules live in a registry in source**, each `{ id, relates_to_fields, applies(record),
+  render(record), provenance }`. `applies` makes the response conditional; `render` produces one
+  line, fact + instruction [Q4]. One line is enough [Q14]; 100 rules are no worse than one [Q17];
+  the form (prose vs field-addressed) does not matter [Q10] — so optimise for correctness and
+  maintainability, not for size.
+- **Prune by relevance, but never drop notes about NULL decision fields.** Pruning notes for
+  populated-but-irrelevant fields is free [Q2]; pruning the note about a null sizing input cost
+  haiku 18/20 → 10/20 [AS]. Gate null-notes on the field BEING null.
+- **Compute determinate verdicts** (a threshold crossed, a band, a conversion) and return them
+  with `unit`, `basis` and `provenance` — the most model-uniform mechanism measured [L1], and the
+  worst failure when wrong [BT]. Return `null` with a `reason` rather than a fallback that mixes
+  scopes.
+- **Ship the constants the payload lacks** (a calorific value, a boiler efficiency): no model
+  reasons its way to them — opus scored 1–3/10 on the gas estimate without the constant [L2].
+- **Ship the data a rule needs, not only the rule** [Q16]: a server-computed reference-period
+  figure took haiku 2/20 → 15/20 and cut sonnet/opus calls by ~87% [Q16b]. Ship the data rather
+  than a finished factor (11/20).
+- **Return thresholded results complete** — no "(+6 more)" [Q11b].
+- **Every quantity that has a calculated and a measured sense states which one it is**, and what
+  it may be compared against [BT].
+- **Keep responses under the limit.** Serialize and guard; drop bulk rows with an alert naming
+  `select`/`summaryOnly`.
 
-One readable label from a closed enum replaces ~200 tokens of boolean-combination prose and is read
-correctly every time. Mark derived fields in the row interface as computed by the MCP server, not
-returned by the API.
-
-**Enriched summary keys.** Aggregate on `"code: description"` so the agent never needs a lookup:
-`{ "P1: High priority": 12 }`.
+**Two-layer enrichment** still applies to the data itself: (1) source-side label joins
+(`CategoryName` next to `CategoryCode`) instead of code tables; (2) derived fields in `transform`
+that collapse flag combinations into one readable label. Summary keys as `"code: description"`.
 
 ## 5. Alerts and empty results
 
-`summarize` returns `{ summary, interpretation: { alerts } }`. The handler appends any feedback
-reminder and, when `records.length === 0`, the empty-result hint. Get both right:
-
-- **An empty response must keep the agent in the same reasoning branch as a full one.** If 0 rows
-  means "wrong ID, try again", say that. If 0 rows is a legitimate upstream state (the caller knows
-  the asset but nothing is monitored on it), say *that* — otherwise the agent retries forever and
-  concludes the tool is broken.
-- **Set the empty-result hint per tool.** A shared generic hint that names `companyId, ean, meterId`
-  becomes actively misleading on a tool whose parameter is `assetId`.
-- **Volume claims must include the zero case.** "30K–60K variables per building" is true for the
-  happy path and sends agents hunting on the cases where the answer is legitimately 0.
-- **Alerts carry domain warnings**, not chatter: a threshold breach, an unapproved record, a summary
-  computed over a capped scan, a counter that was skipped rather than summed.
+- **`interpretation.alerts` on every response**, even when empty.
+- **An empty result names its branch.** "BAG returned no address, EP-Online was NOT queried" is a
+  different next step from "EP-Online was queried and has 0 labels" and from "the field is null
+  because this calculation method does not produce it". Per tool, never a shared generic hint.
+- **Volume claims include the zero case.**
+- **Alerts are domain warnings, not chatter**, and they are the highest-trust thing you emit.
+  Audit every one for the calculated-vs-measured defect ([`audit.md`](audit.md) step 4).
 
 ## 6. Registration
 
 ```ts
-server.registerTool(
-  'get_<entity>',
-  {
-    title: 'Orders',                                              // UI-facing
-    description,                                                  // agent reasoning
-    inputSchema,
-    outputSchema,
-    annotations: {
-      readOnlyHint: true,
-      destructiveHint: false,
-      idempotentHint: true,
-      openWorldHint: false,
-    },
-  },
-  createRestHandler(client, { toolName: 'get_<entity>', operationName: 'Get<Entity>', execute, transform, summarize, outputSchema, emptyResultHint })
-);
+server.registerTool('get_<entity>', {
+  title: 'Orders',
+  description, inputSchema, outputSchema,
+  annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+}, handler);
 ```
 
-(`createRestHandler` here is illustrative of a shared handler factory — see `references/handlers.md`
-for the exact 6-step lifecycle contract; any codebase can implement the same steps by hand without a
-shared factory, as [get-building-profile.ts](../../../../src/tools/get-building-profile.ts) does.)
+All four annotations explicit — `destructiveHint` and `openWorldHint` default to `true` in the
+spec. `openWorldHint: true` whenever the tool calls an external system.
 
-All four annotations explicit — `destructiveHint` and `openWorldHint` default to `true`, so an
-omission labels a read-only tool as destructive and open-world.
+## Server instructions
+
+Cut at 2,048 like descriptions [Q7]; keep them well under (~900). Use them for what spans tools:
+what the server is, what it does **not** have, "every data tool returns `interpretation` — read it
+first", the join chain between tools (`coordinaten` → `latitude`/`longitude`). Do not make them the
+only home of anything essential; some clients do not read them.
+
+A guidance/meta-tool is legitimate when a procedure cannot go in the response — but only behind a
+pointer worded as a requirement ("REQUIRED: before any lookup, call … once"), or as its own
+parameterless tool [Q8b]. `z.object({})` breaks parameterless tools — use `{}` or omit
+`inputSchema`.
 
 ---
 
 ## Per-tool checklist
 
-- [ ] Row interface with a doc comment per field, derived fields marked as computed
-- [ ] Description: canonical core blocks (earned blocks only when justified), English structure,
-      domain terms glossed; no `outputSchema` reference, no RETURNS↔INTERPRETATION duplication
-- [ ] Deduplication pass run after the description was written/changed — each fact appears once (see §1)
-- [ ] RETURNS carries counted volumes; any vendor total known to be unreliable is flagged
-- [ ] WHEN NOT TO USE names the correct alternative tool, and the workaround for unsupported paths
-- [ ] Input: `queryIntent`, `summaryOnly`, `.meta()` on every param with format + working examples
-- [ ] Misbehaving/ignored parameters documented on the parameter itself
-- [ ] Output: SHAPE-ONLY `.meta()` by default (type/optional + short identity, no pointer); the null-meaning, join key, value semantics and sentinel rule live in the DESCRIPTION, not only here
-- [ ] `summary` covers the dimensions an agent would otherwise paginate for
-- [ ] `interpretation.alerts` present in the output schema
-- [ ] An empty-result hint distinguishes "wrong lookup" from "valid but empty"
-- [ ] `transform` for derived fields / sentinel normalisation; `summarize` for aggregation + alerts
-- [ ] All four `annotations` explicit
-- [ ] Registered in `server.ts`; a permission/RBAC entry if your server has that layer and this tool is restricted
-- [ ] Open questions carry `[CONFIDENCE: … TODO: DOMAIN EXPERT — …]` markers
-- [ ] Unit test covers the shape contract and each discovered quirk
-
-## Server instructions (`server.ts`)
-
-Client-dependent — read by some clients (e.g. Claude Code, Claude Desktop), not guaranteed
-elsewhere. Put cross-tool rules here and never rely on them alone:
-
-```
-FEEDBACK: … (only if you have a feedback mechanism; name it and how to call it)
-DOMAIN CONTEXT: <what this source is, who/what it covers>
-TOOL SELECTION / NAVIGATION: <entry-point tool → which IDs feed which tools>
-KNOWN DATA: <counted volumes, key entities, naming conventions>
-KNOWN DATA QUALITY ISSUES: <unreliable fields, broken cross-refs>
-CROSS-REFERENCE: <how this links to your other MCP servers' data, if you have more than one>
-UNITS: <distance, duration, currency conventions>
-```
+- [ ] Name audit done: every numeric name has unit + scope; no name implies another quantity; calculated values say so; renames in a mapping table with reason + provenance
+- [ ] Description ≤ 2,048 (test), ceiling ~1,800, load-bearing sentences pinned to offsets
+- [ ] Description head: what it is and is NOT, "read `interpretation` first", record-independent rules as fact + instruction, input conventions
+- [ ] RETURNS names literal field identifiers
+- [ ] Input: typed, regex/enum where it prevents wrong-entity calls, working examples, valid-name lists, `queryIntent`, `summaryOnly`
+- [ ] Output schema shape-only; no model-facing meaning only there
+- [ ] Response: `interpretation { alerts, notes, constants }` first; rules from a registry with provenance; null-field notes never pruned
+- [ ] Determinate verdicts computed with unit/basis/provenance, or null + reason; no scope-mixing fallback
+- [ ] Constants and the data each rule needs are in the response
+- [ ] Thresholded lists complete; response size guarded
+- [ ] Empty results name their branch
+- [ ] All four annotations explicit
+- [ ] Open questions carry `[CONFIDENCE: … TODO: DOMAIN EXPERT — …]`
+- [ ] Tests: budget, names, each rule, each quirk, response size
 
 ## Anti-patterns
 
-| Anti-pattern | Why |
-|---|---|
-| A meta-tool (`get_query_guide`, `get_data_dictionary`) | Built and tested: agents rarely call them |
-| MCP Resources for essential reference content | Client-dependent; do not make core guidance rely on them without testing |
-| Code tables inline in a description | Tokens + drift. Join the description field instead |
-| Output-field interpretation only in output `.meta()` | In the measured clients the model did not receive output annotations. Put essential interpretation in the description |
-| Pointing to `outputSchema` from a description | Do not assume the model can open it. Inline the essential content |
-| Verbose output `.meta()` prose | Usually dead weight when annotations are validation/UI only. Keep it shape-only by default |
-| Same field explained in both RETURNS and INTERPRETATION | Duplication within the description that drifts apart |
-| Repeating an INPUT param's `.meta()` in INTERPRETATION | When input annotations are model-visible, duplication drifts |
-| `z.object({})` for a parameterless tool | SDK error — use `{}` or omit `inputSchema` |
-| "Nullable" without the condition | The agent still can't tell when to expect a value |
-| Volume claims that skip the 0 case | Agents retry forever on legitimately empty results |
-| A generic shared empty-result hint | Names parameters that some tools don't have |
+| anti-pattern | why | evidence |
+|---|---|---|
+| Interpretation past char 2,048 | never delivered | Q7 |
+| Meaning only in output `.describe()` | never delivered | Q11 |
+| A readable name that implies another quantity | overrides the prose beside it | N2 |
+| An opaque code without a delivered glossary | confidently misread | N3, N6 |
+| A numeric name without a unit | a unit is invented | N5 |
+| Comparing a calculated figure with a measured target (in prose OR an alert) | 59/60 wrong | BT |
+| An instruction without the fact that triggers it | inert: 10/30 | Q4 |
+| A rule that tells the model to go fetch data | helps only the middle model | Q12 |
+| A soft pointer to a guidance tool | haiku never calls it | Q8b |
+| Pruning the note about a null decision field | haiku 18/20 → 10/20 | AS |
+| "(+N more)" in a thresholded alert | boundary cases misread | Q11b |
+| Returning 0 for "no data" | reads as a measurement | audit.md |
+| Response over ~25k tokens | replaced by a file notice | Q9 |
+| Raising the client description cap as the fix | +23.7% tokens on every tool | Q15b |
+| Code tables inline | tokens + drift; join the label field | — |
+| Duplicating a fact across description, input schema and response | drifts apart | — |
