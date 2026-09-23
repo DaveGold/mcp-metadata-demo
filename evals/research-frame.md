@@ -49,13 +49,13 @@ about "the description weakened" is safe to quote until Q7 lands.
 
 | axis | tested by | status |
 |---|---|---|
-| channel | **Q1** (description vs response, byte-identical) · **Q1b** | **Confounded — re-opened 2026-09-22.** 4/30 vs 29/30 stands as numbers, but the description copy sat past the host's 2,048-char cut and was never delivered (Q7). The channel itself is untested. |
-| channel | **Q8** (bootstrap/guidance call) · **Q11** (`outputSchema`) | **Open.** Two of the four channels have never been measured here. |
+| channel | **Q1** (description vs response, byte-identical) · **Q1b** · **Q15 / Q15b** | **Answered 2026-09-23: delivery, not channel.** Q1's 4/30 vs 29/30 was undelivered vs delivered (Q7). With the sentence delivered in both channels, they tie: 20/20 vs 20/20 at the default cap (line inside the cut) and with the cap raised (whole block). Haiku, one question. |
+| channel | **Q8** (bootstrap/guidance call) · **Q11** (`outputSchema`) | **Q8 open**, to run with the cap raised. **Q11's main half answered by accounting (2026-09-23): `outputSchema` is not in the model-facing request on Claude Code** — a 7,659-char schema difference shows up as +181–336 tokens. |
 | timing | **Q7** (is the description still present post-tool?) | **Answered 2026-09-22.** Yes: definitions are re-sent every request. But the description is cut to its first 2,048 chars on every request. |
 | distance | **Q9** (position within a response; turns between guidance and data) | **Open.** |
 | conditionality | **Q2** (prune the block to the record) | **Answered: free, not cheap.** −67% of the block, 0 answers changed, −4.8% tokens. |
 | conditionality | **Q5** (does irrelevant metadata cost?) | **Answered: yes, at list price.** +1,172 tokens on a question the alerts do not answer. |
-| addressability | **Q10** (`relates_to_fields` / `triggered_by`) | **Open, with a prior against it.** Q6: prose beside the value was read and misapplied; a neutral name did worse. |
+| addressability | **Q10** (`relates_to_fields` / `triggered_by`) | **Suspended 2026-09-23.** Its prior ("prose beside the value was read and misapplied", Q6) was absence: the sentence was never delivered. Delivered, `overheating` is 20/20 in every channel, so the set has no question left for this primitive to fix. |
 | activation | server-side alerts vs prose (readable ladder) · **Q4** | **Partly answered.** Computed values: 78/78, identical on all three models — and the worst failure mode in the repo. |
 
 Two axes the draft treats as one and this repo has had to split:
@@ -133,10 +133,10 @@ The draft lists eight principles to falsify. Here is where each one actually sta
 
 | # | principle | status |
 |---|---|---|
-| 1 | Descriptions are for capability discovery | **Unsupported as tested** — Q7 showed the Q1 description copy was never delivered, so Q1 cannot speak to it. What *is* supported: on this host, a description only carries its first 2,048 chars, so anything else must go elsewhere. |
+| 1 | Descriptions are for capability discovery | **Falsified as an exclusive rule** (Q15) — a domain sentence inside the first 2,048 chars was applied 20/20, the same as in the response. What holds: on this host a description only carries its first 2,048 chars, so anything past that must go elsewhere. |
 | 2 | Guidance is for operating the capability | **Untested as a channel** (Q8) |
-| 3 | Output schemas are the canonical home for stable output semantics | **Untested, and doubted** (Q11) — canonical ≠ delivered |
-| 4 | Responses are for interpreting returned instances | **Supported** (Q1, 29/30) |
+| 3 | Output schemas are the canonical home for stable output semantics | **Not deliverable on Claude Code** (Q11, by accounting): `outputSchema` never reaches the model there. It can be canonical for the SERVER; anything the model needs must be projected into the description's first 2,048 chars or the response. |
+| 4 | Responses are for interpreting returned instances | **Supported as a robust default, not as a better channel** — Q1's 29/30 was against an undelivered description (Q7), and a delivered description ties it (Q15/Q15b). The response is host-independent and can be conditional on the record. |
 | 5 | Data-dependent semantics should travel with the data | **Supported structurally, not economically** (Q2: free, not cheap) |
 | 6 | Domain knowledge should be addressable to the fields it explains | **Open (Q10), with a live counter-signal**: Q6 shows adjacency failing and renaming failing too — 2 of 21 across both |
 | 7 | Resolve conditional domain logic server-side | **Strongest effect and worst failure mode.** 78/78 when right; one plausible-looking computed line produced 59 of 60 wrong answers |
@@ -153,14 +153,17 @@ See *Design guidance* in [`open-questions.md`](open-questions.md).
 
 What can be said today, and nothing wider:
 
-> **In the evaluated record-conditional task, the same domain guidance was far more
-> effective when delivered with the tool result than when placed in the tool
-> description.**
+> **In the evaluated record-conditional task, the same domain guidance was applied when
+> it reached the model, whichever channel carried it. On Claude Code a tool description
+> reaches the model only up to character 2,048; guidance past that point was never
+> applied because it never arrived.** (Until 2026-09-23 this read "far more effective
+> when delivered with the tool result". Q15/Q15b withdrew that.)
 
 Still hypotheses, and to be written as hypotheses:
 
 - that all interpretation data belongs in responses;
-- that response placement beats descriptions in general;
+- ~~that response placement beats descriptions in general~~ — tested and not supported on
+  haiku once both channels deliver (Q15/Q15b);
 - that end-of-response placement wins, and that recency is why (Q9);
 - that `outputSchema` semantics are ineffective in all MCP hosts (Q11);
 - that `relates_to_fields` improves attention routing (Q10);

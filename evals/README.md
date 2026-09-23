@@ -134,9 +134,12 @@ BAG and EP-Online are live registers. Re-capture before a scoring run.
 > INTERPRETATION block, the CALCULATED vs MEASURED line and the overheating threshold.
 > §4 and §9 below compare **delivered** guidance (response) with **undelivered** guidance
 > (description past the cut). Their numbers stand; their mechanism is not "channel". It is
-> "whether the text arrived". The claim *the response beats the description* is
-> **untested**. See Q7 in [`open-questions.md`](open-questions.md) and
+> "whether the text arrived". See Q7 in [`open-questions.md`](open-questions.md) and
 > [`results/2026-09-22-q7-description-truncation.json`](results/2026-09-22-q7-description-truncation.json).
+>
+> **Tested 2026-09-23 (§10):** with the sentence delivered in both channels, they score the
+> same, 20/20 vs 20/20, at the default cap and with the cap raised. *The response beats the
+> description* is **retired**. What the numbers below measured is delivery.
 
 Everything below is from runs recorded in [`results/`](results/), each with its
 own caveats. The picture changed substantially on 2026-09-21/22: the early
@@ -196,15 +199,19 @@ Two failure shapes are worth telling apart: where the payload offers **no** path
 the model improvises and scatters; where it offers an **obvious but wrong** path,
 the model is perfectly stable and perfectly wrong. The stable one looks reliable.
 
-### 4 · Guidance works far better in the RESPONSE than in the description
+### 4 · Guidance works when it is DELIVERED, and on this host the description mostly is not
 
 **Q1, 210 runs, three models.** The same 438 bytes of recipe scored **29/30 in the
 response and 4/30 in the tool description**. Both registered predictions were
-falsified.
+falsified. **The description copy sat past character 2,048 and never reached the
+model** (Q7). When the same sentence *is* delivered by the description, it scores the
+same as the response (§10). So this is 29/30 delivered against 4/30 absent.
 
-The description is written before the data is known, so it must carry every
-branch; the response is the only channel that can be conditional on the record.
-That makes the channel a design choice, not a detail.
+The structural argument survives. The description is written before the data is
+known, so it must carry every branch; the response is the only channel that can be
+conditional on the record, and the only one no host truncates at 2,048 characters.
+That still makes the response the robust default. It is no longer a claim that
+models read responses more carefully.
 
 ### 5 · Semantics carry behaviour — an instruction alone is inert
 
@@ -306,8 +313,8 @@ fact** — one threshold, one comparison, no arithmetic. And **`inline` is the
 cheapest arm as well as the best**, the first in this repo where quality and cost
 point the same way.
 
-> **A defect that prose "cannot fix" may just be prose in the wrong channel. Check
-> that before you write a computation.**
+> **A defect that prose "cannot fix" may just be prose that never arrived. Check
+> delivery before you write a computation.**
 
 The computed overheating alert was not wrong — it scores 20/20 — but it was the
 expensive fix to a defect that had a free one.
@@ -325,7 +332,42 @@ One line did everything the 5,020-character block did, and adding it made the ru
 cheaper, not dearer. The registered prediction was confirmed on all three criteria.
 
 > **Put the line that answers the question in the response. That is the whole rule,
-> on this question, on haiku.**
+> on this question, on haiku.** §10 adds the alternative: inside the first 2,048
+> characters of the description works equally well.
+
+### 10 · Delivered is delivered: the channel test, finally run
+
+**Q15 and Q15b, 120 runs, haiku, `overheating`, predictions registered beforehand, all
+seven confirmed.** The first comparison here of the same sentence *delivered* through
+each channel.
+
+| run | arm | where the 1.5 line reaches the model | correct | cited 1.5 |
+|---|---|---|---|---|
+| Q15, default cap | `words` | nowhere (past the cut) | 1/20 | 0/20 |
+| | `words-front` | description, char 330 | **20/20** | **20/20** |
+| | `inline-oneline` | response | **20/20** | **20/20** |
+| Q15b, cap raised to 20,000 | `words` (uncut) | description, whole block | **20/20** | **20/20** |
+| | `inline` | response, whole block | **20/20** | **20/20** |
+
+Three things follow:
+
+- **The channel is not the variable; delivery is.** A description sentence the host
+  actually sends is applied as often as the same sentence in the response. The
+  "description is tool-selection metadata the model under-applies" reading is falsified
+  on haiku for this line. A canary instruction in the same paragraph was obeyed 20/20.
+- **Volume did not drown it.** Uncut `words` puts the line inside ~37.6k characters of
+  tool definitions and still scores 20/20. But raising the cap ships every long
+  description on every request: **+23.7% tokens** against `inline` in that batch, almost
+  all of it other tools' descriptions.
+- **Delivered text also changes behaviour beyond the answer.** `words-front` made exactly
+  one call in every run; `words` made 39 in 20 runs, 19 of them weather detours.
+
+> **Get the sentence delivered: in the response, or inside the first 2,048 characters of
+> the description.** The response is the default because it does not depend on the host,
+> and nothing added above it later can push it out.
+
+Limits: haiku only, one question, and the description copy sat near the top (position is
+Q9). Files: [`results/2026-09-23-q15-delivered-description.json`](results/2026-09-23-q15-delivered-description.json), [`results/2026-09-23-q15b-uncapped-channel.json`](results/2026-09-23-q15b-uncapped-channel.json).
 
 ### The strongest single result
 
@@ -358,7 +400,9 @@ strong model safe.
   [`results/2026-09-22-variance-audit-of-prior-results.json`](results/2026-09-22-variance-audit-of-prior-results.json).
   Three claims are downgraded to direction-only; the rest hold. The weakest is
   *"the prose rung is the carrier on sonnet"*, whose supporting cell is the very
-  one the variance warning was built from.
+  one the variance warning was built from. **Re-baselined 2026-09-23 (RB1, n=20):** the
+  direction holds (`schema` 4/20, `words` 11/20), but the sentence it credited was never
+  delivered, so the mechanism is withdrawn. See [`results/2026-09-23-rb1-schema-words-total-vs-per-m2.json`](results/2026-09-23-rb1-schema-words-total-vs-per-m2.json).
 - **Self-reported call counts are not trustworthy on their own.** One run
   reported `CALLS: 3` against a server log that accounted for fewer. Every recent
   file reconciles against `get_tool_call_log` instead.

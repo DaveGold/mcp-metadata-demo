@@ -37,6 +37,11 @@ their predictions were **confirmed**: a description sentence that is DELIVERED i
 exactly as often as the same sentence in the response. That turns Q1/Q13/Q14's channel
 finding into a delivery finding.
 
+**Q8–Q12 were amended on 2026-09-23, before any of them ran.** Each amendment records which
+quoted numbers measured undelivered text. **Q10 is suspended**: its premise was absence.
+**Q11's main half is answered by accounting**: `outputSchema` never reaches the model on
+Claude Code. Q8 runs with the cap raised, and Q12 must deliver its description copy.
+
 Q13 asks whether the ALERTLESS tiers can be fixed at all, and all three of its
 predictions were falsified. **Read it together with Q7**: Q13 measured the same
 sentence at 0-of-20 use in the description against 20-of-20 in the response, and
@@ -91,12 +96,13 @@ can actually defend. It is narrower, and more useful, than "richer metadata is b
 | change | size of the change | effect |
 | --- | --- | --- |
 | Prune 37–50% of the INTERPRETATION to the record (Q2) | −1,600 to −2,200 chars | **no change.** 39/90 vs 39/90 |
-| Move the same 438 bytes DESCRIPTION → RESPONSE (Q1b) | 0 chars | **4/30 → 29/30** |
+| Move the same 438 bytes DESCRIPTION → RESPONSE (Q1b) | 0 chars | **4/30 → 29/30**, but the description copy was never delivered (Q7). Delivered in both channels, they tie (Q15/Q15b) |
 | Add ONE sentence that was missing (Q2 follow-up) | +682 chars | **0/60 → 59/60** |
 
 Cutting half the prose changed no answer. Adding one *right* sentence changed 59. The
-amount of metadata is close to irrelevant; *which* sentence, and *which channel*, is
-nearly everything.
+amount of metadata is close to irrelevant; *which* sentence, and *whether it is
+delivered*, is nearly everything. (Written as "which channel" until Q15/Q15b showed that
+a delivered description sentence scores like the response.)
 
 This also retires the cost framing. The INTERPRETATION block is ~1,100 tokens of a
 ~38,000-token subagent run — about 2%. No pruning of it can be "substantial", and the
@@ -190,8 +196,11 @@ reasoning invents a calorific value. Capability substitutes for metadata only wh
 quantity is already present. If the tool returns kWh and a caller will want m³, ship
 the conversion.
 
-**2. Put guidance in the RESPONSE, not the description.** 29/30 against 4/30 for the
-same 438 bytes. Free, and it helped all three models. If you change one thing, change
+**2. Make sure the guidance is DELIVERED — in the response, or inside the first 2,048
+characters of the description.** 29/30 against 4/30 for the same 438 bytes was delivered
+against absent (Q7). Delivered in both channels, the same line scores 20/20 either way
+(Q15/Q15b). Prefer the response: no host cut-off applies to it, and later edits above it
+cannot push it out. Free, and it helped all three models. If you change one thing, change
 this one.
 
 **3. Compute it server-side where the computation is determinate.** 78 of 78 across
@@ -208,7 +217,8 @@ one question where the correct call cannot be EXPRESSED without the parameter, a
 everywhere else. Cheap, so do it — but do not expect a schema to carry meaning.
 
 **6. Do not spend effort on volume.** Cutting 37–50% of the prose changed zero answers
-in 180.
+in 180. And adding it did not hurt: uncut `words` scored 20/20 with the line inside
+~37.6k characters of tool definitions (Q15b). It did cost tokens (+23.7%).
 
 ### The rule that outranks all six
 
@@ -1281,6 +1291,37 @@ n=10 = **60 runs**, one new arm to build and deploy.
 
 ---
 
+### AMENDED 2026-09-23 — after Q7, Q15 and Q15b, BEFORE ANY RUN
+
+> The prediction above is **not** reopened. This amendment records which numbers the
+> registration leans on that measured undelivered text, and fixes the decisions that
+> changes, before any arm is built or any run is spawned.
+
+**What the registration leaned on.** `words-recipe`'s **4/30** is the description arm, and
+its recipe sits at **char 6,781**, past the cut. It never reached the model (Q7). The
+reasoning bet that *"what separates 4/30 from 29/30 is not availability but the role"*.
+Q7 says it was availability, and Q15 says a delivered description sentence is applied as
+often as a response one. So the "role" story is already under pressure before Q8 runs.
+
+**Decisions, fixed now.**
+
+- **Run Q8 in a session started with `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=20000`.**
+  Otherwise the description arm measures truncation again. Under the raised cap
+  `words-recipe` delivers its recipe. `guidance-recipe` and `inline-recipe` carry minimal
+  descriptions, so the cap changes nothing for them. The volume confound is the one Q15b
+  measured (it did not fire).
+- **Verify delivery host-side before any run**, as in Q15b: no `[truncated]` in
+  `words-recipe`'s listing, and the recipe present.
+- **The registered thresholds stand**: `guidance-recipe` ≥ 25/30 confirms, ≤ 10/30
+  falsifies. The contrast "lands with the response arm, not the description arm" can no
+  longer be read off `words-recipe`'s old 4/30. The same-batch `words-recipe` cell is now
+  reported descriptively. After Q15, the expected picture is all three arms high, which
+  would say the guidance call works because it delivers, not because of its role.
+- **Unchanged and still the sharpest part:** whether the model makes the parameterless
+  call unprompted. No cap touches that.
+
+---
+
 ## Q9 — Position inside the response, and distance across turns
 
 > **REGISTERED 2026-09-22, BEFORE THE RUN.**
@@ -1354,6 +1395,32 @@ for. **Revise the prediction's threshold when it runs at this scale:** "within 2
 Position: 1 question × 2 arms × 1 model × n=10 = **20 runs**, one trivial arm.
 Distance: 3 distances × 1 arm × 1 model × n=10 = **30 runs**, no new arm, but it needs
 Q8's arm deployed first.
+
+---
+
+### AMENDED 2026-09-23 — after Q7, Q15 and Q15b, BEFORE ANY RUN
+
+> The prediction above is **not** reopened. This amendment records which numbers the
+> registration leans on that measured undelivered text, and fixes the decisions that
+> changes, before any arm is built or any run is spawned.
+
+**Mostly unaffected.** Both halves are response-channel and guidance-call designs. No
+host description cap touches a tool result.
+
+- **The weather question already delivers its rule in the response.** On
+  `weather-partial-normalization` the HDD-ratio rule's description copy sits at
+  **char ~4,048** of `get_weather_context`, past the cut. But the same rule also fires as a
+  computed `interpretation.alerts` line for every partial-period query, on every arm.
+  So the question never depended on the description, and no description-channel
+  comparison is available on it at the default cap. None is needed.
+- **The threshold revision the previous amendment deferred is resolved: no change.** The
+  metric is runs out of n, which does not depend on response size. Position: `inline-head`
+  within 2 of `inline` confirms, ≥ 3 apart falsifies. Distance: ≥ 5 lost between 0 and 3
+  intervening calls. n=10 per cell as registered.
+- **One more volume data point, for the reasoning only:** Q15b put the threshold line
+  inside ~37.6k characters of delivered tool definitions and it still scored 20/20. It
+  changes no threshold.
+- The distance half still needs Q8's arm, which should be deployed first.
 
 ---
 
@@ -1434,6 +1501,36 @@ verdict server-side — do not annotate your way out.** Either way, run the
 ### Cost
 
 3 questions × 2 arms × 2 models × n=10 = **120 runs**, one new arm to build and deploy.
+
+---
+
+### AMENDED 2026-09-23 — after Q7, Q15 and Q15b, BEFORE ANY RUN
+
+> The prediction above is **not** reopened. This amendment records which numbers the
+> registration leans on that measured undelivered text, and fixes the decisions that
+> changes, before any arm is built or any run is spawned.
+
+**The premise is void.** The registration's case rests on *"the threshold sentence is
+present in every prose arm, adjacent to the value, and every prose arm ignores it"*, and
+on Q6's 0/7. On this host that sentence was **never delivered** to any of those arms:
+`words` at char 6,181, `opaque-words`' `to` line at 3,105, and `rich` before the computed
+alert. *"In `words` it reaches the right field and then overrides the stated threshold"*
+is wrong: nothing was stated to it. Once the sentence is delivered, `overheating` is
+**20/20** on haiku through every channel tried: `inline` (Q13), `inline-oneline` (Q14),
+`words-front` (Q15) and uncut `words` (Q15b). "2 correct in 21" was absence, not disbelief.
+
+**Consequence: the registered falsifier is void by construction**, the same failure as
+7b. `inline-addressed` carries the same sentence in the response, so it would almost
+certainly score ~10/10 on `overheating`. That would trip "falsified if ≥ 7/10" for a
+reason that has nothing to do with structure: `inline`, with the same prose and no
+structure, is already 20/20. The other two questions are no better. `benchmark-trap` is
+at 59/60 for the response arms, and `gas-estimate` is at ceiling on the recipe arms.
+
+**Decision, fixed now: Q10 is SUSPENDED, not run and not built.** `relates_to_fields` can
+only be tested on a question where a response-channel arm that *delivers* the sentence
+still fails, and the set has none. The prediction stays as registered. Its status is
+*untestable on the current set*, not confirmed and not falsified. Q10 comes out of first
+place in *Suggested order* below.
 
 ---
 
@@ -1569,6 +1666,54 @@ provide.
 
 ---
 
+### AMENDED 2026-09-23 — after Q7, Q15 and Q15b, BEFORE ANY RUN
+
+> The prediction above is **not** reopened. This amendment records which numbers the
+> registration leans on that measured undelivered text, and fixes the decisions that
+> changes, before any arm is built or any run is spawned.
+
+**The main half is answered on this host by accounting, and running it would measure
+absence.** This was checked before any Q11 arm exists. The request-1 input on disk for
+`eval-thin` against `eval-schema` answers it. The two arms have byte-identical
+descriptions (276 chars in total). Their `outputSchema`s differ by **7,659 characters**
+(8,706 vs 16,365 as JSON), and their input schemas by 486. Median request-1 input:
+
+| model | `thin` | `schema` | Δ tokens |
+|---|---|---|---|
+| haiku | 17,271 (n=45) | 17,452 (n=36) | **+181** |
+| sonnet | 22,297 (n=28) | 22,633 (n=56) | **+336** |
+| opus | 22,270 (n=29) | 22,491 (n=36) | **+221** |
+
+7,659 characters of JSON would be well over 1,500 tokens. The observed +181 to +336 is
+about the size of the input-schema difference alone. So **`outputSchema` is not in the
+model-facing request on Claude Code.** That fits the Messages API tool format, which has
+no output-schema field. The root README's *"the model never sees this"* is therefore
+**measured true for this host**. Other hosts are not measured. Limit: medians pool
+sessions, so this is accounting evidence, not a capture of the request body.
+
+**Decisions, fixed now.**
+
+- **`schema-semantic` is not built for Claude Code.** Its prediction ("behaves like
+  `thin`") would hold by construction, as 7b would have failed by construction. Q11's main
+  half is recorded as *answered by accounting on this host*. The registered run is void
+  here and would only mean something on a host that forwards `outputSchema`.
+- **The falsifier's comparator was also invalid:** *"within 3 of `words`"* compares with
+  `words` numbers measured on a cut description.
+- **`select-blind` stays, and must be built off `minimal`, not off a prose arm.** Input
+  schemas are sent. The `select` field list is 430 characters, far under any cut. But the
+  delivered first 2,048 characters of the full weather description already name
+  `weatherLabel` (char 296), `tempMax` (1,018), `tempMin` (1,475) and `weightedHdd` (237).
+  A prose arm with the input list removed is not blind. With `outputSchema` shown absent,
+  the registered falsifier ("≥ 8/10 valid names means `outputSchema` reaches the model")
+  can only fire if names leak from somewhere else, and that is what would be reported.
+- **The meanings half: check each sentence's position before scoring.** Delivered in the
+  prose description: the fighting-system rule (char ~1,441) and the `weightedHdd` name
+  (237). Past the cut: the seasonal-weight convention (×1.1, char ~4,531). A prose arm's
+  `select-wrong-degree-day` result must be read with the convention absent, unless run
+  with the cap raised.
+
+---
+
 ## Q12 — A second domain
 
 > **REGISTERED 2026-09-22. THE GATE, NOT AN EXPERIMENT.**
@@ -1614,6 +1759,35 @@ Q1's shape, nothing more.
 
 1 question × 2 arms × 2 models × n=10 = **40 runs**, plus the work of writing a second
 domain's ground truth — which is the real cost, and the reason this is last.
+---
+
+### AMENDED 2026-09-23 — after Q7, Q15 and Q15b, BEFORE ANY RUN
+
+> The prediction above is **not** reopened. This amendment records which numbers the
+> registration leans on that measured undelivered text, and fixes the decisions that
+> changes, before any arm is built or any run is spawned.
+
+**The registered falsifier no longer localises anything.** *"Falsified if the description
+arm matches or beats the response arm. That would localise the entire finding to this
+domain."* Q15 and Q15b have now shown the description arm **matching** the response arm
+*in this domain*, whenever the description delivers the sentence. So a tie in a second
+domain would replicate Q15, not localise Q1.
+
+**Decisions, fixed now.**
+
+- **Delivery is verified host-side for both arms before any run**, as in Q15. It is
+  reported per arm: where the guidance sits relative to char 2,048, and whether the
+  listing shows it.
+- **The description copy goes inside the first 2,048 characters** (or the run uses a
+  raised-cap session). Otherwise Q12 replicates the truncation, not the channel.
+  Production descriptions are mostly longer than 2,048 (MCPSER-87 counts ~60 of 88), so
+  an as-shipped description arm would naturally test absence. If that is wanted, it is a
+  third arm, labelled as such.
+- **The prediction stands as registered**: response wins by less than 4/30 → 29/30.
+  Stated plainly: after Q15 the expected outcome with both copies delivered is a tie,
+  which this registration scores as **falsified**. That is recorded now, before the run,
+  so a tie is not later read as a surprise.
+
 ---
 
 ## Q13 — Can the ALERTLESS tiers be fixed at all? Prose in the RESPONSE vs computation
@@ -2315,7 +2489,10 @@ failure mode uncovered.
    and 20 runs — and it decides how every other result in this file may be worded. If the
    description turns out to be present and read, "weakened" and "forgot" come out of the
    prose and the claim gets stronger, not weaker.
-2. **Q10 next.** The highest-value open question now that Q4 has landed: it is the only
+2. **~~Q10 next.~~ SUSPENDED 2026-09-23** (see its amendment): once delivered,
+   `overheating` is 20/20 through every channel, so no question in the set is left for
+   `relates_to_fields` to fix. **Q8 moves up to next**, run with the cap raised.
+   *Superseded text follows.* **Q10 next.** The highest-value open question now that Q4 has landed: it is the only
    untried mechanism aimed at this repo's most stubborn failure — 2 correct in 21 on
    `overheating`, with both prose and renaming already falsified (Q5, Q6) — and it is
    registered as a null, so a win would be the surprise and a loss retires a fashionable
@@ -2323,7 +2500,9 @@ failure mode uncovered.
 3. **Q8, then Q9's distance half.** Q8 builds the arm that Q9's distance protocol needs,
    so one deploy serves both. Q9's position half (`inline-head`) can ride along with
    anything; it is a one-line arm.
-4. **Q11 whenever there is spare batch capacity.** Cheap, and it tests an assertion the
+4. **Q11: the main half is answered by accounting on this host (see its amendment); only
+   `select-blind` (built off `minimal`) and the meanings half remain.**
+   *Superseded text follows.* **Q11 whenever there is spare batch capacity.** Cheap, and it tests an assertion the
    root `README.md` currently states as fact.
 5. **Q12 last, and only if Q7–Q10 hold.** A second domain is the gate on generalising,
    not a way to learn more about this one.
