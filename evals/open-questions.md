@@ -2197,6 +2197,20 @@ within its own batch.
 
 ## RB1 — Re-baseline: `schema` → `words` on `total-vs-per-m2`, sonnet
 
+> **RUN 2026-09-23 — DIRECTION ONLY. The prediction is neither confirmed nor falsified.** See
+> [`results/2026-09-23-rb1-schema-words-total-vs-per-m2.json`](results/2026-09-23-rb1-schema-words-total-vs-per-m2.json).
+> `schema` **4/20**, `words` **11/20**: a gap of 7, inside the registered 4–7 band. The NULL did
+> not hold, and the falsifier (≥ 8) did not fire. Every miss led with 2,859 (the BAG 100 m²);
+> no run reported 28.59 as the total. Same model ID as 2026-09-21 (`claude-sonnet-5`). Audit
+> exact, 41/41.
+>
+> **What it does to the quoted claim.** The direction (`words` above `schema` on sonnet) now
+> reproduces in two same-batch runs. The mechanism the old file gave (*the thermal-zone
+> sentence carries it*) is **withdrawn**, because that sentence was never delivered. Whatever
+> moves sonnet is in the first 2,048 characters. Candidates are QUERY STRATEGY 5's
+> "VBO-level" sentence and the NTA 8800 bullet naming `gebruiksoppervlakte`; this run does
+> not isolate which. The size is still not quotable (8/10, 2/10, 11/20 across three sittings).
+
 > **REGISTERED 2026-09-23, BEFORE ANY RUN.** The first re-baseline Q7's `what_this_changes`
 > asks for. It is not a new question: it re-measures the one `schema → words` gap this
 > repo quoted as "the prose is the carrier", now that Q7 has shown what `words` actually
