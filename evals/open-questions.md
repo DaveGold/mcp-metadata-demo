@@ -3118,6 +3118,23 @@ RULE as `interpretation.guidance`. They differ ONLY in what the server adds to
 
 **Cost:** 60 runs, two new arms.
 
+### Q16b — Does shipping the data also save the STRONG models work? Registered 2026-09-23, BEFORE the run
+
+On `weather-single-quarter` sonnet and opus were already correct from the rule alone, but
+they paid for it: 4–11 (sonnet) and 6–31 (opus) extra weather calls to build a reference
+quarter themselves (Q12). If the server ships that reference, the fix Q16 found for haiku
+should be a **cost** fix for the models actually in use.
+
+- **Run:** the same three arms (`q10-prose`, `q16-ref`, `q16-computed`), `weather-single-quarter`,
+  **sonnet and opus, n=10 per cell**, 60 runs, default cap.
+- **Measured:** correctness (scored as Q16); per run `tool_uses`, `subagent_tokens` and
+  `duration_ms` from the harness, and weather calls from the transcript.
+- **P1:** correctness stays high in every arm, ≥ 8/10 per cell. Falsified if any cell ≤ 6/10.
+- **P2:** `q16-ref` cuts median `tool_uses` and median `subagent_tokens` against `q10-prose` by
+  ≥ 30% on both models. Falsified if either median falls by < 10% on either model.
+- **P3:** `q16-computed` is within 10% of `q16-ref` on both medians (the finished factor saves
+  nothing further).
+
 ## Q17 — Does addressing help when the relevant rule is ONE AMONG A HUNDRED?
 
 > **ANSWERED 2026-09-23 — no, and 100 rules did not hurt either. All three predictions
