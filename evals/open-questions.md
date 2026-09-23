@@ -2746,7 +2746,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**. Q16 ✓ (fetching is the barrier): **twelve of twenty**. Q17 ✓ (volume inert, addressing null): **twelve of twenty-one**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**. Q16 ✓ (fetching is the barrier): **twelve of twenty**. Q17 ✓ (volume inert, addressing null): **twelve of twenty-one**. Q16b (not falsified): **twelve of twenty-two**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -3119,6 +3119,22 @@ RULE as `interpretation.guidance`. They differ ONLY in what the server adds to
 **Cost:** 60 runs, two new arms.
 
 ### Q16b — Does shipping the data also save the STRONG models work? Registered 2026-09-23, BEFORE the run
+
+> **ANSWERED 2026-09-23 — yes: same accuracy, a fraction of the work.** See
+> [`results/2026-09-23-q16b-strong-models-cost.json`](results/2026-09-23-q16b-strong-models-cost.json). Audit exact, 210/210.
+>
+> | | tool calls (median) | tokens | wall time | answer |
+> |---|---|---|---|---|
+> | sonnet, rule only | 7 | 53.1k | 65 s | 4,490–4,800 |
+> | sonnet + reference | **1** (−86%) | **40.7k** (−23%) | **16 s** (−75%) | **4,675**, 10/10 |
+> | opus, rule only | 7.5 | 52.2k | 36 s | 4,670–4,970 |
+> | opus + reference | **1** (−87%) | **39.9k** (−24%) | **10.6 s** (−71%) | **4,675**, 10/10 |
+>
+> All six cells were 10/10 correct. P1 and P3 are **confirmed**. P2 is **partial**: calls fell
+> far past the 30% bar, tokens only 23–24%. The haiku fix is a cost and consistency fix for
+> sonnet and opus.
+>
+> The last three throwaway arms (`mcpQ10Prose`, `mcpQ16Ref`, `mcpQ16Computed`) were deleted afterwards (2026-09-23; code in git history). No research arms from this round remain deployed.
 
 On `weather-single-quarter` sonnet and opus were already correct from the rule alone, but
 they paid for it: 4–11 (sonnet) and 6–31 (opus) extra weather calls to build a reference

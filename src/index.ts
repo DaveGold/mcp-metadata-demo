@@ -26,8 +26,5 @@ export {
   mcpOpaque,
   mcpOpaqueWords,
   mcpGuidanceRecipe,
-  mcpQ10Prose,
-  mcpQ16Ref,
-  mcpQ16Computed,
 } from './functions.js';
 export { createServer } from './server.js';

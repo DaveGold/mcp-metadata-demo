@@ -66,18 +66,6 @@
     "eval-g-recipe": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpGuidanceRecipe"
-    },
-    "eval-q10a": {
-      "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ10Prose"
-    },
-    "eval-q16b": {
-      "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ16Ref"
-    },
-    "eval-q16c": {
-      "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ16Computed"
     }
   }
 }
