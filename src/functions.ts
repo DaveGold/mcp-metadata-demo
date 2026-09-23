@@ -118,3 +118,14 @@ export const mcpWords = onRequest(functionOptions, createHttpApp({ hosted: true,
  */
 export const mcpOpaque = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'opaque' }));
 export const mcpOpaqueWords = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'opaque-words' }));
+
+/**
+ * Q8 arm — the GUIDANCE-CALL channel. The DERIVED FIGURES recipe comes back from a
+ * no-argument call, before any data exists; lookups carry no prose. The third
+ * channel beside `mcpWordsRecipe` (description) and `mcpInlineRecipe` (response).
+ * See open-questions.md Q8.
+ */
+export const mcpGuidanceRecipe = onRequest(
+  functionOptions,
+  createHttpApp({ hosted: true, variant: 'guidance-recipe' })
+);

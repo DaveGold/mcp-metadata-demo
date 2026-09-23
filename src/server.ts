@@ -18,6 +18,7 @@ import { registerGetBuildingProfileMinimalTool } from './tools/get-building-prof
 import { registerGetBuildingProfileWordsTool } from './tools/get-building-profile-words.js';
 import { registerGetBuildingProfileInlineTool } from './tools/get-building-profile-inline.js';
 import { registerGetBuildingProfileInlineOnelineTool } from './tools/get-building-profile-inline-oneline.js';
+import { registerGetBuildingProfileGuidanceTool } from './tools/get-building-profile-guidance.js';
 import { registerGetBuildingProfileInlineConditionalTool } from './tools/get-building-profile-inline-conditional.js';
 import { registerGetBuildingProfileInlineAblationTool } from './tools/get-building-profile-inline-ablation.js';
 import { registerGetBuildingProfileSchemaTool } from './tools/get-building-profile-schema.js';
@@ -71,7 +72,8 @@ export type ServerVariant =
   | 'schema'
   | 'minimal'
   | 'opaque'
-  | 'opaque-words';
+  | 'opaque-words'
+  | 'guidance-recipe';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -210,6 +212,25 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerGetBuildingProfileInlineTool(server, bagClient, epOnlineClient, {
       withRecipe: variant === 'inline-recipe',
     });
+    registerRenderChartTool(server, { minimal: true });
+    registerRenderTableTool(server, { minimal: true });
+    registerRenderMapTool(server, { minimal: true });
+    registerGetWeatherContextTool(server, { minimal: true });
+    registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
+  if (variant === 'guidance-recipe') {
+    // Q8. The GUIDANCE-CALL channel: the DERIVED FIGURES recipe is returned by a
+    // no-argument call, before any data; lookups return data with no prose. Same
+    // bare instructions and minimal neighbours as `inline-recipe`, so the recipe's
+    // channel is the variable. Its server name avoids the word "guidance", which
+    // would sit next to the behaviour being measured.
+    const server = new McpServer(
+      { name: 'metadata-demo-g-recipe', version: VERSION },
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+    );
+    registerGetBuildingProfileGuidanceTool(server, bagClient, epOnlineClient);
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
