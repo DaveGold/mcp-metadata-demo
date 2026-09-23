@@ -233,6 +233,8 @@ export const partialPeriodNote =
   'For same-period year-over-year comparison, use the HDD ratio directly: ' +
   'normalizedEnergy = actualEnergy × (periodHDD_referenceYear / periodHDD_thisYear).';
 export type Q12Rule = 'none' | 'description' | 'response';
+/** open-questions.md Q10 (reopened): the same RULE in the response, as prose / addressed / addressed + triggered. */
+export type Q10Form = 'prose' | 'addressed' | 'triggered';
 
 // ── Input schema ──────────────────────────────────────────────────────────────
 
@@ -743,7 +745,7 @@ export async function executeWeatherQuery(args: Record<string, unknown>): Promis
 
 export function registerGetWeatherContextTool(
   server: McpServer,
-  opts: { minimal?: boolean; q12Rule?: Q12Rule } = {}
+  opts: { minimal?: boolean; q12Rule?: Q12Rule; q10Form?: Q10Form } = {}
 ): void {
   const baseDescription = opts.minimal ? minimalDescription : description;
   server.registerTool(
@@ -776,12 +778,25 @@ export function registerGetWeatherContextTool(
           interpretation.alerts.push(...selected.alerts);
         }
 
-        if (opts.q12Rule) {
-          // Q12: no computed text may carry the rule, in any of its three arms.
+        if (opts.q12Rule || opts.q10Form) {
+          // Q12 / Q10: no computed text may carry the rule, in any arm.
           interpretation.alerts = interpretation.alerts.map((a) => a.replace(partialPeriodNote, ''));
         }
-        const interp =
+        let interp: Record<string, unknown> =
           opts.q12Rule === 'response' ? { ...interpretation, guidance: partialPeriodRule } : interpretation;
+        if (opts.q10Form) {
+          const p = (summary as { period: { dateFrom: string; dateTo: string; days: number } }).period;
+          const edge = { relates_to_fields: ['summary.degreeDays.gasNormalizationFactor'], meaning: partialPeriodRule };
+          const trigger =
+            p.days < 330 ? `requested period is ${p.days} days (${p.dateFrom} to ${p.dateTo}), not a full calendar year` : null;
+          const guidance =
+            opts.q10Form === 'prose'
+              ? partialPeriodRule
+              : opts.q10Form === 'addressed' || !trigger
+                ? [edge]
+                : [{ relates_to_fields: edge.relates_to_fields, triggered_by: trigger, meaning: partialPeriodRule }];
+          interp = { ...interpretation, guidance };
+        }
         const output = { recordCount: records.length, summary, records: outputRecords, interpretation: interp };
 
         await logToolCall({ args, start, status: 'success', rowCount: records.length });

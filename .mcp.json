@@ -78,6 +78,18 @@
     "eval-wx3": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpWxResp"
+    },
+    "eval-q10a": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ10Prose"
+    },
+    "eval-q10b": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ10Addressed"
+    },
+    "eval-q10c": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ10Triggered"
     }
   }
 }
