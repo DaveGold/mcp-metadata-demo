@@ -135,3 +135,9 @@ export const mcpGuidanceRecipe = onRequest(
  * Kept for Q9's distance half. (Its sibling `mcpGuidanceTool` was deleted after Q8b.)
  */
 export const mcpGuidanceStrong = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'guidance-strong' }));
+
+/**
+ * Q9 position arm — THROWAWAY. `mcpInline` with `interpretation` emitted as the first
+ * key of every response instead of the last. See open-questions.md Q9.
+ */
+export const mcpInlineHead = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'inline-head' }));

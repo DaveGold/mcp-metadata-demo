@@ -725,7 +725,12 @@ export async function executeWeatherQuery(args: Record<string, unknown>): Promis
 
 // ── Tool registration ─────────────────────────────────────────────────────────
 
-export function registerGetWeatherContextTool(server: McpServer, opts: { minimal?: boolean } = {}): void {
+// `interpretationFirst` is Q9's `inline-head` arm: the same keys and bytes, with
+// `interpretation` emitted BEFORE the records instead of after them.
+export function registerGetWeatherContextTool(
+  server: McpServer,
+  opts: { minimal?: boolean; interpretationFirst?: boolean } = {}
+): void {
   server.registerTool(
     'get_weather_context',
     {
@@ -756,7 +761,9 @@ export function registerGetWeatherContextTool(server: McpServer, opts: { minimal
           interpretation.alerts.push(...selected.alerts);
         }
 
-        const output = { recordCount: records.length, summary, records: outputRecords, interpretation };
+        const output = opts.interpretationFirst
+          ? { interpretation, recordCount: records.length, summary, records: outputRecords }
+          : { recordCount: records.length, summary, records: outputRecords, interpretation };
 
         await logToolCall({ args, start, status: 'success', rowCount: records.length });
 

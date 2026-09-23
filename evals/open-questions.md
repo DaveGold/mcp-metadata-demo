@@ -1586,6 +1586,50 @@ host description cap touches a tool result.
 
 ---
 
+### BUILD NOTES, fixed 2026-09-23 — after the arms were built, BEFORE ANY RUN
+
+**Model: haiku** for both halves (the registration says "1 model"). It is the model most
+exposed to both effects, and after Q8b it reliably makes the guidance call.
+
+**Position half — `inline-head` vs `inline`, `weather-partial-normalization`, n=10 each.**
+
+- **`inline-head`** is `inline` byte for byte (tools/list, instructions, server name, payload
+  content), except `interpretation` is emitted as the **first** JSON key of both the building
+  and the weather response instead of the last. Four tests pin this, and the weather order
+  is checked on the wire.
+- **The guidance the question needs reaches both arms only through the response.** The
+  weather description is the 87-char minimal one. The HDD-ratio rule and the
+  `gasNormalizationFactor` warning arrive as computed `interpretation.alerts` lines for any
+  partial-period query.
+- **The distance risk, stated before the run.** The question needs two quarterly calls. The
+  model chooses the payload: `summaryOnly` gives ~1.3k chars with nothing to sit "before",
+  full records give ~90 daily rows (~18k chars). So position can only matter in runs that
+  fetch records. Response size and `summaryOnly`/`select` are recorded per call. The position
+  effect is reported overall and for record-fetching runs. **If fewer than 5 runs per arm
+  fetch records, the position half is reported as *not measured at scale*.**
+- **Scoring:** as the question pins it. Correct = 4,434 ± 60 m³ (the plain-HDD road, ~4,451,
+  is also inside). Route is mandatory: weightedHDD / HDD / gasNormalizationFactor / none, and
+  a gasNormalizationFactor answer (~10,626) is confidently wrong. Fabrication per its watch.
+- **Thresholds as registered:** within 2 of 10 confirms, ≥ 3 apart falsifies.
+
+**Distance half — `guidance-strong`, `gas-estimate`, n=10 per distance, d ∈ {0, 1, 3}.**
+
+- **d=0** is the plain `eval-guidance-strong` agent (Q8b: 10/10 called, 10/10 correct).
+  **d=1 / d=3** are the same agent plus ONE protocol paragraph: after the first tool call,
+  call `get_weather_context` exactly N times for Amsterdam, full year 2024, no other
+  arguments. Each such response is ~73k chars (~18k tokens) of daily records. So the recipe
+  from the guidance call sits ~18k or ~55k tokens before the lookup it must be applied to.
+- **Confound, stated:** d=1/d=3 have a longer system prompt than d=0. A d=0 agent with a
+  zero-call protocol sentence would be stranger, not cleaner.
+- **Order is recorded, not assumed.** If a run does not make the guidance call first, or
+  makes a different number of weather calls, it is scored on its ACTUAL distance and flagged.
+- **Scoring as Q8.** Registered: "≥ 5 lost between 0 and 3" confirms. **"Flat", left
+  undefined at registration, is fixed now: falsified if d=3 is within 2 of d=0.** A loss of
+  3–4 is partial.
+- The session cap is left at the default: every arm here carries minimal descriptions.
+
+**Cost:** 20 + 30 = 50 runs. One new arm (`mcpInlineHead`), two agent files.
+
 ## Q10 — Field addressability: can `relates_to_fields` beat a misleading name?
 
 > **REGISTERED 2026-09-22, BEFORE THE RUN. This is the one this repo already has
