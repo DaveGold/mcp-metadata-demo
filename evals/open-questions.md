@@ -91,12 +91,13 @@ can actually defend. It is narrower, and more useful, than "richer metadata is b
 | change | size of the change | effect |
 | --- | --- | --- |
 | Prune 37–50% of the INTERPRETATION to the record (Q2) | −1,600 to −2,200 chars | **no change.** 39/90 vs 39/90 |
-| Move the same 438 bytes DESCRIPTION → RESPONSE (Q1b) | 0 chars | **4/30 → 29/30** |
+| Move the same 438 bytes DESCRIPTION → RESPONSE (Q1b) | 0 chars | **4/30 → 29/30**, but the description copy was never delivered (Q7). Delivered in both channels, they tie (Q15/Q15b) |
 | Add ONE sentence that was missing (Q2 follow-up) | +682 chars | **0/60 → 59/60** |
 
 Cutting half the prose changed no answer. Adding one *right* sentence changed 59. The
-amount of metadata is close to irrelevant; *which* sentence, and *which channel*, is
-nearly everything.
+amount of metadata is close to irrelevant; *which* sentence, and *whether it is
+delivered*, is nearly everything. (Written as "which channel" until Q15/Q15b showed that
+a delivered description sentence scores like the response.)
 
 This also retires the cost framing. The INTERPRETATION block is ~1,100 tokens of a
 ~38,000-token subagent run — about 2%. No pruning of it can be "substantial", and the
@@ -190,8 +191,11 @@ reasoning invents a calorific value. Capability substitutes for metadata only wh
 quantity is already present. If the tool returns kWh and a caller will want m³, ship
 the conversion.
 
-**2. Put guidance in the RESPONSE, not the description.** 29/30 against 4/30 for the
-same 438 bytes. Free, and it helped all three models. If you change one thing, change
+**2. Make sure the guidance is DELIVERED — in the response, or inside the first 2,048
+characters of the description.** 29/30 against 4/30 for the same 438 bytes was delivered
+against absent (Q7). Delivered in both channels, the same line scores 20/20 either way
+(Q15/Q15b). Prefer the response: no host cut-off applies to it, and later edits above it
+cannot push it out. Free, and it helped all three models. If you change one thing, change
 this one.
 
 **3. Compute it server-side where the computation is determinate.** 78 of 78 across
@@ -208,7 +212,8 @@ one question where the correct call cannot be EXPRESSED without the parameter, a
 everywhere else. Cheap, so do it — but do not expect a schema to carry meaning.
 
 **6. Do not spend effort on volume.** Cutting 37–50% of the prose changed zero answers
-in 180.
+in 180. And adding it did not hurt: uncut `words` scored 20/20 with the line inside
+~37.6k characters of tool definitions (Q15b). It did cost tokens (+23.7%).
 
 ### The rule that outranks all six
 
