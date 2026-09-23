@@ -1,0 +1,38 @@
+// get_building_profile: INTERPRETATION block of the tool description
+INTERPRETATION:
+Which fields are populated depends on the berekeningstype:
+- NTA 8800 (labels issued after Dec 2021): ep1, ep2, aandeel_hernieuwbaar, warmtebehoefte, compactheid, gebruiksoppervlakte populated. energie_index = null. EMG forfaitair populated for utiliteitsbouw only (null for woningbouw). sbi_code = null.
+- NEN 7120 / ISSO 75.3 (commercial buildings, labels before Dec 2021): energie_index populated; ep1/ep2/warmtebehoefte = null. berekend_energieverbruik inflated (200–1200+ kWh/m²). EMG forfaitair = null. sbi_code = full-text sector description.
+- Nader Voorschrift (residential labels before 2021): energie_index populated. CRITICAL: berekend_energieverbruik and co2_emissie use DIFFERENT UNITS — values of 80,000–100,000 are MJ total building, NOT kWh/m². Do NOT benchmark.
+- BENG eisen (eis_*): only for new-build BENG certification permits. Almost always null for existing buildings.
+- gebouwtype/gebouwsubtype: only populated for Woningbouw (residential). Null for all Utiliteitsbouw.
+- matchStatus 'exact': single VBO found, high confidence
+- matchStatus 'multiple_vbos': multiple verblijfsobjecten at this address. Profile shows the first match — use huisletter/toevoeging to target a specific unit.
+- matchStatus 'not_found': no BAG match — check postcode format (4 digits + 2 uppercase letters) and huisnummer
+- energielabel null: no registered label in EP-Online (common for older or unlabeled buildings)
+- ep1_energiebehoefte_kwh_m2 (NTA 8800 only): Paris Proof 2040 targets — kantoor: 70 kWh/m², woningbouw: 100 kWh/m². No standardized target for onderwijs, gezondheidszorg, industrie.
+- CALCULATED vs MEASURED — ep1_energiebehoefte, ep2_fossiel and berekend_energieverbruik are all CALCULATED NTA 8800 figures, not meter readings: ep1 is net energy DEMAND, ep2 is PRIMARY FOSSIL energy, berekend is modelled total use. Paris Proof and other metered benchmarks are defined on MEASURED FINAL energy at the meter, and this server holds NO metered data, so none of these three can be ranked against such a target as though it were measured consumption — the unit (kWh/m²) matches and the quantity does not. Where a question asks how a building compares to a metered benchmark, say that the comparison cannot be made from this data and why, rather than producing a ratio.
+- energie_index (pre-NTA 8800): the main performance metric for most existing buildings. EI < 1.2 = A or better; 1.4–1.8 = C; >2.7 = G. No Paris Proof kWh/m² equivalent.
+- gebruiksoppervlakte_thermische_zone_m2 (NTA 8800 only) vs oppervlakte_m2 (BAG): two different scopes, not two measurements of the same thing. BAG = gross floor area of the verblijfsobject; EP-Online = usable floor area of the thermal zone the label covers. The EP-Online figure is often the lower of the two, but when the label covers a whole pand and the VBO is one unit of it, it can be far higher (Gustav Mahlerlaan 10: 118,174 m² EP-Online vs 66,581 m² BAG). Use the EP-Online area as the denominator for every per-m² NTA value (EP-1, EP-2, warmtebehoefte, co2_emissie), and never assume a fixed ratio between the two.
+- label_geldig_tot in the past: label expired, heropname may be needed for Label C obligation compliance
+- op_basis_van_referentiegebouw = true: label is based on a reference building calculation (less accurate)
+- vbo_status not "Verblijfsobject in gebruik": building may be vacant/demolished — verify analysis relevance
+- sbi_code: full-text sector description — NOT a numeric SBI code. Present for ISSO 75.3/NEN 7120 labels (SBI is an input to those methods). Usually null for NTA 8800 labels.
+- ep2_fossiel_emg_forfaitair_kwh_m2 vs ep2_fossiel_kwh_m2: delta shows how standardized forfaitaire area-bound factors compare to the actual calculation. Delta can go EITHER direction.
+- aandeel_hernieuwbaar_emg_forfaitair_pct (NTA 8800 utiliteitsbouw only) can be LOWER than aandeel_hernieuwbaar_pct when the building has on-site renewables not captured in the standardized forfaitaire measures.
+- ep_online_bouwjaar vs bouwjaar: discrepancy may indicate renovation or partial rebuild.
+- co2_emissie_kg_m2 unit depends on berekeningstype: NTA 8800 = kg CO₂/m²/year (comparable across buildings); Nader Voorschrift (residential) = kg CO₂/year TOTAL building, NOT per m² (values of 3,000–5,000 for a 79 m² house confirm this) — do not benchmark per m².
+- warmtebehoefte_kwh_m2 (net heat demand): the key input for heat pump sizing.
+- temperatuuroverschrijding (TOjuli/GTO overheating-risk indicator): 0 = no risk, 0–1.5 = minor risk, >1.5 = significant overheating. Relevant for cooling load and heat pump sizing.
+- compactheid (Als/Ag = loss surface area / usable floor area): lower = more compact = less heat loss per m².
+- soort_opname: "Basisopname" = standard site visit, "Detailopname" = detailed measurement (more accurate). Null = pre-NTA 8800 label or no label.
+- gebouwtype/gebouwsubtype refinements (e.g. hoek/boven) lose more heat than tussen/midden variants — refines the heat-loss estimate for residential buildings.
+
+// get_weather_context: INTERPRETATION block of the tool description
+INTERPRETATION:
+- isForecast per day = MEASURED (archive) vs FORECAST (predicted). Forecast days are fine for a planning outlook (icon + temperature) but are excluded from degree-days, gasNormalizationFactor and solar totals — those summary aggregates cover the measuredDays only. Never normalize energy against a forecast day.
+- weatherCode is the raw WMO code; prefer weatherLabel (Dutch, "Onbekend" if the code is missing) for display.
+- gasNormalizationFactor = 2800 / totalWeightedHDD. The Dutch long-term average year has ~2800 weighted HDD. A cold year (factor < 1.0) means raw energy use looks high — but that's expected. A warm year (factor > 1.0) means raw energy use looks low. Formula: normalizedHeatingEnergy = actualHeatingEnergy × gasNormalizationFactor. IMPORTANT: gasNormalizationFactor is only valid for full-year (Jan 1–Dec 31) queries. For partial-period year-over-year comparison, use the HDD ratio directly: normalizedEnergy = energy × (refPeriodHDD / thisPeriodHDD).
+- GHI (global horizontal irradiance) in kWh/m² = Peak Sun Hours (PSH) for the period. Expected solar yield = totalGHI_kWhM2 × installedKwp × performanceRatio (0.75–0.85 for healthy panels). If actual production < 70% of expected yield → investigate: inverter issue, soiling, shading, curtailment.
+- Dutch weighted HDD seasonal factors: Nov–Feb ×1.1, Mar/Oct ×1.0, Apr–Sep ×0.8. These account for solar gain: in summer, the sun provides heat gain that partially offsets heating demand.
+- select: when requested, records are projected to only the named fields. Unknown field names are ignored (with an alert naming them, valid fields listed). If none of the requested fields are valid, zero records are returned — select never silently falls back to full records.

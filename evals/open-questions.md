@@ -3264,6 +3264,98 @@ char 3,105 and was never delivered.
 - **Stated confound:** uncut `words` also carries ~30k chars of render/weather descriptions.
   Q15b found that did not hurt.
 
+## Q18 — Does an IMPROVING agent edit better from field-keyed semantics? Registered 2026-09-23, BEFORE any run
+
+Design guidance 2c recommends keeping the source of all semantics as
+`{ relates_to_fields, meaning, provenance }`. The reason given is the authoring side, not
+runtime: Q10 and Q17 found that the form of a delivered rule does not matter to the
+answering model. 2c's claim is marked *unmeasured*. This measures it.
+
+**Design-time, not runtime.** No MCP server is involved. Each run is one headless
+`claude -p` call with no tools, no settings and no MCP config, from an empty directory.
+It gets the output-field list of both data tools, the semantics source in one of three
+forms, and one improvement-loop task. It must answer from that material alone. The
+fixture, the tasks and the harness are frozen in [`q18/`](q18/) before the first run:
+- `rules.json` holds the real `get_building_profile` and `get_weather_context`
+  INTERPRETATION bullets, verbatim. Their `relates_to_fields` are hand-labelled, and their
+  provenance comes from git history where history recorded one; otherwise it says the reason
+  was not recorded.
+- The 80 padding rules are the non-building distractors frozen for Q17.
+- `tasks.json` holds the tasks and `q18.py` the harness.
+
+**Arms** (content identical, only rendering differs):
+
+| arm | form |
+|---|---|
+| **A** prose | the INTERPRETATION bullets as the repo has them today. No field list, no provenance. |
+| **B** structured | one `{ tool, relates_to_fields, meaning, provenance }` record per rule |
+| **C** prose, same content | A's bullets, each followed by B's field list and provenance written as sentences |
+
+B vs C isolates **form**. C vs A isolates **content**: explicit field links plus history.
+
+**Sizes:** `small` has the 32 real rules. `large` adds the 80 padding rules, 112 in all,
+which is the ceiling check.
+
+**Tasks** (ground truth by rule id; T2 and T3 are computed from `relates_to_fields`):
+- **T1, attribution** (4 failing traces): which field the failure points at, whether a rule
+  already covers it, and whether to edit or add. One trace (T1b, the survey-date fields) has
+  no covering rule.
+- **T2, orphans** (3 schema changes): list every rule to update. T2a renames
+  `gebruiksoppervlakte_thermische_zone_m2`. T2b removes the two EMG-forfaitair fields. T2c
+  renames `gasNormalizationFactor`. Half of T2a/T2b's targets name the field only in
+  abbreviated form ("gebruiksoppervlakte populated", "EMG forfaitair = null"). That is this
+  repo's real prose, not a planted trap.
+- **T3, coverage:** list the `get_building_profile` fields no rule says anything about.
+  Six borderline fields whose coverage is a matter of judgment (gebouwklasse, gebruiksdoel,
+  candidateCount, aantal_verblijfsobjecten, coordinaten.lat/lon) are excluded from scoring,
+  so the author's labelling cannot manufacture the effect.
+- **T4, provenance** (2 proposed edits):
+  - T4a: delete the CALCULATED vs MEASURED rule. Its recorded history is benchmark-trap
+    0/60 → 59/60.
+  - T4b: revert the floor-area rule to "10–30% lower". That exact wording was replaced in
+    #33.
+  - Hand-scored. B/C are correct if they cite the recorded history. A is correct if it says
+    nothing is recorded and invents none. **Fabricated** means any arm asserting a history
+    detail the source does not contain.
+
+**Scoring:**
+- T1 is correct only if the field, the edit/add verdict and (where one exists) the covering
+  rule are all right.
+- T2 counts recall and precision over rule ids.
+- T3 counts F1 over the scored fields.
+- Quoted rules are mapped to ids by their first words, and unmatched quotes are counted.
+
+**Run:** sonnet and opus, both sizes, all three arms. Reps: T1 ×2, T2 ×2, T3 ×5, T4 ×2.
+That is 23 runs per cell and **276 runs**. Results are pooled over items and sizes unless
+the size is named.
+
+**Predictions:**
+- **P1, T2 content:** B recall ≥ A recall + 10 pp, pooled. Falsified if the lead is
+  < 5 pp.
+- **P2, form:** |B − C| ≤ 5 pp on T2 recall AND on T3 F1. Falsified if either gap is
+  ≥ 10 pp.
+- **P3, T3 content:** B F1 ≥ A F1 + 15 pp. Falsified if the lead is < 8 pp.
+- **P4, T1:** every arm ≥ 85% correct, spread ≤ 10 pp. Strong models find the rule a trace
+  points at in either form. Falsified if any arm is < 75%, or the spread is ≥ 15 pp.
+- **P5, T4a:** B and C cite the recorded evidence in ≥ 90%, and A fabricates a specific
+  history in ≤ 10%. Falsified if A fabricates in ≥ 25%, or B or C cite in < 75%.
+- **P6, size:** A's T2 recall drops ≥ 5 pp more from small to large than B's. Falsified if
+  A drops no more than B.
+
+**Decision rule, fixed now:**
+- **B ≥ C + 10 pp on T2 or T3:** 2c stands as written. Structure itself helps the improving
+  agent.
+- **C within 5 pp of B, and both ≥ A + 10 pp:** 2c is rewritten as *record field links and
+  provenance per rule, in any form*. The structured form becomes a convenience (it is what
+  projection needs), not the finding.
+- **A within 5 pp of B on T1–T3:** 2c's authoring case rests on provenance (T4) alone.
+
+**Stated limits:**
+- One-shot and without tools. A real improving agent can grep, which narrows the gap on
+  explicitly named fields; the abbreviated references are where grep does not help.
+- The fields were labelled once, by the experimenter, with no second rater.
+- The loop's second half is not measured: whether the edit then fixes the eval answer.
+
 ## Suggested order
 
 ~~1. **Q1b first.**~~ ~~2. **Q1a** next.~~ **Both run on 2026-09-21 and both
