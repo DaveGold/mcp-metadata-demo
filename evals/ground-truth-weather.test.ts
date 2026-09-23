@@ -57,6 +57,15 @@ describe('weather eval candidates — ground truth follows from the frozen captu
     expect(Math.abs(viaFactor - normalized)).toBeGreaterThan(tolerance * 10);
   });
 
+  it('weather-single-quarter: the must_not_say figure is the factor applied to the quarter', () => {
+    const f = fixtures.q1_2024;
+    expect(Math.round(f.gasNormalizationFactor * 100) / 100).toBe(2.53);
+    expect(Math.round(NL_REFERENCE_HDD / f.totalWeightedHDD * 100) / 100).toBe(2.53);
+    const viaFactor = Math.round(4200 * f.gasNormalizationFactor);
+    expect(Math.abs(viaFactor - 10626)).toBeLessThan(10);
+    expect(q('weather-single-quarter').must_not_say as string).toContain('10,626');
+  });
+
   it('weather-partial-normalization: the trap is real — the factor IS returned on a quarter', () => {
     // 2800 / a quarter's degree-days. The tool computes and returns it anyway.
     expect(fixtures.q1_2024.gasNormalizationFactor).toBeCloseTo(

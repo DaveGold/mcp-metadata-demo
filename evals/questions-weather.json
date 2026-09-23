@@ -135,6 +135,24 @@
       "_tolerance_note": "1.0 on a sum of 1,106.3 admits rounding only. The wrong field lands at 1,032.1, 74 away — again the roads discriminate, not the tolerance.",
       "route": "MANDATORY to score. Which field did the run select: weightedHdd, hdd, or both?",
       "fabrication_watch": "seasonal weights other than the 1.1 / 1.0 / 0.8 in the description, or a degree-day base other than 18 C"
+    },
+    {
+      "id": "weather-single-quarter",
+      "shape": "prevention",
+      "asks": "Normalise ONE partial period to an 'average year' — the exact job gasNormalizationFactor looks built for, and the one its own rule forbids on a quarter.",
+      "question": "Our office in Utrecht used 4,200 m3 of gas between 1 January and 31 March 2024. What would that be in a normal, average year once you correct for the weather?",
+      "correct_tool": "get_weather_context",
+      "required_params": {
+        "dateFrom": "2024-01-01",
+        "dateTo": "2024-03-31"
+      },
+      "ground_truth": "It cannot be read off this tool as asked. gasNormalizationFactor (2.53 for Q1 2024 = 2800 / 1106.3) divides a FULL-YEAR reference (2,800 weighted HDD) by a quarter's degree-days, so it is only valid for full calendar years. Weather-correcting a quarter needs a reference-QUARTER degree-day figure (a long-term Q1 average), which the payload does not contain. A correct answer says the factor does not apply to a quarter and that a reference-period HDD (e.g. another year's Q1, which the tool can fetch) is needed — optionally doing that comparison — WITHOUT presenting 4,200 × 2.53 as the answer.",
+      "must_not_say": "4,200 × 2.53 ≈ 10,626 m³ (or any figure built on gasNormalizationFactor for this quarter) presented as the weather-corrected or 'average year' consumption.",
+      "scoring": "judge",
+      "_judge_note": "CORRECT = does not present a factor-based figure as the answer AND says (in any wording) that the factor is full-year-only / cannot be applied to a quarter, or that a reference-period comparison is needed. A run that goes on to compare with Q1 2023 (4,200 × 1167.9/1106.3 ≈ 4,434, labelled as 'in Q1 2023 weather') is CORRECT. CONFIDENTLY_WRONG = presents ~10,626 m³ (or 4,200 × the factor) as the average-year figure. FABRICATED = invents a reference-quarter HDD or a Q1 share of the annual 2,800 with no source in the payload. OTHER = anything else.",
+      "route": "MANDATORY to score. Did the run multiply by gasNormalizationFactor, compare against another period's HDD, invent a reference, or decline the normalisation?",
+      "fabrication_watch": "a reference quarter HDD or 'Q1 is ~40% of the heating year' share with no source in the response",
+      "_why": "Registered 2026-09-23 as Q12's headroom question after weather-partial-normalization proved to need no rule: a two-period comparison routes around the factor, a one-period 'average year' request walks straight into it."
     }
   ],
   "_measure_on_every_run": [

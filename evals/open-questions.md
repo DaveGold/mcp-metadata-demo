@@ -218,9 +218,12 @@ and lacked "say X rather than producing a ratio". *(Q4 hypothesis — arms built
 one question where the correct call cannot be EXPRESSED without the parameter, and ≈0
 everywhere else. Cheap, so do it — but do not expect a schema to carry meaning.
 
-**5b. Keep every guidance-carrying response under the host's output limit** (Q9). On
-Claude Code a result over ~25,000 tokens is replaced by a *"saved to file"* notice, and the
-guidance inside it is lost with the data. Under the limit, distance barely matters: a recipe
+**5b. Do not rely on an over-limit response to deliver guidance** (Q9). On Claude Code a
+result over ~25,000 tokens is replaced by a *"saved to file"* notice. An agent with no
+file tools (a subagent, many SDK agents) never sees the data or the guidance in it. One
+with Read or jq has to read the file back, in chunks, and may never reach a block at the
+end. Whether it does is unmeasured. Keeping responses under the limit works for every
+client. Under the limit, distance barely matters: a recipe
 fetched once was still applied after ~62k chars of other tool output (haiku, 9–10/10).
 
 **6. Do not spend effort on volume.** Cutting 37–50% of the prose changed zero answers
@@ -1525,9 +1528,10 @@ as in Q8. **Cost:** 30 runs, two new arms, one deploy.
 > (10/10 vs 9/10 as numbers).
 >
 > **Host finding from the void first distance run:** a 79k-char result was **replaced** by a
-> 1.7k *"saved to file"* notice (the 25,000-token MCP output limit). Guidance inside an
-> over-limit response never reaches the model, whether it sits first or last. This is the
-> response-side twin of Q7's 2,048-char description cut.
+> 1.7k *"saved to file"* notice (the 25,000-token MCP output limit). For these subagents,
+> which had no file-reading tool, the guidance inside the response never arrived, whether
+> it sat first or last. An agent that can read the file might recover it; that is
+> unmeasured. This is the response-side twin of Q7's 2,048-char description cut.
 
 > **REGISTERED 2026-09-22, BEFORE THE RUN.**
 
@@ -2088,10 +2092,30 @@ delivered source for the names** before its first weather response. The model-vi
 > cannot matter. As the amendment fixed before the run, the run measured nothing, and it is
 > not counted in the ledger.
 >
-> **Q12's gate stays open, and cannot be closed from this repo.** Both named candidates are
-> closed APIs, and the public-data version has no headroom on this question. A sharper
-> weather question is recorded in the file but not registered: normalise ONE quarter to an
-> average year, where multiplying by 2.53 is the tempting error.
+> **Re-run with headroom (amendment 3), 2026-09-23: SCORED, and FALSIFIED as recorded in
+> advance.** See [`results/2026-09-23-q12b-weather-single-quarter.json`](results/2026-09-23-q12b-weather-single-quarter.json). The question was `weather-single-quarter`:
+> normalise ONE quarter to an average year. 60 runs, haiku + sonnet, n=10.
+>
+> | arm | haiku | sonnet | total | factor road (≈10,600 m³) |
+> |---|---|---|---|---|
+> | `wx-none` | 0/10 | 3/10 | **3/20** | 16/20 |
+> | `wx-desc` | 0/10 | **10/10** | **10/20** | 6/20 |
+> | `wx-resp` | 0/10 | **10/10** | **10/20** | 7/20 |
+>
+> - **The headroom gate passed:** `wx-none` scored 3/20, under the fixed ≤ 14/20.
+> - **Description and response tie exactly.** The rule, byte-identical in either channel,
+>   takes sonnet from 3/10 to 10/10, and every sonnet run then built a reference quarter from
+>   4–11 prior years. That is Q15's delivery-not-channel result, reproduced in a second data
+>   domain.
+> - **haiku scores 0/10 in every arm.** With the rule delivered it still multiplies by 2.53
+>   (6–7/10), or invents a reference. The overheating line tells haiku how to *read* a value
+>   it already has, and haiku used it 20/20. This rule tells it to *go fetch* data it does
+>   not have, and haiku skips that step, as it skipped Q8's soft-pointer call. That account
+>   is a hypothesis, not tested.
+> - **The gate itself, a second server and author, stays open.** This is a second public
+>   data domain only.
+>
+> Ledger: **ten of fifteen** registered predictions wrong.
 
 > **REGISTERED 2026-09-22. THE GATE, NOT AN EXPERIMENT.**
 
@@ -2222,6 +2246,27 @@ comparing 2.53 against 2.40) is confidently wrong.
 the expected result with both copies delivered is a **tie**, and this registration scores a
 tie as **falsified**. `wx-none` shows whether the question has headroom without the rule. If
 `wx-none` is also near ceiling, the run measured nothing, and it will say so.
+
+### AMENDED 2026-09-23 (third) — a question WITH headroom, registered BEFORE it runs
+
+The weather run above had no headroom: a two-period comparison routes around the factor.
+This re-runs Q12 with the same three arms (`wx-none`, `wx-desc`, `wx-resp`, still deployed
+and unchanged) on **`weather-single-quarter`**, added to `questions-weather.json` in this
+commit with its ground truth tested against the fixtures. It asks for ONE quarter in an
+*"average year"*, which is exactly the job `gasNormalizationFactor` looks built for, and the
+one the rule forbids.
+
+- **Run:** haiku and sonnet, n=10 per cell, 60 runs, default cap, one batch, only the
+  question string passed.
+- **Scoring:** the question's `_judge_note`. CORRECT means no factor-based figure presented
+  as the answer, plus saying the factor is full-year-only or that a reference period is
+  needed. CONFIDENTLY_WRONG means ~10,626 m³ presented. FABRICATED means an invented
+  reference quarter.
+- **Headroom gate, fixed now:** the comparison is scored only if `wx-none` is ≤ 14/20
+  correct. Above that, it is recorded as no headroom, like the run above.
+- **Prediction: unchanged.** Response wins by less than Q1's margin; falsified if the
+  description matches or beats it. After Q15, a tie (within 2 of 20) is again the expected
+  outcome, and is recorded now as the registered falsification.
 
 ## Q13 — Can the ALERTLESS tiers be fixed at all? Prose in the RESPONSE vs computation
 
@@ -2592,7 +2637,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -2934,7 +2979,7 @@ failure mode uncovered.
    is Q11's `select-blind`, then Q12. *Superseded text follows.* **Q8, then Q9's distance half.** Q8 builds the arm that Q9's distance protocol needs,
    so one deploy serves both. Q9's position half (`inline-head`) can ride along with
    anything; it is a one-line arm.
-4. **~~Q11~~ DONE 2026-09-23. ~~Q12~~ RUN 2026-09-23 on weather: no headroom, not scored.** The register is closed except the external-validity gate, which needs a public second domain. Q10 is suspended
+4. **~~Q11~~ DONE 2026-09-23. ~~Q12~~ RUN 2026-09-23 on weather: the first question had no headroom; the second (single quarter) replicated delivery-not-channel on sonnet and failed on haiku.** The register is closed except the external-validity gate, which needs a public second domain. Q10 is suspended
    and Q9's position half is retired.
    *Superseded text follows.* **Q11: the main half is answered by accounting on this host (see its amendment); only
    `select-blind` (built off `minimal`) and the meanings half remain.**
