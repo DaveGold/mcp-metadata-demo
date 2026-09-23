@@ -146,19 +146,32 @@ own caveats. The picture changed substantially on 2026-09-21/22: the early
 findings were n=2–3 and mostly Haiku, and have since been re-run at **n=10–20 per
 cell across three models**. Where a claim has been superseded it says so.
 
-**Seven questions were registered in [`open-questions.md`](open-questions.md)
-before they were run. All seven are now answered — and six of the seven registered
-predictions were wrong.** That pattern is itself the most reliable thing here:
-the effects are large and legible, and intuitions about *why* keep missing.
+**Every question in [`open-questions.md`](open-questions.md) carries a prediction
+registered before its run. As of 2026-09-23, nine of the fourteen scored so far were
+wrong.** That pattern is itself the most reliable thing here: the effects are large and
+legible, and intuitions about *why* keep missing.
 
-**Six more are registered and open (Q7–Q12).** (Q13 is the seventh answered one,
-registered after them and run the same day — see §9.) They come from
-[`research-frame.md`](research-frame.md), which is the map the register is drawn
-on: the six axes a placement effect could run along — channel, timing, distance,
-conditionality, addressability, activation — which of them the answered questions
-actually cover, and which design principles remain unfalsified. Read it before
-quoting any result here as a general MCP rule; it says plainly what this repo can
-and cannot support.
+Status of the register: Q1–Q9, Q11, Q13–Q15b and RB1 have run. **Q10 is suspended**: its
+premise was absence, not misreading. **Q9's position half is retired** as not worth running
+on this host (§12). **Q12, a second domain, is the only one left open.** The questions come
+from [`research-frame.md`](research-frame.md), which is the map the register is drawn on:
+the six axes a placement effect could run along (channel, timing, distance,
+conditionality, addressability, activation), which of them the answered questions cover,
+and which design principles remain unfalsified. Read it before quoting any result here as
+a general MCP rule; it says plainly what this repo can and cannot support.
+
+**The one-paragraph version, as of 2026-09-23.** Guidance works when it **reaches the
+model**, and on Claude Code three things decide that:
+
+- a tool description is cut at 2,048 characters (Q7);
+- a tool result over ~25k tokens is replaced by a "saved to file" notice (Q9);
+- `outputSchema` is never sent at all (Q11).
+
+Once delivered, the channel does not matter: description and response tie (Q15, Q15b,
+Q8). Distance does not matter much either: a recipe was applied after ~62k chars of other
+output (Q9). What still decides outcomes is whether the model **fetches** guidance that is
+only behind a call (Q8/Q8b: soft pointer 0/10 on haiku, "REQUIRED" pointer 10/10), and
+whether the sentence that answers the question exists at all.
 
 ### 1 · Semantics and computation buy different things
 
@@ -368,6 +381,98 @@ Three things follow:
 
 Limits: haiku only, one question, and the description copy sat near the top (position is
 Q9). Files: [`results/2026-09-23-q15-delivered-description.json`](results/2026-09-23-q15-delivered-description.json), [`results/2026-09-23-q15b-uncapped-channel.json`](results/2026-09-23-q15b-uncapped-channel.json).
+
+### 11 · A guidance call works if it is called — and the pointer decides that
+
+**Q8 and Q8b, 90 runs.** The DERIVED FIGURES recipe was returned by a no-argument call,
+beside the same bytes in the description and in the response (`gas-estimate`, cap raised).
+
+| arm | haiku route-correct | sonnet route-correct | made the call |
+|---|---|---|---|
+| recipe in the description (uncut) | 7/10 | 10/10 | — |
+| recipe in the response | 6/10 | 10/10 | — |
+| guidance call, **soft** pointer (*"Call it once with no arguments first: …"*) | **0/10** | 10/10 | haiku **0/10**, sonnet 10/10 |
+| guidance call, **"REQUIRED: before any lookup, call this tool once with no arguments …"** | **10/10** | — | haiku **10/10** |
+| guidance behind its **own** parameterless tool | **10/10** | — | haiku **10/10** |
+
+Every run that made the call was correct, and every run that skipped it improvised:
+invented efficiencies, the wrong area, the wrong energy figure. The extra call cost ~0.5%
+tokens. So a bootstrap tool is a working channel **if its pointer reads as an
+instruction**. Haiku ignores a hint and obeys a requirement, which is also why it obeyed
+Q15's canary. `start_duurzaam` has the separate-tool shape; it has not been measured.
+
+> **If you rely on a bootstrap call, word the pointer as a requirement with a consequence,
+> or give the guidance its own tool.**
+
+### 12 · Distance barely matters — but response SIZE is a delivery gate
+
+**Q9, 80 runs, haiku.** A recipe fetched once, then 0, 1 or 3 quarterly weather calls
+(~21k chars each) before the lookup it must be applied to: **10/10, 10/10, 9/10**. The
+registered "≥ 5 lost" was falsified. Guidance delivered once per session survived ~62k
+chars of intervening, irrelevant tool output.
+
+The first attempt was void, and the reason is the finding. **Claude Code replaced each
+79,182-char result with a 1,713-char notice**, *"exceeds maximum allowed tokens. Output has
+been saved to …/tool-results/….txt"*. The subagent cannot read files, so neither the
+records nor the guidance inside them arrived. This is the 25,000-token MCP output limit.
+It behaves as replacement, not truncation, and it is the response-side twin of the
+2,048-char description cut.
+
+**Position inside a response is retired** as not worth running here. Models keep responses
+small unaided: all 20 position runs chose `summaryOnly`. Forcing large responses needs a
+protocol instruction, and Q9 showed such instructions change behaviour on their own. The
+window where position could matter (large, but under ~25k tokens) is narrow, and distance
+across turns, the bigger perturbation, was already flat.
+
+> **Keep every guidance-carrying response under the host's output limit.** `summaryOnly`
+> and `select` exist for this; a response that is replaced takes its interpretation with it.
+
+### 13 · `outputSchema` never reaches the model — and field names leak from the question
+
+**Q11, measured by accounting plus 110 runs.** `thin` and `schema` differ by 7,659 characters
+of `outputSchema` but only +181–336 request tokens: **the output schema is not in the
+model-facing request on Claude Code.** The root README's *"the model never sees this"* is
+measured true for this host.
+
+With the `select` field list removed from the input description, **sonnet still sent the
+exact names 8/10**. The question says *"the weather label"* and *"the maximum temperature"*,
+and sonnet camel-cased them. **Haiku managed 2/10** and never recovered. In 5 of its 8
+misses it told the user, falsely, that *"the API doesn't expose"* max temperature. Two
+server behaviours closed its escape routes. A partly-valid `select` returns no list of
+valid names, and a retry without `select` is over the output limit (§12).
+
+On meanings, delivered prose changed the **explanation, not the choice**. Every run on
+both arms picked `weightedHdd` for the Dutch degree-day series. But without the weighting
+semantics sonnet **invented** a rationale in 8/10 runs (*"wind-weighted"*, *"NEN 5128"*),
+and with them it stated the real ×1.1/1.0/0.8 every time. And a projection can fail with the
+right fields: on the fighting-days question sonnet selected `tempMin` and `tempMax` every
+time and still scored **0/20**, misreading boundary values (14.1 °C, 20.5 °C). Haiku scored
+13/20 on the same records.
+
+> **Keep the output field list in the input description** (haiku needs it) **and return
+> the valid names on every partly-invalid `select`.** When a threshold decides the answer,
+> compute it and return the complete result: the alert's *"(+6 more)"* truncation is where
+> sonnet went wrong.
+
+### 14 · Where this host drops what you ship — one table
+
+| what you ship | what Claude Code does | found by |
+|---|---|---|
+| a tool description | sends the first **2,048 characters**, then `… [truncated]` | Q7 |
+| server instructions | the same 2,048-character cut | Q7 |
+| a tool result | replaces anything over **~25k tokens** with a "saved to file" notice | Q9 |
+| `outputSchema` | **not sent** to the model | Q11 |
+| input schemas | sent (the `select` field list, 430 chars, arrives) | Q11 |
+
+`CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH` (from 2.1.280) raises the first cut per session,
+at a token cost: +23.7% in Q15b. `MAX_MCP_OUTPUT_TOKENS` raises the second. **None of this
+is visible on the protocol side**: raw `tools/list`, the unit tests and the server log all
+show the full text. Check what the model received, not what the server sent.
+
+**Re-baselines.** RB1 re-ran the one `schema → words` gap quoted as "the prose is the
+carrier" (sonnet, `total-vs-per-m2`, n=20): **4/20 → 11/20**, direction only. The sentence it
+credited sat at char 4,311 and was never delivered, so the mechanism is withdrawn. Whatever
+helps sonnet sits in the first 2,048 characters.
 
 ### The strongest single result
 

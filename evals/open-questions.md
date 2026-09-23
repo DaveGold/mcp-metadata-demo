@@ -1495,6 +1495,16 @@ as in Q8. **Cost:** 30 runs, two new arms, one deploy.
 > SCALE.** See [`results/2026-09-23-q9-position-distance.json`](results/2026-09-23-q9-position-distance.json). haiku. Audits exact (38/38, 101/101).
 > `inline-head` was deleted afterwards (`mcpInlineHead`, 2026-09-23; code in git history).
 >
+> **Position half RETIRED 2026-09-23 as not worth running on this host.** Three reasons:
+> - **Models keep responses small unaided.** All 20 runs chose `summaryOnly`. Forcing large
+>   responses needs a protocol instruction, and this question's first distance run showed
+>   such instructions change behaviour on their own.
+> - **The window where position could matter is narrow:** large enough to have distance,
+>   but under the ~25k-token output limit, past which the response is replaced.
+> - **Distance across turns, the larger perturbation, was flat.**
+>
+> The prediction's position half stays unscored.
+>
 > **Distance** (`guidance-strong`, `gas-estimate`, n=10 per distance, redesigned run):
 >
 > | intervening quarterly weather calls | route-correct |
@@ -1816,6 +1826,28 @@ place in *Suggested order* below.
 ---
 
 ## Q11 — Does `outputSchema` reach the model at all?
+
+> **ANSWERED 2026-09-23 — no, and the rest of the question falls out differently than
+> registered.** Main half, by accounting: `outputSchema` is not in the model-facing request
+> on Claude Code (see the amendment). The remaining halves ran as 110 runs, haiku + sonnet,
+> cap raised. See [`results/2026-09-23-q11-select.json`](results/2026-09-23-q11-select.json).
+>
+> - **Names (`select-blind`) — FALSIFIED by the letter.** sonnet sent the exact
+>   `{date, weatherLabel, tempMax}` 8/10 times blind, and recovered in the other 2. But it
+>   took the names from the question's own words (*"the weather label"*, *"the maximum
+>   temperature"*), not from `outputSchema`. haiku managed 2/10 and never recovered. 5 of
+>   its 8 misses told the user, falsely, that the API lacks the field. None presented the
+>   gap as complete, so the "report without noticing" sub-prediction is false too.
+> - **`select-wrong-degree-day` — FALSIFIED.** Uncut `words` scored 20/20 and even `thin`
+>   18/20; everyone picked `weightedHdd`. The semantics changed the *explanation*:
+>   `thin`/sonnet invented a weighting rationale in 8/10 runs; `words`/sonnet gave the real
+>   factors every time.
+> - **`select-hides-the-evidence` — PARTIAL.** `words`/haiku 6/10, `words`/sonnet 0/10, and no
+>   arm reached 8. The registered mechanism, a silent `tempMean` projection, never happened
+>   (0/40). sonnet selected the right fields 20/20 and still misread boundary values (14.1 °C,
+>   20.5 °C) every time. Prose made no difference (`words` ≈ `thin`).
+>
+> Recorded as wrong: **nine of fourteen** registered predictions now wrong.
 
 > **REGISTERED 2026-09-22, BEFORE THE RUN.**
 
@@ -2487,7 +2519,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -2829,7 +2861,9 @@ failure mode uncovered.
    is Q11's `select-blind`, then Q12. *Superseded text follows.* **Q8, then Q9's distance half.** Q8 builds the arm that Q9's distance protocol needs,
    so one deploy serves both. Q9's position half (`inline-head`) can ride along with
    anything; it is a one-line arm.
-4. **Q11: the main half is answered by accounting on this host (see its amendment); only
+4. **~~Q11~~ DONE 2026-09-23.** Only **Q12** (a second domain) remains open. Q10 is suspended
+   and Q9's position half is retired.
+   *Superseded text follows.* **Q11: the main half is answered by accounting on this host (see its amendment); only
    `select-blind` (built off `minimal`) and the meanings half remain.**
    *Superseded text follows.* **Q11 whenever there is spare batch capacity.** Cheap, and it tests an assertion the
    root `README.md` currently states as fact.

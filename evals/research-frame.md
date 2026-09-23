@@ -140,7 +140,7 @@ The draft lists eight principles to falsify. Here is where each one actually sta
 | 5 | Data-dependent semantics should travel with the data | **Supported structurally, not economically** (Q2: free, not cheap) |
 | 6 | Domain knowledge should be addressable to the fields it explains | **Open (Q10), with a live counter-signal**: Q6 shows adjacency failing and renaming failing too — 2 of 21 across both |
 | 7 | Resolve conditional domain logic server-side | **Strongest effect and worst failure mode.** 78/78 when right; one plausible-looking computed line produced 59 of 60 wrong answers |
-| 8 | Project only the semantics relevant to the current response and intent | **Supported on cost** (Q5), **null on accuracy** (Q2), **and newly conditional**: caller-side projection via `select` can silently drop the field the conclusion needed (Q11, amended) |
+| 8 | Project only the semantics relevant to the current response and intent | **Supported on cost** (Q5), **null on accuracy** (Q2). **Caller-side projection measured (Q11):** no run silently dropped the field the conclusion needed (0/40 chose `tempMean`). The failures were elsewhere. A weak model that cannot name the fields claims they do not exist (haiku 5/8). A strong model with the right fields misreads the threshold (sonnet 0/20). |
 
 ### The rule that outranks all eight
 
