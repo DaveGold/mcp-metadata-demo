@@ -1416,6 +1416,57 @@ input.
 
 ---
 
+### Q8b — Can haiku be made to make the call? Registered 2026-09-23, BEFORE either arm exists
+
+Q8 found the guidance channel works only when the model calls it: sonnet called it 10/10,
+haiku 0/10. The pointer haiku ignored was one soft sentence: *"Call it once with no arguments
+first: that returns how to derive figures from the lookup result."* This follow-up asks
+whether that is a wording problem or a property of haiku. It is the question the shipped
+`start_duurzaam` pattern turns on.
+
+**The puzzle it has to explain.** Q15's canary was also an instruction in a delivered
+description (*"end your answer with the marker ⟨D7⟩"*), and haiku obeyed it 20/20. The Q8
+pointer is an instruction in a delivered description, and haiku obeyed it 0/10. The
+difference may be what is asked: an output-format instruction applied at answer time,
+against an extra action required *before* the call the model already wants to make.
+
+**Arms** (haiku, `gas-estimate`, n=10 each, one batch, cap raised as in Q8):
+
+| arm | how the guidance is reached | pointer |
+|---|---|---|
+| `guidance-recipe` | no-argument call of `get_building_profile` (Q8, unchanged) | soft: Q8's sentence |
+| **`guidance-strong`** | the same no-argument call | **imperative, with a consequence:** *"REQUIRED: before any lookup, call this tool once with no arguments. That returns how to derive figures from the lookup result; do not derive figures without it."* |
+| **`guidance-tool`** | a **separate** parameterless tool, `get_derivation_guide`, as `start_duurzaam` is | `get_building_profile`'s description: *"Call get_derivation_guide first: it returns how to derive figures from this tool's result."* The guide tool's own description says to call it before `get_building_profile`. |
+
+The guidance bytes are `derivedFiguresBlock` in all three. The only thing that varies is how the
+call is pointed to. `guidance-tool`'s `get_building_profile` takes the normal required
+address. Model-visible keys and server names avoid the word "guidance". The separate tool's
+own name cannot, because the tool name *is* the pattern.
+
+**Prediction.**
+
+> **Wording fixes it. A stronger pointer, or a tool of its own, gets haiku to make the call.**
+>
+> - **P1: `guidance-strong` — haiku makes the call in ≥ 7/10.** Falsified if ≤ 3/10.
+> - **P2: `guidance-tool` — haiku makes the call in ≥ 7/10.** Falsified if ≤ 3/10.
+> - **P3 (sanity): a run that makes the call is route-correct in ≥ 80% of such runs**, pooled
+>   across arms. The Q8 result says fetching was the whole problem, and this checks it.
+> - The `guidance-recipe` baseline is not a prediction. Q8 measured it at 0/10; ≤ 2/10 is
+>   expected, and anything above 4 is reported as a sitting effect.
+>
+> **Reasoning.** Haiku obeyed a delivered instruction 20/20 in Q15, so the channel carries
+> instructions. The Q8 pointer was soft ("first"), gave no consequence, and competed with a
+> required-looking address schema. An explicit REQUIRED plus a reason, or a separate tool
+> whose only purpose is the guide, removes both.
+>
+> **The case against.** Haiku may treat any extra pre-lookup step as optional however it is
+> worded. If so, both P1 and P2 fail, and a bootstrap channel is unusable on the weakest
+> model whatever the pointer says. That would be the stronger design finding.
+
+**Scoring.** As Q8's build notes: MADE_GUIDANCE_CALL from the transcript, cross-checked in the
+log, with before/after lookup recorded; value- and route-correct on `gas-estimate` exactly
+as in Q8. **Cost:** 30 runs, two new arms, one deploy.
+
 ## Q9 — Position inside the response, and distance across turns
 
 > **REGISTERED 2026-09-22, BEFORE THE RUN.**
