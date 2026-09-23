@@ -201,8 +201,9 @@ characters of the description.** 29/30 against 4/30 for the same 438 bytes was d
 against absent (Q7). Delivered in both channels, the same line scores 20/20 either way
 (Q15/Q15b). Prefer the response: no host cut-off applies to it, and later edits above it
 cannot push it out. Free, and it helped all three models. If you change one thing, change
-this one. **Not a guidance call on its own** (Q8): sonnet made the no-argument call 10/10,
-haiku 0/10, so what only a bootstrap call returns never reaches a model that skips it.
+this one. **Not a guidance call behind a soft pointer** (Q8): sonnet made the no-argument call
+10/10, haiku 0/10. **Word the pointer as a requirement, or give the guidance its own tool**
+(Q8b): haiku then made it 10/10 both ways, and every caller was correct.
 
 **3. Compute it server-side where the computation is determinate.** 78 of 78 across
 three questions, and the only mechanism that performs IDENTICALLY on all three models —
@@ -1418,6 +1419,21 @@ input.
 
 ### Q8b — Can haiku be made to make the call? Registered 2026-09-23, BEFORE either arm exists
 
+> **ANSWERED 2026-09-23 — YES, by wording alone. All three predictions CONFIRMED.** See
+> [`results/2026-09-23-q8b-guidance-discovery.json`](results/2026-09-23-q8b-guidance-discovery.json). haiku, n=10 per arm, one batch. Audit exact, 52/52.
+>
+> | arm | pointer | made the call | route-correct | fabricated |
+> |---|---|---|---|---|
+> | `guidance-recipe` | soft (Q8's) | **0/10** | 0/10 | 8/10 |
+> | **`guidance-strong`** | **REQUIRED + consequence** | **10/10**, first | **10/10** | 0 |
+> | **`guidance-tool`** | **its own tool** | **10/10**, first | **10/10** | 0 |
+>
+> **P1, P2 and P3 all CONFIRMED.** All 20 runs that made the call were route-correct; none of
+> the 10 that skipped it were. The extra round trip cost 0.1–0.5% tokens. **Q8's haiku failure
+> was the pointer, not the model.** It also resolves the puzzle above. The canary and the strong
+> pointer are explicit imperatives, while the soft pointer (*"first: that returns …"*) reads as
+> information. Haiku obeys delivered instructions when they are worded as instructions.
+
 Q8 found the guidance channel works only when the model calls it: sonnet called it 10/10,
 haiku 0/10. The pointer haiku ignored was one soft sentence: *"Call it once with no arguments
 first: that returns how to derive figures from the lookup result."* This follow-up asks
@@ -2304,7 +2320,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
