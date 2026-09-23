@@ -219,6 +219,21 @@ composition, fighting-system risk days, select-projection notes, and data qualit
 
 const minimalDescription = 'Look up daily weather and degree-day/solar metrics for a Dutch location and date range.';
 
+/**
+ * open-questions.md Q12 (weather amendment). The tool's own record-conditional rule,
+ * flattened from the description above, shipped byte-identical by one of two channels.
+ */
+export const partialPeriodRule =
+  'IMPORTANT: gasNormalizationFactor is only valid for full-year (Jan 1–Dec 31) queries. For partial-period ' +
+  'year-over-year comparison, use the HDD ratio directly: normalizedEnergy = energy × (refPeriodHDD / ' +
+  'thisPeriodHDD).';
+/** The computed alert's copy of the same rule, removed in every Q12 arm. */
+export const partialPeriodNote =
+  ' Note: gasNormalizationFactor is designed for full-year (Jan 1–Dec 31) normalization. ' +
+  'For same-period year-over-year comparison, use the HDD ratio directly: ' +
+  'normalizedEnergy = actualEnergy × (periodHDD_referenceYear / periodHDD_thisYear).';
+export type Q12Rule = 'none' | 'description' | 'response';
+
 // ── Input schema ──────────────────────────────────────────────────────────────
 
 const inputSchema = {
@@ -726,12 +741,16 @@ export async function executeWeatherQuery(args: Record<string, unknown>): Promis
 
 // ── Tool registration ─────────────────────────────────────────────────────────
 
-export function registerGetWeatherContextTool(server: McpServer, opts: { minimal?: boolean } = {}): void {
+export function registerGetWeatherContextTool(
+  server: McpServer,
+  opts: { minimal?: boolean; q12Rule?: Q12Rule } = {}
+): void {
+  const baseDescription = opts.minimal ? minimalDescription : description;
   server.registerTool(
     'get_weather_context',
     {
       title: 'Weercondities & Graaddagen (Open-Meteo)',
-      description: opts.minimal ? minimalDescription : description,
+      description: opts.q12Rule === 'description' ? baseDescription + ' ' + partialPeriodRule : baseDescription,
       inputSchema,
       outputSchema,
       annotations: {
@@ -757,7 +776,13 @@ export function registerGetWeatherContextTool(server: McpServer, opts: { minimal
           interpretation.alerts.push(...selected.alerts);
         }
 
-        const output = { recordCount: records.length, summary, records: outputRecords, interpretation };
+        if (opts.q12Rule) {
+          // Q12: no computed text may carry the rule, in any of its three arms.
+          interpretation.alerts = interpretation.alerts.map((a) => a.replace(partialPeriodNote, ''));
+        }
+        const interp =
+          opts.q12Rule === 'response' ? { ...interpretation, guidance: partialPeriodRule } : interpretation;
+        const output = { recordCount: records.length, summary, records: outputRecords, interpretation: interp };
 
         await logToolCall({ args, start, status: 'success', rowCount: records.length });
 
