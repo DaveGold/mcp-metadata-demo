@@ -2730,7 +2730,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**. Q16 ✓ (fetching is the barrier): **twelve of twenty**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**. Q16 ✓ (fetching is the barrier): **twelve of twenty**. Q17 ✓ (volume inert, addressing null): **twelve of twenty-one**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -3103,6 +3103,22 @@ RULE as `interpretation.guidance`. They differ ONLY in what the server adds to
 **Cost:** 60 runs, two new arms.
 
 ## Q17 — Does addressing help when the relevant rule is ONE AMONG A HUNDRED?
+
+> **ANSWERED 2026-09-23 — no, and 100 rules did not hurt either. All three predictions
+> CONFIRMED.** See [`results/2026-09-23-q17-rules-at-scale.json`](results/2026-09-23-q17-rules-at-scale.json). 160 runs, haiku + sonnet, n=10. Audit exact,
+> 186/186.
+>
+> | question / model | 2 rules | 10 | 100 | 100 addressed |
+> |---|---|---|---|---|
+> | overheating / haiku | 10/10 | 10/10 | 10/10 | 10/10 |
+> | overheating / sonnet | 8/10 | 10/10 | 10/10 | 9/10 |
+> | area / haiku | 2/10 | 3/10 | 0/10 | 2/10 |
+> | area / sonnet | 10/10 | 10/10 | 10/10 | 10/10 |
+>
+> haiku found the overheating rule at position 41 of 100 in every run. There is no dilution
+> up to ~16k chars of response guidance, so there is nothing for addressing to win back, and
+> it won nothing back. Caveat: haiku's area cells are at a floor this sitting (2/10 with the
+> rule alone), which can hide dilution there; the overheating cells carry the result.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARMS EXIST.**
 

@@ -147,7 +147,7 @@ findings were n=2–3 and mostly Haiku, and have since been re-run at **n=10–2
 cell across three models**. Where a claim has been superseded it says so.
 
 **Every question in [`open-questions.md`](open-questions.md) carries a prediction
-registered before its run. As of 2026-09-23, twelve of the twenty scored so far were
+registered before its run. As of 2026-09-23, twelve of the twenty-one scored so far were
 wrong.** That pattern is itself the most reliable thing here: the effects are large and
 legible, and intuitions about *why* keep missing.
 
