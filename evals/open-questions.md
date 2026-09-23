@@ -1426,7 +1426,7 @@ input.
 
 > **ANSWERED 2026-09-23 — YES, by wording alone. All three predictions CONFIRMED.** See
 > [`results/2026-09-23-q8b-guidance-discovery.json`](results/2026-09-23-q8b-guidance-discovery.json). haiku, n=10 per arm, one batch. Audit exact, 52/52.
-> `guidance-tool` was deleted afterwards (`mcpGuidanceTool`, 2026-09-23; code in git history). `guidance-strong` is kept for Q9.
+> Both Q8b arms were deleted afterwards: `mcpGuidanceTool` after Q8b, and `mcpGuidanceStrong` after Q9 used it (2026-09-23). Code is in git history.
 >
 > | arm | pointer | made the call | route-correct | fabricated |
 > |---|---|---|---|---|
@@ -1848,6 +1848,8 @@ place in *Suggested order* below.
 >   20.5 °C) every time. Prose made no difference (`words` ≈ `thin`).
 >
 > Recorded as wrong: **nine of fourteen** registered predictions now wrong.
+>
+> `select-blind` was deleted afterwards (`mcpSelectBlind`, 2026-09-23; code in git history).
 
 > **REGISTERED 2026-09-22, BEFORE THE RUN.**
 
@@ -2076,6 +2078,21 @@ delivered source for the names** before its first weather response. The model-vi
 
 ## Q12 — A second domain
 
+> **RUN 2026-09-23 (weather amendment) — NO HEADROOM, NOT SCORED.** See
+> [`results/2026-09-23-q12-weather-replication.json`](results/2026-09-23-q12-weather-replication.json). 60 runs, haiku + sonnet, n=10 per cell. Audit exact,
+> 126/126. The weather tool's own partial-period rule was placed in the description
+> (`wx-desc`) or the response (`wx-resp`), with a no-rule control (`wx-none`): **18/20, 19/20,
+> 19/20.** Both channels tie, but the control is at ceiling. Asked to compare two quarters,
+> both models compare their degree-days without being told, and only 1 run in 60 took the
+> `gasNormalizationFactor` road. The question does not need the rule, so where it sits
+> cannot matter. As the amendment fixed before the run, the run measured nothing, and it is
+> not counted in the ledger.
+>
+> **Q12's gate stays open, and cannot be closed from this repo.** Both named candidates are
+> closed APIs, and the public-data version has no headroom on this question. A sharper
+> weather question is recorded in the file but not registered: normalise ONE quarter to an
+> average year, where multiplying by 2.53 is the tempting error.
+
 > **REGISTERED 2026-09-22. THE GATE, NOT AN EXPERIMENT.**
 
 ### Why it matters
@@ -2149,6 +2166,62 @@ domain would replicate Q15, not localise Q1.
   so a tie is not later read as a surprise.
 
 ---
+
+### AMENDED 2026-09-23 (second) — the domain changes to WEATHER, before anything is built
+
+**Why.** Both registered candidates are closed APIs. Artikelbeheer (Compano) and
+Ketenstandaard need licensed access and are not public. An eval publishes its records,
+so neither can be used. The only public data this repo can publish is BAG/EP-Online
+(the building set) and Open-Meteo (the weather tool).
+
+**What this makes Q12.** A replication in a **second data domain**, not a second author:
+
+- a different public source (Open-Meteo, not BAG/EP-Online);
+- a different field set;
+- a different rule shape (a period condition, not a berekeningstype or a threshold);
+- ground truth derived from `weather-fixtures.json`, independent of `questions.json`.
+
+It shares the server, the host and the author. `questions-weather.json` already says it is
+"not a second domain" in Q12's sense, and that stays true of the *gate*. This amendment runs
+the narrowest version the constraint allows, and it will be reported as **partial external
+validity, not the gate**.
+
+**The rule.** The weather tool's own record-conditional sentence, byte-identical in every arm
+that carries it (the `RULE`):
+
+> *"IMPORTANT: gasNormalizationFactor is only valid for full-year (Jan 1–Dec 31) queries. For
+> partial-period year-over-year comparison, use the HDD ratio directly: normalizedEnergy =
+> energy × (refPeriodHDD / thisPeriodHDD)."*
+
+It applies only when the requested period is not a calendar year. The payload still returns
+a `gasNormalizationFactor` for every period (2.53 for Q1 2024), so the wrong road is always
+on offer.
+
+**Arms.** All are `thin`'s minimal server, identical except where the RULE goes. In **all**
+of them the computed partial-period alert keeps its first sentence (HDD total and factor)
+and **loses its "Note: …" clause**, so no computed text carries the rule.
+
+| arm | the RULE is delivered in | model-visible key |
+|---|---|---|
+| `wx-none` | nowhere (control, descriptive, not part of the prediction) | `eval-wx1` |
+| `wx-desc` | the weather tool DESCRIPTION: minimal one-liner + RULE, well inside 2,048 chars | `eval-wx2` |
+| `wx-resp` | the weather RESPONSE: `interpretation.guidance` = RULE, on every call | `eval-wx3` |
+
+**Run.** `weather-partial-normalization`, **haiku and sonnet, n=10 per cell**, 60 runs, one
+batch, default cap. Only the question string is passed. The preflight is Q15's: the host
+listing shows the RULE inside the delivered description of `wx-desc`, and in no other
+arm's listing; live calls; `countByVariant`.
+
+**Scoring** as the question pins it: correct = 4,434 ± 60 m³ (the plain-HDD road ~4,451 is
+inside), or the equivalent ~3.6% weather-corrected improvement, as in Q9. Route is mandatory:
+HDD ratio / gasNormalizationFactor / none. The gasNormalizationFactor road (~10,626, or
+comparing 2.53 against 2.40) is confidently wrong.
+
+**Prediction: unchanged**, response wins by less than Q1's margin, and it is scored on
+`wx-desc` vs `wx-resp`, 20 runs each. **Stated again, before the run:** after Q15, Q15b and Q8,
+the expected result with both copies delivered is a **tie**, and this registration scores a
+tie as **falsified**. `wx-none` shows whether the question has headroom without the rule. If
+`wx-none` is also near ceiling, the run measured nothing, and it will say so.
 
 ## Q13 — Can the ALERTLESS tiers be fixed at all? Prose in the RESPONSE vs computation
 
@@ -2861,7 +2934,7 @@ failure mode uncovered.
    is Q11's `select-blind`, then Q12. *Superseded text follows.* **Q8, then Q9's distance half.** Q8 builds the arm that Q9's distance protocol needs,
    so one deploy serves both. Q9's position half (`inline-head`) can ride along with
    anything; it is a one-line arm.
-4. **~~Q11~~ DONE 2026-09-23.** Only **Q12** (a second domain) remains open. Q10 is suspended
+4. **~~Q11~~ DONE 2026-09-23. ~~Q12~~ RUN 2026-09-23 on weather: no headroom, not scored.** The register is closed except the external-validity gate, which needs a public second domain. Q10 is suspended
    and Q9's position half is retired.
    *Superseded text follows.* **Q11: the main half is answered by accounting on this host (see its amendment); only
    `select-blind` (built off `minimal`) and the meanings half remain.**

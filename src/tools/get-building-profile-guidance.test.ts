@@ -10,7 +10,6 @@ import {
   guidanceDescription,
   guidancePointer,
   schemaTierDescription,
-  strongDescription,
 } from './get-building-profile-guidance.js';
 
 /**
@@ -133,33 +132,5 @@ describe('guidance-recipe arm (Q8)', () => {
   it('keeps "guidance" out of the model-visible server name', async () => {
     const client = await connectArm('guidance-recipe');
     expect(client.getServerVersion()?.name).not.toMatch(/guidance/i);
-  });
-});
-
-describe('Q8b arms — only the pointer to the guidance varies', () => {
-  it('guidance-strong: the same no-argument call, an imperative pointer, nothing else changed', async () => {
-    const s = await connectArm('guidance-strong');
-    const g = await connectArm('guidance-recipe');
-    const sTools = (await s.listTools()).tools;
-    const gTools = (await g.listTools()).tools;
-    expect(sTools.find((t) => t.name === 'get_building_profile')!.description).toBe(strongDescription);
-    expect(strongDescription.startsWith(schemaTierDescription + ' ')).toBe(true);
-    // every other part of the listing is guidance-recipe's
-    const strip = (ts: typeof sTools) => ts.map((t) => (t.name === 'get_building_profile' ? { ...t, description: '' } : t));
-    expect(strip(sTools)).toEqual(strip(gTools));
-    const r = await s.callTool({ name: 'get_building_profile', arguments: {} });
-    expect(r.structuredContent).toEqual({ guidance: derivedFiguresBlock });
-  });
-
-  it('no pointer carries a word of the recipe', () => {
-    for (const d of [strongDescription]) {
-      for (const s of ['0.95', '8.79', 'DERIVED FIGURES', 'warmtebehoefte', 'thermische_zone']) expect(d).not.toContain(s);
-    }
-  });
-
-  it('keeps "guidance" out of the new server name', async () => {
-    for (const v of ['guidance-strong'] as const) {
-      expect((await connectArm(v)).getServerVersion()?.name).not.toMatch(/guidance/i);
-    }
   });
 });

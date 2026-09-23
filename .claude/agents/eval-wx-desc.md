@@ -1,7 +1,7 @@
 ---
-name: eval-select-blind
-description: Eval arm select-blind (Q11 THROWAWAY — thin with the get_weather_context select field list removed). Answers one building-data question using ONLY the eval-thin-s MCP server. Not for general use — spawned by the run-eval skill.
-tools: mcp__eval-thin-s__get_building_profile, mcp__eval-thin-s__get_weather_context, mcp__eval-thin-s__render_chart, mcp__eval-thin-s__render_table, mcp__eval-thin-s__render_map, mcp__eval-thin-s__get_tool_call_log
+name: eval-wx-desc
+description: Eval arm wx-desc (Q12 THROWAWAY — thin with the partial-period rule in the weather DESCRIPTION). Answers one building-data question using ONLY the eval-wx2 MCP server. Not for general use — spawned by the run-eval skill.
+tools: mcp__eval-wx2__get_building_profile, mcp__eval-wx2__get_weather_context, mcp__eval-wx2__render_chart, mcp__eval-wx2__render_table, mcp__eval-wx2__render_map, mcp__eval-wx2__get_tool_call_log
 ---
 
 You are answering a single question from a user about Dutch buildings, using the

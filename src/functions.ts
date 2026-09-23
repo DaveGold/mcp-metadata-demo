@@ -131,13 +131,9 @@ export const mcpGuidanceRecipe = onRequest(
 );
 
 /**
- * Q8b arm — `guidance-recipe` with an imperative pointer to the no-argument call.
- * Kept for Q9's distance half. (Its sibling `mcpGuidanceTool` was deleted after Q8b.)
+ * Q12 arms (weather amendment) — THROWAWAY. `mcpMinimal` with the weather tool's
+ * partial-period rule nowhere / in the description / in the response.
  */
-export const mcpGuidanceStrong = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'guidance-strong' }));
-
-/**
- * Q11 arm — THROWAWAY. `mcpMinimal` with get_weather_context's `select` field list
- * removed, so output field names are declared only in outputSchema. See Q11.
- */
-export const mcpSelectBlind = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'select-blind' }));
+export const mcpWxNone = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'wx-none' }));
+export const mcpWxDesc = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'wx-desc' }));
+export const mcpWxResp = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'wx-resp' }));

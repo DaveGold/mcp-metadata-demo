@@ -151,9 +151,10 @@ registered before its run. As of 2026-09-23, nine of the fourteen scored so far 
 wrong.** That pattern is itself the most reliable thing here: the effects are large and
 legible, and intuitions about *why* keep missing.
 
-Status of the register: Q1–Q9, Q11, Q13–Q15b and RB1 have run. **Q10 is suspended**: its
+Status of the register: every question has run or been stopped. **Q10 is suspended**: its
 premise was absence, not misreading. **Q9's position half is retired** as not worth running
-on this host (§12). **Q12, a second domain, is the only one left open.** The questions come
+on this host (§12). **Q12** ran on weather, the only public second data source, and had
+**no headroom** (§14). The external-validity gate it stands for is still open. The questions come
 from [`research-frame.md`](research-frame.md), which is the map the register is drawn on:
 the six axes a placement effect could run along (channel, timing, distance,
 conditionality, addressability, activation), which of them the answered questions cover,
@@ -468,6 +469,14 @@ time and still scored **0/20**, misreading boundary values (14.1 °C, 20.5 °C).
 at a token cost: +23.7% in Q15b. `MAX_MCP_OUTPUT_TOKENS` raises the second. **None of this
 is visible on the protocol side**: raw `tools/list`, the unit tests and the server log all
 show the full text. Check what the model received, not what the server sent.
+
+**Q12, the second-domain check, and why it could not be closed.** Both registered
+candidates (Artikelbeheer, Ketenstandaard) are closed APIs, and an eval publishes its
+records. On public weather data, with the tool's own partial-period rule in the
+description, in the response, or nowhere: **18/20, 19/20, 19/20**. The channels tie again,
+but the no-rule control is at ceiling. Models compare two quarters' degree-days unaided, so
+this question cannot tell the channels apart. Recorded as measuring nothing. Every result
+above is still one domain, one server and one author.
 
 **Re-baselines.** RB1 re-ran the one `schema → words` gap quoted as "the prose is the
 carrier" (sonnet, `total-vs-per-m2`, n=20): **4/20 → 11/20**, direction only. The sentence it
