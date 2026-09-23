@@ -218,6 +218,11 @@ and lacked "say X rather than producing a ratio". *(Q4 hypothesis — arms built
 one question where the correct call cannot be EXPRESSED without the parameter, and ≈0
 everywhere else. Cheap, so do it — but do not expect a schema to carry meaning.
 
+**5b. Keep every guidance-carrying response under the host's output limit** (Q9). On
+Claude Code a result over ~25,000 tokens is replaced by a *"saved to file"* notice, and the
+guidance inside it is lost with the data. Under the limit, distance barely matters: a recipe
+fetched once was still applied after ~62k chars of other tool output (haiku, 9–10/10).
+
 **6. Do not spend effort on volume.** Cutting 37–50% of the prose changed zero answers
 in 180. And adding it did not hurt: uncut `words` scored 20/20 with the line inside
 ~37.6k characters of tool definitions (Q15b). It did cost tokens (+23.7%).
@@ -1486,6 +1491,33 @@ as in Q8. **Cost:** 30 runs, two new arms, one deploy.
 
 ## Q9 — Position inside the response, and distance across turns
 
+> **ANSWERED 2026-09-23 — distance is FLAT (prediction falsified); position NOT MEASURED AT
+> SCALE.** See [`results/2026-09-23-q9-position-distance.json`](results/2026-09-23-q9-position-distance.json). haiku. Audits exact (38/38, 101/101).
+>
+> **Distance** (`guidance-strong`, `gas-estimate`, n=10 per distance, redesigned run):
+>
+> | intervening quarterly weather calls | route-correct |
+> |---|---|
+> | 0 | 10/10 |
+> | 1 (~21k chars) | 10/10 |
+> | 3 (~62k chars) | 9/10 |
+>
+> Actual distance: 5 of the 6 runs that really had ~62k chars between the guidance and the
+> lookup were correct. The registered **≥ 5 lost** did not happen: one was lost, within the
+> "flat" band fixed before the run, so the prediction is **FALSIFIED**. The registration's own
+> reading of a flat curve applies: *guidance delivered once per session is safe*, here for
+> haiku up to ~15k tokens of intervening, irrelevant tool output.
+>
+> **Position** (`inline-head` vs `inline`, `weather-partial-normalization`): every one of the 20
+> runs asked for `summaryOnly` (~1.2k-char responses), so there was nothing for the block to
+> sit before or after. By the rule fixed before the run, it is **not measured at scale**
+> (10/10 vs 9/10 as numbers).
+>
+> **Host finding from the void first distance run:** a 79k-char result was **replaced** by a
+> 1.7k *"saved to file"* notice (the 25,000-token MCP output limit). Guidance inside an
+> over-limit response never reaches the model, whether it sits first or last. This is the
+> response-side twin of Q7's 2,048-char description cut.
+
 > **REGISTERED 2026-09-22, BEFORE THE RUN.**
 
 ### Why it matters
@@ -2407,7 +2439,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -2745,7 +2777,8 @@ failure mode uncovered.
    `overheating`, with both prose and renaming already falsified (Q5, Q6) — and it is
    registered as a null, so a win would be the surprise and a loss retires a fashionable
    primitive before it reaches a guide.
-3. **Q8, then Q9's distance half.** Q8 builds the arm that Q9's distance protocol needs,
+3. **~~Q8, then Q9's distance half.~~ DONE 2026-09-23:** Q8, Q8b and Q9 are answered. Next
+   is Q11's `select-blind`, then Q12. *Superseded text follows.* **Q8, then Q9's distance half.** Q8 builds the arm that Q9's distance protocol needs,
    so one deploy serves both. Q9's position half (`inline-head`) can ride along with
    anything; it is a one-line arm.
 4. **Q11: the main half is answered by accounting on this host (see its amendment); only
