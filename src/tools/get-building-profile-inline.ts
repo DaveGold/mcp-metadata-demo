@@ -72,9 +72,7 @@ export function registerGetBuildingProfileInlineTool(
   server: McpServer,
   bagClient: BagClientLike,
   epOnlineClient: EpOnlineClientLike,
-  // `interpretationFirst` is Q9's `inline-head` arm: the identical block emitted as
-  // the FIRST key of the JSON instead of the last. Zero bytes different.
-  opts: { withRecipe?: boolean; interpretationFirst?: boolean } = {}
+  opts: { withRecipe?: boolean } = {}
 ): void {
   const interpretationPayload = opts.withRecipe
     ? interpretationBlock + '\n\n' + derivedFiguresBlock
@@ -110,9 +108,7 @@ export function registerGetBuildingProfileInlineTool(
         // words tier's description does. Sizing it to the record is a SEPARATE
         // experiment (open-questions.md Q2) and must not be smuggled in here —
         // it would change two variables at once.
-        const withInterpretation = opts.interpretationFirst
-          ? { interpretation: interpretationPayload, ...profile }
-          : { ...profile, interpretation: interpretationPayload };
+        const withInterpretation = { ...profile, interpretation: interpretationPayload };
 
         // Same call accounting as every other arm, so the only variable is the
         // delivery channel and not what the server records about itself.

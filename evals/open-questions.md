@@ -1493,6 +1493,7 @@ as in Q8. **Cost:** 30 runs, two new arms, one deploy.
 
 > **ANSWERED 2026-09-23 — distance is FLAT (prediction falsified); position NOT MEASURED AT
 > SCALE.** See [`results/2026-09-23-q9-position-distance.json`](results/2026-09-23-q9-position-distance.json). haiku. Audits exact (38/38, 101/101).
+> `inline-head` was deleted afterwards (`mcpInlineHead`, 2026-09-23; code in git history).
 >
 > **Distance** (`guidance-strong`, `gas-estimate`, n=10 per distance, redesigned run):
 >
