@@ -2195,6 +2195,82 @@ within its own batch.
 
 ---
 
+## RB1 — Re-baseline: `schema` → `words` on `total-vs-per-m2`, sonnet
+
+> **REGISTERED 2026-09-23, BEFORE ANY RUN.** The first re-baseline Q7's `what_this_changes`
+> asks for. It is not a new question: it re-measures the one `schema → words` gap this
+> repo quoted as "the prose is the carrier", now that Q7 has shown what `words` actually
+> delivers.
+
+### What is being re-measured
+
+`readable-ladder-co2` (2026-09-21, n=10) measured `schema` 2/10 → `words` 8/10 on sonnet
+and read it as *"PROSE PAYS WHEN IT CARRIES THE SPECIFIC FACT THE QUESTION TURNS ON"*: the
+thermal-zone vs BAG sentence. The variance audit downgraded that to direction-only, because
+`words`/sonnet on the same question read **2/10** in `q1-response-channel` the same day.
+
+Q7 changes the premise. The sentence that claim credits (*"gebruiksoppervlakte_thermische_zone_m2
+… vs oppervlakte_m2 (BAG): two different scopes"*) sits at **char 4,311**, past the cut. It
+was never delivered. What `words` delivers at the default cap, and `schema` does not, is the
+first 2,048 characters. Measured on the wire today, those include QUERY STRATEGY 5 (*"oppervlakte_m2
+is VBO-level and may represent only one unit"*, char ~1,617) and the start of the NTA 8800
+bullet (*"… gebruiksoppervlakte populated"*, char ~1,938). Input and output schemas are
+byte-identical between the two arms. `schema`'s output schema already describes
+`gebruiksoppervlakte_thermische_zone_m2` as *"Usable floor area of the thermal zone in m²"*.
+
+### The run
+
+`schema` · `words`, **sonnet**, `total-vs-per-m2`, **n=20 per arm**, one sitting, five waves
+of 8 (four per arm per wave, rotated). **Default cap** (`CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH`
+unset), the host every quoted number came from. Only the `question` string is passed.
+The preflight is the Q15 one: the host listing for both arms, one live call per arm, and
+`countByVariant` unfiltered.
+
+### Prediction
+
+> **The quoted gap was not the prose. `words` − `schema` < 4 of 20 on CORRECT (NULL).**
+>
+> - **Falsified if `words` leads by ≥ 8 of 20.** That would mean the first 2,048 characters
+>   carry a real effect on this question. The candidate carrier would be the VBO-level
+>   sentence, not the thermal-zone sentence the old file credited.
+> - A lead of 4–7 is **direction only**, reported as such.
+>
+> **Reasoning.** The fact the old file credited was never delivered, and the same cell read
+> 8/10 and 2/10 on the same day. What is delivered is a warning that `oppervlakte_m2` may
+> be one unit of a larger building. That is about which VBO, not about which area the label
+> is expressed against, and here the VBO *is* the flat.
+>
+> **The case against.** "oppervlakte_m2 is VBO-level and may represent only one unit" is a
+> sentence that makes BAG area look unreliable, and sonnet reads carefully. It could push a
+> run toward the other area field without ever seeing the scopes sentence.
+
+### Scoring, fixed now
+
+- **CORRECT** = the figure the run LEADS WITH is in 2,570–2,690 kg/year (`exact_value`, 2,630 ± 60),
+  as in `readable-ladder-co2`. **CONFIDENTLY_WRONG** = a figure outside the band, stated as
+  the answer. **DECLINED** = no figure. Reporting 28.59 kg as the total counts as
+  CONFIDENTLY_WRONG, and is also noted.
+- **Denominator**, recorded per run from the answer: `thermal_zone` (92), `bag` (100), `other`.
+  Route and value coincide on this question (2,630 only from 92, 2,859 only from 100), so
+  it is reported, not scored separately.
+- A run that gets no `get_building_profile` result is `NO_RECORD`, kept, and dropped from
+  denominators.
+- **Per run:** `tool_uses`, `duration_ms`, `subagent_tokens`, ANSWER characters, request-1 input
+  from disk.
+
+### Known limits, stated up front
+
+- One question, one model, one address. This re-baselines ONE quoted number; Q8–Q12 are next.
+- It measures `words` **as delivered at the default cap**. Whether the uncut description
+  (the Q15b session setting) carries the thermal-zone sentence into an effect is a
+  different run, in a different session, not compared with this one.
+
+### Cost
+
+40 runs, no deploy.
+
+---
+
 ## Suggested order
 
 ~~1. **Q1b first.**~~ ~~2. **Q1a** next.~~ **Both run on 2026-09-21 and both
