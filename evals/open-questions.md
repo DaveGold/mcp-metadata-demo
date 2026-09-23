@@ -207,7 +207,7 @@ this one. **Not a guidance call behind a soft pointer** (Q8): sonnet made the no
 
 **2b. If a rule needs data the payload lacks, SHIP THE DATA** (Q16). The partial-period rule
 alone: haiku 2/20. The same rule plus a server-computed reference-period figure: 15/20.
-Handing over the finished factor did not add to that (12/20). Strong models fetch the data
+Handing over the finished factor did not add to that (11/20). Strong models fetch the data
 themselves (sonnet 10/10, opus 9/10); weak ones do not.
 
 **3. Compute it server-side where the computation is determinate.** 78 of 78 across
@@ -3039,9 +3039,9 @@ The preflight is the Q15 one: the host listing for both arms, one live call per 
 > |---|---|
 > | rule only | **2/20** |
 > | + server-computed reference quarter (1,231.3 HDD) | **15/20** |
-> | + the computed factor (1.113) | **12/20** |
+> | + the computed factor (1.113) | **11/20** |
 >
-> P1 and P2 are **confirmed**. P3 is **partial**: 12, when it needed ≥ 16, but not ≤ 10.
+> P1 and P2 are **confirmed**. P3 is **partial**: 11, when it needed ≥ 16, but not ≤ 10.
 > Give haiku the data it would have had to fetch and it applies the rule. The finished
 > factor adds nothing on top. What still goes wrong in both arms is leading with a full-year
 > extrapolation, which lands on the same 10,600 by another road.

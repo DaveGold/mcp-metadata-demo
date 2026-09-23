@@ -519,7 +519,7 @@ Four runs registered together, 230 runs:
 
 **Then Q16 found what does fix it.** With the reference quarter the rule needs delivered
 in the response, haiku goes from **2/20 to 15/20**. The barrier was *fetching* the data, not
-*applying* the rule. Handing over the finished factor added nothing beyond that (12/20).
+*applying* the rule. Handing over the finished factor added nothing beyond that (11/20).
 
 > **If a rule needs data the payload lacks, ship the data. Prose alone works only for
 > models that go and get it (sonnet, opus). For a strong model most rules are

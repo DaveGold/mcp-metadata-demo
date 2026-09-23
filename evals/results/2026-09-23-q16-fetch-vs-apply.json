@@ -1,5 +1,5 @@
 {
-  "_comment": "Q16 — is haiku's barrier FETCHING the data or APPLYING the rule? FETCHING. Same rule in the response in all three arms; gasNormalizationFactor (2.53) on offer in all three. Rule only (q10-prose): 2/20. + a server-computed reference-quarter HDD (1,231.3, 2014–2023): 15/20. + the computed period factor (1.113): 12/20. Give haiku the data it would have had to fetch and it applies the rule; handing it the finished factor adds nothing on top (12 vs 15, within noise). P1 and P2 CONFIRMED, P3 PARTIAL (12 < 16, > 10).",
+  "_comment": "Q16 — is haiku's barrier FETCHING the data or APPLYING the rule? FETCHING. Same rule in the response in all three arms; gasNormalizationFactor (2.53) on offer in all three. Rule only (q10-prose): 2/20. + a server-computed reference-quarter HDD (1,231.3, 2014–2023): 15/20. + the computed period factor (1.113): 11/20. Give haiku the data it would have had to fetch and it applies the rule; handing it the finished factor adds nothing on top (11 vs 15, within noise). P1 and P2 CONFIRMED, P3 PARTIAL (11 < 16, > 10).",
   "date": "2026-09-23",
   "question": "weather-single-quarter",
   "model": "haiku (claude-haiku-4-5-20251001)",
@@ -58,19 +58,19 @@
     },
     "P3": {
       "registered": "C >= 16/20; falsified if <= 10",
-      "measured": "12/20",
+      "measured": "11/20",
       "verdict": "PARTIAL"
     }
   },
   "reading": [
     "The barrier is the fetch. With the reference quarter in the response haiku uses it: 2 → 15 of 20 on the same rule, same model, same batch. Q12's 0/10 and Q10's 1/0/1 were a model that does not go and GET data, not one that ignores rules.",
-    "The finished factor does not help beyond the data (12 vs 15). What remains wrong in B and C is the same thing: leading with a full-year extrapolation, which lands on 4,200 × 2.53 by a different road.",
+    "The finished factor does not help beyond the data (11 vs 15). What remains wrong in B and C is the same thing: leading with a full-year extrapolation, which lands on 4,200 × 2.53 by a different road.",
     "Design consequence: for a rule that needs data the payload lacks, SHIP THE DATA (here a reference-period figure) — prose alone works only for models that fetch it themselves (sonnet 10/10, opus 9/10)."
   ],
   "log_audit": "EXACT, 101/101 (q10-prose 32, q16-ref 34, q16-computed 35).",
   "caveats": [
     "haiku only, one question, one sitting, 60 runs.",
-    "B and C differ by 3 — within the noise bar; the ordering B > C is not a finding.",
+    "B and C differ by 4 — within the noise bar; the ordering B > C is not a finding.",
     "The reference is the 2014–2023 mean the server computes from Open-Meteo; a different reference window would change the target number, not the reading."
   ],
   "runs": [
