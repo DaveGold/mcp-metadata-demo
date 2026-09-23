@@ -3102,6 +3102,57 @@ RULE as `interpretation.guidance`. They differ ONLY in what the server adds to
 
 **Cost:** 60 runs, two new arms.
 
+## Q17 — Does addressing help when the relevant rule is ONE AMONG A HUNDRED?
+
+> **REGISTERED 2026-09-23, BEFORE THE ARMS EXIST.**
+
+### Why it matters
+
+Q10 put ONE rule next to the data, so there was nothing to route; the answer was that
+labelling it changes nothing. The case `relates_to_fields` exists for is different:
+**many** rules in one response, and the model must find the one that applies. That is the
+production shape, a server that ships all its semantics, and nothing here has measured it.
+It has to be measured on a model that could be misled by volume. **Sonnet, not only haiku:**
+single-rule questions are at ceiling for sonnet, but 100 rules may not be.
+
+### The arms
+
+`get_building_profile`, `schema`'s one-liner description; all guidance is in the RESPONSE
+(`interpretation`). There are two target rules, both sliced from `interpretationBlock`: the
+overheating line and the scopes line.
+
+| arm | `interpretation` carries |
+|---|---|
+| `q17-one` | the 2 target rules, as prose |
+| `q17-many` | the same 2 among **98 real distractors**, 100 lines of prose; targets at fixed positions 41 and 63 |
+| `q17-many-addressed` | the same 100, each as `{ relates_to_fields, meaning }` |
+
+**The distractors** are real guidance bullets from this server's own tool descriptions
+(building, weather, render, log), in a fixed order, frozen in `src/tools/q17-rules.json`.
+Example-question lines are excluded, as is any line that mentions
+`temperatuuroverschrijding`, the thermal zone, `co2_emissie`, per-m² or whole-building
+totals, so no distractor helps or misleads either answer. `relates_to_fields` is extracted
+mechanically: the identifiers each rule names, or `[]`.
+
+### Run
+
+- `overheating` and `total-vs-per-m2`, **haiku and sonnet**, n=10 per cell, 120 runs, default
+  cap.
+- Scoring as Q13 (overheating) and RB1 (lead figure).
+
+### Prediction
+
+> **Volume does not hurt, and addressing adds nothing.** The repo found volume inert every time
+> it looked (Q2 pruning, Q15b 37k chars of definitions).
+>
+> - **P1:** `q17-many` within 3 of `q17-one` in every model × question cell. Falsified if any
+>   cell drops by ≥ 5.
+> - **P2:** `q17-many-addressed` within 3 of `q17-many` in every cell. Falsified if it recovers
+>   ≥ 4 in a cell where `many` dropped.
+> - **The outcome that would matter most:** P1 falsified (the dilution is real) together with P2
+>   falsified (addressing wins it back). That would be the first evidence for addressable
+>   semantics at scale.
+
 ## RB2 and RB3 — re-baselines with the description cap RAISED. Registered 2026-09-23, BEFORE either runs
 
 > **RUN 2026-09-23 — both CONFIRMED.**
