@@ -74,7 +74,8 @@ export type ServerVariant =
   | 'opaque'
   | 'opaque-words'
   | 'guidance-recipe'
-  | 'guidance-strong';
+  | 'guidance-strong'
+  | 'select-blind';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -163,6 +164,22 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
     registerGetWeatherContextTool(server, { minimal: true });
+    registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
+  if (variant === 'select-blind') {
+    // Q11. `minimal` byte for byte, except get_weather_context's `select` input
+    // description loses its field list. Same server name as `minimal`.
+    const server = new McpServer(
+      { name: 'metadata-demo-minimal', version: VERSION },
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+    );
+    registerGetBuildingProfileMinimalTool(server, bagClient, epOnlineClient);
+    registerRenderChartTool(server, { minimal: true });
+    registerRenderTableTool(server, { minimal: true });
+    registerRenderMapTool(server, { minimal: true });
+    registerGetWeatherContextTool(server, { minimal: true, blindSelect: true });
     registerGetToolCallLogTool(server, { minimal: true });
     return server;
   }

@@ -27,5 +27,6 @@ export {
   mcpOpaqueWords,
   mcpGuidanceRecipe,
   mcpGuidanceStrong,
+  mcpSelectBlind,
 } from './functions.js';
 export { createServer } from './server.js';

@@ -2002,7 +2002,8 @@ sessions, so this is accounting evidence, not a capture of the request body.
 daily record — a token saver …"* and drops *"Fields: date, tempMean, … isForecast."* With
 `outputSchema` shown absent on this host (the amendment above), the model then has **no
 delivered source for the names** before its first weather response. The model-visible key is
-`eval-thin-s` and the server name is `thin`'s, so nothing says "blind".
+`eval-thin-s` and the server name is `thin`'s, so nothing says "blind". One field name does leak on every arm: the shared `dateTo` description mentions
+`isForecast`. The question does not need that field, and `weatherLabel` and `tempMax` are named nowhere the model is shown.
 
 - **Question `select-blind`, haiku and sonnet, n=10 each**, plus **`thin` on haiku, n=10**, as
   the control with the list present. That is 30 runs.
