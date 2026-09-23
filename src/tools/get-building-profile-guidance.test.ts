@@ -6,7 +6,14 @@ import { derivedFiguresBlock } from './get-building-profile.js';
 import type { BagClientLike, EpOnlineClientLike } from './get-building-profile.js';
 import type { BagAddress, BagVerblijfsobject, BagPand } from '../clients/bag-client.js';
 import type { PandEnergielabelV5 } from '../clients/ep-online-client.js';
-import { guidanceDescription, guidancePointer, schemaTierDescription } from './get-building-profile-guidance.js';
+import {
+  guidanceDescription,
+  guidancePointer,
+  schemaTierDescription,
+  strongDescription,
+  lookupWithToolPointerDescription,
+  guideToolName,
+} from './get-building-profile-guidance.js';
 
 /**
  * Q8's arm must ship the recipe by ONE channel only, the no-argument call, and be
@@ -128,5 +135,59 @@ describe('guidance-recipe arm (Q8)', () => {
   it('keeps "guidance" out of the model-visible server name', async () => {
     const client = await connectArm('guidance-recipe');
     expect(client.getServerVersion()?.name).not.toMatch(/guidance/i);
+  });
+});
+
+describe('Q8b arms — only the pointer to the guidance varies', () => {
+  const names = async (c: Client) => (await c.listTools()).tools.map((t) => t.name).sort();
+
+  it('guidance-strong: the same no-argument call, an imperative pointer, nothing else changed', async () => {
+    const s = await connectArm('guidance-strong');
+    const g = await connectArm('guidance-recipe');
+    const sTools = (await s.listTools()).tools;
+    const gTools = (await g.listTools()).tools;
+    expect(sTools.find((t) => t.name === 'get_building_profile')!.description).toBe(strongDescription);
+    expect(strongDescription.startsWith(schemaTierDescription + ' ')).toBe(true);
+    // every other part of the listing is guidance-recipe's
+    const strip = (ts: typeof sTools) => ts.map((t) => (t.name === 'get_building_profile' ? { ...t, description: '' } : t));
+    expect(strip(sTools)).toEqual(strip(gTools));
+    const r = await s.callTool({ name: 'get_building_profile', arguments: {} });
+    expect(r.structuredContent).toEqual({ guidance: derivedFiguresBlock });
+  });
+
+  it('guidance-tool: a separate parameterless guide returning the same bytes', async () => {
+    const c = await connectArm('guidance-tool');
+    const r = await c.callTool({ name: guideToolName, arguments: {} });
+    expect(r.structuredContent).toEqual({ guidance: derivedFiguresBlock });
+  });
+
+  it("guidance-tool: its lookup is schema's tool with the pointer appended, and returns schema's fields", async () => {
+    const c = await connectArm('guidance-tool');
+    const tools = (await c.listTools()).tools;
+    const lookupTool = tools.find((t) => t.name === 'get_building_profile')!;
+    expect(lookupTool.description).toBe(lookupWithToolPointerDescription);
+    const schemaTool = (await (await connectArm('schema')).listTools()).tools.find((t) => t.name === 'get_building_profile')!;
+    expect(lookupTool.inputSchema).toEqual(schemaTool.inputSchema);
+    const a = await c.callTool({ name: 'get_building_profile', arguments: lookup });
+    const b = await (await connectArm('schema')).callTool({ name: 'get_building_profile', arguments: lookup });
+    expect(a.structuredContent).toEqual(b.structuredContent);
+  });
+
+  it('guidance-tool: the tool set is inline-recipe\'s plus exactly the guide', async () => {
+    const t = await names(await connectArm('guidance-tool'));
+    const r = await names(await connectArm('inline-recipe'));
+    expect(t).toEqual([...r, guideToolName].sort());
+  });
+
+  it('no pointer carries a word of the recipe', () => {
+    for (const d of [strongDescription, lookupWithToolPointerDescription]) {
+      for (const s of ['0.95', '8.79', 'DERIVED FIGURES', 'warmtebehoefte', 'thermische_zone']) expect(d).not.toContain(s);
+    }
+  });
+
+  it('keeps "guidance" out of both new server names', async () => {
+    for (const v of ['guidance-strong', 'guidance-tool'] as const) {
+      expect((await connectArm(v)).getServerVersion()?.name).not.toMatch(/guidance/i);
+    }
   });
 });

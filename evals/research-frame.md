@@ -134,7 +134,7 @@ The draft lists eight principles to falsify. Here is where each one actually sta
 | # | principle | status |
 |---|---|---|
 | 1 | Descriptions are for capability discovery | **Falsified as an exclusive rule** (Q15) — a domain sentence inside the first 2,048 chars was applied 20/20, the same as in the response. What holds: on this host a description only carries its first 2,048 chars, so anything past that must go elsewhere. |
-| 2 | Guidance is for operating the capability | **Conditional** (Q8): a guidance call delivers as well as the response when it is made, but haiku never made it (0/10 against sonnet's 10/10). Usable as an addition, not as the sole carrier. |
+| 2 | Guidance is for operating the capability | **Supported, if the pointer is an instruction** (Q8, Q8b): a guidance call delivers as well as the response when it is made. Behind a soft pointer haiku never made it (0/10); behind "REQUIRED: …" or as its own tool, 10/10, every caller correct. |
 | 3 | Output schemas are the canonical home for stable output semantics | **Not deliverable on Claude Code** (Q11, by accounting): `outputSchema` never reaches the model there. It can be canonical for the SERVER; anything the model needs must be projected into the description's first 2,048 chars or the response. |
 | 4 | Responses are for interpreting returned instances | **Supported as a robust default, not as a better channel** — Q1's 29/30 was against an undelivered description (Q7), and a delivered description ties it (Q15/Q15b). The response is host-independent and can be conditional on the record. |
 | 5 | Data-dependent semantics should travel with the data | **Supported structurally, not economically** (Q2: free, not cheap) |
