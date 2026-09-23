@@ -18,11 +18,7 @@ import { registerGetBuildingProfileMinimalTool } from './tools/get-building-prof
 import { registerGetBuildingProfileWordsTool } from './tools/get-building-profile-words.js';
 import { registerGetBuildingProfileInlineTool } from './tools/get-building-profile-inline.js';
 import { registerGetBuildingProfileInlineOnelineTool } from './tools/get-building-profile-inline-oneline.js';
-import {
-  registerGetBuildingProfileGuidanceTool,
-  registerGetDerivationGuideTool,
-  lookupWithToolPointerDescription,
-} from './tools/get-building-profile-guidance.js';
+import { registerGetBuildingProfileGuidanceTool } from './tools/get-building-profile-guidance.js';
 import { registerGetBuildingProfileInlineConditionalTool } from './tools/get-building-profile-inline-conditional.js';
 import { registerGetBuildingProfileInlineAblationTool } from './tools/get-building-profile-inline-ablation.js';
 import { registerGetBuildingProfileSchemaTool } from './tools/get-building-profile-schema.js';
@@ -78,8 +74,7 @@ export type ServerVariant =
   | 'opaque'
   | 'opaque-words'
   | 'guidance-recipe'
-  | 'guidance-strong'
-  | 'guidance-tool';
+  | 'guidance-strong';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -226,22 +221,15 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     return server;
   }
 
-  if (variant === 'guidance-strong' || variant === 'guidance-tool') {
+  if (variant === 'guidance-strong') {
     // Q8b. As `guidance-recipe` in every respect but HOW the guidance call is
-    // pointed to: an imperative pointer on the same no-argument call, or a separate
-    // parameterless guide tool (the `start_duurzaam` shape) beside a normal lookup.
+    // pointed to: an imperative pointer on the same no-argument call. Kept for Q9's
+    // distance half, which needs the call made reliably (haiku 10/10 in Q8b).
     const server = new McpServer(
-      { name: variant === 'guidance-strong' ? 'metadata-demo-g2-recipe' : 'metadata-demo-g3-recipe', version: VERSION },
+      { name: 'metadata-demo-g2-recipe', version: VERSION },
       { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
     );
-    if (variant === 'guidance-strong') {
-      registerGetBuildingProfileGuidanceTool(server, bagClient, epOnlineClient, { pointer: 'strong' });
-    } else {
-      registerGetDerivationGuideTool(server);
-      registerGetBuildingProfileSchemaTool(server, bagClient, epOnlineClient, {
-        descriptionOverride: lookupWithToolPointerDescription,
-      });
-    }
+    registerGetBuildingProfileGuidanceTool(server, bagClient, epOnlineClient, { pointer: 'strong' });
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });

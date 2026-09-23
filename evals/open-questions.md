@@ -1421,6 +1421,7 @@ input.
 
 > **ANSWERED 2026-09-23 — YES, by wording alone. All three predictions CONFIRMED.** See
 > [`results/2026-09-23-q8b-guidance-discovery.json`](results/2026-09-23-q8b-guidance-discovery.json). haiku, n=10 per arm, one batch. Audit exact, 52/52.
+> `guidance-tool` was deleted afterwards (`mcpGuidanceTool`, 2026-09-23; code in git history). `guidance-strong` is kept for Q9.
 >
 > | arm | pointer | made the call | route-correct | fabricated |
 > |---|---|---|---|---|
