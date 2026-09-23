@@ -71,14 +71,6 @@
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ10Prose"
     },
-    "eval-q10b": {
-      "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ10Addressed"
-    },
-    "eval-q10c": {
-      "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ10Triggered"
-    },
     "eval-q16b": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ16Ref"
@@ -86,22 +78,6 @@
     "eval-q16c": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ16Computed"
-    },
-    "eval-q17a": {
-      "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ17One"
-    },
-    "eval-q17b": {
-      "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ17Many"
-    },
-    "eval-q17c": {
-      "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ17ManyAddressed"
-    },
-    "eval-q17d": {
-      "type": "http",
-      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ17Ten"
     }
   }
 }

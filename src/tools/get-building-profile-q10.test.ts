@@ -74,7 +74,7 @@ async function connectArm(variant: ServerVariant): Promise<Client> {
   return client;
 }
 const lookup = { postcode: '3543AR', huisnummer: 1 };
-const ARMS = ['q10-prose', 'q10-addressed', 'q10-triggered'] as const;
+const ARMS = ['q10-prose', 'q16-ref', 'q16-computed'] as const;
 
 describe('Q10 arms', () => {
   it('slice the scopes sentence out of interpretationBlock', () => {
@@ -106,12 +106,5 @@ describe('Q10 arms', () => {
       expect(x.getInstructions()).toBe(ref.getInstructions());
       expect(x.getServerVersion()?.name).toBe(ref.getServerVersion()?.name);
     }
-  });
-
-  it('return the same profile fields, differing only in interpretation', async () => {
-    const outs = await Promise.all(ARMS.map(async (v) => ((await (await connectArm(v)).callTool({ name: 'get_building_profile', arguments: lookup })).structuredContent) as Record<string, unknown>));
-    const strip = (o: Record<string, unknown>) => { const { interpretation, ...rest } = o; void interpretation; return rest; };
-    expect(strip(outs[1])).toEqual(strip(outs[0]));
-    expect(strip(outs[2])).toEqual(strip(outs[0]));
   });
 });

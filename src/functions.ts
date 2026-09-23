@@ -135,8 +135,6 @@ export const mcpGuidanceRecipe = onRequest(
  * relates_to_fields / relates_to_fields + a computed triggered_by.
  */
 export const mcpQ10Prose = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q10-prose' }));
-export const mcpQ10Addressed = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q10-addressed' }));
-export const mcpQ10Triggered = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q10-triggered' }));
 
 /**
  * Q16 arms — THROWAWAY. `mcpQ10Prose` plus a server-computed reference-quarter HDD
@@ -144,9 +142,3 @@ export const mcpQ10Triggered = onRequest(functionOptions, createHttpApp({ hosted
  */
 export const mcpQ16Ref = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q16-ref' }));
 export const mcpQ16Computed = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q16-computed' }));
-
-/** Q17 arms — THROWAWAY. Two target rules alone / among 98 distractors / the same 100 addressed. */
-export const mcpQ17One = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q17-one' }));
-export const mcpQ17Ten = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q17-ten' }));
-export const mcpQ17Many = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q17-many' }));
-export const mcpQ17ManyAddressed = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'q17-many-addressed' }));

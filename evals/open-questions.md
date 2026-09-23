@@ -3150,7 +3150,7 @@ should be a **cost** fix for the models actually in use.
 >
 > haiku found the overheating rule at position 41 of 100 in every run. There is no dilution
 > up to ~16k chars of response guidance, so there is nothing for addressing to win back, and
-> it won nothing back. Caveat: haiku's area cells are at a floor this sitting (2/10 with the
+> it won nothing back. (The four Q17 arms were deleted afterwards, 2026-09-23; the frozen rule list is in git history.) Caveat: haiku's area cells are at a floor this sitting (2/10 with the
 > rule alone), which can hide dilution there; the overheating cells carry the result.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARMS EXIST.**
