@@ -2152,6 +2152,62 @@ domain would replicate Q15, not localise Q1.
 
 ---
 
+### AMENDED 2026-09-23 (second) — the domain changes to WEATHER, before anything is built
+
+**Why.** Both registered candidates are closed APIs. Artikelbeheer (Compano) and
+Ketenstandaard need licensed access and are not public. An eval publishes its records,
+so neither can be used. The only public data this repo can publish is BAG/EP-Online
+(the building set) and Open-Meteo (the weather tool).
+
+**What this makes Q12.** A replication in a **second data domain**, not a second author:
+
+- a different public source (Open-Meteo, not BAG/EP-Online);
+- a different field set;
+- a different rule shape (a period condition, not a berekeningstype or a threshold);
+- ground truth derived from `weather-fixtures.json`, independent of `questions.json`.
+
+It shares the server, the host and the author. `questions-weather.json` already says it is
+"not a second domain" in Q12's sense, and that stays true of the *gate*. This amendment runs
+the narrowest version the constraint allows, and it will be reported as **partial external
+validity, not the gate**.
+
+**The rule.** The weather tool's own record-conditional sentence, byte-identical in every arm
+that carries it (the `RULE`):
+
+> *"IMPORTANT: gasNormalizationFactor is only valid for full-year (Jan 1–Dec 31) queries. For
+> partial-period year-over-year comparison, use the HDD ratio directly: normalizedEnergy =
+> energy × (refPeriodHDD / thisPeriodHDD)."*
+
+It applies only when the requested period is not a calendar year. The payload still returns
+a `gasNormalizationFactor` for every period (2.53 for Q1 2024), so the wrong road is always
+on offer.
+
+**Arms.** All are `thin`'s minimal server, identical except where the RULE goes. In **all**
+of them the computed partial-period alert keeps its first sentence (HDD total and factor)
+and **loses its "Note: …" clause**, so no computed text carries the rule.
+
+| arm | the RULE is delivered in | model-visible key |
+|---|---|---|
+| `wx-none` | nowhere (control, descriptive, not part of the prediction) | `eval-wx1` |
+| `wx-desc` | the weather tool DESCRIPTION: minimal one-liner + RULE, well inside 2,048 chars | `eval-wx2` |
+| `wx-resp` | the weather RESPONSE: `interpretation.guidance` = RULE, on every call | `eval-wx3` |
+
+**Run.** `weather-partial-normalization`, **haiku and sonnet, n=10 per cell**, 60 runs, one
+batch, default cap. Only the question string is passed. The preflight is Q15's: the host
+listing shows the RULE inside the delivered description of `wx-desc`, and in no other
+arm's listing; live calls; `countByVariant`.
+
+**Scoring** as the question pins it: correct = 4,434 ± 60 m³ (the plain-HDD road ~4,451 is
+inside), or the equivalent ~3.6% weather-corrected improvement, as in Q9. Route is mandatory:
+HDD ratio / gasNormalizationFactor / none. The gasNormalizationFactor road (~10,626, or
+comparing 2.53 against 2.40) is confidently wrong.
+
+**Prediction: unchanged**, response wins by less than Q1's margin, and it is scored on
+`wx-desc` vs `wx-resp`, 20 runs each. **Stated again, before the run:** after Q15, Q15b and Q8,
+the expected result with both copies delivered is a **tie**, and this registration scores a
+tie as **falsified**. `wx-none` shows whether the question has headroom without the rule. If
+`wx-none` is also near ceiling, the run measured nothing, and it will say so.
+
 ## Q13 — Can the ALERTLESS tiers be fixed at all? Prose in the RESPONSE vs computation
 
 > **ANSWERED 2026-09-22 — ALL THREE PREDICTIONS FALSIFIED. The channel is the whole
