@@ -147,14 +147,14 @@ findings were n=2–3 and mostly Haiku, and have since been re-run at **n=10–2
 cell across three models**. Where a claim has been superseded it says so.
 
 **Every question in [`open-questions.md`](open-questions.md) carries a prediction
-registered before its run. As of 2026-09-23, nine of the fourteen scored so far were
+registered before its run. As of 2026-09-23, ten of the fifteen scored so far were
 wrong.** That pattern is itself the most reliable thing here: the effects are large and
 legible, and intuitions about *why* keep missing.
 
 Status of the register: every question has run or been stopped. **Q10 is suspended**: its
 premise was absence, not misreading. **Q9's position half is retired** as not worth running
-on this host (§12). **Q12** ran on weather, the only public second data source, and had
-**no headroom** (§14). The external-validity gate it stands for is still open. The questions come
+on this host (§12). **Q12** ran on weather, the only public second data source. The first
+question had no headroom; the second replicated the channel tie (§14). The external-validity gate it stands for is still open. The questions come
 from [`research-frame.md`](research-frame.md), which is the map the register is drawn on:
 the six axes a placement effect could run along (channel, timing, distance,
 conditionality, addressability, activation), which of them the answered questions cover,
@@ -417,7 +417,10 @@ The first attempt was void, and the reason is the finding. **Claude Code replace
 been saved to …/tool-results/….txt"*. The subagent cannot read files, so neither the
 records nor the guidance inside them arrived. This is the 25,000-token MCP output limit.
 It behaves as replacement, not truncation, and it is the response-side twin of the
-2,048-char description cut.
+2,048-char description cut. **Scope of that finding:** it is exact for an agent without
+file tools, like these subagents. A main Claude Code session has Read and jq and could read
+the file back. That costs extra round trips, and whether it then reaches guidance placed
+after the records is **unmeasured**.
 
 **Position inside a response is retired** as not worth running here. Models keep responses
 small unaided: all 20 position runs chose `summaryOnly`. Forcing large responses needs a
@@ -425,8 +428,9 @@ protocol instruction, and Q9 showed such instructions change behaviour on their 
 window where position could matter (large, but under ~25k tokens) is narrow, and distance
 across turns, the bigger perturbation, was already flat.
 
-> **Keep every guidance-carrying response under the host's output limit.** `summaryOnly`
-> and `select` exist for this; a response that is replaced takes its interpretation with it.
+> **Do not rely on an over-limit response to carry guidance.** It arrives only if the client
+> can read the spilled file and does read it to the guidance. Keeping responses under the
+> limit (`summaryOnly`, `select`) is the one route that works for every client.
 
 ### 13 · `outputSchema` never reaches the model — and field names leak from the question
 
@@ -461,7 +465,7 @@ time and still scored **0/20**, misreading boundary values (14.1 °C, 20.5 °C).
 |---|---|---|
 | a tool description | sends the first **2,048 characters**, then `… [truncated]` | Q7 |
 | server instructions | the same 2,048-character cut | Q7 |
-| a tool result | replaces anything over **~25k tokens** with a "saved to file" notice | Q9 |
+| a tool result | replaces anything over **~25k tokens** with a "saved to file" notice (recoverable only by an agent with file tools; not measured whether it reads to the end) | Q9 |
 | `outputSchema` | **not sent** to the model | Q11 |
 | input schemas | sent (the `select` field list, 430 chars, arrives) | Q11 |
 
@@ -475,8 +479,20 @@ candidates (Artikelbeheer, Ketenstandaard) are closed APIs, and an eval publishe
 records. On public weather data, with the tool's own partial-period rule in the
 description, in the response, or nowhere: **18/20, 19/20, 19/20**. The channels tie again,
 but the no-rule control is at ceiling. Models compare two quarters' degree-days unaided, so
-this question cannot tell the channels apart. Recorded as measuring nothing. Every result
-above is still one domain, one server and one author.
+this question cannot tell the channels apart. It was recorded as measuring nothing.
+
+A question with headroom, normalising ONE quarter to an average year, scored:
+
+| arm | haiku | sonnet | total |
+|---|---|---|---|
+| no rule | 0/10 | 3/10 | 3/20 |
+| rule in description | 0/10 | 10/10 | 10/20 |
+| rule in response | 0/10 | 10/10 | 10/20 |
+
+The rule is worth 7 of 10 on sonnet by either channel. That is delivery, not channel, in a
+second data domain. **haiku ignores it everywhere** and multiplies by the full-year factor.
+A rule that says *go fetch more data* does not move the weak model; one that says *read
+this value this way* did (Q15). Every result above is still one server and one author.
 
 **Re-baselines.** RB1 re-ran the one `schema → words` gap quoted as "the prose is the
 carrier" (sonnet, `total-vs-per-m2`, n=20): **4/20 → 11/20**, direction only. The sentence it
