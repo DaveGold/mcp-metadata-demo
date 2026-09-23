@@ -78,6 +78,14 @@
     "eval-q10c": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ10Triggered"
+    },
+    "eval-q16b": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ16Ref"
+    },
+    "eval-q16c": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpQ16Computed"
     }
   }
 }

@@ -77,7 +77,9 @@ export type ServerVariant =
   | 'guidance-recipe'
   | 'q10-prose'
   | 'q10-addressed'
-  | 'q10-triggered';
+  | 'q10-triggered'
+  | 'q16-ref'
+  | 'q16-computed';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -166,6 +168,26 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
     registerGetWeatherContextTool(server, { minimal: true });
+    registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
+  if (variant === 'q16-ref' || variant === 'q16-computed') {
+    // Q16. `q10-prose` byte for byte, plus a server-computed reference-quarter HDD
+    // (and, for q16-computed, the period factor) in summary.degreeDays.
+    const server = new McpServer(
+      { name: 'metadata-demo-minimal', version: VERSION },
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+    );
+    registerGetBuildingProfileQ10Tool(server, bagClient, epOnlineClient, 'prose');
+    registerRenderChartTool(server, { minimal: true });
+    registerRenderTableTool(server, { minimal: true });
+    registerRenderMapTool(server, { minimal: true });
+    registerGetWeatherContextTool(server, {
+      minimal: true,
+      q10Form: 'prose',
+      q16Extra: variant === 'q16-ref' ? 'ref' : 'computed',
+    });
     registerGetToolCallLogTool(server, { minimal: true });
     return server;
   }

@@ -29,5 +29,7 @@ export {
   mcpQ10Prose,
   mcpQ10Addressed,
   mcpQ10Triggered,
+  mcpQ16Ref,
+  mcpQ16Computed,
 } from './functions.js';
 export { createServer } from './server.js';

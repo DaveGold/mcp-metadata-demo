@@ -234,6 +234,34 @@ export const partialPeriodNote =
   'normalizedEnergy = actualEnergy × (periodHDD_referenceYear / periodHDD_thisYear).';
 /** open-questions.md Q10 (reopened): the same RULE in the response, as prose / addressed / addressed + triggered. */
 export type Q10Form = 'prose' | 'addressed' | 'triggered';
+/** open-questions.md Q16: what the server adds to summary.degreeDays for a partial period. */
+export type Q16Extra = 'ref' | 'computed';
+
+/**
+ * Q16: mean weighted HDD of the SAME calendar window over the `years` years before
+ * dateFrom's year. Only for a partial period inside one calendar year; null otherwise.
+ */
+export async function referencePeriodWeightedHDD(
+  args: Record<string, unknown>,
+  years = 10
+): Promise<{ mean: number; fromYear: number; toYear: number } | null> {
+  const dateFrom = args.dateFrom as string;
+  const dateTo = args.dateTo as string;
+  const y = Number(dateFrom.slice(0, 4));
+  if (dateTo.slice(0, 4) !== dateFrom.slice(0, 4)) return null;
+  const mdFrom = dateFrom.slice(4);
+  let mdTo = dateTo.slice(4);
+  const totals: number[] = [];
+  for (let yr = y - years; yr < y; yr++) {
+    // A 29 February end date does not exist in non-leap years.
+    if (mdTo === '-02-29' && !(yr % 4 === 0 && (yr % 100 !== 0 || yr % 400 === 0))) mdTo = '-02-28';
+    const rows = await executeWeatherQuery({ ...args, dateFrom: `${yr}${mdFrom}`, dateTo: `${yr}${mdTo}` });
+    totals.push(rows.reduce((s, r) => s + r.weightedHdd, 0));
+    mdTo = dateTo.slice(4);
+  }
+  const mean = Math.round((totals.reduce((s, x) => s + x, 0) / totals.length) * 10) / 10;
+  return { mean, fromYear: y - years, toYear: y - 1 };
+}
 
 // ── Input schema ──────────────────────────────────────────────────────────────
 
@@ -744,7 +772,7 @@ export async function executeWeatherQuery(args: Record<string, unknown>): Promis
 
 export function registerGetWeatherContextTool(
   server: McpServer,
-  opts: { minimal?: boolean; q10Form?: Q10Form } = {}
+  opts: { minimal?: boolean; q10Form?: Q10Form; q16Extra?: Q16Extra } = {}
 ): void {
   server.registerTool(
     'get_weather_context',
@@ -794,7 +822,25 @@ export function registerGetWeatherContextTool(
                 : [{ relates_to_fields: edge.relates_to_fields, triggered_by: trigger, meaning: partialPeriodRule }];
           interp = { ...interpretation, guidance };
         }
-        const output = { recordCount: records.length, summary, records: outputRecords, interpretation: interp };
+        let outSummary: unknown = summary;
+        if (opts.q16Extra) {
+          const s = summary as { period: { days: number }; degreeDays: Record<string, unknown> };
+          const ref = s.period.days < 330 ? await referencePeriodWeightedHDD(args) : null;
+          if (ref) {
+            const dd: Record<string, unknown> = {
+              ...s.degreeDays,
+              referencePeriodWeightedHDD: ref.mean,
+              referencePeriodNote: `Mean weighted HDD for the same calendar window (${String(args.dateFrom).slice(5)} to ${String(args.dateTo).slice(5)}) over ${ref.fromYear}–${ref.toYear}.`,
+            };
+            if (opts.q16Extra === 'computed') {
+              const tw = s.degreeDays.totalWeightedHDD as number;
+              dd.periodNormalizationFactor = Math.round((ref.mean / tw) * 1000) / 1000;
+              dd.periodNormalizationFormula = 'normalizedEnergy = energy × periodNormalizationFactor (= referencePeriodWeightedHDD / totalWeightedHDD)';
+            }
+            outSummary = { ...s, degreeDays: dd };
+          }
+        }
+        const output = { recordCount: records.length, summary: outSummary, records: outputRecords, interpretation: interp };
 
         await logToolCall({ args, start, status: 'success', rowCount: records.length });
 

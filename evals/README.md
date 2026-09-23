@@ -147,7 +147,7 @@ findings were n=2–3 and mostly Haiku, and have since been re-run at **n=10–2
 cell across three models**. Where a claim has been superseded it says so.
 
 **Every question in [`open-questions.md`](open-questions.md) carries a prediction
-registered before its run. As of 2026-09-23, twelve of the nineteen scored so far were
+registered before its run. As of 2026-09-23, twelve of the twenty scored so far were
 wrong.** That pattern is itself the most reliable thing here: the effects are large and
 legible, and intuitions about *why* keep missing.
 
@@ -517,8 +517,12 @@ Four runs registered together, 230 runs:
 - **The rule helps only the middle model (Q12, opus).** The single-quarter rule is worth 0
   on haiku (it does not act on it), 7/10 on sonnet, and 0 on opus (9/10 without it).
 
-> **For a rule a weak model does not act on, neither channel nor form fixes it; compute
-> the result, or give it an imperative to fetch. For a strong model, most rules are
+**Then Q16 found what does fix it.** With the reference quarter the rule needs delivered
+in the response, haiku goes from **2/20 to 15/20**. The barrier was *fetching* the data, not
+*applying* the rule. Handing over the finished factor added nothing beyond that (11/20).
+
+> **If a rule needs data the payload lacks, ship the data. Prose alone works only for
+> models that go and get it (sonnet, opus). For a strong model most rules are
 > redundant.**
 
 ### The strongest single result

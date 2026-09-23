@@ -205,6 +205,11 @@ this one. **Not a guidance call behind a soft pointer** (Q8): sonnet made the no
 10/10, haiku 0/10. **Word the pointer as a requirement, or give the guidance its own tool**
 (Q8b): haiku then made it 10/10 both ways, and every caller was correct.
 
+**2b. If a rule needs data the payload lacks, SHIP THE DATA** (Q16). The partial-period rule
+alone: haiku 2/20. The same rule plus a server-computed reference-period figure: 15/20.
+Handing over the finished factor did not add to that (11/20). Strong models fetch the data
+themselves (sonnet 10/10, opus 9/10); weak ones do not.
+
 **3. Compute it server-side where the computation is determinate.** 78 of 78 across
 three questions, and the only mechanism that performs IDENTICALLY on all three models —
 which is exactly the property you want when you cannot know the model. But see the
@@ -2725,7 +2730,7 @@ contrary.
 > and declined it as a tool-description instruction. A canary on stronger models must score
 > mentions, as Q7's rule already does.
 >
-> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**.
+> This repo's record is now **six of ten registered predictions wrong** (Q15 and Q15b both right). With Q8 (not confirmed, recorded as falsified): **seven of eleven**. With Q8b (confirmed): **seven of twelve**. With Q9 (distance falsified): **eight of thirteen**. With Q11 (names and degree-day falsified): **nine of fourteen**. With Q12 on weather (a tie, falsified as recorded in advance): **ten of fifteen**. Round 3 (2026-09-23): Q10 reopened ✗, Q12 on opus ✗, RB2 ✓, RB3 ✓. That makes **twelve of nineteen**. Q16 ✓ (fetching is the barrier): **twelve of twenty**.
 
 > **REGISTERED 2026-09-23, BEFORE THE ARM EXISTS AND BEFORE ANY RUN.** This is the question
 > Q7 meant to ask. Q7 found that the host sends only the first 2,048 characters of each MCP
@@ -3024,6 +3029,78 @@ The preflight is the Q15 one: the host listing for both arms, one live call per 
 40 runs, no deploy.
 
 ---
+
+## Q16 — Is the weak model's barrier FETCHING the data, or APPLYING the rule?
+
+> **ANSWERED 2026-09-23 — FETCHING.** See [`results/2026-09-23-q16-fetch-vs-apply.json`](results/2026-09-23-q16-fetch-vs-apply.json). haiku, n=20 per arm.
+> Audit exact, 101/101.
+>
+> | arm | correct |
+> |---|---|
+> | rule only | **2/20** |
+> | + server-computed reference quarter (1,231.3 HDD) | **15/20** |
+> | + the computed factor (1.113) | **11/20** |
+>
+> P1 and P2 are **confirmed**. P3 is **partial**: 11, when it needed ≥ 16, but not ≤ 10.
+> Give haiku the data it would have had to fetch and it applies the rule. The finished
+> factor adds nothing on top. What still goes wrong in both arms is leading with a full-year
+> extrapolation, which lands on the same 10,600 by another road.
+
+> **REGISTERED 2026-09-23, BEFORE THE ARMS EXIST.**
+
+### Why it matters
+
+On `weather-single-quarter` haiku failed in every channel (Q12: 0/10) and in every form (Q10:
+1 / 0 / 1 of 20), while sonnet and opus built a reference quarter from 4–31 prior years and
+got it right. In all of those arms, following the rule required **fetching data the payload
+does not contain** (a reference quarter). Q12 and Q10 cannot tell two explanations apart:
+
+- **(a) Fetching is the barrier.** haiku reads and applies a rule, but does not go and get
+  the data it needs. Give it the data and it succeeds.
+- **(b) Applying is the barrier.** Even with the reference in hand, haiku reaches for the
+  ready-made `gasNormalizationFactor`.
+
+This decides the design advice for weak callers: *ship the reference data*, *ship the
+computed factor*, or *neither is enough*.
+
+### The arms
+
+All of them are `q10-prose`: minimal descriptions, the Note stripped, and the partial-period
+RULE as `interpretation.guidance`. They differ ONLY in what the server adds to
+`summary.degreeDays` for a partial period inside one calendar year:
+
+| arm | adds | key |
+|---|---|---|
+| `q10-prose` (**A**, reused) | nothing (rule only) | `eval-q10a` |
+| `ref-data` (**B**) | `referencePeriodWeightedHDD`: the mean weighted HDD of the SAME calendar window over the 10 previous years (server-computed from Open-Meteo), with `referencePeriodNote` naming the years | `eval-q16b` |
+| `ref-computed` (**C**) | B + `periodNormalizationFactor` = referencePeriodWeightedHDD / totalWeightedHDD, with a one-line formula | `eval-q16c` |
+
+`gasNormalizationFactor` (2.53) stays in every arm, so the trap is always on offer.
+
+### Run and scoring
+
+- **Run:** `weather-single-quarter`, **haiku, n=20 per arm**, 60 runs, default cap, one batch.
+- **CORRECT:** 4,200 × (reference-quarter HDD / 1,106.3), ≈ 4,675 m³ with the 2014–2023 mean,
+  accepted within ± 100. A reference the run built itself from tool data also counts, as
+  before.
+- **CONFIDENTLY_WRONG:** a factor-based ~10,600 m³.
+- **FABRICATED:** an unsourced reference quarter.
+
+### Prediction
+
+> **Fetching is the barrier.**
+> - **P1: A ≤ 3/20** (a replication of Q10's 1/20).
+> - **P2: B ≥ 10/20.** Falsified if B ≤ 4/20: then the reference in hand is ignored, and
+>   (b) holds.
+> - **P3: C ≥ 16/20.** Falsified if C ≤ 10/20: then even a computed, ready-to-multiply factor
+>   loses to `gasNormalizationFactor`.
+>
+> **Reasoning.** Haiku applied delivered reading rules 20/20 (Q15) and failed only where the
+> rule sent it to get more data (Q12, Q10). The case against: haiku reached for 2.53 even
+> when told, for this very record, that the period is not a full year (Q10's trigger). A
+> ready-made number beside it may just be one more number.
+
+**Cost:** 60 runs, two new arms.
 
 ## RB2 and RB3 — re-baselines with the description cap RAISED. Registered 2026-09-23, BEFORE either runs
 
