@@ -1995,6 +1995,52 @@ sessions, so this is accounting evidence, not a capture of the request body.
 
 ---
 
+### BUILD NOTES, fixed 2026-09-23 — BEFORE the select-blind arm is built and before any run
+
+**Names half: `select-blind`.** It is the `thin` (minimal) arm byte for byte, except that the
+`select` input description loses its field list. It keeps *"Return only these fields per
+daily record — a token saver …"* and drops *"Fields: date, tempMean, … isForecast."* With
+`outputSchema` shown absent on this host (the amendment above), the model then has **no
+delivered source for the names** before its first weather response. The model-visible key is
+`eval-thin-s` and the server name is `thin`'s, so nothing says "blind".
+
+- **Question `select-blind`, haiku and sonnet, n=10 each**, plus **`thin` on haiku, n=10**, as
+  the control with the list present. That is 30 runs.
+- **Scored per run:**
+  - **VALID_SELECT**: the first `select` array sent is exactly {date, weatherLabel, tempMax},
+    in any order. This is the registered measure.
+  - the names actually guessed;
+  - whether the response was the silent partial case (≥ 1 valid name, so no list of valid
+    fields comes back);
+  - **SAFE_BUT_EXPENSIVE**: a re-query that recovered;
+  - whether the final answer presents a projection missing the requested fields as complete.
+    That is the registered "report the empty projection without noticing the alert".
+- Registered: ≤ 3/10 valid, and of the rest ≥ half report without noticing. Falsified if
+  ≥ 8/10 valid.
+- **A host interaction to watch:** a full-year response with no `select` is ~79k chars, and
+  on this host it is replaced by a file notice (Q9). So "call once without select to learn
+  the names" fails on this question. That is recorded, not designed around.
+
+**Meanings half: `words` vs `thin`, on `select-hides-the-evidence` and
+`select-wrong-degree-day`, haiku and sonnet, n=10 per cell, 80 runs.**
+
+- **The cap is RAISED** (`CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=20000`). The registered
+  falsifier needs *"an arm whose description carries the semantics"*. At the default cap,
+  `words`' weather description delivers the fighting-system hint (*"check daily
+  tempMin/tempMax"*, char ~1,441) but NOT the `weightedHdd` seasonal-weight convention
+  (×1.1 / 1.0 / 0.8, char ~4,531). Uncut, it carries both. `thin` is unaffected by the cap.
+  The whole Q11 batch runs under the raised cap for uniformity.
+- **select-hides-the-evidence:** CORRECT = exactly the 11 dates. **PARTIAL (alert only)** =
+  the alert's count or its five named dates without the rest. WRONG = anything else. Route =
+  the exact `select` array (tempMin+tempMax / tempMean / none). Registered: ≤ 4/10 on the prose
+  arm, with silent failures.
+- **select-wrong-degree-day:** CORRECT = a weightedHdd series summing to 1,106.3 ± 1. Route =
+  weightedHdd / hdd / both. Registered: ≤ 5/10, with hdd chosen in most misses.
+- **Falsified if either question clears 8/10 on uncut `words`.**
+- Waves of 8, one question per wave, five waves per question. NO_RECORD as in Q9.
+
+**Cost:** 110 runs, one new arm.
+
 ## Q12 — A second domain
 
 > **REGISTERED 2026-09-22. THE GATE, NOT AN EXPERIMENT.**
