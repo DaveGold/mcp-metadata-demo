@@ -73,9 +73,7 @@ export type ServerVariant =
   | 'minimal'
   | 'opaque'
   | 'opaque-words'
-  | 'guidance-recipe'
-  | 'guidance-strong'
-  | 'select-blind';
+  | 'guidance-recipe';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -168,22 +166,6 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     return server;
   }
 
-  if (variant === 'select-blind') {
-    // Q11. `minimal` byte for byte, except get_weather_context's `select` input
-    // description loses its field list. Same server name as `minimal`.
-    const server = new McpServer(
-      { name: 'metadata-demo-minimal', version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
-    );
-    registerGetBuildingProfileMinimalTool(server, bagClient, epOnlineClient);
-    registerRenderChartTool(server, { minimal: true });
-    registerRenderTableTool(server, { minimal: true });
-    registerRenderMapTool(server, { minimal: true });
-    registerGetWeatherContextTool(server, { minimal: true, blindSelect: true });
-    registerGetToolCallLogTool(server, { minimal: true });
-    return server;
-  }
-
   if (variant === 'opaque' || variant === 'opaque-words') {
     // A' and B'. Identical but for the tool description — see get-building-profile-opaque.ts.
     const withProse = variant === 'opaque-words';
@@ -230,23 +212,6 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerGetBuildingProfileInlineTool(server, bagClient, epOnlineClient, {
       withRecipe: variant === 'inline-recipe',
     });
-    registerRenderChartTool(server, { minimal: true });
-    registerRenderTableTool(server, { minimal: true });
-    registerRenderMapTool(server, { minimal: true });
-    registerGetWeatherContextTool(server, { minimal: true });
-    registerGetToolCallLogTool(server, { minimal: true });
-    return server;
-  }
-
-  if (variant === 'guidance-strong') {
-    // Q8b. As `guidance-recipe` in every respect but HOW the guidance call is
-    // pointed to: an imperative pointer on the same no-argument call. Kept for Q9's
-    // distance half, which needs the call made reliably (haiku 10/10 in Q8b).
-    const server = new McpServer(
-      { name: 'metadata-demo-g2-recipe', version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
-    );
-    registerGetBuildingProfileGuidanceTool(server, bagClient, epOnlineClient, { pointer: 'strong' });
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });

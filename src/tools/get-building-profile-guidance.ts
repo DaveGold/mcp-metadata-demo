@@ -19,11 +19,8 @@
  * postcode and huisnummer are therefore optional in this arm's input schema, the
  * one schema difference it has. A lookup with only one of them is an error.
  *
- * Q8b adds two arms that vary ONLY how the call is pointed to, the bytes returned
- * staying `derivedFiguresBlock`:
- *   `guidance-strong` — the same no-argument call, with an imperative pointer;
- *   `guidance-tool`   — a separate parameterless `get_derivation_guide` tool.
- *                       Deleted after Q8b (10/10, same as strong); see git history.
+ * Q8b's two pointer variants (`guidance-strong`, `guidance-tool`) were deleted after
+ * their runs; see git history and open-questions.md Q8b.
  */
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -45,10 +42,6 @@ export const guidancePointer =
   'Call it once with no arguments first: that returns how to derive figures from the lookup result.';
 export const guidanceDescription = schemaTierDescription + ' ' + guidancePointer;
 
-/** Q8b `guidance-strong`: the same call, pointed to imperatively and with a consequence. */
-export const strongPointer =
-  'REQUIRED: before any lookup, call this tool once with no arguments. That returns how to derive figures from the lookup result; do not derive figures without it.';
-export const strongDescription = schemaTierDescription + ' ' + strongPointer;
 
 
 /** Every profile field optional, so the guidance-only result validates too. */
@@ -62,14 +55,13 @@ export const outputSchemaWithGuidance = outputSchemaWithoutAlerts.partial().exte
 export function registerGetBuildingProfileGuidanceTool(
   server: McpServer,
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike,
-  opts: { pointer?: 'soft' | 'strong' } = {}
+  epOnlineClient: EpOnlineClientLike
 ): void {
   server.registerTool(
     'get_building_profile',
     {
       title: 'Building Profile (BAG + Energy Label)',
-      description: opts.pointer === 'strong' ? strongDescription : guidanceDescription,
+      description: guidanceDescription,
       inputSchema: z.object({
         ...inputSchema,
         postcode: inputSchema.postcode.optional(),
@@ -128,7 +120,7 @@ export function registerGetBuildingProfileGuidanceTool(
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error('tool.error', { tool: 'get_building_profile', variant: opts.pointer === 'strong' ? 'guidance-strong' : 'guidance-recipe', error: errorMessage });
+        logger.error('tool.error', { tool: 'get_building_profile', variant: 'guidance-recipe', error: errorMessage });
         await logToolCall({
           args: { ...args, postcode: args.postcode ?? '', huisnummer: args.huisnummer ?? 0 },
           start,

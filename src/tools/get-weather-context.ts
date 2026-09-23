@@ -277,15 +277,6 @@ const inputSchema = {
   queryIntent: z.string().optional().describe('Describe what this weather data is being used for. Used for observability.'),
 };
 
-/**
- * Q11's `select-blind` arm: the same input schema with the `select` field LIST removed,
- * so the names are declared only in outputSchema (which this host does not deliver).
- */
-export const blindSelectDescription =
-  'Return only these fields per daily record — a token saver for a long range where you need per-day ' +
-  'detail (e.g. a full-year calendar or chart), not just the summary. ' +
-  'Ignored when summaryOnly=true (no records returned either way).';
-const blindInputSchema = { ...inputSchema, select: z.array(z.string()).optional().describe(blindSelectDescription) };
 
 // ── Output schema ─────────────────────────────────────────────────────────────
 
@@ -735,16 +726,13 @@ export async function executeWeatherQuery(args: Record<string, unknown>): Promis
 
 // ── Tool registration ─────────────────────────────────────────────────────────
 
-export function registerGetWeatherContextTool(
-  server: McpServer,
-  opts: { minimal?: boolean; blindSelect?: boolean } = {}
-): void {
+export function registerGetWeatherContextTool(server: McpServer, opts: { minimal?: boolean } = {}): void {
   server.registerTool(
     'get_weather_context',
     {
       title: 'Weercondities & Graaddagen (Open-Meteo)',
       description: opts.minimal ? minimalDescription : description,
-      inputSchema: opts.blindSelect ? blindInputSchema : inputSchema,
+      inputSchema,
       outputSchema,
       annotations: {
         readOnlyHint: true,

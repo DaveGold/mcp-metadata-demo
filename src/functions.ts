@@ -129,15 +129,3 @@ export const mcpGuidanceRecipe = onRequest(
   functionOptions,
   createHttpApp({ hosted: true, variant: 'guidance-recipe' })
 );
-
-/**
- * Q8b arm — `guidance-recipe` with an imperative pointer to the no-argument call.
- * Kept for Q9's distance half. (Its sibling `mcpGuidanceTool` was deleted after Q8b.)
- */
-export const mcpGuidanceStrong = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'guidance-strong' }));
-
-/**
- * Q11 arm — THROWAWAY. `mcpMinimal` with get_weather_context's `select` field list
- * removed, so output field names are declared only in outputSchema. See Q11.
- */
-export const mcpSelectBlind = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'select-blind' }));
