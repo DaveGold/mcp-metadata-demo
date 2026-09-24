@@ -171,6 +171,15 @@ export const inputSchema = {
   A regex stops silent wrong-entity lookups (`"3039 WB"` returned a different building).
 - **List the valid names wherever the model must produce names** (`select`, `fields`, `sortBy`).
   Without the list haiku got 2/10 and told users the field does not exist [N7].
+- **When the model must pick an enum value from the data** (a chart type, a strategy, a mode),
+  key the guidance on what the data IS: the most specific structure first, the common default
+  last ("flows → sankey; a cycle → polarArea; … otherwise a comparison → bar"). Put it in the
+  parameter's describe, where it is delivered, above the per-value rules. Rules written per value
+  only fire once the model already considers that value: without the path a weekly cycle got bar
+  20/20, with it polarArea 16/20, and nothing else moved [Q24].
+- **Every enum value must be reachable.** Send the payload the description prescribes for each
+  value and check that the input schema accepts it. Three of 14 chart types were refused by the
+  schema itself, on every tier, and the refusals never reached the server log [Q24].
 - **`queryIntent` and `summaryOnly` on every query tool** — the observability join, and the
   alternative to paginating to hand-aggregate.
 - **Working example values**, explicit formats, sane defaults.
@@ -333,6 +342,7 @@ parameterless tool [Q8b]. `z.object({})` breaks parameterless tools — use `{}`
 - [ ] Description head: what it is and is NOT, "read `interpretation` first", record-independent rules as fact + instruction, input conventions
 - [ ] RETURNS names literal field identifiers
 - [ ] Input: typed, regex/enum where it prevents wrong-entity calls, working examples, valid-name lists, `queryIntent`, `summaryOnly`
+- [ ] Enums the model chooses from the data: a structure-first decision path on the parameter; every value's prescribed payload passes the input schema
 - [ ] Output schema shape-only; no model-facing meaning only there; shape baseline frozen when annotations are trimmed
 - [ ] Derived fields marked as computed in the row type
 - [ ] Response: `interpretation { alerts, notes, constants }` first; rules from a registry with provenance; null-field notes never pruned
