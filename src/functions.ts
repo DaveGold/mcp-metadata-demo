@@ -33,6 +33,12 @@ export const mcp = onRequest(functionOptions, createHttpApp({ hosted: true, vari
 export const mcpMinimal = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'minimal' }));
 
 /**
+ * Thin tier — the same `minimal` variant under the name the talk and the docs use for it.
+ * `/mcpMinimal` stays: it is the URL on the MCPCon slide and in the eval arms' config.
+ */
+export const mcpThin = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'minimal' }));
+
+/**
  * Schema tier — the rung between minimal and words. Minimal's one-sentence
  * description, but the full typed and `.describe()`d input/output schemas. It
  * exists so `minimal → schema → words` attributes the schema and the prose
@@ -132,4 +138,10 @@ export const mcpBestV1 = onRequest(functionOptions, createHttpApp({ hosted: true
 export const mcpBestNoTypeRules = onRequest(
   functionOptions,
   createHttpApp({ hosted: true, variant: 'best-no-type-rules' }),
+);
+
+/** `best` with a decision path on render_chart's `type`: Q24 arm C. */
+export const mcpBestDecisionTree = onRequest(
+  functionOptions,
+  createHttpApp({ hosted: true, variant: 'best-decision-tree' }),
 );

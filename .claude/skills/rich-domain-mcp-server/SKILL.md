@@ -273,6 +273,11 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
   alert as a note: 0/10 re-rendered a table whose headers the alert said were wrong [Q22b]. The
   same check as a refusal with the fix in the message: 10/10, every refused run retried [Q22c].
   Keep alerts for what the user should know.
+- **Walk every branch with data built for it.** For each value of an enum like a chart `type`,
+  send the payload the description prescribes and check it passes the INPUT SCHEMA. Three of 14
+  chart types were unreachable on every tier because the schema refused the right call; the model
+  fell back to bar or line, and the refusals never reached the server log, since schema validation
+  runs before the handler [Q24].
 - **Size render guidance to the mistakes the data invites.** A chart tool offering 14 types got bar
   and line (and text, most often); its 2,769 characters of per-type rules changed one thing, a
   12-slice pie, 3/10 → 0/10 [Q23]. Keep the rules for the tempting wrong choices on your data, cut

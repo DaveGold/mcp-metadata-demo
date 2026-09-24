@@ -1,0 +1,114 @@
+{
+ "_comment": "Deliberate re-baseline of every arm's wire freeze, 2026-09-24. render_chart's input schema required `data` on every dataset, so scatter/bubble (scatterData) and boxplot (samples/stats) could not be called in object form on ANY tier: the Q24 pilot found it. `data` is now optional. Proof that nothing else moved: per arm, a hash of tools/list WITHOUT render_chart plus the instructions ('others') is identical before and after; only render_chart's hash changed. Earlier results measured on these arms are unaffected: none of their questions used scatter, bubble or boxplot.",
+ "date": "2026-09-24",
+ "arms": {
+  "rich": {
+   "others_before": "a0b8077989953a7396097cb9b9bd7347",
+   "others_after": "a0b8077989953a7396097cb9b9bd7347",
+   "render_chart_before": "57933ed6085d59f9",
+   "render_chart_after": "af67425ea567eccd"
+  },
+  "words": {
+   "others_before": "b493e83a3190c0e0344f1e60cbf6d043",
+   "others_after": "b493e83a3190c0e0344f1e60cbf6d043",
+   "render_chart_before": "57933ed6085d59f9",
+   "render_chart_after": "af67425ea567eccd"
+  },
+  "inline": {
+   "others_before": "9800e5ad8aa9b53eb94aa7aa2b5d22e3",
+   "others_after": "9800e5ad8aa9b53eb94aa7aa2b5d22e3",
+   "render_chart_before": "c48082ac00b96d31",
+   "render_chart_after": "ae50b4a655aca0aa"
+  },
+  "inline-recipe": {
+   "others_before": "9800e5ad8aa9b53eb94aa7aa2b5d22e3",
+   "others_after": "9800e5ad8aa9b53eb94aa7aa2b5d22e3",
+   "render_chart_before": "c48082ac00b96d31",
+   "render_chart_after": "ae50b4a655aca0aa"
+  },
+  "inline-conditional": {
+   "others_before": "9800e5ad8aa9b53eb94aa7aa2b5d22e3",
+   "others_after": "9800e5ad8aa9b53eb94aa7aa2b5d22e3",
+   "render_chart_before": "c48082ac00b96d31",
+   "render_chart_after": "ae50b4a655aca0aa"
+  },
+  "inline-oneline": {
+   "others_before": "bfa11c774e40082fb94aa7aa2b5d22e3",
+   "others_after": "bfa11c774e40082fb94aa7aa2b5d22e3",
+   "render_chart_before": "c48082ac00b96d31",
+   "render_chart_after": "ae50b4a655aca0aa"
+  },
+  "inline-fact": {
+   "others_before": "9800e5ad8aa9b53eb94aa7aa2b5d22e3",
+   "others_after": "9800e5ad8aa9b53eb94aa7aa2b5d22e3",
+   "render_chart_before": "c48082ac00b96d31",
+   "render_chart_after": "ae50b4a655aca0aa"
+  },
+  "inline-instruction": {
+   "others_before": "9800e5ad8aa9b53eb94aa7aa2b5d22e3",
+   "others_after": "9800e5ad8aa9b53eb94aa7aa2b5d22e3",
+   "render_chart_before": "c48082ac00b96d31",
+   "render_chart_after": "ae50b4a655aca0aa"
+  },
+  "words-recipe": {
+   "others_before": "0d7a5e5fcdace366344f1e60cbf6d043",
+   "others_after": "0d7a5e5fcdace366344f1e60cbf6d043",
+   "render_chart_before": "57933ed6085d59f9",
+   "render_chart_after": "af67425ea567eccd"
+  },
+  "schema": {
+   "others_before": "3b8a6a9f07992b95b94aa7aa2b5d22e3",
+   "others_after": "3b8a6a9f07992b95b94aa7aa2b5d22e3",
+   "render_chart_before": "c48082ac00b96d31",
+   "render_chart_after": "ae50b4a655aca0aa"
+  },
+  "minimal": {
+   "others_before": "0522ba02f8a02517b94aa7aa2b5d22e3",
+   "others_after": "0522ba02f8a02517b94aa7aa2b5d22e3",
+   "render_chart_before": "c48082ac00b96d31",
+   "render_chart_after": "ae50b4a655aca0aa"
+  },
+  "opaque": {
+   "others_before": "b27097c682c383dcb94aa7aa2b5d22e3",
+   "others_after": "b27097c682c383dcb94aa7aa2b5d22e3",
+   "render_chart_before": "c48082ac00b96d31",
+   "render_chart_after": "ae50b4a655aca0aa"
+  },
+  "opaque-words": {
+   "others_before": "1908470fd5c35486b94aa7aa2b5d22e3",
+   "others_after": "1908470fd5c35486b94aa7aa2b5d22e3",
+   "render_chart_before": "c48082ac00b96d31",
+   "render_chart_after": "ae50b4a655aca0aa"
+  },
+  "guidance-recipe": {
+   "others_before": "93a950e347e4ac26b94aa7aa2b5d22e3",
+   "others_after": "93a950e347e4ac26b94aa7aa2b5d22e3",
+   "render_chart_before": "c48082ac00b96d31",
+   "render_chart_after": "ae50b4a655aca0aa"
+  },
+  "best": {
+   "others_before": "9c94a43359c62b8041e7bfb7abae9dcf",
+   "others_after": "9c94a43359c62b8041e7bfb7abae9dcf",
+   "render_chart_before": "b643eea64226c5d6",
+   "render_chart_after": "453055c2f2c6f8dd"
+  },
+  "best-v1": {
+   "others_before": "4b8464202e77871a41e7bfb7abae9dcf",
+   "others_after": "4b8464202e77871a41e7bfb7abae9dcf",
+   "render_chart_before": "c48082ac00b96d31",
+   "render_chart_after": "ae50b4a655aca0aa"
+  },
+  "best-no-type-rules": {
+   "others_before": "9c94a43359c62b8041e7bfb7abae9dcf",
+   "others_after": "9c94a43359c62b8041e7bfb7abae9dcf",
+   "render_chart_before": "9340bd1b4b6f2871",
+   "render_chart_after": "4a86117e832074c7"
+  },
+  "best-decision-tree": {
+   "others_before": "9c94a43359c62b8041e7bfb7abae9dcf",
+   "others_after": "9c94a43359c62b8041e7bfb7abae9dcf",
+   "render_chart_before": "00c7d47774cd5754",
+   "render_chart_after": "940546a41a0b395b"
+  }
+ }
+}

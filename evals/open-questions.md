@@ -3932,3 +3932,82 @@ or series. Each run scores CORRECT (acceptable form), WRONG (a listed wrong form
 **Failure mode to expect.** Models may choose well without any rules (C at ceiling). The honest
 result is then that the `type` rules are volume, paid on every turn (~3k characters), and a
 candidate to trim.
+
+## Q24 — Can the decision tree reach all 14 chart types when the data calls for them? Registered 2026-09-24, BEFORE the pilot
+
+> **PILOT ANSWERED 2026-09-24.** See [`results/2026-09-24-q24-chart-paths-pilot.json`](results/2026-09-24-q24-chart-paths-pilot.json).
+>
+> **Three paths were broken on every tier by the input schema, not by the choice.** The model
+> picked scatter, bubble and boxplot correctly, and render_chart refused the call (every dataset
+> required `data`; these types carry `scatterData` or `samples`). It then fell back to line or bar.
+> Repaired: `data` is optional. After that, 3/3 in every arm.
+>
+> **The one real choice problem was polarArea.** On a weekly cycle, the decision-tree arm chose it
+> 5/6; the other two arms chose bar 6/6.
+>
+> **Paths reached:** decision tree 14/14; `best` and no-rules 13/14. The per-type rules alone
+> changed nothing measurable.
+>
+> **Why the schema defect stayed hidden.** A schema refusal happens in the SDK, before the handler,
+> so it never reaches the server's call log: 54 calls in round 1 exist only in the transcripts.
+>
+> P1 and P3 confirmed, P2 and P4 falsified. Next: confirm at n=10 on haiku and sonnet.
+
+> **REGISTERED before any run. Pilot first**, per the loop: find the broken paths, repair only
+> those, then confirm at n=10 with new predictions.
+
+**Why.** Q23 showed that this server's data only ever asks for bar or line, so whether the other
+12 paths work was untested. This builds the data: `evals/questions-chart-paths.json` has one
+question per chart type, with the data in the prompt and no type named. The structure of the data
+is what should decide the type (a flow, a subset funnel, a network, a hierarchy, a grid, samples
+per category, three measures, two measures, a trend, a cycle, shares, a profile, a ranking).
+
+**Arms:**
+- A — `best`: the per-type REFUSE rules on `type`.
+- B — `best-no-type-rules`: the enum only.
+- C — `best-decision-tree`: a question-first decision path ("decide from what the data IS: flows →
+  sankey, subset stages → funnel, …") placed ABOVE the same rules on `type`, where it is delivered
+  (3,829 characters). `rich` has a comparable path in its description, but that one falls mostly
+  past the cut.
+
+**Pilot.** haiku, n=3 per path per arm, 126 runs, waves of 9 (3 arms × 3). Scoring is by the type
+of the last successful render_chart:
+- CORRECT: the target type;
+- ACCEPTABLE: a listed alternative;
+- WRONG: any other type;
+- FAILED: no chart was rendered.
+
+A path counts as REACHED when at least 2 of its 3 runs are CORRECT.
+
+| # | pilot expectation | falsified if |
+|---|---|---|
+| P1 | A reaches ≥ 9 of 14 paths | ≤ 6 |
+| P2 | B reaches fewer paths than A, and the gap is in the structure paths (sankey, funnel, graph, treemap, matrix, boxplot, bubble) | B ≥ A |
+| P3 | C reaches ≥ as many paths as A, and at least one path A misses | C < A |
+| P4 | line, bar, scatter and sankey are reached by every arm (the data leaves little choice) | any of them missed by 2+ arms |
+
+> **CONFIRMATION ANSWERED 2026-09-24.** See [`results/2026-09-24-q24-chart-paths-confirm.json`](results/2026-09-24-q24-chart-paths-confirm.json). 560 runs, audit exact 56/56.
+> - **All 14 paths work when the data calls for them**, apart from polarArea without the tree. The
+>   13 other paths score 9–10/10 in both arms on both models, including scatter, bubble and
+>   boxplot. There were 0 schema refusals.
+> - **polarArea on a weekly cycle:** `best` chose bar 20/20. The decision tree chose polarArea
+>   16/20 (haiku 6/10, sonnet 10/10).
+> - **The tree changes nothing else** (every other gap ≤ 1) and costs +0.7–1.6% tokens.
+>
+> P7–P9 confirmed. P5 and P6 partial: haiku's 6/10 falls short of the predicted 7 and of the 8
+> that counts as reached.
+
+**Confirmation, registered 2026-09-24 BEFORE its run.** Limited to the two arms that matter:
+- A — `best`;
+- C — `best-decision-tree`.
+
+It runs on haiku AND sonnet, n=10 per path per arm per model: 14 × 2 × 2 × 10 = 560 runs, waves of
+10 (5 + 5, interleaved), on the repaired schema. A path is REACHED at ≥ 8/10 CORRECT.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P5 | haiku: C reaches all 14 paths | any path ≤ 5/10 in C |
+| P6 | polarArea: A ≤ 3/10 and C ≥ 7/10, on haiku; on sonnet A ≤ 5/10 and C ≥ 8/10 | C ≤ A + 3 on either model |
+| P7 | the 13 other paths: A and C within 2 of each other on every path and model (the tree changes only the path it was written for) | a gap ≥ 4 on any other path |
+| P8 | 0 schema refusals (-32602) on scatter, bubble and boxplot, in both arms | any |
+| P9 | C costs ≤ +3% median tokens over A (the tree adds ~1,060 characters to `type`) | > +6% |
