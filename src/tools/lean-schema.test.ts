@@ -1,8 +1,14 @@
-/** The lean input schemas change words, not structure: stripped of descriptions they equal best's. */
+/**
+ * best's lean schemas change words, not structure: stripped of descriptions they equal the full
+ * schema (rich). render_chart's wire schema is small; the full shape is the validator its handler
+ * runs (bestChartInputSchema), so that is the one compared.
+ */
 import { describe, it, expect } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createServer, type ServerVariant } from '../server.js';
+import { bestChartInputSchema } from './render-chart-schema-best.js';
 import type { BagClientLike, EpOnlineClientLike } from './get-building-profile.js';
 
 const noBag: BagClientLike = {
@@ -12,8 +18,9 @@ const noBag: BagClientLike = {
 };
 const noEp: EpOnlineClientLike = { getByBagVboId: async () => [] };
 
-async function schemas(variant: ServerVariant) {
-  const server = createServer({ variant, bagClient: noBag, epOnlineClient: noEp });
+async function schemas(variant: ServerVariant | McpServer) {
+  const server =
+    typeof variant === 'string' ? createServer({ variant, bagClient: noBag, epOnlineClient: noEp }) : variant;
   const [c, s] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: 'lean-test', version: '0.0.0' });
   await Promise.all([client.connect(c), server.connect(s)]);
@@ -32,10 +39,28 @@ const strip = (n: unknown): unknown =>
         )
       : n;
 
+/** A server with one tool whose input schema is best's render_chart validator. */
+function validatorServer() {
+  const server = new McpServer({ name: 'validator', version: '0.0.0' });
+  server.registerTool('render_chart', { inputSchema: bestChartInputSchema }, async () => ({ content: [] }));
+  return server;
+}
+
 describe('lean input schemas', () => {
-  it.each(['render_chart', 'render_table'])('%s has the same structure as best, with fewer words', async (tool) => {
-    const [best, lean] = await Promise.all([schemas('best'), schemas('best-lean')]);
-    expect(strip(lean[tool])).toEqual(strip(best[tool]));
-    expect(JSON.stringify(lean[tool]).length).toBeLessThan(JSON.stringify(best[tool]).length * 0.7);
+  it('render_table on best has the structure of the full schema, with fewer words', async () => {
+    const [best, rich] = await Promise.all([schemas('best'), schemas('rich')]);
+    expect(strip(best.render_table)).toEqual(strip(rich.render_table));
+    expect(JSON.stringify(best.render_table).length).toBeLessThan(JSON.stringify(rich.render_table).length * 0.7);
+  });
+
+  it("render_chart's validator on best has the structure of the full schema, with fewer words", async () => {
+    const [validator, rich] = await Promise.all([schemas(validatorServer()), schemas('rich')]);
+    expect(strip(validator.render_chart)).toEqual(strip(rich.render_chart));
+    expect(JSON.stringify(validator.render_chart).length).toBeLessThan(JSON.stringify(rich.render_chart).length * 0.7);
+  });
+
+  it("render_chart's wire schema on best is a fraction of the full one", async () => {
+    const [best, rich] = await Promise.all([schemas('best'), schemas('rich')]);
+    expect(JSON.stringify(best.render_chart).length).toBeLessThan(JSON.stringify(rich.render_chart).length * 0.3);
   });
 });

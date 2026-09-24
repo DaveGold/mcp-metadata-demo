@@ -36,7 +36,8 @@ Trimming it is safe and pays on every run: the same structure in fewer words (to
 48.3k) lost nothing and cost 21–23% fewer tokens on every question group, including questions
 that never draw a chart; moving the shapes of the rarer chart types behind a REQUIRED
 `get_chart_guidance(type)` (41.4k) saved 26–29%, and the pointer was followed 58/62 times where it
-applied [Q25].
+applied [Q25]. Confirmed at n=10 on the rarer shapes: as reliable as the trimmed schema (117
+against 118 of 120) and 7.6% cheaper, so `best` uses the guided form.
 
 ## What follows from it
 

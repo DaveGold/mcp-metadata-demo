@@ -1,14 +1,15 @@
 /**
- * Chart guidance on demand — an alternative to a large render_chart input schema.
+ * Chart guidance on demand, instead of a large render_chart input schema.
  *
  * The input schema is delivered in full and re-sent on every turn, for every tool
  * (evals/results/2026-09-24-input-schema-delivery.json). A bar chart does not need the payload
- * shapes of sankey, matrix, treemap and graph, so this variant keeps render_chart's schema small:
+ * shapes of sankey, matrix, treemap and graph, so best keeps render_chart's schema small:
  * the decision tree that picks the type, and plain labels + tuple datasets. Every other shape comes
  * from get_chart_guidance(type), which render_chart's `type` makes a REQUIRED first call (a hint
  * alone is not followed: evals/results/2026-09-23-q8b-guidance-discovery.json). The handler still
- * validates the full shape (the lean schema), and a mismatch is refused with the shape for that
- * type in the message.
+ * validates the full shape (render-chart-schema-best.ts), and a mismatch is refused with the shape
+ * for that type in the message. Measured against the full schema in one call: as reliable, 7.6%
+ * cheaper per run (evals/results/2026-09-25-q25b-lean-vs-guided-confirm.json).
  */
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -222,7 +223,7 @@ export const guidedChartInputSchema = {
   type: z
     .enum(CHART_TYPES)
     .describe(
-      CHART_DECISION_TREE.replace(/Per-type rules:\n$/, '') +
+      CHART_DECISION_TREE.replace(', then check the per-type rules below', '').replace(/Per-type rules:\n$/, '') +
         'REQUIRED: for any chart other than a plain bar or line chart (and for any option, such as a target line), call get_chart_guidance with the type first. It returns the exact payload.',
     ),
   title: z.string().optional().describe('Short title, in the language of the conversation.'),
@@ -266,6 +267,7 @@ export function registerGetChartGuidanceTool(server: McpServer): void {
       title: 'Chart guidance',
       description:
         'WHEN TO USE: REQUIRED before render_chart for any chart other than a plain bar or line chart, and before any chart option (a target line, stacking). ' +
+        'WHEN NOT TO USE: a plain bar or line chart without options; render_chart shows that shape. ' +
         'Returns the exact payload shape, an example call and the rules for one chart type. It fetches no data.',
       inputSchema: { type: z.enum(CHART_TYPES).describe('The chart type you are about to render.') },
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },

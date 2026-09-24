@@ -127,4 +127,5 @@ that never draw a chart. Two smaller versions were measured against `best`
   those refusals never reach the log; the guided variant's handler refuses, and logs it.
 - Confirmed at n=10 on the 12 non-bar/line paths
   ([`q25b`](../evals/results/2026-09-25-q25b-lean-vs-guided-confirm.json)): lean 118/120, guided
-  117/120, largest gap on a path 2; guided −7.6% against lean. Guided goes into `best`.
+  117/120, largest gap on a path 2; guided −7.6% against lean. Promoted into `best` on 2026-09-25;
+  the temporary variants `best-lean` and `best-guided` are removed.

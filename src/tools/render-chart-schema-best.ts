@@ -1,11 +1,11 @@
 /**
- * render_chart's input schema — reference implementation.
+ * render_chart's full input shape on best, in few words.
  *
- * The input schema is delivered in full and re-sent on every turn, for every tool, used or not
- * (evals/results/2026-09-24-input-schema-delivery.json). So it carries what forming the call
- * needs, and nothing else: the decision path for `type` (keyed on what the data IS), the few
- * caps that measurably matter, the payload shape per chart type, one example each. The structure
- * is identical to the other tiers' schema (a test pins it); only the words differ.
+ * best does not send this schema: its handler validates against it (chart-guidance.ts), because the
+ * input schema is re-sent on every turn (evals/results/2026-09-24-input-schema-delivery.json) and a
+ * bar chart does not need the shapes of sankey, matrix, treemap and graph. It carries the decision
+ * path for `type`, the caps that measurably matter, the payload shape per chart type, one example
+ * each. The structure is identical to the other tiers' schema (a test pins it); only the words differ.
  */
 import { z } from 'zod';
 import { CHART_DECISION_TREE } from './app-tools-best.js';

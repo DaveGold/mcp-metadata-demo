@@ -18,7 +18,6 @@ import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
 import { BEST_ANNOTATION_EXAMPLES, CHART_DECISION_TREE, bestChartDescription, chartAlerts } from './app-tools-best.js';
-import { bestChartInputSchema } from './render-chart-schema-best.js';
 import { guidedChartInputSchema, guidedShapeProblem } from './chart-guidance.js';
 import { registerAppTool, registerAppResource, RESOURCE_MIME_TYPE } from '@modelcontextprotocol/ext-apps/server';
 import { getAuthExtra } from '../shared/auth.js';
@@ -844,7 +843,6 @@ export function registerRenderChartTool(
     best?: boolean;
     typeRules?: boolean;
     decisionTree?: boolean;
-    leanSchema?: boolean;
     guided?: boolean;
   } = {},
 ): void {
@@ -868,23 +866,21 @@ export function registerRenderChartTool(
       description: opts.best ? bestChartDescription : opts.minimal ? 'Render data as a chart.' : description,
       inputSchema: opts.guided
         ? guidedChartInputSchema
-        : opts.leanSchema
-          ? bestChartInputSchema
-          : opts.best
-            ? {
-                ...inputSchema,
-                // A measured variant without the per-type rules, to see whether the rules do the work.
-                ...(opts.typeRules === false ? { type: inputSchema.type.describe('Chart type.') } : {}),
-                ...(opts.decisionTree
-                  ? {
-                      type: inputSchema.type.describe(
-                        CHART_DECISION_TREE + (inputSchema.type.description ?? '').replace(/^[^\n]*\n/, ''),
-                      ),
-                    }
-                  : {}),
-                options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES),
-              }
-            : inputSchema,
+        : opts.best
+          ? {
+              ...inputSchema,
+              // A measured variant without the per-type rules, to see whether the rules do the work.
+              ...(opts.typeRules === false ? { type: inputSchema.type.describe('Chart type.') } : {}),
+              ...(opts.decisionTree
+                ? {
+                    type: inputSchema.type.describe(
+                      CHART_DECISION_TREE + (inputSchema.type.description ?? '').replace(/^[^\n]*\n/, ''),
+                    ),
+                  }
+                : {}),
+              options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES),
+            }
+          : inputSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,

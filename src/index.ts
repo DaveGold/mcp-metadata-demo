@@ -30,7 +30,5 @@ export {
   mcpBest,
   mcpBestV1,
   mcpBestNoTypeRules,
-  mcpBestLean,
-  mcpBestGuided,
 } from './functions.js';
 export { createServer } from './server.js';

@@ -80,9 +80,7 @@ export type ServerVariant =
   | 'guidance-recipe'
   | 'best'
   | 'best-v1'
-  | 'best-no-type-rules'
-  | 'best-lean'
-  | 'best-guided';
+  | 'best-no-type-rules';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -173,40 +171,6 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     return server;
   }
 
-  if (variant === 'best-guided') {
-    // Temporary measurement arm: best-lean, but render_chart's schema is small and the per-type
-    // shapes come from a REQUIRED get_chart_guidance call.
-    const server = new McpServer(
-      { name: 'metadata-demo-best-guided', version: VERSION },
-      { instructions: bestInstructions },
-    );
-    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
-    registerGetWeatherContextBestTool(server);
-    registerRenderChartTool(server, { best: true, guided: true });
-    registerGetChartGuidanceTool(server);
-    registerRenderTableTool(server, { best: true, leanSchema: true });
-    registerRenderMapTool(server, { best: true });
-    registerFetchImageTool(server, { openWorld: true });
-    registerGetToolCallLogTool(server, { best: true });
-    return server;
-  }
-
-  if (variant === 'best-lean') {
-    // Temporary measurement arm: `best` with the lean chart and table input schemas.
-    const server = new McpServer(
-      { name: 'metadata-demo-best-lean', version: VERSION },
-      { instructions: bestInstructions },
-    );
-    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
-    registerGetWeatherContextBestTool(server);
-    registerRenderChartTool(server, { best: true, decisionTree: true, leanSchema: true });
-    registerRenderTableTool(server, { best: true, leanSchema: true });
-    registerRenderMapTool(server, { best: true });
-    registerFetchImageTool(server, { openWorld: true });
-    registerGetToolCallLogTool(server, { best: true });
-    return server;
-  }
-
   if (variant === 'best-no-type-rules') {
     // Q23 arm C: `best` exactly, except that render_chart's `type` carries no per-type rules.
     const server = new McpServer(
@@ -227,11 +191,14 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     // The reference implementation, built with the rich-domain-mcp-server skill's audit flow
     // (references/audit.md): the two data tools, the render tools and the log tool. fetch_image
     // is app-only (the table UI resolves image cells through it), so the model never sees it.
+    // The input schemas are re-sent every turn, so render_chart's carries the decision tree and the
+    // bar/line shape; every other shape comes from get_chart_guidance (evals/results/2026-09-25-q25b-lean-vs-guided-confirm.json).
     const server = new McpServer({ name: 'metadata-demo-best', version: VERSION }, { instructions: bestInstructions });
     registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
     registerGetWeatherContextBestTool(server);
-    registerRenderChartTool(server, { best: true, decisionTree: true });
-    registerRenderTableTool(server, { best: true });
+    registerRenderChartTool(server, { best: true, guided: true });
+    registerGetChartGuidanceTool(server);
+    registerRenderTableTool(server, { best: true, leanSchema: true });
     registerRenderMapTool(server, { best: true });
     registerFetchImageTool(server, { openWorld: true });
     registerGetToolCallLogTool(server, { best: true });

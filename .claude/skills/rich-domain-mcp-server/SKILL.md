@@ -283,9 +283,13 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
   12-slice pie, 3/10 → 0/10 [Q23]. Keep the rules for the tempting wrong choices on your data, cut
   the menu to what your data can use.
 - **Size the input schema to what forming the call needs.** It is re-sent every turn for every
-  tool, so every question pays for it: the same structure in fewer words saved 21–23% of each run
-  and lost nothing; the shapes only some calls need can move behind a REQUIRED guidance call
-  (−26–29%, followed 58/62) [Q25]. The handler still validates the full shape and refuses with it.
+  tool, so every question pays for it, also the ones that never call the tool. Trim the words first:
+  the same structure in fewer words saved 21–23% of each run and lost nothing. Then, when one tool
+  has a common shape and several rare ones (a chart tool: bar and line against sankey, matrix,
+  graph), keep the choice and the common shape in the schema, and move the rare shapes behind a
+  REQUIRED guidance tool; the handler validates the full shape and refuses with the expected shape
+  and an example. Against the trimmed schema: as reliable (117 against 118 of 120), 7.6% cheaper,
+  the pointer followed 114/120 [Q25].
 - **Audit the app tools too.** Their input schema is delivered, so an example there is advice: a
   "Paris Proof target" annotation example on a server of calculated figures got the line drawn
   20/20, and the fixed tool left it out 16/20 [Q22].
@@ -380,6 +384,7 @@ the codebase's own implementations, and those come first where the pattern match
 | Description ≤ 2,048 + `interpretation`-first response + computed `derived` values | [get-building-profile-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-best.ts) |
 | Shipping the data a rule needs (reference-period degree days), size guard, complete lists | [get-weather-context-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context-best.ts), [reference-period.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/reference-period.ts) |
 | Defects an eval found in the reference itself, and their fixes (query-relative reference 0/10 → fixed span 8/10; annualising 10/16 → 5/18) | [docs/weather-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/weather-findings.md) §7 |
+| Small input schema + a REQUIRED guidance tool + full-shape validation in the handler | [chart-guidance.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/chart-guidance.ts), [render-chart-schema-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart-schema-best.ts) |
 | Budget, name and rule tests | [best-arm.test.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/best-arm.test.ts) |
 | Wire-surface freeze of measured variants | [arms-frozen.test.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/arms-frozen.test.ts) |
 | Audit record written the way `recording.md` prescribes | [docs/building-profile-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/building-profile-findings.md), [docs/weather-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/weather-findings.md) |
