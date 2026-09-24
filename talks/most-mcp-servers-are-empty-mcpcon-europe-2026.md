@@ -199,12 +199,11 @@ called only when the pointer says it is required
 the table got stricter. One view of it all:
 [evals §14](../evals/README.md#14--where-this-host-drops-what-you-ship--one-table).
 
-**On server instructions:** the MCP spec of 2026-07-28 removed the `initialize` handshake, whose
-result used to carry `instructions`. The field did not go away: it moved to the result of the new
-`server/discover` request, which servers must implement and clients _may_ call
-([changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog)). So the row
-still holds, and "client-dependent" is, if anything, stronger. The evals here ran on Claude Code,
-which delivers the first 2,048 characters of them
+**On server instructions:** the slide marks them client-dependent, and the 2026-07-28 spec keeps
+it that way: with the `initialize` handshake gone, `instructions` moved to the result of
+`server/discover`, which clients _may_ call
+([changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog)). Claude Code
+delivers their first 2,048 characters
 ([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 ## 18 · One string. Three moments.
