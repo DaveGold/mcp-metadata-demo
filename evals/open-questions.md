@@ -3986,6 +3986,17 @@ A path counts as REACHED when at least 2 of its 3 runs are CORRECT.
 | P3 | C reaches ≥ as many paths as A, and at least one path A misses | C < A |
 | P4 | line, bar, scatter and sankey are reached by every arm (the data leaves little choice) | any of them missed by 2+ arms |
 
+> **CONFIRMATION ANSWERED 2026-09-24.** See [`results/2026-09-24-q24-chart-paths-confirm.json`](results/2026-09-24-q24-chart-paths-confirm.json). 560 runs, audit exact 56/56.
+> - **All 14 paths work when the data calls for them**, apart from polarArea without the tree. The
+>   13 other paths score 9–10/10 in both arms on both models, including scatter, bubble and
+>   boxplot. There were 0 schema refusals.
+> - **polarArea on a weekly cycle:** `best` chose bar 20/20. The decision tree chose polarArea
+>   16/20 (haiku 6/10, sonnet 10/10).
+> - **The tree changes nothing else** (every other gap ≤ 1) and costs +0.7–1.6% tokens.
+>
+> P7–P9 confirmed. P5 and P6 partial: haiku's 6/10 falls short of the predicted 7 and of the 8
+> that counts as reached.
+
 **Confirmation, registered 2026-09-24 BEFORE its run.** Limited to the two arms that matter:
 - A — `best`;
 - C — `best-decision-tree`.

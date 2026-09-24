@@ -103,6 +103,8 @@ One prompt per chart type, with the data in the prompt; results in
 - **Defect: the Q22c header refusal hit measured data** the user brought. Narrowed to register
   names and per-m² figures.
 - **Choice:** only polarArea failed on the choice itself. A decision path above the rules fixes it
-  (`CHART_DECISION_TREE` in `src/tools/app-tools-best.ts`). `[CONFIDENCE: MEDIUM — pilot, n=3;
-  confirmation at n=10 pending.]`
+  (`CHART_DECISION_TREE` in `src/tools/app-tools-best.ts`). Confirmed at n=10 on haiku and sonnet
+  ([`confirm`](../evals/results/2026-09-24-q24-chart-paths-confirm.json)): bar 20/20 without it,
+  polarArea 16/20 with it; nothing else moves. It lives in the frozen variant
+  `best-decision-tree`. Promoting it into `best` is the next deliberate change.
 
