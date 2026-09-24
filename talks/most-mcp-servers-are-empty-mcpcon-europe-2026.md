@@ -33,18 +33,18 @@ every tool, every field — and not something the protocol can hand you.
 
 ## 4 · "Does this building have an energy label?"
 
-The same question to a thin and a rich server over the same data. Both return
-`energielabel: null`. Thin says nothing about the null, so it could mean _no label_, _not
-registered_, _not applicable_ or _not loaded yet_; the model guesses "this building has no energy
-label". Rich carries one line — null means not registered — and the answer is grounded: none is
-registered for this address. _Same null. Nothing in the response says which._
+A hypothetical example of the problem: the same question to a thin and a rich server, and both
+return `energielabel: null`. If nothing says what the null means, it could mean _no label_, _not
+registered_, _not applicable_ or _not loaded yet_, and the model has to guess — "this building has
+no energy label". One line saying null means not registered grounds the answer: none is registered
+for this address. _Same null. Nothing in the response says which._
 
-**Since the talk:** the slide shows the mechanism, not a measured failure. On this repo's data the
-null is not bare: thin also returns `labelCount: 0`, and models read that as _no label found_. The
-same case in the eval set, `invented-label`, is a control every arm answers correctly
+**In this repo:** the example is not reproducible as a failure here, because the payload carries a
+second field that disambiguates the null — thin also returns `labelCount: 0`. The same case in
+the eval set, `invented-label`, is a control every arm answers correctly
 ([evals](../evals/README.md#the-set)). A null that does separate the tiers is
-`absent-sizing-input` — the field a heat-pump sizing needs is null; haiku fabricated a figure 3 in
-20 times with the note about it, 10 in 20 without
+`absent-sizing-input`: the field a heat-pump sizing needs is null, and haiku fabricated a figure
+3 times in 20 with the note about it, 10 in 20 without
 ([AS](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship)). The
 live A/B that separates most is the Paris Proof trap under
 [Try it live](../README.md#try-it-live).
