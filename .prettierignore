@@ -1,0 +1,13 @@
+# Code only. Markdown and eval data are records: reflowing them can change what they say.
+*.md
+evals/
+docs/
+talks/
+.claude/
+.codex/
+.agents/
+dist/
+build/
+coverage/
+node_modules/
+package-lock.json
