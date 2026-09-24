@@ -3794,3 +3794,24 @@ draws it with the caveat, WRONG draws it).
 **Failure mode to expect.** P1 may fail the other way: `best-v1`'s `get_building_profile` already
 delivers the CALCULATED vs MEASURED line, so the chart-tool fix may add nothing on top of it. That
 would say the data tool's own semantics carry to the render call, which is worth knowing.
+
+## Q22b — Does a check on the finished table call fix what the description could not? Registered 2026-09-24, BEFORE the run
+
+> **REGISTERED before any run.** Q22 found `table-label-figures` at `best` 1/10, `best-v1` 0/10:
+> the models translate `ep2_primair_fossiel_berekend_kwh_m2` into "EP-2 primary fossil energy
+> (kWh/m²)" and the provenance falls out, although `best`'s table description says to keep it.
+
+**Change, one variable.** `best`'s render_table now answers with `interpretation.alerts` naming any
+header (or transposed row label) that names a label energy figure without saying it is calculated
+(`tableAlerts`, `src/tools/app-tools-best.ts`). The wire surface is unchanged, and the freeze hash
+of `best` did not move. `best-v1` is unchanged.
+
+**Run.** `table-label-figures`, haiku, `best-v1` vs `best`, n=10 each, same batches. Scored on the
+LAST successful render_table call (a re-render after the alert counts).
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `best` ≥ 7/10 CORRECT (was 1/10) | ≤ 4/10 |
+| P2 | `best` re-renders after the alert in ≥ 6/10 runs | ≤ 3/10 |
+| P3 | `best-v1` ≤ 2/10 (control) | ≥ 5/10 |
+| P4 | `best` median tokens ≤ +25% of `best-v1` (a re-render costs a call) | > +40% |

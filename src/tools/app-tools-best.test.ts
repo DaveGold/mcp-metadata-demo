@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer } from '../server.js';
-import { chartAlerts, mapAlerts } from './app-tools-best.js';
+import { chartAlerts, mapAlerts, tableAlerts } from './app-tools-best.js';
 import type { BagClientLike, EpOnlineClientLike } from './get-building-profile.js';
 
 const noBag: BagClientLike = {
@@ -37,6 +37,28 @@ describe('chartAlerts', () => {
       expect(a[0]).toMatch(/MEASURED/);
     }
     expect(chartAlerts({ type: 'bar', options: { annotations: [{ label: { content: 'BENG-1 max' } }] } })).toEqual([]);
+  });
+});
+
+describe('tableAlerts', () => {
+  it('flags an energy header without "calculated", in headers and in a transposed first column', () => {
+    const cols = [
+      { key: 'adres', header: 'Address' },
+      { key: 'ep2', header: 'EP-2 primary fossil energy (kWh/m²)' },
+    ];
+    expect(tableAlerts(cols, [])[0]).toMatch(/EP-2 primary fossil energy/);
+    expect(tableAlerts([{ key: 'ep2', header: 'EP-2 berekend (kWh/m²)' }], [])).toEqual([]);
+    const transposed = [
+      { key: 'field', header: 'Figure' },
+      { key: 'a', header: 'Mahlerlaan' },
+    ];
+    expect(tableAlerts(transposed, [['EP-1 energy demand (kWh/m²)', 81.68]])[0]).toMatch(/EP-1 energy demand/);
+    expect(
+      tableAlerts(transposed, [
+        ['Energy label', 'A'],
+        ['Bouwjaar', 1999],
+      ]),
+    ).toEqual([]);
   });
 });
 

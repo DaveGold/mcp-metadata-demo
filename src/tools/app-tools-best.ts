@@ -106,6 +106,34 @@ export function chartAlerts(args: {
   return alerts;
 }
 
+/** A header or row label that names a label energy figure. */
+const LABEL_FIGURE =
+  /\b(ep-?[12]|energiebehoefte|primair|primary|fossiel|fossil|energieverbruik|energy (use|demand|consumption)|co2|co₂|warmtebehoefte|heat(ing)? (demand|need))\b/i;
+const SAYS_CALCULATED = /berekend|calculated|rekenwaarde|label calc|modelled|modeled/i;
+
+/**
+ * Headers (or first-column row labels, for a transposed table) that name a label energy figure
+ * without saying it is calculated. Models translate `ep2_primair_fossiel_berekend_kwh_m2` into
+ * "EP-2 primary fossil energy (kWh/m²)" and the provenance falls out of the name
+ * (evals/results/2026-09-24-q22-app-tools.json).
+ */
+export function tableAlerts(
+  columns: { key: string; header?: string }[],
+  data: (Record<string, unknown> | unknown[])[],
+): string[] {
+  const names = columns.map((c) => c.header ?? c.key);
+  const first = columns[0]?.key;
+  for (const row of data) {
+    const v = Array.isArray(row) ? row[0] : first ? row[first] : undefined;
+    if (typeof v === 'string') names.push(v);
+  }
+  const unmarked = [...new Set(names.filter((n) => LABEL_FIGURE.test(n) && !SAYS_CALCULATED.test(n)))];
+  if (!unmarked.length) return [];
+  return [
+    `${unmarked.map((n) => `"${n}"`).join(', ')}: a label figure headed as if it were consumption. It is CALCULATED by the label method; put that in the header (e.g. "EP-2 berekend (kWh/m²)") and render the table again.`,
+  ];
+}
+
 /** Netherlands bounding box, as in get_weather_context's input schema. */
 const NL = { lat: [50.75, 53.55], lng: [3.36, 7.23] } as const;
 const inNl = (lat: number, lng: number) => lat >= NL.lat[0] && lat <= NL.lat[1] && lng >= NL.lng[0] && lng <= NL.lng[1];

@@ -14,7 +14,7 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { bestTableDescription } from './app-tools-best.js';
+import { bestTableDescription, tableAlerts } from './app-tools-best.js';
 import { z } from 'zod';
 import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -663,7 +663,12 @@ export function registerRenderTableTool(server: McpServer, opts: { minimal?: boo
           content: [
             {
               type: 'text' as const,
-              text: `Table rendered: "${args.title ?? 'Untitled'}" — ${args.data.length} rows, ${args.columns.length} columns`,
+              text: opts.best
+                ? JSON.stringify({
+                    interpretation: { alerts: tableAlerts(args.columns, args.data), notes: [] },
+                    rendered: `"${args.title ?? 'Untitled'}" — ${args.data.length} rows, ${args.columns.length} columns`,
+                  })
+                : `Table rendered: "${args.title ?? 'Untitled'}" — ${args.data.length} rows, ${args.columns.length} columns`,
             },
           ],
           structuredContent: { ...args },
