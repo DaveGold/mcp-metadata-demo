@@ -30,7 +30,7 @@ readable back by anyone through `get_tool_call_log`; see [Logging](running.md#lo
 
 ## The prompts
 
-### 1 — The A/B: ask thin and rich, compare the answers
+### 1 — The talk's opening example: same null
 
 > _"What's the energy label of Museumstraat 1, 1071XX Amsterdam, and what should I keep in mind about this building?"_
 
@@ -38,13 +38,21 @@ readable back by anyone through `get_tool_call_log`; see [Logging](running.md#lo
   `alerts: ["Pre-Bouwbesluit 1992 — likely limited insulation.", "No registered energy label found in EP-Online."]`.
   The agent correctly explains that _no label is registered_ (not that the building has none) and
   flags the pre-1992 insulation caveat — with zero priming from you.
-- **thin** → returns the same bare `null`. An unprimed agent typically concludes _"this building
-  has no energy label"_ — wrong, and the exact misread the rich tier's alert exists to prevent.
+- **thin** → returns the same `null`, but not a bare one: the payload also carries
+  `labelCount: 0`, and models read that as _no label found_. So thin usually gets this right too.
 
-Same registers, same building (it's the Rijksmuseum, bouwjaar 1885) — the only difference is the
-metadata layer. This is the talk's opening example: same null, nothing in the response says which.
+Same registers, same building (it's the Rijksmuseum, bouwjaar 1885). This is the talk's opening
+example, and it shows the mechanism — a null needs a meaning — but on this data it does **not**
+separate the tiers: the payload already carries a second field that disambiguates it. The eval set
+confirms that: the same case, `invented-label`, is a control every arm answers correctly
+([evals](../evals/README.md#the-set)). What differs is the rest of the answer — the pre-1992
+caveat on rich, the don't-infer-from-age line on best. For a null that does separate, see
+`absent-sizing-input`: the field a heat-pump sizing needs is null, and haiku fabricated a figure 3
+times in 20 with the note, 10 in 20 without it
+([AS](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship)).
+For the A/B that separates most, use prompt 2.
 
-### 2 — Domain reasoning without priming (best, or rich)
+### 2 — The A/B that separates: domain reasoning without priming (best, or rich)
 
 > _"Gustav Mahlerlaan 10, 1082PP Amsterdam — how does it stack up against the Paris Proof 2040 office target of 70 kWh/m²?"_
 

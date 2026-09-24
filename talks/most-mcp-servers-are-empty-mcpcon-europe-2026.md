@@ -39,8 +39,15 @@ registered_, _not applicable_ or _not loaded yet_; the model guesses "this build
 label". Rich carries one line — null means not registered — and the answer is grounded: none is
 registered for this address. _Same null. Nothing in the response says which._
 
-**Try it:** this is the first prompt under [Try it live](../README.md#try-it-live). `best` goes
-further than rich: no label is known, and do not infer one from the building's age.
+**Since the talk:** the slide shows the mechanism, not a measured failure. On this repo's data the
+null is not bare: thin also returns `labelCount: 0`, and models read that as _no label found_. The
+same case in the eval set, `invented-label`, is a control every arm answers correctly
+([evals](../evals/README.md#the-set)). A null that does separate the tiers is
+`absent-sizing-input` — the field a heat-pump sizing needs is null; haiku fabricated a figure 3 in
+20 times with the note about it, 10 in 20 without
+([AS](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship)). The
+live A/B that separates most is the Paris Proof trap under
+[Try it live](../README.md#try-it-live).
 
 ## 5 · Where did the meaning go?
 

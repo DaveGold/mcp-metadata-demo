@@ -127,17 +127,18 @@ differs:
 
 Then ask each the **same question**:
 
-> _"What's the energy label of Museumstraat 1, 1071XX Amsterdam, and what should I keep in mind about this building?"_
-
-The talk's opening example. Every tier gets `energielabel: null`. Rich says no label is
-_registered_ and flags the pre-1992 insulation caveat; best says no label is known and not to infer
-one from the building's age; on thin, an unprimed agent typically says the building _has_ no label
-— wrong.
-
 > _"Gustav Mahlerlaan 10, 1082PP Amsterdam — how does it stack up against the Paris Proof 2040 office target of 70 kWh/m²?"_
 
 The eval set's headline trap. The right answer: it **cannot be ranked from this data** — the
 label figures are calculated, Paris Proof is defined on measured energy. `best` gets it right.
+
+> _"What's the energy label of Museumstraat 1, 1071XX Amsterdam, and what should I keep in mind about this building?"_
+
+The talk's opening example — and, on this data, not one that separates the tiers. Every tier gets
+`energielabel: null`, but also `labelCount: 0`, so even thin usually reads it as _none
+registered_; in the eval set the same case (`invented-label`) is a control every arm passes. What
+differs is the rest of the answer: rich flags the pre-1992 insulation caveat, best says not to
+infer a label from the building's age.
 
 Three more prompts (visualisation, Select, reading `queryIntent` back) and the full tier
 comparison: [`docs/live-demo.md`](docs/live-demo.md).
