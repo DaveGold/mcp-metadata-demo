@@ -152,9 +152,9 @@ section or field ~26%, status and progress ~19%, verifying a previous write ~16%
 scope triage ~11%. _They only asked for the whole thing because the whole thing was all I
 offered._
 
-Production data from a ticketing server, not part of this repo: about 400 interactive calls,
-sorted by hand, so the shares are approximate. They add up to ~95%; the slide does not break out
-the rest.
+Production data from a ticketing server, not part of this repo. The intents were pulled from the
+tool-call log and classified with AI, so the shares are approximate. They add up to ~95%; the
+slide does not break out the rest.
 
 ## 16 · Not prompt tuning. Interface engineering.
 
