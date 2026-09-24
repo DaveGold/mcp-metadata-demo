@@ -240,9 +240,8 @@ bought almost nothing. Two things are _not_ measured: other model families, and 
 reaches the model is set by the host, not the protocol (the 2,048 cut is Claude Code's), so check
 it per client: [what reaches the model, and how to check](../docs/design.md#2--ownership-is-not-delivery).
 
-**Who may see which data?** In production each server sits behind the company's identity provider,
-and servers with sensitive data are restricted to an allowlist. The agent acts for the signed-in
-person and cannot reach anything that person could not reach on their own. This repo serves only
-public registers, so it has no access control; the one thing to know is that every
-`queryIntent` sent to the hosted endpoints is readable by anyone
-([logging](../docs/running.md#logging)).
+**Who may see which data?** Warmtebouw is an open company: almost anyone can use almost all of
+the data, and breaking down data silos is part of the point. HR and other sensitive data sit
+behind role-based access control. This repo serves only public registers, so it has no access
+control; the one thing to know is that every `queryIntent` sent to the hosted endpoints is
+readable by anyone ([logging](../docs/running.md#logging)).
