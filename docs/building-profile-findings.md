@@ -49,9 +49,12 @@ Repro: `npx tsx scripts/smoke.ts 3543AR 1` (NEN 7120), `1082PP 10` (NTA 8800 off
   measured (0/60 → 59/60). In `rich` it sits past char 2,048, so it is not delivered.
   Measured as Q20: the removal did NOT fix `rich` on benchmark-trap (haiku 0/10, sonnet 1/10),
   because the correcting CALCULATED vs MEASURED line is past its cut; it did end the "Paris
-  Proof target" misnaming on heat-pump-triage (0/10, was 8/20). The production Duurzaam server
-  has the same defect (MCPSER-81) — fix there needs both halves: remove the alert AND deliver the
-  fact.
+  Proof target" misnaming on heat-pump-triage (0/10, was 8/20). **Second half, Q21:** the
+  CALCULATED vs MEASURED line is now inserted before QUERY STRATEGY in `rich`'s description
+  (char 766, inside the cut; `richPreamble` in `get-building-profile.ts`). benchmark-trap `rich`:
+  haiku 0/10 → 10/10, sonnet 1/10 → 10/10; building-size unchanged at 10/10, although QUERY
+  STRATEGY item 5 now falls past the cut. The production Duurzaam server has the same defect
+  (MCPSER-81) — fix there needs both halves: remove the alert AND deliver the fact.
 - **BAG-area fallback for totals** — `benchmarkArea()` falls back to the BAG area when there is
   no thermal zone, mixing scopes by up to 1.8×.
 - **Large-pand alert threshold** — fires only above 10 verblijfsobjecten; the scope problem

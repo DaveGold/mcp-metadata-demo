@@ -54,6 +54,9 @@ in [`evals/results/`](evals/results/). The short version, one line per finding:
 - **Evals find bugs that tests cannot.** The 2,048 cut, a stale deploy, a quota the tool itself
   exhausted — and this repo's own computed alert, which ranked a calculated figure against a
   measured target and was repeated by the models (0/20). All tests were green.
+- **Removing the wrong line is half the fix.** With that alert gone, `rich` still scored 0/10: the
+  correcting sentence sat past the cut. Moving that one sentence inside it: 10/10.
+  ([Q20](evals/results/2026-09-24-q20-rich-alert-removed.json), [Q21](evals/results/2026-09-24-q21-rich-line-delivered.json))
 - **Most of the predictions were wrong** — 13 of the first 23. Measure; do not reason about what a
   model reads.
 
@@ -70,7 +73,8 @@ fields need explanation (a field-reading probe), and a portable eval harness.
 reference, in the same batches: the calculated-vs-measured trap **20/20 · 9/10 · 10/10 against
 0/20 · 0/10 · 0/10** (haiku · sonnet · opus; hand-read), a held-out question **19/20 against 0/20**, cheaper in
 30 of 32 cells — and two defects the runs found in `best` itself, fixed and re-measured
-([Q19–Q20](evals/results/README.md)).
+([Q19–Q21](evals/results/README.md)). Those trap numbers are `rich` before its fix. Moving its one
+correcting sentence inside the cut took it to 10/10 as well ([Q21](evals/results/2026-09-24-q21-rich-line-delivered.json)).
 
 ## Try it live (no install, no API key)
 
@@ -113,7 +117,7 @@ Same registers, same building (it's the Rijksmuseum, bouwjaar 1885) — the only
 
 > *"Gustav Mahlerlaan 10, 1082PP Amsterdam — how does it stack up against the Paris Proof 2040 office target of 70 kWh/m²?"*
 
-The right answer is that it **cannot be ranked from this data**: every EP-Online figure is CALCULATED by the label method, and Paris Proof is defined on MEASURED energy at the meter — same unit, different quantity. `best` states that fact where the model reads it and scores 20/20 on haiku. Until 2026-09-24 `rich` itself carried a computed alert that made exactly this comparison, and the models repeated it (0/20). The alert is removed now, but `rich` still scores 0/10 on haiku: the question invites the comparison, and `rich`'s CALCULATED vs MEASURED sentence sits past the 2,048 cut. Removing a wrong line is not the same as delivering the right one ([Q20](evals/results/2026-09-24-q20-rich-alert-removed.json)). This is the eval set's headline trap ([`benchmark-trap`](evals/questions.json)).
+The right answer is that it **cannot be ranked from this data**: every EP-Online figure is CALCULATED by the label method, and Paris Proof is defined on MEASURED energy at the meter — same unit, different quantity. `best` states that fact where the model reads it and scores 20/20 on haiku. Until 2026-09-24 `rich` itself carried a computed alert that made exactly this comparison, and the models repeated it (0/20). Removing that alert alone left `rich` at 0/10 on haiku: the question invites the comparison, and `rich`'s CALCULATED vs MEASURED sentence sat past the 2,048 cut ([Q20](evals/results/2026-09-24-q20-rich-alert-removed.json)). Moving that one sentence inside the cut took it to 10/10 on haiku and on sonnet ([Q21](evals/results/2026-09-24-q21-rich-line-delivered.json)). Removing a wrong line is half the fix; delivering the right one is the other half. This is the eval set's headline trap ([`benchmark-trap`](evals/questions.json)).
 
 **3 — Self-describing visualization (rich):**
 

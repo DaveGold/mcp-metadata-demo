@@ -66,8 +66,9 @@ Read that before quoting any number from this directory.
 | [`2026-09-24-q19d-canonical-blocks.json`](2026-09-24-q19d-canonical-blocks.json) | **Q19d: renaming `best`'s description heads to the talk's eight canonical blocks breaks nothing.** haiku, 60 runs, audit exact 12/12. `best` 10/10 on benchmark-trap, 10/10 on metered-vs-model, 9/10 on weather-single-quarter; `rich` 0/10, 10/10, 0/10. The metered refusal is still answered without a call in 6/10 (P2 partial). |
 | [`2026-09-24-field-probe-best.json`](2026-09-24-field-probe-best.json) | **The field-reading probe on `best`.** A tool-less haiku read one bare response per field (3 records × 3). No calculated energy field was read as measured (0/99), and all 14 fields left unexplained on purpose read right. **The auto-score missed a real scope misread:** `oppervlakte_bag_verblijfsobject_m2` was taken as the building's area in 2 of 9 readings, so the response rule is needed and the name alone is not enough. It also flagged 7 weather fields whose meanings were right (unit spelling, kind choice). Read the flagged meanings; do not trust the score. |
 | [`2026-09-24-q20-rich-alert-removed.json`](2026-09-24-q20-rich-alert-removed.json) | **Q20: removing a wrong sentence is not the same as adding the right one.** `rich` had its computed EP-1-vs-Paris-Proof alert removed. It still ranks the calculated figure against the measured target: **haiku 0/10, sonnet 1/10** (+3 hedged), against `best` 10/10 and 10/10 in the same batches. The question invites the comparison, and `rich`'s CALCULATED vs MEASURED line sits past its 2,048 cut. What the removal did fix: no `rich` answer calls the heat-pump band a "Paris Proof target" any more (Q19: 8 of 20), at 9/10. P1 and P2 falsified, as the registration's failure mode said; P3 and P4 confirmed. It also introduced a hand rule for hedged verdicts, applied back to Q19 as an erratum: `rich`-opus 6/10 → 0/10. Audit exact 12/12. |
+| [`2026-09-24-q21-rich-line-delivered.json`](2026-09-24-q21-rich-line-delivered.json) | **Q21: deliver the right sentence and the error goes.** The only change from Q20: `rich`'s CALCULATED vs MEASURED line moved from char ~3,380 to char 766, inside the 2,048 cut. benchmark-trap `rich` **haiku 0/10 → 10/10, sonnet 1/10 → 10/10**, every answer hand-read, each one explicitly declining the comparison. No cost: building-size `rich` 10/10 with QUERY STRATEGY item 5 now past its cut. `best` 10/10 in every cell. P1–P4 confirmed. Q20 + Q21: removing a wrong line left the error in place; delivering the right one removed it. Audit exact 12/12. |
 
-> ### ⚠️ 2026-09-24 — `rich` CHANGED: the EP-1 vs Paris Proof alert is removed
+> ### ⚠️ 2026-09-24 — `rich` CHANGED, twice: the EP-1 vs Paris Proof alert is removed (Q20), and the CALCULATED vs MEASURED line is delivered (Q21)
 >
 > After Q19 the `rich` arm lost its computed "EP-1 above Paris Proof 2040 target" and "EP-1 >
 > 150 above benchmark" alerts, and the Paris Proof promise in its description's ALERTS paragraph,
@@ -75,6 +76,10 @@ Read that before quoting any number from this directory.
 > touching ep1 or ep2 — benchmark-trap, heat-pump-triage — is from the version WITH the alert.
 > Do not compare it with a `rich` number scored afterwards. No other arm changed; the hash
 > freeze proves it. See `docs/building-profile-findings.md` §7 and Q20.
+>
+> Then, before Q21, `rich`'s description got the CALCULATED vs MEASURED line up front (char 766,
+> inside the cut). From that point `rich` vs `words` is no longer a one-variable rung on ep1/ep2
+> questions, and a `rich` benchmark-trap number from before Q21 does not describe today's `rich`.
 
 > ### ⚠️ DESCRIPTION TRUNCATION — read before quoting ANY description-channel number
 >

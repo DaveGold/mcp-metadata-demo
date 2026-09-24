@@ -84,7 +84,8 @@ which is exactly why a wrong one is the worst failure in the set.
 comparison, the model makes it unaided: in Q20 `rich` lost its false alert and still scored
 0/10, because the fact that forbids the comparison sat past the description cut. After removing
 a defect, make sure the correcting FACT is delivered (description head or response) and measure
-it [Q20].
+it [Q20]. Doing exactly that — moving that one line from char ~3,380 to char 766, nothing else —
+took `rich` from 0/10 to 10/10 on haiku and from 1/10 to 10/10 on sonnet [Q21].
 
 ## Step 5 — Provenance backfill
 

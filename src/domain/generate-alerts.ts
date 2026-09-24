@@ -106,7 +106,9 @@ export function generateAlerts(profile: ProfileCore): string[] {
   // (sonnet), 0/10 (opus, hand-read) in evals/results/2026-09-24-q19-best-arm.json. Q20
   // (evals/results/2026-09-24-q20-rich-alert-removed.json): removing it did NOT fix rich on that
   // question (haiku 0/10, sonnet 1/10) — the missing CALCULATED vs MEASURED fact sits past rich's
-  // 2,048 cut. Removing a wrong line is not the same as delivering the right one.
+  // 2,048 cut. Removing a wrong line is not the same as delivering the right one. Q21
+  // (evals/results/2026-09-24-q21-rich-line-delivered.json): with that line moved inside the cut
+  // (get-building-profile.ts, richPreamble), rich went to 10/10 on haiku and on sonnet.
   // Do not reintroduce a numeric benchmark comparison for calculated label figures.
 
   if (profile.label_geldig_tot) {

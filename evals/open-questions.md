@@ -3731,6 +3731,13 @@ removes a false claim, but it does not add the missing fact.
 
 ## Q21 — Once the correcting fact is DELIVERED, does `rich` pass benchmark-trap? Registered 2026-09-24, BEFORE the run
 
+> **ANSWERED 2026-09-24 — yes, completely.** See [`results/2026-09-24-q21-rich-line-delivered.json`](results/2026-09-24-q21-rich-line-delivered.json).
+> benchmark-trap `rich`: haiku **10/10** (Q20: 0/10), sonnet **10/10** (Q20: 1/10); building-size
+> `rich` 10/10; `best` 10/10 in every cell. All four predictions confirmed. All 20 `rich`
+> benchmark-trap answers hand-read: every one declines the comparison (two quote the figure while
+> declining, CORRECT under the hand rule). Audit exact 12/12 (30 + 30 calls). Q20 → Q21 is
+> cross-sitting, so read it as direction; a 10-of-10 gap is far past the bar either way.
+
 > **REGISTERED before any run.** Deployed and verified live: in `rich`'s description the CALCULATED
 > vs MEASURED line starts at char 766 and its instruction ends at ~1,445, inside the 2,048 cut.
 
