@@ -3837,3 +3837,24 @@ LAST successful render_table call (a re-render after the alert counts).
 | P2 | `best` re-renders after the alert in ≥ 6/10 runs | ≤ 3/10 |
 | P3 | `best-v1` ≤ 2/10 (control) | ≥ 5/10 |
 | P4 | `best` median tokens ≤ +25% of `best-v1` (a re-render costs a call) | > +40% |
+
+## Q22c — Does REFUSING the call fix what the alert could not? Registered 2026-09-24, BEFORE the run
+
+> **REGISTERED before any run.** In Q22b the alert on a successful table render fixed 2/10 headers
+> and triggered 0/10 re-renders. This tests the rule added to the skill from it — "a fix that must
+> happen is a refusal, not an alert" — before the release.
+
+**Change, one variable.** `best`'s render_table now refuses the call (`isError`, "Not rendered. …
+say so in the header … and call render_table again") when a header or transposed row label names a
+label energy figure without saying it is calculated. It uses the same check as Q22b. Wire bytes
+unchanged. `best-v1` unchanged.
+
+**Run.** `table-label-figures`, haiku, `best-v1` vs `best`, n=10 each, same batches. Scored on the
+LAST successful render_table call.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `best` ≥ 8/10 CORRECT (Q22b: 2/10) | ≤ 5/10 |
+| P2 | every refused `best` run retries, and ≥ 9/10 end with a rendered table | ≤ 7/10 rendered |
+| P3 | `best-v1` ≤ 2/10 (control) | ≥ 5/10 |
+| P4 | `best` median tokens ≤ +20% of `best-v1` (the retry costs a call) | > +35% |

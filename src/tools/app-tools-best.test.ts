@@ -70,6 +70,37 @@ describe('mapAlerts', () => {
   });
 });
 
+describe('render_table on the wire', () => {
+  const table = (header: string) => ({
+    title: 't',
+    columns: [
+      { key: 'adres', header: 'Address' },
+      { key: 'ep2', header, type: 'number' },
+    ],
+    data: [['Mahlerlaan 10', 179.06]],
+  });
+
+  it('best refuses a label figure headed as consumption, and renders it once the header says calculated', async () => {
+    const client = await connect('best');
+    const bad = await client.callTool({
+      name: 'render_table',
+      arguments: table('EP-2 primary fossil energy (kWh/m²)'),
+    });
+    expect(bad.isError).toBe(true);
+    expect(textOf(bad)).toMatch(/^Not rendered\..*CALCULATED/);
+    const good = await client.callTool({ name: 'render_table', arguments: table('EP-2 berekend (kWh/m²)') });
+    expect(good.isError).toBeFalsy();
+    expect(JSON.parse(textOf(good)).interpretation.alerts).toEqual([]);
+  });
+
+  it('rich still renders it: the older tiers keep their behaviour', async () => {
+    const r = await (
+      await connect('rich')
+    ).callTool({ name: 'render_table', arguments: table('EP-2 primary fossil energy (kWh/m²)') });
+    expect(r.isError).toBeFalsy();
+  });
+});
+
 describe('render_chart on the wire', () => {
   const bar = {
     type: 'bar',

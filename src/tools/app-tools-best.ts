@@ -130,7 +130,7 @@ export function tableAlerts(
   const unmarked = [...new Set(names.filter((n) => LABEL_FIGURE.test(n) && !SAYS_CALCULATED.test(n)))];
   if (!unmarked.length) return [];
   return [
-    `${unmarked.map((n) => `"${n}"`).join(', ')}: a label figure headed as if it were consumption. It is CALCULATED by the label method; put that in the header (e.g. "EP-2 berekend (kWh/m²)") and render the table again.`,
+    `Not rendered. ${unmarked.map((n) => `"${n}"`).join(', ')}: a label figure headed as if it were consumption. It is CALCULATED by the label method; say so in the header (e.g. "EP-2 berekend (kWh/m²)") and call render_table again.`,
   ];
 }
 

@@ -657,6 +657,15 @@ export function registerRenderTableTool(server: McpServer, opts: { minimal?: boo
           };
         }
 
+        // A header that names a calculated label figure as if it were consumption is refused, not
+        // flagged: after a successful render the model does not redo the call
+        // (evals/results/2026-09-24-q22b-table-alert.json).
+        const headerProblems = opts.best ? tableAlerts(args.columns, args.data) : [];
+        if (headerProblems.length) {
+          await logToolCall({ auth, args, start, status: 'error' });
+          return { content: [{ type: 'text' as const, text: headerProblems.join(' ') }], isError: true };
+        }
+
         await logToolCall({ auth, args, start, status: 'success' });
 
         return {
