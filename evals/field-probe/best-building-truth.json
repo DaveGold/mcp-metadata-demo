@@ -1,0 +1,379 @@
+{
+ "_comment": "Ground truth for the field-reading probe on the best arm (get_building_profile). kinds = accepted answers; critical = a misreading changes an answer (calculated vs measured, scope, unit).",
+ "fields": {
+  "matchStatus": {
+   "kinds": [
+    "metadata",
+    "computed_by_tool"
+   ],
+   "unit": "none",
+   "meaning": "whether the address matched one unit, several, or none",
+   "critical": false
+  },
+  "candidateCount": {
+   "kinds": [
+    "metadata",
+    "computed_by_tool"
+   ],
+   "unit": "count",
+   "meaning": "number of units matching the address",
+   "critical": false
+  },
+  "labelCount": {
+   "kinds": [
+    "metadata",
+    "computed_by_tool"
+   ],
+   "unit": "count",
+   "meaning": "number of energy labels found",
+   "critical": false
+  },
+  "adres": {
+   "kinds": [
+    "register"
+   ],
+   "unit": "none",
+   "meaning": "formatted address",
+   "critical": false
+  },
+  "gemeente": {
+   "kinds": [
+    "register"
+   ],
+   "unit": "none",
+   "meaning": "municipality",
+   "critical": false
+  },
+  "provincie": {
+   "kinds": [
+    "register"
+   ],
+   "unit": "none",
+   "meaning": "province",
+   "critical": false
+  },
+  "oppervlakte_bag_verblijfsobject_m2": {
+   "kinds": [
+    "register",
+    "measured"
+   ],
+   "unit": "m2",
+   "meaning": "BAG floor area of one unit (verblijfsobject), not the building",
+   "critical": true
+  },
+  "gebruiksdoel": {
+   "kinds": [
+    "register"
+   ],
+   "unit": "none",
+   "meaning": "registered use (woonfunctie, kantoorfunctie, ...)",
+   "critical": false
+  },
+  "coordinaten": {
+   "kinds": [
+    "register",
+    "computed_by_tool",
+    "measured"
+   ],
+   "unit": "degrees",
+   "meaning": "latitude/longitude of the unit",
+   "critical": false
+  },
+  "bag_vbo_id": {
+   "kinds": [
+    "identifier"
+   ],
+   "unit": "none",
+   "meaning": "BAG unit identifier",
+   "critical": false
+  },
+  "vbo_status": {
+   "kinds": [
+    "register",
+    "metadata"
+   ],
+   "unit": "none",
+   "meaning": "registration status of the unit",
+   "critical": false
+  },
+  "bouwjaar": {
+   "kinds": [
+    "register"
+   ],
+   "unit": "year",
+   "meaning": "construction year (BAG)",
+   "critical": false
+  },
+  "pand_status": {
+   "kinds": [
+    "register",
+    "metadata"
+   ],
+   "unit": "none",
+   "meaning": "registration status of the building",
+   "critical": false
+  },
+  "aantal_verblijfsobjecten_in_pand": {
+   "kinds": [
+    "register",
+    "computed_by_tool",
+    "metadata"
+   ],
+   "unit": "count",
+   "meaning": "number of units in the building (pand)",
+   "critical": false
+  },
+  "bag_pand_id": {
+   "kinds": [
+    "identifier"
+   ],
+   "unit": "none",
+   "meaning": "BAG building identifier",
+   "critical": false
+  },
+  "energielabel": {
+   "kinds": [
+    "register",
+    "calculated"
+   ],
+   "unit": "none",
+   "meaning": "registered energy label class",
+   "critical": false
+  },
+  "ep1_energiebehoefte_berekend_kwh_m2": {
+   "kinds": [
+    "calculated"
+   ],
+   "unit": "kwh/m2",
+   "meaning": "calculated net energy demand per m2 per year",
+   "critical": true
+  },
+  "ep2_primair_fossiel_berekend_kwh_m2": {
+   "kinds": [
+    "calculated"
+   ],
+   "unit": "kwh/m2",
+   "meaning": "calculated primary fossil energy per m2 per year",
+   "critical": true
+  },
+  "aandeel_hernieuwbare_energie_berekend_pct": {
+   "kinds": [
+    "calculated"
+   ],
+   "unit": "%",
+   "meaning": "calculated renewable share",
+   "critical": true
+  },
+  "co2_emissie_berekend_kg_m2": {
+   "kinds": [
+    "calculated"
+   ],
+   "unit": "kg/m2",
+   "meaning": "calculated CO2 emission per m2 per year",
+   "critical": true
+  },
+  "energieverbruik_berekend_niet_gemeten_kwh_m2": {
+   "kinds": [
+    "calculated"
+   ],
+   "unit": "kwh/m2",
+   "meaning": "calculated (modelled, not metered) total energy use per m2 per year",
+   "critical": true
+  },
+  "warmtebehoefte_berekend_kwh_m2": {
+   "kinds": [
+    "calculated"
+   ],
+   "unit": "kwh/m2",
+   "meaning": "calculated net heat demand per m2 per year",
+   "critical": true
+  },
+  "temperatuuroverschrijding_indicator_eenheidloos": {
+   "kinds": [
+    "calculated"
+   ],
+   "unit": "none",
+   "meaning": "overheating risk indicator (unitless)",
+   "critical": true
+  },
+  "compactheid_als_ag_eenheidloos": {
+   "kinds": [
+    "calculated"
+   ],
+   "unit": "none",
+   "meaning": "compactness ratio loss area / usable area (unitless)",
+   "critical": true
+  },
+  "gebruiksoppervlakte_thermische_zone_m2": {
+   "kinds": [
+    "register",
+    "calculated",
+    "measured"
+   ],
+   "unit": "m2",
+   "meaning": "usable floor area of the thermal zone the label covers",
+   "critical": true
+  },
+  "gebouwklasse": {
+   "kinds": [
+    "register",
+    "metadata"
+   ],
+   "unit": "none",
+   "meaning": "residential (Woningbouw) or non-residential (Utiliteitsbouw)",
+   "critical": false
+  },
+  "soort_opname": {
+   "kinds": [
+    "metadata"
+   ],
+   "unit": "none",
+   "meaning": "type of label assessment",
+   "critical": false
+  },
+  "berekeningstype": {
+   "kinds": [
+    "metadata"
+   ],
+   "unit": "none",
+   "meaning": "calculation method of the label (NTA 8800, NEN 7120, ...)",
+   "critical": false
+  },
+  "label_status": {
+   "kinds": [
+    "metadata"
+   ],
+   "unit": "none",
+   "meaning": "existing or new-build label",
+   "critical": false
+  },
+  "op_basis_van_referentiegebouw": {
+   "kinds": [
+    "metadata"
+   ],
+   "unit": "none",
+   "meaning": "label based on a reference building",
+   "critical": false
+  },
+  "label_geldig_tot": {
+   "kinds": [
+    "metadata"
+   ],
+   "unit": "date",
+   "meaning": "label expiry date",
+   "critical": false
+  },
+  "label_opnamedatum": {
+   "kinds": [
+    "metadata"
+   ],
+   "unit": "date",
+   "meaning": "label assessment date",
+   "critical": false
+  },
+  "label_registratiedatum": {
+   "kinds": [
+    "metadata"
+   ],
+   "unit": "date",
+   "meaning": "label registration date",
+   "critical": false
+  },
+  "gebouwtype": {
+   "kinds": [
+    "register",
+    "metadata"
+   ],
+   "unit": "none",
+   "meaning": "residential building type",
+   "critical": false
+  },
+  "gebouwsubtype": {
+   "kinds": [
+    "register",
+    "metadata"
+   ],
+   "unit": "none",
+   "meaning": "residential building subtype",
+   "critical": false
+  },
+  "sbi_sector_omschrijving": {
+   "kinds": [
+    "register",
+    "metadata"
+   ],
+   "unit": "none",
+   "meaning": "sector description (text)",
+   "critical": false
+  },
+  "energie_index_berekend_eenheidloos": {
+   "kinds": [
+    "calculated"
+   ],
+   "unit": "none",
+   "meaning": "calculated energy index (unitless)",
+   "critical": true
+  },
+  "ep2_primair_fossiel_emg_forfaitair_berekend_kwh_m2": {
+   "kinds": [
+    "calculated"
+   ],
+   "unit": "kwh/m2",
+   "meaning": "calculated ep2 with standardised area-bound measures",
+   "critical": true
+  },
+  "aandeel_hernieuwbare_energie_emg_forfaitair_berekend_pct": {
+   "kinds": [
+    "calculated"
+   ],
+   "unit": "%",
+   "meaning": "calculated renewable share with standardised measures",
+   "critical": true
+  },
+  "eis_energiebehoefte_kwh_m2": {
+   "kinds": [
+    "metadata",
+    "register"
+   ],
+   "unit": "kwh/m2",
+   "meaning": "legal BENG-1 limit (requirement), not the building value",
+   "critical": false
+  },
+  "eis_primaire_fossiele_energie_kwh_m2": {
+   "kinds": [
+    "metadata",
+    "register"
+   ],
+   "unit": "kwh/m2",
+   "meaning": "legal BENG-2 limit",
+   "critical": false
+  },
+  "eis_aandeel_hernieuwbare_energie_pct": {
+   "kinds": [
+    "metadata",
+    "register"
+   ],
+   "unit": "%",
+   "meaning": "legal BENG-3 minimum",
+   "critical": false
+  },
+  "certificaathouder": {
+   "kinds": [
+    "metadata"
+   ],
+   "unit": "none",
+   "meaning": "adviser who registered the label",
+   "critical": false
+  },
+  "ep_online_bouwjaar": {
+   "kinds": [
+    "register",
+    "metadata"
+   ],
+   "unit": "year",
+   "meaning": "construction year as registered in EP-Online",
+   "critical": false
+  }
+ },
+ "_calibration": "2026-09-24, after one smoke run on mahlerlaan, BEFORE the scored runs: floor areas may be called measured (they are surveyed; the risk is scope, not kind); status fields may be metadata; the VBO count and coordinates may be tool-derived. The measured-misread flag applies only to fields whose accepted kinds include calculated and exclude measured."
+}

@@ -69,6 +69,21 @@ description: Run the eval set in evals/questions.json against the arm servers (t
    each tripped it. Keep multi-call waves small (3 worked), and treat a "Too many requests"
    result as NO_RECORD, not as model behaviour.
 
+   **Four more, found in Q19 (2026-09-24).** The portable harness in
+   `.claude/skills/rich-domain-mcp-server/references/harness/` handles them:
+   - (a) A headless parent can spawn its Agent calls BEFORE an MCP server connects. The host then
+     refuses the tool-less subagent, and the run is missing. Make one ToolSearch `select:` call for
+     every arm's tool first.
+   - (b) Open-Meteo meters by data volume (~1 call per 14 days of data) and caps concurrency. One
+     arm's 10-year fetch per call exhausted the hourly quota. Arms that make the models fetch
+     history themselves (opus on `rich`: 7–8 multi-year calls per run) burn it too. Treat any
+     upstream 429 as NO_RECORD.
+   - (c) Re-run an incomplete wave WHOLE, or as same-batch pairs, never just the missing slot.
+   - (d) `get_tool_call_log` pages at 500 with no offset. Audit a big run by reading the Firestore
+     `toolCalls` collection directly, per wave time window. Use file mtimes for the window
+     (`date +%N` does not exist on macOS). Calls rejected by input validation are not logged;
+     explain them instead.
+
    The only check that counts: can you call
    `mcp__eval-<arm>__get_building_profile` right now — an actual call, not a
    schema lookup? If not, STOP. Do not attempt the run. Re-check later in the
@@ -176,6 +191,18 @@ prediction registered before they were built; it says `instruction-only` should 
 run `metered-vs-model` as well as `benchmark-trap`, because an instruction without its
 reason should be brittle on a case it does not name. That second question is also
 where Q2's untested cross-record half can finally be run.
+
+**`best` is a COMPOSITE, not a rung** — Q19's arm, built 2026-09-23 with the
+`rich-domain-mcp-server` skill's audit flow. It changes many layers at once on BOTH
+data tools: renamed fields (`src/domain/best-field-names.ts`), descriptions under
+2,048 chars, `interpretation`-first responses from a rule registry, computed
+`derived` values, a shipped reference period for weather, no Paris Proof threshold.
+It is a ceiling and a reference, never an attribution: compare it with `rich` (the
+old reference) and `inline` (the fair token baseline — minimal neighbours, like
+`best`), and attribute any gap through the one-variable arms above. Its field names
+differ from every other arm, so a scorer that matches a field name must accept the
+`best` name (e.g. `warmtebehoefte_berekend_kwh_m2` for `warmtebehoefte_kwh_m2`).
+Read `evals/open-questions.md` Q19 for the predictions registered before it ran.
 
 Before scoring, read `results/2026-09-21-shape-replication.json` for `_the_rule`
 (semantics handle interpretation, classification, prevention and refusal; recipes

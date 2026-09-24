@@ -1,4 +1,13 @@
 import { describe, it, expect } from 'vitest';
+import { description as richDescription, calcVsMeasuredLine as calcLine } from './get-building-profile.js';
+
+describe('rich description — delivery (Q21)', () => {
+  it('carries the CALCULATED vs MEASURED line inside the 2,048-char cut', () => {
+    const at = richDescription.indexOf(calcLine);
+    expect(at).toBeGreaterThan(0);
+    expect(at + calcLine.length).toBeLessThan(2048);
+  });
+});
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer } from '../server.js';

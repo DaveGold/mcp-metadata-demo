@@ -1,374 +1,336 @@
 ---
 name: rich-domain-mcp-server
 description: >-
-  Guides building and enriching rich-domain MCP servers and tools using Introspective
-  Context Engineering — scaffold something simple, then run the Examine → Flag → Validate
-  → Encode → Iterate loop until the tool teaches the agent the domain. Invoke when asked to
-  add, build, scaffold or wire a new MCP server or backend, add or change an MCP tool,
-  enrich or review tool metadata (description, inputSchema, outputSchema, .describe(),
-  .meta(), summarize, alerts, RETURNS/WHEN TO USE/INTERPRETATION blocks), run a
-  data-discovery session against an API (explore the data, what does this field mean,
-  which fields are null, probe the API, API findings), or prepare a domain-expert
-  validation session on discovered metadata (confidence markers, questions for a subject
-  matter expert). Also triggers on "the agent picks the wrong tool", "the agent doesn't
-  understand this field", user-feedback triage, and tool-call-log pattern analysis.
+  Guides building a NEW rich-domain MCP server or tool, and auditing an EXISTING one up to a
+  measured reference, using Introspective Context Engineering: discover the domain from live
+  data, name fields so they cannot be misread, deliver guidance where the model actually receives
+  it (description head, input schema, response — not the output schema, not past char 2,048),
+  compute determinate verdicts, record provenance per rule, and measure the result. Invoke when
+  asked to add, build, scaffold or wire an MCP server or tool; review, audit, enrich or fix tool
+  metadata (descriptions, inputSchema, outputSchema, field names, alerts, interpretation,
+  summaries); run a data-discovery session against an API (what does this field mean, which
+  fields are null, probe the API); decide where discovered knowledge should be written down;
+  prepare a domain-expert validation session; or measure a metadata change with an eval. Also
+  triggers on "the agent picks the wrong tool", "the agent misreads this field", "the agent
+  ignores the description", user-feedback triage, and tool-call-log pattern analysis.
 ---
 
-# rich-domain-mcp-server — build & enrich MCP servers
+# rich-domain-mcp-server — build, audit and measure MCP tools
 
-A well-built MCP codebase gives you transport, logging, and (optionally) auth for free. What
-you actually build is **metadata**: the tool descriptions and schemas an agent reasons over at
-call time. Plumbing is a day; metadata is the product.
+A good MCP codebase gives you transport, logging and auth. What you actually build is the layer a
+model reasons over at call time: **field names, the description head, the input schema, and the
+response**. Plumbing is a day; that layer is the product.
 
-The method is **Introspective Context Engineering**: you do not write the domain knowledge from
-documentation — you *discover* it from the live data, get it confirmed by someone who knows the
-business, and encode it where the agent reads it.
+The method is **Introspective Context Engineering**: you do not write domain knowledge from
+vendor docs — you *discover* it from live data, get it confirmed by someone who knows the business,
+encode it **where the model receives it**, and **measure** whether it was used.
 
-**Two rules drive everything:**
-
-- **Tool descriptions and INPUT schemas are the most portable model-facing channels.** In the
-  clients measured for this project (Claude Code, claude.ai, and OpenAI's Responses API), output
-  schema annotations were not forwarded to the model; use them for validation and UI, and do not
-  make essential interpretation depend on them unless you have verified the target client. Server
-  instructions, MCP Resources, and meta-tools are also client-dependent, so do not make them the
-  sole delivery path for essential guidance. Put output-reading knowledge in the **description**
-  or returned data; keep output annotations **shape-only** by default.
-- **Discovery beats documentation.** Vendor docs describe the happy path. Null patterns, silently
-  ignored parameters, lying totals, and broken joins only show up when you interrogate real rows.
-
-This companion repo ([mcp-metadata-demo](https://github.com/DaveGold/mcp-metadata-demo)) practices
-exactly this: see [get-building-profile.ts](../../../src/tools/get-building-profile.ts) for a
-worked rich-domain tool, and the paper it accompanies,
-["The Missing Layer"](https://davidgolverdingen.nl/en/the-missing-layer), for the underlying
-argument.
+Every rule below carries a tag (`[Q7]`, `[BT]`, `[N2]`) that resolves in
+[`references/evidence.md`](references/evidence.md) to the eval result behind it. Read that row
+before weakening a rule. The eval set is this repo's `evals/`; the paper it accompanies is
+["The Missing Layer"](https://davidgolverdingen.nl/en/the-missing-layer).
 
 ---
 
-## The loop: EFVEI
+## Start here — two entry points
 
-Scaffold once. Then loop — 3–4 passes per tool is normal, and the loop never really closes, because
-production telemetry keeps reopening it.
+| you have | path |
+|---|---|
+| **Nothing yet** — a new server or tool | Scaffold → the EFVEI loop → Harden |
+| **An existing server or tool** — even one with rich metadata | [`references/audit.md`](references/audit.md) first (inventory → names → delivery → wrongness → provenance → migrate), then the EFVEI loop |
+
+Do not skip the audit because the metadata looks rich. In this repo the richest tool delivered
+28% of its own description to the model, and one of its computed alerts asserted a verdict the
+eval set had already shown to be wrong.
+
+## What reaches the model (Claude Code; verify for other hosts)
+
+| surface | delivered | budget |
+|---|---|---|
+| field names | **always**, every response | — |
+| tool description | **first 2,048 chars only**, every request [Q7] | ≤ 2,048, ceiling ~1,800 |
+| server instructions | first 2,048 chars [Q7] | ≤ 2,048 |
+| input schema | yes [L3] [Q11] | — |
+| output schema | **no** [Q11] | validation/UI only |
+| response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9] | guard it |
+| guidance tool | only if the pointer is a requirement [Q8b] | — |
+
+The variable is **delivery, not channel**: the same sentence delivered in the description and in
+the response scored 20/20 and 20/20 [Q15]. Details, and how to check it yourself:
+[`references/delivery.md`](references/delivery.md).
+
+## What to do, in order (when you do not know which model will call you)
+
+MCP gives a server `clientInfo`, not the model. Build for all of them; this order is ranked by
+leverage and by how model-independent each mechanism is:
+
+0. **Name fields so they cannot be misread.** The only semantics guaranteed to arrive. A name
+   says what + scope + provenance + unit. A name that implies another quantity overrides the prose
+   beside it [N2]; an opaque code is confidently misread [N3]; a unitless name gets a unit
+   invented [N5]. If the API is not yours, rename in `transform` with a mapping table.
+1. **Ship the facts the payload lacks** — constants, conversions. No model reasons its way to a
+   calorific value; opus scored 1–3/10 without it [L2].
+2. **Make sure guidance is delivered** — in the response under `interpretation`, or in the first
+   2,048 chars of the description [Q15]. Prefer the response for anything that interprets values.
+3. **Ship the data a rule needs**, not only the rule: haiku 2/20 → 15/20, strong models −87% calls
+   [Q16] [Q16b].
+4. **Compute determinate verdicts server-side** — 78/78, identical on all models [L1] — and give
+   each computed value its unit, basis and provenance.
+5. **Write the fact with the instruction.** Instruction alone 10/30, fact alone 25/30, both 30/30
+   [Q4].
+6. **Type the input schema** for expressibility and validation [L3], and list valid names where
+   the model must produce them [N7].
+7. **Do not spend effort on volume.** Cutting half the prose changed 0 of 180 answers [Q2]; one
+   relevant rule among 100 was found as easily as alone [Q17].
+
+> **The rule that outranks all of them: volume does not hurt. Wrongness does.** One
+> plausible-looking line (`ep1 … Paris Proof kantoor: 70 kWh/m²`) produced 59 of 60 wrong answers
+> across three models; one sentence stating that the figures are CALCULATED, not MEASURED, took the
+> same question 0/60 → 59/60 [BT]. Auditing what you already ship beats adding more.
+
+Do not tailor per model: with the steps above in place every model converges, so tailoring buys
+at most ~2% in tokens [M1]. Haiku-class models are where delivery, explicitness and shipped data
+matter most [M2].
+
+---
+
+## The loop: EFVEI — same shape as the talk
 
 ```
-SCAFFOLD   ship something simple straight from the API docs
+SCAFFOLD   ship something thin (new) — or AUDIT what exists (existing)
    │
-   ├─► EXAMINE    interrogate the live data through the deployed tools, in a FRESH context
+   ├─► EXAMINE    interrogate your own deployed tool in a FRESH session: the data AND what the model received
    │      │
-   │   FLAG       tag every pattern with a confidence level + a question, while you find it
+   │   FLAG       every finding carries a confidence level + a question, while you find it
    │      │
-   │   VALIDATE   a domain expert confirms or kills the uncertain ones — an afternoon, batched
+   │   VALIDATE   the agent settles what it can against the data — and a small eval MEASURES
+   │      │       whether the model uses what you encoded (references/evaluation.md)
    │      │
-   │   ENCODE     write it back into description blocks + schema annotations → redeploy
+   │   ENCODE     into the channel the model actually reads (names → description head →
+   │      │       input schema → response), each rule with a provenance line → redeploy
    │      │
-   │   ITERATE    telemetry (queryIntent, tool-call logs, user feedback) exposes the next gap
+   │   ITERATE    back to Examine; in production, telemetry picks the next gap
    │      │
-   └──────┘
-
-HARDEN     tests, docs, project agent guide — once the loop stabilises
+   └──────┘   3–4 passes is typical (experience, not measured)
+VALIDATE   the expert — only what the agent could not settle — then one more pass
+HARDEN     the eval set becomes a regression suite: budget, name and rule tests, frozen
+           variants, ground-truth tests, a periodic re-run, a dated findings log
 ```
+
+Measuring belongs **inside** the loop, not after it. Every large defect in this repo was found by
+a run during iteration, not by a test or a review: the 2,048-character cut [Q7], the undelivered
+output schema [Q11], a computed alert that asserted a wrong verdict [BT] [Q19], a stale deploy [D],
+and an upstream quota the tool itself exhausted [Q19]. Waiting until "the loop stabilises" means
+several passes of metadata written into a channel that does not arrive.
 
 Copy this checklist into your response and tick it off:
 
 ```
-- [ ] S. Scaffold: client (if any) + server.ts + a simple tool + deploy
-- [ ] E. Examine: directed interrogation in a FRESH context — the probe matrix
+- [ ] S/A. Scaffold a thin tool — or run references/audit.md on the existing one
+- [ ] E. Examine the data (probe matrix) and the model (what it received, which field it used, how many calls)
 - [ ] F. Flag: every finding carries [CONFIDENCE: …  TODO: DOMAIN EXPERT — …]
-- [ ] V. Validate: LOW/MEDIUM markers batched into one expert session; answers dated
-- [ ] E. Encode: description blocks (interpretation here), shape-only output .meta(), transform, summarize, alerts → redeploy
-- [ ] I. Iterate: back to Examine in a new context; then telemetry drives the next round
-- [ ] H. Harden: unit tests, docs/<name>-api-findings.md, project agent guide
+- [ ] V. Validate by the agent against the data; measure with a minimal eval (evaluation.md §0)
+- [ ] E. Encode: names, description ≤2,048, input schema, `interpretation` rules + computed values, provenance per rule
+- [ ] I. Iterate: fresh session, re-measure, then telemetry
+- [ ] V. Expert session for what the agent could not settle (validation.md), then one more pass
+- [ ] H. Harden: regression suite (evaluation.md §7), docs/<name>-findings.md, agent guide
 ```
 
-## Scaffold — ship something simple
+### Scaffold (new) — ship something thin
 
-Do not design the tool surface up front. Build the client (if the API needs one), one plain tool,
-and deploy — everything after this is informed by data you do not have yet.
+Build the client (if the API needs one), one plain tool, and deploy. Keep the metadata thin on
+purpose: `queryIntent`, `summaryOnly`, the params you are sure of, a permissive output schema, a
+one-line description ending `[Stub — enriching after discovery.]`. Everything richer written now
+is guesswork from vendor docs. Wiring: [`references/scaffolding.md`](references/scaffolding.md);
+handler lifecycle: [`references/handlers.md`](references/handlers.md).
 
-Full file-by-file wiring: **`references/scaffolding.md`**. Handler-factory contract and its
-non-negotiable invariants: **`references/handlers.md`**.
+### Audit (existing) — find the defects before adding anything
 
-Minimum to be reachable:
+[`references/audit.md`](references/audit.md): measure description offsets and response sizes;
+audit every field name; move what is not delivered; check every alert and threshold for the
+calculated-vs-measured defect; backfill provenance; rebuild as a new variant beside the old one
+and measure the two. In this repo that audit predicted where the old reference would lose, and it
+lost there: `rich` 0/20 against `best` 20/20 on `benchmark-trap` [Q19].
 
-| File | What |
-|---|---|
-| `src/<name>-client.ts` | auth (if any) + token cache + `get<T>()` — skip entirely if the API is public/keyless |
-| `server.ts` | `McpServer` + instructions skeleton + tool registration |
-| `tools/<entity>.ts` | one simple tool |
-| an entrypoint export | however your runtime wants it (Firebase Function, plain HTTP server, stdio) |
+### Examine — the data and the model
 
-**Keep the metadata thin on purpose.** A first tool has `queryIntent`, `summaryOnly`, the domain
-params you are sure of, a permissive output schema, and a one-line description ending in
-`[Stub — enriching after discovery.]`. Everything richer you could write now is guesswork copied
-from vendor docs — and guesswork that ships is guesswork nobody re-checks.
+[`references/discovery.md`](references/discovery.md). Deploy first, then examine through MCP in a
+**fresh session** (clients fix their tool catalog at session start, and an agent that watched you
+write the description confirms your assumptions instead of testing them). Be an operator: one
+directed probe at a time. Nine data dimensions — shape · **null patterns per slice** · enums ·
+ordering · filter semantics and silently ignored params · pagination and lying totals · joins ·
+temporal edges and sentinels · failure surface. Then the model side: what did it receive, which
+field did it cite, what did it invent, how many calls did it need.
 
-If your server needs auth, start behind a narrow allowlist and widen it only once the metadata is
-real — a bootstrapping server with stub descriptions teaches people the wrong things about the data.
-
-## Examine — interrogate the live data
-
-**This is where the value is. Route to `references/discovery.md` and follow it.**
-
-Two non-negotiables:
-
-- **Deploy first, then examine through MCP.** The primary loop is: deploy → open a **fresh chat
-  context** → let the agent call the real tools and hammer them with variations. Direct HTTP probing
-  is the fallback for when the vendor docs are bad, auth is unknown, or the endpoint shape is a
-  mystery — not the default.
-- **Fresh context is mandatory, not hygiene.** MCP clients cache the tool catalog per chat session,
-  so a redeploy is invisible in a running chat even after a reconnect. And an agent that watched you
-  write the description will confirm your assumptions instead of testing them.
-
-You are an operator, not a requester: one directed instruction at a time, read the answer, let it
-choose the next question. "Examine the data" produces a summary of the first page; the first page is
-never representative.
-
-Nine dimensions, with the exact prompts, in the reference: shape · **null patterns per slice** ·
-cardinality and enums · sortability and ordering · filter/operator semantics and silently-ignored
-params · pagination edges and lying totals · join reliability and coverage · temporal edges and
-sentinels · the failure surface.
-
-## Flag — tag uncertainty while you find it
-
-During examination, not after. The moment you write a finding down, it carries its confidence and
-the question it raises:
+### Flag — while you find it
 
 ```
 [CONFIDENCE: HIGH|MEDIUM|LOW — <observation>. TODO: DOMAIN EXPERT — <question>]
 ```
 
-**HIGH** — confirmed across many records and several slices.
-**MEDIUM** — observed, but exceptions are plausible.
-**LOW** — inferred from limited data, or possibly environment-specific.
+HIGH: confirmed across many records and slices. MEDIUM: observed, exceptions plausible. LOW:
+inferred from little data. Without markers, ambiguity is silently resolved with the model's best
+guess — which reads exactly like an observation.
 
-Without markers, ambiguous discoveries get silently resolved with the model's best guess — which for
-domain-specific knowledge is usually wrong, and invisibly so. Markers live inline in the tool (as
-code comments or in the description) and in the findings doc, and they are removed as they get
-answered, so what remains inline is always the open edge.
+### Validate in the loop — the agent against the data, and a measurement
 
-## Validate — an afternoon with someone who knows the business
+- **The agent settles what it can**: another probe instead of a question for the expert
+  (`discovery.md`).
+- **Measure whether the model USES it** ([`references/evaluation.md`](references/evaluation.md)):
+  §0 is a minimal version for any server (5–10 questions, the old and the new variant, n=10, one
+  batch); the rest is the full method — questions that need what the payload lacks, one variable
+  per variant, a prediction registered before the run, the variance bar, an audit against the
+  server log. Most registered predictions in this repo were wrong [P].
 
-The step that is easiest to skip and most expensive to skip. Roughly 90% of AI-discovered metadata
-holds up under expert review; the other 10% is precisely the part that would have shipped as
-confident, plausible, wrong.
+### Encode — write it where it is delivered
 
-**Route to `references/validation.md`** for the session protocol. The short version: batch the
-markers (never drip-feed), take LOW first, and ask closed questions backed by a data sample — *"29
-of 31 records in category R have no fiscal year; is that a legacy import or a real state?"* beats
-*"what does this field mean?"*. Record each answer with a date in `docs/<name>-api-findings.md`,
-encode it, and delete the marker.
+[`references/metadata.md`](references/metadata.md). In order:
 
-An expert answer that contradicts the data is not a correction — it is a new finding. It usually
-means config drift, an environment difference, or a process that changed without the data changing.
+1. **Names** (§0) — rename what the audit flagged; mapping table with reason + provenance.
+2. **Description head** (§1, the eight blocks: the before-the-call and calling-it groups here, the
+   after-the-answer group in the response) — what it is and is NOT (refusals must be possible before a call),
+   "read `interpretation` first", the few rules that hold for every record as fact + instruction,
+   input conventions. ≤ 2,048, enforced by a test.
+3. **Input schema** (§2) — types, regex, working examples, valid-name lists, misbehaving params.
+4. **Output schema** (§3) — shape-only.
+5. **Response** (§4) — `interpretation { alerts, notes, constants }` first; notes selected from a
+   rule registry by `applies(record)`; computed `derived` values with unit/basis/provenance or
+   `null` + reason; the data each rule needs — comparable across calls, cached if it is costly
+   upstream; complete thresholded lists; a size guard.
 
-## Encode — write it back into the tool
+Where each kind of knowledge is written down — for the model and for the next maintainer — is
+mapped in [`references/recording.md`](references/recording.md). The short form: **model-facing
+knowledge in names, description head, input schema and response; maintainer-facing knowledge
+(provenance, evidence, open questions) in source, the findings doc and `evals/`.**
 
-Discoveries go into the tool, not into a wiki. Five layers, all of them:
+### Iterate — production finds the next gap
 
-1. **Description blocks** (model-visible) — canonical core RETURNS · WHEN TO USE · WHEN NOT TO USE ·
-   QUERY STRATEGY · INTERPRETATION · RELATED TOOLS, plus a FEEDBACK line if you have a feedback
-   mechanism, and earned blocks when justified. **Output-field interpretation lives here** — it
-   cannot reach the model any other way.
-2. **Input schema** (model-visible) — `.meta({ description, examples })` per param: formats, working
-   example values, operators, and explicit warnings about params that misbehave
-3. **Output schema** (validation + UI; not a guaranteed model channel) — `.meta()` kept
-   **shape-only**: type + optional + short identity, no interpretation, no pointer
-4. **`transform`** (returned data — model-visible) — derived fields that collapse flag-combinations
-   into one readable label
-5. **`summarize`** (returned data — model-visible) — domain aggregation + `interpretation.alerts`
+`queryIntent` read as a narrative across consecutive calls names the missing sentence. Call-shape
+patterns (tightening filters, deep pagination, many calls to a second tool) name the missing
+field, summary dimension or shipped data. User friction is the rare, high-signal input. Details in
+[`references/validation.md`](references/validation.md).
 
-**The whole shape in one place** (generic — swap `Order`/`Customer` for your own domain):
+### Validate after the loop — the expert
 
-```ts
-const description = `\
-RETURNS: Orders with OrderId, CustomerName, OrderDate, OrderStatus (Pending/Shipped/Cancelled),
-FulfillmentStatus (derived — see INTERPRETATION). Plus a summary and pagination.
+Only what the agent could not settle from the data, batched into one session, LOW markers first,
+closed questions backed by a sample ([`references/validation.md`](references/validation.md)). Then
+one more pass of the loop with the answers encoded.
 
-WHEN TO USE:
-- "What did customer X order?" / "Which orders are still unpaid?"
+### Harden — the measurement becomes a regression suite
 
-WHEN NOT TO USE:
-- Invoice line items → use get_invoice_lines instead.
+What the talk calls "tests, a findings log": concretely, the parts of the eval that keep guarding
+after the loop has stabilised ([`references/evaluation.md`](references/evaluation.md) §7):
 
-QUERY STRATEGY:
-- Call summaryOnly=true first for counts by status; fetch full records only for one customer/date range.
-
-INTERPRETATION:
-- FulfillmentStatus: 'Shipped' (paid+shipped), 'AwaitingShipment' (paid, not yet shipped),
-  'ShippedUnpaid' (shipped, invoice outstanding), 'AwaitingPayment' (neither).
-
-RELATED TOOLS:
-- get_customer(CustomerId) → account details, credit status.
-
-ALERTS: flags any order unpaid more than 30 days after shipment.`;
-
-const inputSchema = {
-  customerId: z.string().regex(/^\d{6}$/).optional().meta({ description: 'Customer account number, 6 digits.' }),
-  summaryOnly: z.boolean().optional().default(false).meta({ description: 'Summary + alerts only, no rows.' }),
-  queryIntent: z.string().optional().meta({ description: 'The business question this call answers.' }),
-};
-
-const outputSchema = {
-  recordCount: z.number().meta({ description: 'Rows in this page.' }),
-  summary: z.object({ byStatus: z.record(z.string(), z.number()).meta({ description: 'Count per OrderStatus.' }) }),
-  records: z.array(z.object({
-    OrderId: z.string().meta({ description: 'Order number' }),
-    CustomerName: z.string().nullable().meta({ description: 'Customer name' }),
-    OrderStatus: z.string().meta({ description: 'Order status' }),
-    FulfillmentStatus: z.string().optional().meta({ description: 'Derived fulfillment label' }),
-  })).optional(),
-  interpretation: z.object({ alerts: z.array(z.string()) }),
-};
-
-// Layer 2 enrichment (transform, before summarize) — collapses two flags into one readable label
-function transformOrders(records: OrderRow[]): void {
-  for (const row of records) {
-    if (row.IsPaid && row.IsShipped) row.FulfillmentStatus = 'Shipped';
-    else if (row.IsPaid) row.FulfillmentStatus = 'AwaitingShipment';
-    else if (row.IsShipped) row.FulfillmentStatus = 'ShippedUnpaid';
-    else row.FulfillmentStatus = 'AwaitingPayment';
-  }
-}
-
-function summarizeOrders(records: OrderRow[]): SummaryResult {
-  const alerts: string[] = [];
-  const byStatus: Record<string, number> = {};
-  for (const row of records) {
-    byStatus[row.OrderStatus] = (byStatus[row.OrderStatus] ?? 0) + 1;
-    if (row.FulfillmentStatus === 'ShippedUnpaid') alerts.push(`Order ${row.OrderId} shipped but unpaid.`);
-  }
-  return { summary: { byStatus }, interpretation: { alerts } };
-}
-
-server.registerTool(
-  'get_orders',
-  {
-    title: 'Orders',
-    description, inputSchema, outputSchema,
-    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-  },
-  createRestHandler(client, {
-    toolName: 'get_orders', operationName: 'GetOrders',
-    execute, transform: transformOrders, summarize: summarizeOrders, outputSchema,
-  })
-);
-```
-
-That's the pattern standalone — no reliance on any one codebase's files. `createRestHandler` is
-illustrative of the 6-step lifecycle (permission check → execute → transform → summarize → validate
-→ log); any codebase can write those 6 steps by hand without a shared factory — see
-[get-building-profile.ts](../../../src/tools/get-building-profile.ts)'s `resolveBuildingProfile` +
-`generateAlerts` in this same repo for exactly that: no shared handler factory, the same six
-concerns written out directly.
-
-Rules, examples and the per-tool checklist: **`references/metadata.md`**.
-
-Then redeploy and go back to Examine — in a *new* fresh context. A description that survives a
-second interrogation is a description that works.
-
-## Iterate — let production find the next gap
-
-The loop does not end at deploy; it changes its input from your probes to real usage. If your
-handlers log tool calls anywhere (a database, structured logs, whatever you have), that log is the
-next probe.
-
-- **`queryIntent` read as a narrative.** Three calls with tightening filters and intents that drift
-  from *"which orders exist for this customer"* to *"only completed ones — the previous call also
-  returned open orders"* names the exact missing sentence. That fix takes minutes.
-- **Call-shape patterns** — repeated calls, deep pagination, tools never selected. A pagination
-  nudge that fires often is a missing `summary` dimension, not a user error. If you have a saved
-  query or a dashboard over your tool-call log, run it periodically; if not, grep the log directly.
-- **User-reported friction** (a `report_problem`-style tool, a feedback channel, or just users
-  telling you something was confusing) — the join key, if you have a session/call ID available, is
-  what links a report to the full call sequence that preceded it.
-
-Details in **`references/validation.md`**.
-
-## Harden — once the loop stabilises
-
-- **Unit tests** (`vitest` or your test runner): one `<tool>.test.ts` per tool + a client test.
-  Cover the shape contract, the `transform`/`summarize` logic, and each empirically-discovered quirk
-  (a sentinel normalisation, a null pattern) — those are exactly what a vendor fix will silently
-  change.
-- **A way to manually exercise the tool** — the [MCP Inspector](https://github.com/modelcontextprotocol/inspector)
-  works with any MCP server and needs no custom UI (this repo uses it: `npm run inspect`).
-- **`docs/<name>-api-findings.md`**: the discovery log — evidence, open markers, vendor bugs,
-  re-check agenda. Structure in `references/discovery.md`.
-- **Project agent guide** (`AGENTS.md`, `CLAUDE.md`, or equivalent): server list, deploy command,
-  code-organization tree, and key technical details (auth, secrets, timeout, quirks).
-- **An MCP client configuration** (for example `.mcp.json` for Claude Code) for local connection;
-  use the equivalent connector/configuration supported by the client you are testing.
+- **Budget tests:** description and instructions ≤ 2,048 (ceiling ~1,800), load-bearing sentences
+  before fixed offsets, worst-case response under the size guard.
+- **Name and rule tests:** units in names, a provenance line on every rename and rule, each rule
+  on a fixture record that triggers it.
+- **Ground-truth tests:** every eval question's expected value re-derived from frozen fixtures.
+- **Frozen variants:** a hash of `tools/list` + instructions for every variant that has been measured.
+- **Deploy check:** one live call per variant, and the call log shows it stamped with its own name.
+- **Periodic re-run** of the eval set — registers, upstream APIs, hosts and models all drift.
+- `docs/<name>-findings.md` — the dated discovery, audit and eval log; a project agent guide
+  (`CLAUDE.md` / `AGENTS.md`) and an MCP client config.
 
 ---
 
 ## Hard rules
 
-- **Never claim in a description what you have not observed.** "Usually populated" without a count
-  is a guess. Give the number, or the confidence marker.
-- **A finding without a confidence level is not a finding.** It is an assumption that has lost its
-  audit trail.
-- **Every response must be safe to interpret.** `interpretation.alerts` always present; an empty
-  result must tell the agent *which branch it is in* — "wrong lookup, try again" vs "valid, nothing
-  here". Use a tool-specific empty-result hint; never let a shared generic hint name parameters a
-  tool does not have.
-- **All four `annotations` explicit** — `destructiveHint` and `openWorldHint` default to `true` in
-  the spec, so an omission mislabels a read-only tool.
-- **Title in the source language if your domain has one, description in English** with domain terms
-  glossed on first use — `Voorraadmutatie (stock mutation — inventory in/out events)`.
-- **Do not make meta-tools or Resources required for core guidance.** Build the real tool and put
-  essential instructions on it; use other MCP primitives only after confirming the target client
-  surfaces and selects them. (`z.object({})` also breaks parameterless tools — use `{}` or omit
-  `inputSchema`.)
-- **Never silently sum a counter.** If aggregation semantics depend on metadata not present in the
-  data response (unit, counter-vs-period), fetch it explicitly. A silent fallback is worse than a
-  hard error because nobody sees it.
-- **API limits are vendor config.** Fetch and cache them if the vendor exposes a limits endpoint;
-  don't hardcode a constant that drifts.
-- **Deploy before testing MCP tools whenever they run as a hosted function** — a local run and a
-  deployed run can differ (cold starts, secrets, region).
-- **A removed function export must actually be removed from production** or your next deploy step
-  may abort trying to reconcile an orphaned function, depending on your hosting platform.
+- **Never claim what you have not observed.** Give the count, or the confidence marker.
+- **Nothing load-bearing past char 2,048** of a description or the instructions; a test enforces
+  it [Q7].
+- **No model-facing meaning only in the output schema** [Q11].
+- **No field name that implies a quantity it is not; every numeric name carries its unit; calculated
+  values say so in the name** when a measured counterpart exists [N2] [N5].
+- **Every quantity that could be calculated or measured states which it is, and what it may be
+  compared with** — in the name, the rule, and any alert [BT].
+- **An instruction ships with the fact that triggers it** [Q4].
+- **Computed values carry unit, basis and provenance, or are `null` with a reason** — never a
+  fallback that mixes scopes, never 0 for "no data".
+- **Ship the data a rule needs** [Q16]; ship constants in `interpretation.constants` [L2].
+- **Shipped data must be comparable across calls.** A reference that moves with the query (the
+  previous 10 years of *each* window) gives two periods different denominators: 0/10 against
+  10/10 on a two-period comparison; with one fixed span, 8/10 [Q19b]. Fix the reference period,
+  or say that two calls' references are not comparable.
+- **Shipped data has an upstream cost.** Know how the source meters requests (Open-Meteo weighs by
+  data volume and caps concurrency); fetch only what the computation needs, and cache data that
+  cannot change. One un-cached 10-year fetch per call exhausted the quota and failed every call
+  [Q19c].
+- **Say what NOT to do with shipped data when the question invites misuse.** With the right
+  quarter figure in hand, 10 of 16 correct haiku answers still extrapolated it to a year; with an
+  explicit "do not scale it to a year", 5 of 18 [Q19d]. It reduces the misuse; it does not end it.
+- **Never prune the note about a null decision field** [AS].
+- **Thresholded results are returned complete** [Q11b].
+- **Responses stay under the host limit**; guidance lives under the fixed key `interpretation` [Q9].
+- **A pointer to guidance is a requirement** ("REQUIRED: …"), or the guidance is its own tool
+  [Q8b].
+- **Every rule, rename and alert has a provenance line in source** — date + the result, incident
+  or expert answer behind it — and it is never serialized [Q18].
+- **An empty result names its branch** ("not found — EP-Online not queried" ≠ "0 labels").
+- **All four annotations explicit**; `destructiveHint` and `openWorldHint` default to `true`.
+- **Title in the source language if the domain has one; description in English**, domain terms
+  glossed on first use.
+- **Measured variants are frozen** — hash their wire surface; build the next version beside them.
+- **Never silently sum a counter**; fetch the metadata aggregation depends on.
+- **Deploy before testing hosted tools, then prove the new code is running** (a call-log row
+  stamped with the variant), not just that the tool is listed [D].
 
 ## Routing
 
-| You are doing… | Open |
+| you are doing… | open |
 |---|---|
-| Scaffold: wiring files, secrets, deploy, CI, project agent guide | `references/scaffolding.md` |
-| Examine + Flag: interrogating an API, the probe matrix, findings doc | `references/discovery.md` |
-| Validate + Iterate: expert session, telemetry, feedback triage | `references/validation.md` |
-| Encode: writing/reviewing descriptions & schemas, per-tool checklist | `references/metadata.md` |
-| Handler lifecycle contract, alerts, logging, output validation | `references/handlers.md` |
+| Auditing an existing server or tool | `references/audit.md` |
+| Checking what reaches the model; budgets | `references/delivery.md` |
+| Scaffold: wiring, deploy, CI, adding a variant | `references/scaffolding.md` |
+| Examine + Flag: probing an API and the model | `references/discovery.md` |
+| Encode: names, descriptions, schemas, response rules | `references/metadata.md` |
+| Handler lifecycle, size guard, logging | `references/handlers.md` |
+| Where to write each kind of knowledge down | `references/recording.md` |
+| Expert session, telemetry, feedback | `references/validation.md` |
+| Measuring a change with an eval | `references/evaluation.md` |
+| Why a rule exists / whether it was refuted | `references/evidence.md` |
 
-## Reference implementations in this repo
+## Reference implementation in this repo
 
-The generic example above is enough to apply the pattern anywhere. This skill ships inside
-[mcp-metadata-demo](https://github.com/DaveGold/mcp-metadata-demo), so these are worked, tested
-examples sitting right next to it:
+The **`best`** variant applies every rule above to two tools, and is measured against the older
+variants in `evals/`:
 
-| Pattern | File |
+| pattern | file |
 |---|---|
-| Richest single-tool metadata (description ↔ output-schema split) | [get-building-profile.ts](../../../src/tools/get-building-profile.ts) |
-| Derived-field enrichment (Layer 2) + curated alerts | `generateAlerts`/`resolveBuildingProfile` in the same file |
-| Interactive / MCP App tool (renders UI, doesn't just return data) | [render-chart.ts](../../../src/tools/render-chart.ts) |
-| Field-projection ("Select") as its own tested unit | [project-fields.ts](../../../src/domain/project-fields.ts), used by [get-weather-context.ts](../../../src/tools/get-weather-context.ts) |
-| Deliberately ablated tier (what happens with no metadata layer) | [get-building-profile-minimal.ts](../../../src/tools/get-building-profile-minimal.ts) |
+| Field renames with reason + provenance | [best-field-names.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-field-names.ts) |
+| Rule registry, record-conditional selection, provenance | [best-rules.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-rules.ts), [best-building-rules.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-building-rules.ts), [best-weather-rules.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-weather-rules.ts) |
+| Description ≤ 2,048 + `interpretation`-first response + computed `derived` values | [get-building-profile-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-best.ts) |
+| Shipping the data a rule needs (reference-period degree days), size guard, complete lists | [get-weather-context-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context-best.ts), [reference-period.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/reference-period.ts) |
+| Defects an eval found in the reference itself, and their fixes (query-relative reference 0/10 → fixed span 8/10; annualising 10/16 → 5/18) | [docs/weather-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/weather-findings.md) §7 |
+| Budget, name and rule tests | [best-arm.test.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/best-arm.test.ts) |
+| Wire-surface freeze of measured variants | [arms-frozen.test.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/arms-frozen.test.ts) |
+| Audit record written the way `recording.md` prescribes | [docs/building-profile-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/building-profile-findings.md), [docs/weather-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/weather-findings.md) |
+
+Contrast cases, kept frozen because results were measured on them:
+[get-building-profile.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts) (`rich`: a 7,360-char
+description of which the first 2,048 arrive, and an EP-1 vs Paris Proof alert that the audit
+flags as the calculated-vs-measured defect) and
+[get-building-profile-minimal.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-minimal.ts) (no metadata
+layer). [render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart.ts) is the MCP App (render) example.
 
 ## Caveats
 
-- **Zod 4 `.meta()` vs `.describe()`** — prefer `.meta({ description, examples })` in new code (it
-  carries `examples`, which help on INPUT). `.describe()` remains equivalent for description-only
-  and is perfectly fine — just without `examples`. In the clients measured for this project, INPUT
-  annotations reached the model and OUTPUT annotations did not; verify that behaviour for another
-  target client before relying on it.
-- **Discovery findings expire.** Pre-release and beta APIs change under you; every claim in a
-  description is a maintenance liability. Put a re-check section in the findings doc.
+- **Host-specific numbers.** The 2,048-char cut, the ~25k-token response limit and the absent
+  output schema were measured on Claude Code. Re-verify on another host with the techniques in
+  `delivery.md` before relying on them — or design for the strictest, as this skill does.
+- **One author, one domain family.** The same party wrote the metadata, questions, ground truth
+  and scoring of every eval behind this skill. Treat `evidence.md` statuses accordingly.
+- **Discovery findings expire.** Every claim in a description is a maintenance liability; date it
+  in the findings doc and re-check it.
 
 ## Example requests
 
-- "Add an MCP server for backend X" → the full loop, starting at Scaffold.
-- "I want a new tool on this server for entity Y" → Scaffold (tool only) → EFVEI.
-- "The agent keeps picking get_dossier when get_project was meant" → Encode: WHEN NOT TO USE +
-  RELATED TOOLS in both tools (`references/metadata.md`).
-- "What does this field actually mean / which fields are always empty?" → Examine + Flag
-  (`references/discovery.md`), then Encode the answer into the schema.
-- "Prepare the open questions for the domain expert" → Validate (`references/validation.md`).
-- "Enrich these tools with what we learned last week" → Encode only.
+- "Add an MCP server for backend X" → Scaffold → EFVEI.
+- "Review / improve the tools on this server" → `audit.md`, then EFVEI.
+- "The agent ignores what the description says" → `delivery.md`: is it past char 2,048?
+- "The agent misreads this field" → `audit.md` step 2 (names), then `metadata.md` §0.
+- "The agent keeps picking the wrong tool" → description head: WHEN NOT TO USE + RELATED TOOLS in both tools.
+- "Which fields are always empty / what does this field mean?" → `discovery.md`, then encode.
+- "Where do I write this down?" → `recording.md`.
+- "Did this change help?" → `evaluation.md`.
+- "Can I delete this rule?" → its provenance line in source, and `evidence.md`.

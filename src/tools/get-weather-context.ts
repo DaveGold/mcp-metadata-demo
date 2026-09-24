@@ -462,7 +462,7 @@ async function fetchOpenMeteoDaily(url: string): Promise<OpenMeteoResponse['dail
 }
 
 /** Archive (measured) rows for [startDate, endDate] inclusive. */
-async function fetchArchive(lat: number, lon: number, startDate: string, endDate: string): Promise<WeatherDayRow[]> {
+export async function fetchArchive(lat: number, lon: number, startDate: string, endDate: string): Promise<WeatherDayRow[]> {
   const params = new URLSearchParams({
     latitude: String(lat),
     longitude: String(lon),

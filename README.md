@@ -2,21 +2,79 @@
 
 From the talk *[Most MCP servers are empty](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)* (MCPCon Europe · Amsterdam · Sep 18 2026) — an extracted demo repo, showing part of this:
 
-1. A skill that runs the loop on **your** server — [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) / [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md)
+1. A skill that builds a new server, or audits an existing one, against the eval evidence in this repo — [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) / [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md). Every rule links to the result behind it in [`references/evidence.md`](.claude/skills/rich-domain-mcp-server/references/evidence.md)
 2. The practitioner paper — [*The Missing Layer*](https://davidgolverdingen.nl/en/the-missing-layer)
-3. Example code — [`get-building-profile.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts)
+3. Example code — the reference implementation, [`get-building-profile-best.ts`](src/tools/get-building-profile-best.ts) and [`get-weather-context-best.ts`](src/tools/get-weather-context-best.ts); [where to find the when, how and what](#see-it-in-the-source)
 4. A thin and a rich MCP server on the same public API — [Try it live](#try-it-live-no-install-no-api-key)
 5. These slides, as a PDF — [*Most MCP servers are empty*](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
 
 It makes one contrast concrete: the **same** Dutch building capability, served two ways — as a **Rich Domain MCP Server** and as the **thin API wrapper** most MCP servers ship today.
 
-A Rich Domain MCP Server layers *agent-facing capabilities* on top of the raw registers so the model can reason without external priming: rich **metadata** (descriptions + typed schemas), selective retrieval (**Select**), **summaries**, curated **alerts**, [**derived values**](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/generate-alerts.ts), and **self-describing UI**. The thin wrapper — `get_building_profile` with a one-line description, no schema, no alerts — has none of it: same data, no help.
+A Rich Domain MCP Server layers *agent-facing capabilities* on top of the raw registers so the model can reason without external priming: rich **metadata** (descriptions + typed schemas), selective retrieval (**Select**), **summaries**, curated **alerts**, [**derived values**](src/domain/generate-alerts.ts), and **self-describing UI**. The thin wrapper — `get_building_profile` with a one-line description, no schema, no alerts — has none of it: same data, no help.
 
 > When those capabilities are present, the AI doesn't need a wrapper agent telling it *how* to use the tool, or *what the data means* — the server carries that itself. That's the missing layer.
 
 **The progression:** the paper showed that production usage reveals what *metadata* is missing; the follow-up — [*Your MCP Server Should Get Smarter Every Week*](https://davidgolverdingen.nl/en/insights/mcp-server-smarter-every-week) — and this repo — show it reveals what *capabilities* are missing. The feedback loop doesn't just yield better descriptions; it yields Select, Summaries, Alerts and Derived Values.
 
 > ⚠️ **This is a condensed public demo — not the full system.** It shows a *subset* of the capability set: rich **metadata**, curated **alerts**, **derived values** (the gas/CO₂/heat-pump estimates in `generate-alerts.ts`), **self-describing UI** (the render apps), **selective retrieval** (`select` on `get_weather_context`), **summaries** (its `summary` block), a real `queryIntent` param on every tool, and a small, live version of the **Iterate** step — `get_tool_call_log` reads those queryIntent values back. What's still production-only: months of real telemetry across every caller, and the [articles](https://davidgolverdingen.nl/en/insights/mcp-server-smarter-every-week)' larger dashboards — even the capabilities shown here are deliberately lighter than production.
+
+## What the evals found
+
+This repo also carries an **eval set** that measures what the metadata layer actually does to an
+agent's answers: 18 questions, more than 3,700 scored live runs, haiku, sonnet and opus, every
+prediction registered before its run and every run audited against the server's own call log.
+The method and the full findings are in [`evals/README.md`](evals/README.md), the register of
+questions and predictions in [`evals/open-questions.md`](evals/open-questions.md), and each run
+in [`evals/results/`](evals/results/). The short version, one line per finding:
+
+- **rich-Haiku beats thin-Opus.** On a question the thin schema cannot even express, the weakest
+  model with the layer answers right; the strongest without it can only refuse. The layer makes
+  the weak model right and the strong model safe. ([§ strongest single result](evals/README.md#the-strongest-single-result))
+- **Volume does not hurt. Wrongness does.** Cutting half the prose changed 0 of 180 answers; one
+  plausible-looking line (`EP-1 … Paris Proof: 70 kWh/m²`) made 59 of 60 answers wrong, and one
+  sentence saying the figures are CALCULATED, not MEASURED, took the same question 0/60 → 59/60.
+  ([§5](evals/README.md#5--semantics-carry-behaviour--an-instruction-alone-is-inert), [§7](evals/README.md#7--conditional-pruning-is-free--and-only-bites-the-weakest-model))
+- **Protocol-visible is not model-effective.** Claude Code sends only the first **2,048
+  characters** of a tool description, and never the output schema: 72% of this repo's richest
+  description never reached the model. ([§14](evals/README.md#14--where-this-host-drops-what-you-ship--one-table))
+- **Delivered is delivered.** Inside that cut, a sentence in the description works exactly as well
+  as the same sentence in the response — 20/20 against 20/20. Placement matters only because of
+  what arrives. ([§10](evals/README.md#10--delivered-is-delivered-the-channel-test-finally-run))
+- **An instruction without its fact is inert.** "Say it cannot be compared" alone: 10/30. With the
+  fact that tells the model *when* it applies: 30/30. ([§5](evals/README.md#5--semantics-carry-behaviour--an-instruction-alone-is-inert))
+- **Ship the data, not just the rule.** A rule that sends the model off to fetch history: haiku
+  2/20. The same rule with the server-computed reference figure: 15/20 — and sonnet and opus
+  needed 87% fewer calls. ([§15](evals/README.md#15--rounds-3-and-4-structure-the-rest-of-the-cap-the-model-split-and-cost))
+- **Richer metadata can be cheaper — when it answers the question asked.** The model has less to
+  think about; metadata that answers nothing is paid for on every call. ([§6](evals/README.md#6--richer-metadata-can-be-cheaper-and-not-for-the-reason-anyone-guessed))
+- **A misleading name is worse than no name,** and a name is the one thing that reaches the model
+  in every response. ([§2](evals/README.md#2--a-misleading-name-is-worse-than-no-name))
+- **Word the pointer as a requirement.** A hint to call a guidance tool: haiku 0/10. "REQUIRED:
+  call it first": 10/10. ([§11](evals/README.md#11--a-guidance-call-works-if-it-is-called--and-the-pointer-decides-that))
+- **Evals find bugs that tests cannot.** The 2,048 cut, a stale deploy, a quota the tool itself
+  exhausted — and this repo's own computed alert, which ranked a calculated figure against a
+  measured target and was repeated by the models (0/20). All tests were green.
+- **Removing the wrong line is half the fix.** With that alert gone, `rich` still scored 0/10: the
+  correcting sentence sat past the cut. Moving that one sentence inside it: 10/10.
+  ([Q20](evals/results/2026-09-24-q20-rich-alert-removed.json), [Q21](evals/results/2026-09-24-q21-rich-line-delivered.json))
+- **Most of the predictions were wrong** — 13 of the first 23. Measure; do not reason about what a
+  model reads.
+
+**Processed into the skill.** The [`rich-domain-mcp-server`](.claude/skills/rich-domain-mcp-server/SKILL.md)
+skill is rewritten on these results: every rule carries a tag that resolves to the run behind it
+in [`references/evidence.md`](.claude/skills/rich-domain-mcp-server/references/evidence.md),
+together with the rules the evals refuted. It covers building a new server and auditing an
+existing one, naming fields, where each kind of knowledge reaches the model, how to find which
+fields need explanation (a field-reading probe), and a portable eval harness.
+
+**And measured with it.** Running that skill's audit on this repo's own tools produced the
+**`best`** arm ([`get-building-profile-best.ts`](src/tools/get-building-profile-best.ts),
+[`get-weather-context-best.ts`](src/tools/get-weather-context-best.ts)). Against the previous
+reference, in the same batches: the calculated-vs-measured trap **20/20 · 9/10 · 10/10 against
+0/20 · 0/10 · 0/10** (haiku · sonnet · opus; hand-read), a held-out question **19/20 against 0/20**, cheaper in
+30 of 32 cells — and two defects the runs found in `best` itself, fixed and re-measured
+([Q19–Q21](evals/results/README.md)). Those trap numbers are `rich` before its fix. Moving its one
+correcting sentence inside the cut took it to 10/10 as well ([Q21](evals/results/2026-09-24-q21-rich-line-delivered.json)).
 
 ## Try it live (no install, no API key)
 
@@ -26,6 +84,7 @@ Two hosted endpoints — a **Rich Domain MCP Server** and a **thin wrapper** ove
 |---|---|---|
 | **rich** | full description + input schema (both model-visible), curated `alerts[]` + interpretation | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp` |
 | **minimal** | one sentence, no schema, no alerts | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal` |
+| **best** | the reference built with the skill: descriptions inside the 2,048 cut, `interpretation`-first responses, computed values, fields named so they cannot be misread | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest` |
 
 Same Firebase project, same code — only the function name (`/mcp` vs `/mcpMinimal`) and the metadata tier it serves differ.
 
@@ -35,7 +94,8 @@ Add **both** to your `.mcp.json` (Claude Code) so you can aim a prompt at each:
 {
   "mcpServers": {
     "metadata-demo-rich": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp" },
-    "metadata-demo-minimal": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal" }
+    "metadata-demo-minimal": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal" },
+    "metadata-demo-best": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest" }
   }
 }
 ```
@@ -53,11 +113,11 @@ Add **both** to your `.mcp.json` (Claude Code) so you can aim a prompt at each:
 
 Same registers, same building (it's the Rijksmuseum, bouwjaar 1885) — the only difference is the metadata layer.
 
-**2 — Domain reasoning without priming (rich):**
+**2 — Domain reasoning without priming (best, or rich):**
 
-> *"Get the building profile for 3543AR 1 and tell me whether it's on track for Paris Proof 2040."*
+> *"Gustav Mahlerlaan 10, 1082PP Amsterdam — how does it stack up against the Paris Proof 2040 office target of 70 kWh/m²?"*
 
-The tool's `INTERPRETATION` block and `alerts[]` carry the Paris Proof thresholds and label semantics, so the agent reasons about Dutch energy regulation it was never separately taught.
+The right answer is that it **cannot be ranked from this data**: every EP-Online figure is CALCULATED by the label method, and Paris Proof is defined on MEASURED energy at the meter — same unit, different quantity. `best` states that fact where the model reads it and scores 20/20 on haiku. Until 2026-09-24 `rich` itself carried a computed alert that made exactly this comparison, and the models repeated it (0/20). Removing that alert alone left `rich` at 0/10 on haiku: the question invites the comparison, and `rich`'s CALCULATED vs MEASURED sentence sat past the 2,048 cut ([Q20](evals/results/2026-09-24-q20-rich-alert-removed.json)). Moving that one sentence inside the cut took it to 10/10 on haiku and on sonnet ([Q21](evals/results/2026-09-24-q21-rich-line-delivered.json)). Removing a wrong line is half the fix; delivering the right one is the other half. This is the eval set's headline trap ([`benchmark-trap`](evals/questions.json)).
 
 **3 — Self-describing visualization (rich):**
 
@@ -75,7 +135,7 @@ The tool's `QUERY STRATEGY` block tells the agent that a year-long range would n
 
 > *"What have people actually been asking this server?"*
 
-Every tool accepts a `queryIntent` param describing the business question behind the call. `get_tool_call_log` reads recent calls back — tool, queryIntent, status, duration — the same signal production usage is read as a narrative to find the next metadata gap, at small scale and live. Locally it's an in-memory buffer for the current process; on the deployed endpoint it's a persisted Firestore log across every caller. See [`log-store.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/shared/log-store.ts) and [`get-tool-call-log.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-tool-call-log.ts).
+Every tool accepts a `queryIntent` param describing the business question behind the call. `get_tool_call_log` reads recent calls back — tool, queryIntent, status, duration — the same signal production usage is read as a narrative to find the next metadata gap, at small scale and live. Locally it's an in-memory buffer for the current process; on the deployed endpoint it's a persisted Firestore log across every caller. See [`log-store.ts`](src/shared/log-store.ts) and [`get-tool-call-log.ts`](src/tools/get-tool-call-log.ts).
 
 ## Why two endpoints — the ablation
 
@@ -98,15 +158,52 @@ The failure it prevents is concrete: a residential *Nader Voorschrift* label ret
 
 ### See it in the source
 
-The metadata layer is just code — read the exact pieces the agent consumes, and the ablated twin that drops them:
+The metadata layer is just code. Read it by the moment the model needs it. Links go to the
+reference implementation (`best`), then the older `rich` and `minimal` tiers for contrast.
 
-- **Rich tool description** — the `RETURNS` / `WHEN TO USE` / `QUERY STRATEGY` / `INTERPRETATION` / `ALERTS` prose the model reads before it ever calls the tool (on Claude Code, only its first 2,048 characters — see the evals): [`get-building-profile.ts` L23–71](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L23-L71)
-- **Input schema** — model-visible, a `.describe()` on every field: [`get-building-profile.ts` L75–83](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L75-L83)
-- **Output schema — deliberately shape-only** — the model never sees this (validation + `structuredContent` shape only); every field's `.describe()` is a short identity, not interpretation. That interpretation used to live here for several fields (`temperatuuroverschrijding`, `compactheid`, the `co2_emissie_kg_m2` unit caveat, and others) until it was moved into the description above — the exact fix this repo's paper argues for, applied to itself. **Measured since (evals Q7, Q11):** on Claude Code the model indeed never receives `outputSchema`, but it also receives only the first **2,048 characters** of each tool description, so most of that INTERPRETATION block does not arrive there either. Guidance has to sit inside that cut or in the response; see [`evals/README.md`](evals/README.md) §10–§14: [`get-building-profile.ts` L88–201](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L88-L201)
-- **Server-side interpretation** — the `alerts[]` rules (regulation eras, Paris Proof thresholds, the Nader Voorschrift MJ-unit trap): [`generate-alerts.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/generate-alerts.ts)
-- **The minimal twin** — the whole ablated tool, ~60 lines, none of the above: [`get-building-profile-minimal.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-minimal.ts)
-- **Selective retrieval (Select)** — the field-projection mechanism itself, with its safety rails (never silently fall back to full records, alert on unknown fields): `project-fields.ts`, used by [`get-weather-context.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context.ts)
-- **queryIntent + Iterate** — the per-environment persisted log (Firestore when deployed, in-memory locally) and the tool that reads it back: [`log-store.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/shared/log-store.ts), [`get-tool-call-log.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-tool-call-log.ts)
+**1 · WHEN — before the call.** Does this tool fit the question, what is it not for, what does it
+join with? These must be in the first 2,048 characters of the description, because the model
+decides before it has any response:
+- building: [`WHEN TO USE` · `WHEN NOT TO USE` · `RELATED TOOLS`](src/tools/get-building-profile-best.ts#L34-L38), including the
+  refusal that must be possible without a call ("this server has NO metered energy consumption")
+- weather: [the same three blocks](src/tools/get-weather-context-best.ts#L48-L52)
+
+**2 · HOW — calling it.** How to form the arguments, and what comes back:
+- building: [`QUERY STRATEGY` · `RETURNS`](src/tools/get-building-profile-best.ts#L40-L42) and [a `.describe` on every input](src/tools/get-building-profile-best.ts#L137-L144)
+  (the input schema is delivered; the output schema is not)
+- weather: [`QUERY STRATEGY` · `RETURNS`](src/tools/get-weather-context-best.ts#L54-L56) and [the input schema](src/tools/get-weather-context-best.ts#L67-L85), including
+  `select` with its exact field names, and `energyUse` / `solarKwp` so the server computes the verdict
+
+**3 · WHAT — meaning and interpretation, after the answer.** What a value is, and how to read it
+for this record. Most of it travels in the response, where there is no 2,048 cut:
+- **names first** — [the rename table](src/domain/best-field-names.ts#L34-L133): upstream name → name
+  that says quantity, scope, provenance and unit, with a reason and provenance per row
+  ([weather](src/domain/best-field-names.ts#L165-L172))
+- **rules that hold for every record** — [`INTERPRETATION` in the description head](src/tools/get-building-profile-best.ts#L44-L50),
+  each a fact plus an instruction (CALCULATED vs MEASURED, which area totals use, what null means)
+- **rules for this record** — [the rule shape](src/domain/best-rules.ts#L33-L47) (`applies`, `render`,
+  `relates_to_fields`, `provenance`; only `render()` reaches the model) and the registries:
+  [building](src/domain/best-building-rules.ts#L208-L439), [weather](src/domain/best-weather-rules.ts#L106-L227)
+- **computed values** — [`computeBuildingDerived`](src/domain/best-building-rules.ts#L100-L183): each with unit,
+  basis and provenance, or `null` plus the reason; the server-computed
+  [reference period](src/domain/reference-period.ts) for a partial year
+- **the response, `interpretation` first** — [building](src/tools/get-building-profile-best.ts#L111-L125), [weather](src/tools/get-weather-context-best.ts#L135-L271)
+  (including the size guard that drops records rather than lose the interpretation to a file notice)
+- **proof it holds** — [`best-arm.test.ts`](src/tools/best-arm.test.ts) pins every computed value to
+  the eval ground truth, and checks the description budget and rule coverage
+
+**For contrast — the older tiers:**
+- **`rich`** puts all three moments in one description of ~8,000 characters: [`get-building-profile.ts`](src/tools/get-building-profile.ts#L23-L171).
+  On Claude Code only the first 2,048 characters arrive, so the INTERPRETATION block it carries
+  never reaches the model. Its [`alerts[]`](src/domain/generate-alerts.ts) are the first version of the
+  response-side rules (the EP-1 vs Paris Proof alert was removed on 2026-09-24: it compared a
+  calculated figure with a measured target). Its [output schema](src/tools/get-building-profile.ts#L219-L332)
+  is shape-only, because the model never receives it (evals Q7, Q11; [`evals/README.md`](evals/README.md) §10–§14).
+- **`minimal`** — the whole ablated tool, ~60 lines, none of the above: [`get-building-profile-minimal.ts`](src/tools/get-building-profile-minimal.ts)
+- **Select** — field projection with its safety rails (never fall back silently to full records, alert on
+  unknown fields): [`project-fields.ts`](src/domain/project-fields.ts)
+- **queryIntent + Iterate** — the persisted call log and the tool that reads it back:
+  [`log-store.ts`](src/shared/log-store.ts), [`get-tool-call-log.ts`](src/tools/get-tool-call-log.ts)
 
 ## Two levels, one strategy
 
@@ -122,7 +219,7 @@ The demo applies the same metadata principle in **two places at once**:
 > "Given the pre-1992 era and the lack of a registered label, what's the next step?"
 ```
 
-**Level 2 — self-describing app config.** The same agent then picks an appropriate visualisation. The chart-type metadata tells it sankey is for flows, treemap for hierarchical area shares, bar for category comparison — no wrapper logic ([see the `type` REFUSE rules](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart.ts#L162-L200)):
+**Level 2 — self-describing app config.** The same agent then picks an appropriate visualisation. The chart-type metadata tells it sankey is for flows, treemap for hierarchical area shares, bar for category comparison — no wrapper logic ([see the `type` REFUSE rules](src/tools/render-chart.ts#L162-L200)):
 
 ```
 > Agent looks at three buildings' data and chooses render_chart({ type: 'bar', ... })
@@ -141,7 +238,9 @@ The two levels use the metadata layer differently, and the difference matters. `
 - `render_map` — Leaflet maps with markers (car, building, project, pin)
 - `fetch_image` — server-side image proxy with SSRF protection (used by `render_table` when the iframe CSP blocks `img-src`)
 
-Also included: standalone [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) and [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md) skills teaching the method behind this repo (Scaffold → Examine → Flag → Validate → Encode → Iterate), generalized so they're useful for building *your own* rich-domain MCP server, not just for maintaining this one.
+Also included: standalone [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) and [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md) skills teaching the method behind this repo (Scaffold or Audit → Examine → Flag → Validate → Encode → Iterate), generalized so they're useful for building *your own* rich-domain MCP server, not just for maintaining this one. Since 2026-09-23 the skill is rewritten on the eval results: what actually reaches the model (the 2,048-char description cut, the undelivered output schema, the response-size limit), field naming, response-side interpretation, shipping the data a rule needs, and provenance per rule.
+
+The **`best`** arm (`/mcpBest`, [`get-building-profile-best.ts`](src/tools/get-building-profile-best.ts), [`get-weather-context-best.ts`](src/tools/get-weather-context-best.ts)) is what that skill produces when run on this repo's own tools — the reference implementation, with its audit written up in [`docs/`](docs/). Its interpretation comes from a rule registry ([`best-rules.ts`](src/domain/best-rules.ts)): each rule has a gate (`applies`), a rendered line, a `relates_to_fields` list and a `provenance` line, and **only the rendered line is sent to the model** — the rest is for tests and for whoever maintains the server.
 
 ## Run it locally
 
@@ -192,13 +291,13 @@ Single `createServer({ variant })` factory in [src/server.ts](src/server.ts), ex
 
 - **stdio** ([src/stdio.ts](src/stdio.ts)) — default for Claude Desktop / Code / Inspector. JSON-RPC over stdin/stdout, no network, no ports. `MCP_VARIANT` selects the tier.
 - **Local HTTP** ([src/http.ts](src/http.ts)) — Streamable-HTTP bound to `127.0.0.1` for browser-based testing, no middleware.
-- **Cloud Functions** ([src/functions.ts](src/functions.ts)) — two Firebase Cloud Functions v2 (`mcp` = rich, `mcpMinimal` = minimal) wrapping the same HTTP app with `hosted: true`, which mounts request-logging, daily-cap, and rate-limit middleware. EP-Online key injected from Secret Manager.
+- **Cloud Functions** ([src/functions.ts](src/functions.ts)) — one Firebase Cloud Function v2 per tier (`mcp` = rich, `mcpMinimal` = minimal, `mcpBest` = best, plus the eval arms) wrapping the same HTTP app with `hosted: true`, which mounts request-logging, daily-cap, and rate-limit middleware. EP-Online key injected from Secret Manager.
 
 ### Layers
 
-- **Tools** (`src/tools/`) — each tool's `description` and Zod `inputSchema` (`.describe()` on every field) carry the metadata that drives agent reasoning; `outputSchema` is deliberately **shape-only** — it validates `structuredContent` and drives UI rendering, but the model never reads a single `.describe()` on an output field, so all output-field interpretation lives in the description instead (see [Two levels, one strategy](#two-levels-one-strategy)). `get-building-profile.ts` encodes `RETURNS` / `WHEN TO USE` / `INTERPRETATION` / `ALERTS`; the render tools register a `ui://` resource + tool pair and return `structuredContent` for the iframe. `get-building-profile-minimal.ts` is the ablated twin — same data path (`resolveBuildingProfile`), none of the metadata.
+- **Tools** (`src/tools/`) — each tool's `description` and Zod `inputSchema` (`.describe()` on every field) carry the metadata that drives agent reasoning; `outputSchema` is deliberately **shape-only** — it validates `structuredContent` and drives UI rendering, but the model never reads a single `.describe()` on an output field. In `best`, output-field meaning lives in the field names and the response's `interpretation`; in `rich`, in the description (see [See it in the source](#see-it-in-the-source)). `get-building-profile.ts` encodes `RETURNS` / `WHEN TO USE` / `INTERPRETATION` / `ALERTS`; the render tools register a `ui://` resource + tool pair and return `structuredContent` for the iframe. `get-building-profile-minimal.ts` is the ablated twin — same data path (`resolveBuildingProfile`), none of the metadata.
 - **Clients** (`src/clients/`) — one class per upstream, each owning its URL, auth, timeout, and Zod-validated response parsing, so upstream wire-format drift surfaces here rather than silently downstream. `BagClient` is auth-free; `EpOnlineClient` needs an API key.
-- **Domain** (`src/domain/`) — pure functions: `buildProfile` (raw registers → `BuildingProfile`), `selectBestLabel`, and `generateAlerts` (regulation eras, Paris Proof 2040 thresholds, BENG, heat-pump suitability — knowledge moved server-side, to where the data lives).
+- **Domain** (`src/domain/`) — pure functions: `buildProfile` (raw registers → `BuildingProfile`), `selectBestLabel`, and `generateAlerts` (regulation eras, BENG, heat-pump suitability, overheating — knowledge moved server-side, to where the data lives; `best` uses a rule registry instead, `best-rules.ts`).
 - **Logger** (`src/logger.ts`) — stderr-only structured JSON. **Never** writes to stdout, which stdio MCP framing owns; a stray `console.log` would corrupt the JSON-RPC stream.
 
 ### How an MCP app gets to the client
@@ -254,7 +353,7 @@ Code, docs, and agent-facing tool descriptions are English. Field names mirror t
 
 The hosted endpoints log request metadata (IP, User-Agent, tool name, duration) to Cloud Logging for usage analytics and abuse prevention. Retention is 30 days (Cloud Logging default). Legal basis: legitimate interest.
 
-Separately, every tool call is logged with its `queryIntent` — the free-text description of what the call was for, which the caller supplies or which the server derives from other args (e.g. an address, a chart title). No filter values or response data are stored (see [`log-store.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/shared/log-store.ts)). On the hosted endpoints this persists to Firestore indefinitely and is readable back by anyone via `get_tool_call_log` — don't put anything in `queryIntent` you wouldn't want another user of this shared demo to see. Contact via the GitHub issues tracker if you'd like your data scrubbed.
+Separately, every tool call is logged with its `queryIntent` — the free-text description of what the call was for, which the caller supplies or which the server derives from other args (e.g. an address, a chart title). No filter values or response data are stored (see [`log-store.ts`](src/shared/log-store.ts)). On the hosted endpoints this persists to Firestore indefinitely and is readable back by anyone via `get_tool_call_log` — don't put anything in `queryIntent` you wouldn't want another user of this shared demo to see. Contact via the GitHub issues tracker if you'd like your data scrubbed.
 
 ## Talks
 

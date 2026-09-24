@@ -66,6 +66,10 @@
     "eval-g-recipe": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpGuidanceRecipe"
+    },
+    "eval-best": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest"
     }
   }
 }

@@ -3462,3 +3462,303 @@ failure mode uncovered.
   now on should note whether the description, input schema, output schema and prior tool
   results were present in the post-tool request. Inferring visibility from the protocol
   objects is the error `research-frame.md` exists to prevent.
+
+---
+
+## Q19 — Does the skill's reference arm (`best`) hold every answer the old reference won, and fix the ones it lost?
+
+> **ANSWERED 2026-09-24 — a safe reference, with one new defect of its own.** See
+> [`results/2026-09-24-q19-best-arm.json`](results/2026-09-24-q19-best-arm.json). 790 runs, audit exact.
+>
+> - **Confirmed:** P1, P2, P3, P5, P7, P8, P9, P10. **Partial:** P4 (16/20). **Falsified:** P6 (both
+>   margins stated 10/20).
+> - **P2 in numbers:** `best` 20/20 · 9/10 · 10/10 on `benchmark-trap`, `rich` 0/20 · 0/10 · 0/10. The
+>   opus and sonnet cells follow the hand-read erratum in the results file: `rich`-opus's six
+>   "correct" answers were hedged verdicts.
+>   The old reference loses the question it was built to win, exactly where the audit said.
+> - **Held-out:** `best` 19/20 · 10/10 · 10/10, `rich` 0/20 · 5/10 · 10/10.
+> - **Unpredicted:** `weather-partial-normalization` `best` 0/10 against `rich` 10/10. The shipped
+>   reference moves with the query year, so two periods are normalised to different denominators
+>   (6.6% where 3.6% is right). *Shipped data must be comparable across calls*: a new rule, recorded
+>   in the skill.
+> - **Infrastructure:** `best`'s first reference fetch cost ~260 Open-Meteo weighted calls and
+>   exhausted the quota mid-run. Fixed (window-sized, sequential, cached) and re-run.
+
+> **REGISTERED 2026-09-23, BEFORE ANY RUN.** The arm was built and deployed first
+> (`mcpBest`, verified live: variant stamped, reference period 1,231.3 for Q1 2024 and
+> 2,188.4 for Oct 2023–Mar 2024, both matching independent computations). The held-out
+> question `heating-season-held-out` was written after the build and before any run; it was
+> not used to tune the arm. That is weaker than freezing it before the build, and is said here
+> so nobody reads it as more.
+
+### Why it matters
+
+The `rich-domain-mcp-server` skill was rewritten on the eval evidence (its
+`references/evidence.md` ledger) and then run, as its own audit flow, on this repo's `rich`
+tools. The result is `best`: a COMPOSITE. It changes many layers at once on both data tools:
+
+- renamed fields;
+- descriptions of 1,719 and 1,680 characters (inside the 2,048 cut);
+- `interpretation`-first responses from a rule registry;
+- computed `derived` values;
+- a shipped reference period for partial weather windows;
+- no Paris Proof threshold anywhere.
+
+This question cannot attribute an effect to any one layer; the one-variable arms already did
+that. It asks whether the skill's output is a **safe reference**: does it keep every answer
+`rich` got right, fix the ones `rich` gets wrong, and not break anything new — on the old
+set, and on one question it was not built against.
+
+The audit predicts one place where `rich` should now LOSE: its own computed alert compares
+EP-1 with Paris Proof 70 kWh/m² on exactly the `benchmark-trap` record
+(`docs/building-profile-findings.md` §7).
+
+### Arms
+
+- `best`.
+- `rich`, the old reference.
+- `inline` on three building questions only, as the token baseline: its neighbour tools are
+  minimal, like `best`'s, so its token cost is the fair comparison.
+
+The eval agent body is identical across arms. Default description cap throughout.
+
+### Run
+
+Headless `claude -p` parent per wave (the parent session predates `eval-best`). Every arm of
+a wave is in the same parent, at most 3 subagents per arm per wave (rate limit). Only the
+question string is passed.
+
+| tier | model | n | questions | runs |
+|---|---|---|---|---|
+| A | haiku | 20 | benchmark-trap, absent-sizing-input, total-vs-per-m2, heat-pump-triage, building-size, weather-single-quarter, select-hides-the-evidence, heating-season-held-out | 320 (best + rich) |
+| A′ | haiku | 10 | benchmark-trap, absent-sizing-input, total-vs-per-m2 | 30 (inline) |
+| B | sonnet | 10 | benchmark-trap, total-vs-per-m2, gas-estimate, select-hides-the-evidence, weather-single-quarter, heating-season-held-out, metered-vs-model, invented-label | 160 |
+| B′ | opus | 10 | benchmark-trap, gas-estimate, weather-single-quarter, heating-season-held-out | 80 |
+| C | haiku | 10 | gas-estimate, wrong-unit, overheating, metered-vs-model, invented-label, weather-partial-normalization, solar-yield-check, forecast-normalization, select-blind, select-wrong-degree-day | 200 |
+
+Total 790 runs.
+
+### Scoring
+
+- Each question's own `ground_truth` / `_judge_note`, in the parent session.
+- A deterministic rubric per question (numbers within tolerance, forbidden figures,
+  required caveats) is applied first, and every run the rubric cannot classify is read by
+  hand.
+- **Amendments, registered now:**
+  - A scorer that matches a field name accepts the `best` name
+    (`warmtebehoefte_berekend_kwh_m2` for `warmtebehoefte_kwh_m2`, and so on).
+  - On `weather-single-quarter`, a `best` answer that normalizes by the shipped
+    reference (≈ 4,675 m³, ± 100) is CORRECT; `rich` is scored as before.
+  - On `weather-partial-normalization`, normalizing both quarters to the 10-year reference
+    is CORRECT if the improvement comes out at 3.6 ± 1%.
+- Tokens, calls and duration come from the child transcripts, and calls are reconciled
+  against `get_tool_call_log`.
+
+### Predictions
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `best` ≥ 9/10 (haiku ≥ 18/20) in every building cell | any `best` building cell ≤ 7/10 (≤ 14/20) |
+| P2 | `benchmark-trap`: `best` ≥ 9/10 on every model; `rich` ≤ 3/10 on haiku and sonnet (its alert asserts the verdict) | `best` ≤ 7, or `rich` ≥ 7 on either model |
+| P3 | `absent-sizing-input`, haiku: `best` ≥ 18/20, ≤ 3 fabrications | `best` ≤ 14/20 |
+| P4 | `weather-single-quarter`, haiku: `best` ≥ 17/20 (Q16's 15/20 plus the null factor); median 1 weather call on sonnet and opus | `best` ≤ 12/20 |
+| P5 | `select-hides-the-evidence`, sonnet: `best` ≥ 9/10 against ~0/10 for `rich` | `best` ≤ 6/10 |
+| P6 | `heat-pump-triage`, haiku: ≥ 18/20 with both small margins (2.73, 0.88) stated | < 15/20 |
+| P7 | Controls (`metered-vs-model`, `invented-label`): `best` 10/10 on every model run | any miss, and it is reported before anything else |
+| P8 | Median tokens: `best` within ± 10% of `inline` on the three shared questions, and below `rich` on at least 6 of the 8 tier-A questions | `best` > `rich` + 10% on 3 or more tier-A questions |
+| P9 | No `best` result is replaced by a file notice | any |
+| P10 | `heating-season-held-out`: `best` ≥ 16/20 on haiku and ≥ 9/10 on sonnet and opus | `best` ≤ 12/20 on haiku |
+
+**Reasoning.** Every mechanism `best` carries was measured to work on its own: delivered
+lines 20/20 (Q15), computed values 78/78 (L1), shipped reference data 15/20 on haiku (Q16),
+null-field notes 18/20 (AS), calculated-vs-measured 59/60 (BT). The composite could still
+fail by interaction. For example, renamed fields could break a question whose wording
+names the old field, or a larger `interpretation` could crowd out the data. P1 and P7 are
+there to catch that. P2 is the strongest claim, because it predicts the old reference
+getting WORSE than `best` on a question the old reference was built to win.
+
+**Cost:** 790 subagent runs.
+
+### Q19b — Do the two fixes repair the two weather defects Q19 found? Registered 2026-09-24, BEFORE the run
+
+> **ANSWERED 2026-09-24.** See [`results/2026-09-24-q19b-weather-fixes.json`](results/2026-09-24-q19b-weather-fixes.json).
+> 60 runs, haiku; audit exact.
+> - **P1 confirmed.** `weather-partial-normalization` `best` 8/10 (Q19: 0/10). The 2 misses asked
+>   for an address without calling.
+> - **P2 partial.** `weather-single-quarter` `best` 18/20, but 5 of the 18 still annualised
+>   (predicted ≤ 3).
+> - **P3 confirmed.** `rich` scores 8/10 and 0/20.
+
+> **REGISTERED before any run.** The fixes are deployed and verified live:
+> - Q1 2023 and Q1 2024 now share one reference (1,231.3, windows ending 2014–2023), and the live
+>   two-period improvement is 3.6%.
+> - Held-out is unchanged (2,188.4 → 9,899).
+
+**What changed in `best`:**
+1. The reference span is fixed (`REFERENCE_END_YEARS`) instead of "the 10 years before this
+   window".
+2. The partial-window alert, the normalization alert and the description say the corrected figure
+   is for that window and must not be scaled to a year.
+
+The measured Q19 values do not move. Only comparability between calls and the annualising
+instruction change.
+
+**Run.** haiku, `best` vs `rich`, one batch per wave, same harness as Q19 (the portable one in the
+skill's `references/harness/`):
+- `weather-partial-normalization`, n=10 per arm;
+- `weather-single-quarter`, n=20 per arm.
+
+60 runs.
+
+**Scoring.** As in Q19:
+- `weather-single-quarter` is scored on the lead figure. Every correct answer that also offers a
+  full-year extrapolation is counted as `annualised`.
+- `weather-partial-normalization` is CORRECT at 3.6 ± 1% (or ~4,434 ± 60 m³).
+
+**Predictions**
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `weather-partial-normalization`: `best` ≥ 8/10 (Q19: 0/10) | `best` ≤ 4/10 |
+| P2 | `weather-single-quarter`: `best` ≥ 17/20, and ≤ 3 of its correct answers annualised (Q19: 16/20, 10 annualised) | `best` ≤ 12/20, or ≥ 8 annualised |
+| P3 | `rich` replicates Q19 in the same batches: partial ≥ 8/10, single-quarter ≤ 3/20 | `rich` partial ≤ 5/10 or single-quarter ≥ 7/20 |
+
+Comparisons with Q19's `best` cells are cross-sitting: quote the direction only. The within-batch
+`best` vs `rich` gap is the controlled comparison.
+
+### Q19c — Do the remaining misses disappear once the head says "call it directly"? Registered 2026-09-24, BEFORE the run
+
+> **ANSWERED 2026-09-24.** See [`results/2026-09-24-q19c-call-it-directly.json`](results/2026-09-24-q19c-call-it-directly.json).
+> - **P1 confirmed.** 0 of 20 `best` runs asked for an address; there was a weather call in 30/30.
+> - **P3 confirmed.** The quarter questions scored 10/10 and 9/10.
+> - **P2 partial.** `best` called in 10/10, but was correct in 5/10. With the call made, the
+>   remaining miss is reading: 5 runs give a whole-window factor without mentioning the 7 forecast
+>   days the response's alert names.
+>
+> The pre-call gap is closed by the head. What is left is the known limit of response guidance
+> on haiku (Q12b).
+
+> **REGISTERED before any run.** Deployed and verified live: 1,776 chars, containing "CALL IT
+> DIRECTLY".
+
+**Why.** Every miss that remained after Q19b happened BEFORE the first call:
+- haiku asked for an address and called nothing (3 of 30 runs);
+- on a window ending in the future it asked for the gas figure and called nothing (8 of 10 in
+  Q19).
+
+No response rule can fix a call that is never made. Only the description head can.
+
+**Change.** Two sentences go in the head:
+- no address is needed — use city coordinates or the Utrecht default;
+- call the tool even when the window ends in the future, because the response separates archive
+  from forecast days.
+
+The stand-alone "never weather-correct against forecast days" line leaves the head. The
+response's forecast alert still says it.
+
+**Run.** haiku, `best` vs `rich`, n=10 per arm, on `weather-partial-normalization`,
+`weather-single-quarter` and `forecast-normalization`. 60 runs, the skill's portable harness,
+same scoring as Q19/Q19b.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | No `best` run on the two quarter questions asks for an address without calling (Q19b: 3 of 30) | ≥ 3 of 20 |
+| P2 | `forecast-normalization`: `best` calls the weather tool in ≥ 8/10 and is CORRECT in ≥ 6/10 (Q19: 2/10, 0 calls in 8) | CORRECT ≤ 3/10 |
+| P3 | No regression: `best` ≥ 8/10 on both quarter questions | either ≤ 6/10 |
+
+### Q19d — Does renaming the description heads to the eight canonical blocks break anything? Registered 2026-09-24, BEFORE the run
+
+> **ANSWERED 2026-09-24 — no.** See [`results/2026-09-24-q19d-canonical-blocks.json`](results/2026-09-24-q19d-canonical-blocks.json).
+> - **P1 confirmed:** 10/10, 10/10, 9/10.
+> - **P2 partial:** the refusal was answered with no call in 6/10.
+
+> **REGISTERED before any run.** Deployed and verified live: building 1,800 chars, weather 1,781,
+> both opening with `WHEN TO USE:`.
+
+**Change.** The same content as in Q19c, now under the talk's eight block names, in the talk's
+order. Weather RETURNS now lists the literal record fields. The load-bearing lines therefore sit
+later in the description (≤ 1,500), but still inside the cut.
+
+**Run.** haiku, `best` vs `rich`, n=10 per arm, 60 runs, on the three questions that lean most on
+the description head:
+- `metered-vs-model` — a refusal answered from the head alone, median 0 calls in Q19;
+- `benchmark-trap` — the rule for every record, now under INTERPRETATION, after RETURNS;
+- `weather-single-quarter` — the reference rule, now after RETURNS.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | No regression: `best` ≥ 9/10 on each question (Q19/Q19c: 10/10, 20/20, 9/10) | any `best` cell ≤ 7/10 |
+| P2 | `metered-vs-model` is still answered without a building call in ≥ 7/10 `best` runs | ≤ 4/10 |
+
+## Q20 — Does removing `rich`'s EP-1 vs Paris Proof alert fix `rich` on benchmark-trap? Registered 2026-09-24, BEFORE the run
+
+> **ANSWERED 2026-09-24 — no.** See [`results/2026-09-24-q20-rich-alert-removed.json`](results/2026-09-24-q20-rich-alert-removed.json).
+>
+> **Falsified:**
+> - P1 — `rich` haiku 0/10;
+> - P2 — `rich` sonnet 1/10, +3 hedged. This is the failure mode the registration named.
+>
+> **Confirmed:**
+> - P3 — no "Paris Proof" misnaming on heat-pump-triage, 9/10;
+> - P4 — `best` 10/10, 10/10, 9/10.
+>
+> The removal takes the false claim out of `rich`'s output. It does not deliver the missing fact
+> that stops a model making the comparison itself. That fact is in `best` (head and response). In
+> `rich` it sits past the cut.
+
+> **REGISTERED before any run.** Deployed and verified live: `rich` on Gustav Mahlerlaan 10
+> returns only the overheating alert.
+
+**Change.** `rich` loses its computed "EP-1 above Paris Proof 2040 target" and "> 150 above
+benchmark" alerts. The Paris Proof promise also goes from its alerts paragraph, its instructions
+and its ep1 schema describe. The shared `interpretationBlock` line stays, but it sits past `rich`'s
+2,048 cut and is not delivered. No other arm changed; the hash freeze proves it.
+
+**Run.** `rich` vs `best` in the same batches, the portable harness, 60 runs:
+- `benchmark-trap` on haiku and on sonnet, n=10 per arm each;
+- `heat-pump-triage` on haiku, n=10 per arm.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `benchmark-trap`, haiku: `rich` ≥ 7/10 (Q19: 0/20) | ≤ 3/10 |
+| P2 | `benchmark-trap`, sonnet: `rich` ≥ 7/10 (Q19: 0/10) | ≤ 3/10 |
+| P3 | `heat-pump-triage`, haiku: `rich` stays ≥ 9/10 and calls the 100 kWh/m² band boundary a "Paris Proof" target in ≤ 2/10 (Q19: 8 of 20) | correct ≤ 7/10, or Paris Proof named in ≥ 5/10 |
+| P4 | `best` unchanged: ≥ 9/10 in every cell | any `best` cell ≤ 7/10 |
+
+**Why P1 could fail.** Without the alert and without a delivered CALCULATED vs MEASURED line
+(`rich`'s sits past the cut), haiku may compare 81.68 with 70 unaided. In that case the fix
+removes a false claim, but it does not add the missing fact.
+
+## Q21 — Once the correcting fact is DELIVERED, does `rich` pass benchmark-trap? Registered 2026-09-24, BEFORE the run
+
+> **ANSWERED 2026-09-24 — yes, completely.** See [`results/2026-09-24-q21-rich-line-delivered.json`](results/2026-09-24-q21-rich-line-delivered.json).
+> benchmark-trap `rich`: haiku **10/10** (Q20: 0/10), sonnet **10/10** (Q20: 1/10); building-size
+> `rich` 10/10; `best` 10/10 in every cell. All four predictions confirmed. All 20 `rich`
+> benchmark-trap answers hand-read: every one declines the comparison (two quote the figure while
+> declining, CORRECT under the hand rule). Audit exact 12/12 (30 + 30 calls). Q20 → Q21 is
+> cross-sitting, so read it as direction; a 10-of-10 gap is far past the bar either way.
+
+> **REGISTERED before any run.** Deployed and verified live: in `rich`'s description the CALCULATED
+> vs MEASURED line starts at char 766 and its instruction ends at ~1,445, inside the 2,048 cut.
+
+**Why.** Q20 removed `rich`'s false alert and `rich` still scored 0/10 (haiku), because the
+correcting line sat at char ~3,380 and was never delivered. This adds the delivered half, and
+changes nothing else. The shared `descriptionCore` / `interpretationBlock` are byte-identical;
+only `rich`'s tools hash moves. The cost is QUERY STRATEGY item 5 (large panden), which now falls
+past `rich`'s cut. `rich`'s large-pand alert still carries it in the response.
+
+**Run.** `rich` vs `best`, same batches, the portable harness, 60 runs:
+- `benchmark-trap` on haiku and on sonnet, n=10 per arm each;
+- `building-size` on haiku, n=10 per arm, as the check on the cost.
+
+Same hand rule as Q20: CORRECT declines a verdict, PARTIAL hedges one, WRONG gives it.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `benchmark-trap`, haiku: `rich` ≥ 7/10 (Q20: 0/10) | ≤ 3/10 |
+| P2 | `benchmark-trap`, sonnet: `rich` ≥ 7/10 (Q20: 1/10) | ≤ 3/10 |
+| P3 | `building-size`, haiku: `rich` ≥ 9/10 (Q19: 20/20) with QUERY STRATEGY item 5 now past the cut | ≤ 7/10 |
+| P4 | `best` ≥ 9/10 in every cell | any `best` cell ≤ 7/10 |
+
+**If P1 holds,** Q20 + Q21 together are the cleanest two-step result in the set. Removing a wrong
+line leaves the error in place; delivering the right one fixes it.

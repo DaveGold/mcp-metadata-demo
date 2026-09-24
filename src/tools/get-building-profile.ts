@@ -154,10 +154,21 @@ DERIVED FIGURES YOU MUST COMPUTE YOURSELF (nothing below is returned):
  * That variant returns no `alerts` field, and a description promising one
  * would be describing a field that is not there.
  */
-const alertsParagraph = `ALERTS: Always check interpretation.alerts — they contain bouwjaar era warnings (suppressed for good labels A/A+/A++/A+++/A++++), multiple-VBO disambiguation, large pand oppervlakte warning (>10 VBOs), Paris Proof threshold breaches (differentiated by gebouwklasse), label expiry notices, BENG compliance violations, VBO status warnings, bouwjaar discrepancies, and district heating impact notes. For residential buildings alerts also include an estimated annual gas consumption (m³), total CO₂ emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.`;
+const alertsParagraph = `ALERTS: Always check interpretation.alerts — they contain bouwjaar era warnings (suppressed for good labels A/A+/A++/A+++/A++++), multiple-VBO disambiguation, large pand oppervlakte warning (>10 VBOs), label expiry notices, BENG compliance violations, VBO status warnings, bouwjaar discrepancies, and district heating impact notes. For residential buildings alerts also include an estimated annual gas consumption (m³), total CO₂ emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.`;
 
-/** Full rich description: domain prose plus the alerts promise. */
-export const description = descriptionCore + '\n\n' + alertsParagraph;
+/**
+ * rich only (2026-09-24, Q21): the CALCULATED vs MEASURED line is ALSO placed right after WHEN NOT
+ * TO USE, so it lands inside the 2,048-char cut (Q7). In the shared interpretationBlock it sits at
+ * char ~3,380 and never arrived: Q20 measured rich at 0/10 (haiku) on benchmark-trap even after its
+ * false Paris Proof alert was removed. descriptionCore / interpretationBlock stay byte-identical for
+ * the other arms; the price is QUERY STRATEGY item 5 (large panden), now past the cut — rich's
+ * large-pand ALERT still carries it in the response.
+ */
+const richPreamble = descriptionPreamble.replace('\n\nQUERY STRATEGY:', '\n\n' + calcVsMeasuredLine + '\n\nQUERY STRATEGY:');
+if (richPreamble === descriptionPreamble) throw new Error('rich description: QUERY STRATEGY anchor not found');
+
+/** Full rich description: domain prose (with the calc-vs-measured line up front) plus the alerts promise. */
+export const description = richPreamble + '\n\n' + interpretationBlock + '\n\n' + alertsParagraph;
 
 /** Arm B description: identical prose, minus the promise of a field it does not return. */
 export { descriptionCore, interpretationBlock, derivedFiguresBlock };
@@ -391,7 +402,14 @@ export function registerGetBuildingProfileTool(
       title: 'Building Profile (BAG + Energy Label)',
       description,
       inputSchema: z.object(inputSchema),
-      outputSchema,
+      // rich only (2026-09-24, Q20): the shared schema's ep1 describe names a Paris Proof target;
+      // the other arms keep it frozen, rich states what the figure is.
+      outputSchema: outputSchema.extend({
+        ep1_energiebehoefte_kwh_m2: z
+          .number()
+          .nullable()
+          .describe('EP-1: CALCULATED net energy demand in kWh/m²/year (NTA 8800). Not a measured value.'),
+      }),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,

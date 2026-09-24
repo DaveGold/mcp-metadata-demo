@@ -8,7 +8,12 @@ that are null for one record type, parameters the server silently ignores, total
 that only work in one direction — is invisible until you hammer real rows.
 
 Output goes three places: the tool metadata (Encode — see `metadata.md`), the list of open questions
-for the expert (Validate — see `validation.md`), and `docs/<name>-api-findings.md`.
+for the expert (Validate — see `validation.md`), and `docs/<name>-findings.md` (the full map of
+where each kind of finding is written is in [`recording.md`](recording.md)).
+
+Examine has **two subjects**: the *data* (what the API really returns — the probe matrix below) and
+the *model* (what the model actually received and did with it — the section after it). The second
+is the one people skip, and in this repo it found the largest defects.
 
 ---
 
@@ -26,10 +31,11 @@ deploy → FRESH context → EXAMINE → FLAG → (VALIDATE) → ENCODE → rede
 
 **Fresh context is mandatory.** Two independent reasons:
 
-1. MCP clients cache the tool catalog per chat session. A newly deployed tool — or a changed
-   description — is **not** visible in a running chat, not even after reconnecting the server.
-   claude.ai needs the chat closed and reopened; Claude Code needs a restart or `/clear` plus a
-   reconnect.
+1. MCP clients fix their connections and tool catalog when a session starts. A newly deployed
+   tool — or a changed description — may not be visible in a running chat; a reconnect picks up
+   some changes and not others, depending on the client. The safe default is a new session (in
+   Claude Code a fresh `claude -p` per test wave), and to *prove* the change arrived by calling
+   the tool, not by seeing it listed.
 2. An agent that watched you write the description will confirm your assumptions. An agent that
    only sees the deployed metadata will *test* them — and its confusion is the signal you want.
 
@@ -41,6 +47,43 @@ never representative. The patterns live at the edges.
 **Two validation paths, both required.** After a deploy, verify via a direct API/probe call *and*
 via MCP. They catch different bugs: a probe script that pre-fetches metadata will pass where the
 deployed tool, which doesn't, silently falls back to the wrong aggregation.
+
+---
+
+## Examine the model, not only the data
+
+The data can be perfectly understood and the tool still fail, because the model never received
+the sentence that explains it, or received it and read a field name instead. Probe that directly:
+
+- **What did it receive?** Ask a fresh subagent to quote the last 100 characters of the tool
+  description and of the server instructions. A quote ending at char 2,048 with `… [truncated]` is
+  the host cut [Q7]. See [`delivery.md`](delivery.md) for the other checks (token accounting,
+  offsets, response size).
+- **Which fields does it misread? — the field-reading probe.** Do not test every field with an
+  eval. Hand a fresh, tool-less model (the weakest you might be called by) one real response with
+  the guidance stripped, and ask per field what it is, its unit, its kind (register / calculated /
+  measured / computed by the tool / identifier / metadata) and what null means. Score it against a
+  ground-truth file. A field read right 3/3 needs no explanation — that is the evidence for leaving
+  it unexplained. A misread field gets a rename or a rule. A few calls per tool, minutes not hours:
+  [`harness/field_probe.py`](harness/field_probe.py). Calibrate the ground truth on ONE smoke run
+  before the scored runs, and record that you did. **Read the meanings of every flagged field AND
+  of every critical field** — on `best` the auto-score passed a real scope misread (the BAG area
+  read as the building's, 2/9) and flagged seven harmless unit spellings [FP1] [FP2]. Most fields need no probe at all; start from the
+  six risk classes in `metadata.md` §0.
+- **Which field did it use?** Ask a question the payload can answer and read which field the
+  answer cites. A model that reaches for the wrong field (a "magnet" name) or invents a unit for
+  a unitless one has found a naming defect, not a prose gap [N3] [N4] [N5].
+- **How many calls did it make, and why?** Read the server's call log, not the model's summary.
+  39 calls where 1 would do (19 of them detours into another tool) meant the answer's key fact
+  was not delivered [Q15]; 4–16 weather calls per run meant the payload lacked the reference data
+  the rule needed [Q16b]. Extra fetches are a missing field or a missing sentence.
+- **Did it invent anything?** Constants, thresholds, units, field names. Every invention names a
+  fact the payload or the delivered text should have carried.
+- **Where did it land by the wrong road?** A correct value from a wrong derivation is luck that
+  will not repeat on the next record [L1].
+
+Run these on the weakest model you might be called by (haiku-class) *and* a strong one; defects
+here were routinely model-specific ([`evidence.md`](evidence.md) → Model differences).
 
 ---
 
@@ -241,7 +284,7 @@ vendor ships a fix.
 
 ## The findings doc
 
-`docs/<name>-api-findings.md` is where discovery lives that is too long, too provisional, or too
+`docs/<name>-findings.md` is where discovery lives that is too long, too provisional, or too
 vendor-specific for a tool description. Descriptions carry what the agent needs at call time; the
 findings doc carries the evidence, the open questions and the maintenance agenda.
 
@@ -280,4 +323,6 @@ been fixed.
 | Discovering in the same chat that wrote the code | Stale tool catalog + confirmation bias |
 | Writing "nullable" without the condition | The agent still doesn't know when to expect a value |
 | Believing the vendor schema | Documented-but-never-returned fields are common |
-| One pass and done | Pass 3–4 is where conditional population and business rules appear |
+| One pass and done | In practice pass 3–4 is where conditional population and business rules appear (experience, not measured) |
+| Examining only the data | The largest defects here were delivery and naming, visible only from the model side |
+| Trusting the model's own call count | The server log contradicted self-reports more than once |

@@ -80,22 +80,15 @@ describe('generateAlerts', () => {
     expect(co2Alert).toMatch(/~4200 kg\/year/);
   });
 
-  it('fires Paris Proof office threshold only for offices', () => {
-    const officeAlerts = generateAlerts(
-      baseProfile({
-        ep1_energiebehoefte_kwh_m2: 85,
-        gebruiksdoel: 'kantoorfunctie',
-      })
-    );
-    expect(officeAlerts.some((a) => a.includes('Paris Proof 2040 target (70'))).toBe(true);
-
-    const industrialAlerts = generateAlerts(
-      baseProfile({
-        ep1_energiebehoefte_kwh_m2: 85,
-        gebruiksdoel: 'industriefunctie',
-      })
-    );
-    expect(industrialAlerts.some((a) => a.includes('Paris Proof'))).toBe(false);
+  it('never ranks a CALCULATED EP-1 against Paris Proof or an unsourced benchmark (Q19/Q20)', () => {
+    for (const [ep1, gebruiksdoel, gebouwklasse] of [
+      [85, 'kantoorfunctie', 'Utiliteitsbouw'],
+      [132, 'woonfunctie', 'Woningbouw'],
+      [199, 'winkelfunctie', 'Utiliteitsbouw'],
+    ] as const) {
+      const alerts = generateAlerts(baseProfile({ ep1_energiebehoefte_kwh_m2: ep1, gebruiksdoel, gebouwklasse }));
+      expect(alerts.join(' ')).not.toMatch(/Paris Proof|above benchmark/i);
+    }
   });
 
   it('produces a BENG-toetsing summary with ✓ / ✗ markers', () => {

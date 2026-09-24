@@ -22,7 +22,7 @@ src/<name>/
 
 (This companion repo keeps it even flatter — one `src/tools/` directory, one `src/server.ts` with a
 `variant` flag instead of one file per environment. See
-[server.ts](../../../../src/server.ts) for a small, complete example of the whole shape.)
+[server.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/server.ts) for a small, complete example of the whole shape.)
 
 ## 1. Client
 
@@ -55,7 +55,7 @@ export class MyClient {
 ```
 
 Not every tool needs a client at all — a public, keyless API (this repo's
-[get-weather-context.ts](../../../../src/tools/get-weather-context.ts) calls Open-Meteo directly
+[get-weather-context.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context.ts) calls Open-Meteo directly
 with plain `fetch()`, no client class, no auth) is the simplest case and shouldn't be forced into a
 client-class shape it doesn't need.
 
@@ -131,7 +131,7 @@ works against a local stdio or HTTP server with no custom UI needed (this repo: 
 - **A project agent guide** (`AGENTS.md`, `CLAUDE.md`, or equivalent) — server list, build & deploy
   commands, deployed URLs, code-organization tree, and key technical details (auth, secrets,
   timeout, quirks).
-- **`docs/<name>-api-findings.md`** — the discovery log (structure in `discovery.md`).
+- **`docs/<name>-findings.md`** — the discovery log (structure in `discovery.md`).
 - A raw-request collection (Bruno, Postman, `.http` files) in `api/<name>/` if you want reproducible
   raw calls outside the MCP layer — optional, but useful when debugging a vendor issue.
 
@@ -139,12 +139,35 @@ works against a local stdio or HTTP server with no custom UI needed (this repo: 
 
 Co-locate as `<file>.test.ts`. Worth testing, in priority order:
 
+0. **Delivery budgets**: every description and the server instructions `length <= 2048` (working
+   ceiling ~1,800), load-bearing sentences before fixed offsets, and a worst-case response under
+   the size guard. Measure through the real transport (`InMemoryTransport` + `client.listTools()`),
+   not only on the constants.
 1. The client's auth/token-cache logic and error mapping, if it has one.
 2. `transform` and `summarize` — the domain logic, including each empirically-discovered quirk
    (sentinel normalisation, counter detection, DST bucketing). These are exactly what a vendor fix
    will silently change.
 3. Output-schema conformance on a realistic fixture row.
 4. Filter/param building, if the API has a non-trivial protocol.
+5. **Names**: every numeric field has a unit suffix (or says it is unitless); every rename has a
+   reason and provenance; no upstream name leaks past the rename.
+6. **Rules**: unique ids, provenance present, `relates_to_fields` exist in the output, each rule's
+   rendered line on a fixture record that triggers it.
+7. **Frozen variants**: once a variant has been measured, hash its `tools/list` + instructions so
+   it cannot drift (this repo: [`arms-frozen.test.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/arms-frozen.test.ts)).
+
+## 7. Adding a variant to this repo
+
+To build a new version of a tool next to the old one (the audit flow's step 6):
+
+1. `src/tools/<tool>-<variant>.ts` — reuse the shared resolver/clients; never retype shared prose.
+2. `src/server.ts` — add to `ServerVariant`, add a branch before the `rich` fall-through.
+3. `src/functions.ts` + `src/index.ts` — export the Cloud Function (a missing re-export means
+   `firebase deploy` never sees it).
+4. `src/http.ts` + `src/stdio.ts` — `MCP_VARIANT` allow-lists; `package.json` `deploy` list.
+5. `.mcp.json` entry and, for the eval, `.claude/agents/eval-<variant>.md` with only that arm's tools.
+6. Deploy, then prove the arm is reachable and stamping its variant in the call log before any run.
+The `best` variant is the worked example.
 
 ## Bundled lookup data
 
@@ -157,6 +180,6 @@ redeploy — only suitable when the data changes rarely (monthly or less).
 
 Interactive tools (charts, tables, forms, games) register differently from plain data tools and
 ship a small built UI alongside the tool registration. See
-[render-chart.ts](../../../../src/tools/render-chart.ts) in this repo for a complete, working
+[render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart.ts) in this repo for a complete, working
 example — the render tool itself does not fetch data; the agent fetches data elsewhere and passes
 reshaped data in.
