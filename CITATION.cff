@@ -1,13 +1,13 @@
 cff-version: 1.2.0
-message: "If you use or refer to Rich Domain MCP, Introspective Context Engineering for MCP, or this repository, please cite it as below."
-title: "Rich Domain MCP — companion repository to The Missing Layer"
+message: 'If you use or refer to Rich Domain MCP, Introspective Context Engineering for MCP, or this repository, please cite it as below.'
+title: 'Rich Domain MCP — companion repository to The Missing Layer'
 type: software
 authors:
   - family-names: Golverdingen
     given-names: David
-    website: "https://davidgolverdingen.nl/en"
-repository-code: "https://github.com/DaveGold/mcp-metadata-demo"
-url: "https://davidgolverdingen.nl/en/the-missing-layer"
+    website: 'https://davidgolverdingen.nl/en'
+repository-code: 'https://github.com/DaveGold/mcp-metadata-demo'
+url: 'https://davidgolverdingen.nl/en/the-missing-layer'
 license: MIT
 version: 2.0.0
 date-released: 2026-09-24
@@ -20,8 +20,8 @@ keywords:
   - evals
 references:
   - type: report
-    title: "The Missing Layer: Why AI on Enterprise Data Might Fail, and a Pattern That Could Fix It"
+    title: 'The Missing Layer: Why AI on Enterprise Data Might Fail, and a Pattern That Could Fix It'
     authors:
       - family-names: Golverdingen
         given-names: David
-    url: "https://davidgolverdingen.nl/en/the-missing-layer"
+    url: 'https://davidgolverdingen.nl/en/the-missing-layer'
