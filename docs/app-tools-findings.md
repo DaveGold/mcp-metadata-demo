@@ -65,4 +65,13 @@ or outside the Netherlands. The chart still renders; the alert names the fix.
 **Step 5 — provenance.** The checks carry their reason in source; the defects are dated here.
 
 **Step 6 — measure.** `best-v1` (frozen) against `best`, registered as Q22 in
-`evals/open-questions.md` before the run.
+`evals/open-questions.md` before the run. Results:
+[`q22`](../evals/results/2026-09-24-q22-app-tools.json) and
+[`q22b`](../evals/results/2026-09-24-q22b-table-alert.json).
+- **The chart trap is fixed.** `best` leaves out the Paris Proof line in 6/10 haiku and 10/10
+  sonnet runs; `best-v1` draws it 20/20.
+- **Payload shapes follow what is delivered.** Positional map markers: 20/20 against 4/20.
+- **The table headers are NOT fixed.** A description instruction held in 1/10. An alert on the
+  response held in 2/10, with 0/10 re-renders, because the model treats a successful render as
+  done. Open: refuse the call instead (as for `scaleID`), or rewrite the header server-side.
+  `[CONFIDENCE: HIGH that the alert does not work; the refusal is unmeasured.]`

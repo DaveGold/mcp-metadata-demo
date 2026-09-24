@@ -3765,6 +3765,18 @@ line leaves the error in place; delivering the right one fixes it.
 
 ## Q22 — Does applying the skill to the APP tools help, and what does it cost? Registered 2026-09-24, BEFORE the run
 
+> **ANSWERED 2026-09-24.** See [`results/2026-09-24-q22-app-tools.json`](results/2026-09-24-q22-app-tools.json).
+> - **The trap:** `best` leaves the Paris Proof line off the EP-2 bars and says why: haiku 6/10
+>   (+4 drew it with the caveat), sonnet 10/10. `best-v1` draws it in 20/20, always with a caveat,
+>   and also states the verdict in 9/10 haiku and 5/10 sonnet answers (`best`: 1/10, 0/10).
+> - **The table headers failed:** every energy header says calculated in `best` 1/10, `best-v1`
+>   0/10. The models translate the field name and drop "berekend" (P3 falsified; see Q22b).
+> - **Payload guidance only matters where the input schema does not already show the shape.**
+>   Positional map markers: `best` 20/20, `best-v1` 4/20. Chart tuples 28/28 vs 29/30.
+> - **Controls and cost:** both controls at 10/10, 0 render errors, and +2–4% median tokens.
+>
+> P2, P4–P7 confirmed, P1 partial, P3 falsified. Audit exact 25/25.
+
 > **REGISTERED before any run.** Audit: `docs/app-tools-findings.md`. `best` now carries rebuilt
 > app tools (descriptions of 781–1,541 chars, domain-correct annotation examples, checks on the
 > finished call under `interpretation.alerts`, `fetch_image` registered). `best` as measured in
@@ -3796,6 +3808,16 @@ delivers the CALCULATED vs MEASURED line, so the chart-tool fix may add nothing 
 would say the data tool's own semantics carry to the render call, which is worth knowing.
 
 ## Q22b — Does a check on the finished table call fix what the description could not? Registered 2026-09-24, BEFORE the run
+
+> **ANSWERED 2026-09-24 — no.** See [`results/2026-09-24-q22b-table-alert.json`](results/2026-09-24-q22b-table-alert.json).
+> - **The headers:** `best` 2/10, `best-v1` 0/10.
+> - **No run re-rendered after the alert** (0/10).
+> - **The prose:** the alert does reach it. 9/10 `best` answers say the figures are calculated
+>   (`best-v1` 5/10).
+>
+> A response alert after a successful render is read as a note, not as a reason to redo the call.
+> A fix that must happen needs the call refused with the fix in the message, or applied by the
+> server. P1 and P2 falsified, P3 and P4 confirmed. Audit exact 5/5.
 
 > **REGISTERED before any run.** Q22 found `table-label-figures` at `best` 1/10, `best-v1` 0/10:
 > the models translate `ep2_primair_fossiel_berekend_kwh_m2` into "EP-2 primary fossil energy
