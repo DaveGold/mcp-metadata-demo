@@ -260,6 +260,13 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
   quarter figure in hand, 10 of 16 correct haiku answers still extrapolated it to a year; with an
   explicit "do not scale it to a year", 5 of 18 [Q19d]. It reduces the misuse; it does not end it.
 - **Never prune the note about a null decision field** [AS].
+- **A fix that must happen is a refusal, not an alert.** After a successful call the model reads an
+  alert as a note: 0/10 re-rendered a table whose headers the alert said were wrong [Q22b]. The
+  same check as a refusal with the fix in the message: 10/10, every refused run retried [Q22c].
+  Keep alerts for what the user should know.
+- **Audit the app tools too.** Their input schema is delivered, so an example there is advice: a
+  "Paris Proof target" annotation example on a server of calculated figures got the line drawn
+  20/20, and the fixed tool left it out 16/20 [Q22].
 - **Thresholded results are returned complete** [Q11b].
 - **Responses stay under the host limit**; guidance lives under the fixed key `interpretation` [Q9].
 - **A pointer to guidance is a requirement** ("REQUIRED: …"), or the guidance is its own tool

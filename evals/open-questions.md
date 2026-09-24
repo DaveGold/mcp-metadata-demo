@@ -3762,3 +3762,107 @@ Same hand rule as Q20: CORRECT declines a verdict, PARTIAL hedges one, WRONG giv
 
 **If P1 holds,** Q20 + Q21 together are the cleanest two-step result in the set. Removing a wrong
 line leaves the error in place; delivering the right one fixes it.
+
+## Q22 — Does applying the skill to the APP tools help, and what does it cost? Registered 2026-09-24, BEFORE the run
+
+> **ANSWERED 2026-09-24.** See [`results/2026-09-24-q22-app-tools.json`](results/2026-09-24-q22-app-tools.json).
+> - **The trap:** `best` leaves the Paris Proof line off the EP-2 bars and says why: haiku 6/10
+>   (+4 drew it with the caveat), sonnet 10/10. `best-v1` draws it in 20/20, always with a caveat,
+>   and also states the verdict in 9/10 haiku and 5/10 sonnet answers (`best`: 1/10, 0/10).
+> - **The table headers failed:** every energy header says calculated in `best` 1/10, `best-v1`
+>   0/10. The models translate the field name and drop "berekend" (P3 falsified; see Q22b).
+> - **Payload guidance only matters where the input schema does not already show the shape.**
+>   Positional map markers: `best` 20/20, `best-v1` 4/20. Chart tuples 28/28 vs 29/30.
+> - **Controls and cost:** both controls at 10/10, 0 render errors, and +2–4% median tokens.
+>
+> P2, P4–P7 confirmed, P1 partial, P3 falsified. Audit exact 25/25.
+
+> **REGISTERED before any run.** Audit: `docs/app-tools-findings.md`. `best` now carries rebuilt
+> app tools (descriptions of 781–1,541 chars, domain-correct annotation examples, checks on the
+> finished call under `interpretation.alerts`, `fetch_image` registered). `best` as measured in
+> Q19–Q19d is frozen as `best-v1` (same wire hash as before). `tools/list`: 67.7k → 72.5k chars.
+
+**Why.** No eval question so far touched the app tools, so the skill's claims about them are
+unmeasured. The audit found one defect of the worst class in the set: the delivered input schema
+offers a Paris Proof line as the example annotation, on a server whose energy figures are all
+calculated. And the new descriptions cost ~4.9k characters on every turn.
+
+**Run.** `best-v1` vs `best`, same batches, interleaved, the portable harness, haiku n=10 per arm on
+the four questions of `evals/questions-apps.json`, plus `chart-paris-proof-line` on sonnet n=10
+per arm. 100 runs. Scored on the render call's arguments (the harness captures every MCP call's
+input) and, for the trap, on the answer by hand (the Q20 rule: CORRECT declines the line, PARTIAL
+draws it with the caveat, WRONG draws it).
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `chart-paris-proof-line`, haiku: `best` ≥ 8/10 CORRECT; `best-v1` ≤ 5/10 | `best` ≤ 5/10, or `best-v1` ≥ 8/10 |
+| P2 | same on sonnet: `best` ≥ 9/10; `best-v1` ≤ 6/10 | `best` ≤ 6/10 |
+| P3 | `table-label-figures`: every energy header says calculated in `best` ≥ 7/10, `best-v1` ≤ 3/10 | `best` ≤ 4/10 |
+| P4 | `chart-weighted-hdd-2024`: both arms ≥ 9/10 (control; the data tool is identical) | either arm ≤ 7/10 |
+| P5 | `map-two-buildings`: both arms ≥ 9/10, no swapped coordinates (control) | either arm ≤ 7/10 |
+| P6 | cost: `best` median tokens within +10% of `best-v1` on every question | `best` > +10% on 2+ questions |
+| P7 | render calls that error: `best` ≤ `best-v1` | `best` more errors |
+
+**Failure mode to expect.** P1 may fail the other way: `best-v1`'s `get_building_profile` already
+delivers the CALCULATED vs MEASURED line, so the chart-tool fix may add nothing on top of it. That
+would say the data tool's own semantics carry to the render call, which is worth knowing.
+
+## Q22b — Does a check on the finished table call fix what the description could not? Registered 2026-09-24, BEFORE the run
+
+> **ANSWERED 2026-09-24 — no.** See [`results/2026-09-24-q22b-table-alert.json`](results/2026-09-24-q22b-table-alert.json).
+> - **The headers:** `best` 2/10, `best-v1` 0/10.
+> - **No run re-rendered after the alert** (0/10).
+> - **The prose:** the alert does reach it. 9/10 `best` answers say the figures are calculated
+>   (`best-v1` 5/10).
+>
+> A response alert after a successful render is read as a note, not as a reason to redo the call.
+> A fix that must happen needs the call refused with the fix in the message, or applied by the
+> server. P1 and P2 falsified, P3 and P4 confirmed. Audit exact 5/5.
+
+> **REGISTERED before any run.** Q22 found `table-label-figures` at `best` 1/10, `best-v1` 0/10:
+> the models translate `ep2_primair_fossiel_berekend_kwh_m2` into "EP-2 primary fossil energy
+> (kWh/m²)" and the provenance falls out, although `best`'s table description says to keep it.
+
+**Change, one variable.** `best`'s render_table now answers with `interpretation.alerts` naming any
+header (or transposed row label) that names a label energy figure without saying it is calculated
+(`tableAlerts`, `src/tools/app-tools-best.ts`). The wire surface is unchanged, and the freeze hash
+of `best` did not move. `best-v1` is unchanged.
+
+**Run.** `table-label-figures`, haiku, `best-v1` vs `best`, n=10 each, same batches. Scored on the
+LAST successful render_table call (a re-render after the alert counts).
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `best` ≥ 7/10 CORRECT (was 1/10) | ≤ 4/10 |
+| P2 | `best` re-renders after the alert in ≥ 6/10 runs | ≤ 3/10 |
+| P3 | `best-v1` ≤ 2/10 (control) | ≥ 5/10 |
+| P4 | `best` median tokens ≤ +25% of `best-v1` (a re-render costs a call) | > +40% |
+
+## Q22c — Does REFUSING the call fix what the alert could not? Registered 2026-09-24, BEFORE the run
+
+> **ANSWERED 2026-09-24 — yes.** See [`results/2026-09-24-q22c-table-refusal.json`](results/2026-09-24-q22c-table-refusal.json).
+> - **Headers:** `best` 10/10 say calculated (Q22: 1/10, Q22b: 2/10); `best-v1` 0/10.
+> - **How:** 6/10 runs were refused, retried and rendered. All 10 ended with a table.
+> - **Cost:** +4.9% tokens.
+>
+> All four predictions confirmed. Audit 4/5 exact; the one extra call was rejected by the host as
+> unparseable JSON before it reached the server.
+
+> **REGISTERED before any run.** In Q22b the alert on a successful table render fixed 2/10 headers
+> and triggered 0/10 re-renders. This tests the rule added to the skill from it — "a fix that must
+> happen is a refusal, not an alert" — before the release.
+
+**Change, one variable.** `best`'s render_table now refuses the call (`isError`, "Not rendered. …
+say so in the header … and call render_table again") when a header or transposed row label names a
+label energy figure without saying it is calculated. It uses the same check as Q22b. Wire bytes
+unchanged. `best-v1` unchanged.
+
+**Run.** `table-label-figures`, haiku, `best-v1` vs `best`, n=10 each, same batches. Scored on the
+LAST successful render_table call.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `best` ≥ 8/10 CORRECT (Q22b: 2/10) | ≤ 5/10 |
+| P2 | every refused `best` run retries, and ≥ 9/10 end with a rendered table | ≤ 7/10 rendered |
+| P3 | `best-v1` ≤ 2/10 (control) | ≥ 5/10 |
+| P4 | `best` median tokens ≤ +20% of `best-v1` (the retry costs a call) | > +35% |

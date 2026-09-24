@@ -17,6 +17,7 @@ import { z } from 'zod';
 import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
+import { BEST_ANNOTATION_EXAMPLES, bestChartDescription, chartAlerts } from './app-tools-best.js';
 import { registerAppTool, registerAppResource, RESOURCE_MIME_TYPE } from '@modelcontextprotocol/ext-apps/server';
 import { getAuthExtra } from '../shared/auth.js';
 import { requestContext } from '../shared/log-context.js';
@@ -136,6 +137,110 @@ ALERTS:
 Always check that data is pre-processed (aggregated, filtered, limited) before passing.
 Payload caps: line 3000 points (Decimation plugin auto-downsamples); bar/pie/doughnut/radar/polarArea/scatter/bubble 500; sankey 200 flows; matrix 2000 cells; treemap 500 rows; graph 200 nodes and 500 edges; boxplot 500 samples per category; funnel 20 segments.
 Labels array is REQUIRED for bar, line, pie, doughnut, radar, polarArea, boxplot, and funnel. Omitting labels for those types causes an invisible chart with no error. Not needed for scatter, bubble, sankey, matrix, treemap, or graph (those use their own coordinate/structure fields).`;
+
+/** The annotation examples differ per tier; everything else in `options` is shared. */
+interface AnnotationExamples {
+  /** The `value` describe: what a numeric line position looks like. */
+  value: string;
+  /** The first example in the `annotations` describe, followed by ' '. */
+  lineExample: string;
+}
+
+const RICH_ANNOTATION_EXAMPLES: AnnotationExamples = {
+  value:
+    'For type="line": the position on scaleID. Number for numeric/time axes (e.g. value:70 for Paris Proof). For a categorical x-axis (labels[] is strings, e.g. dates), pass the label string verbatim (e.g. value:"30 apr") — Chart.js resolves it against the category scale.',
+  lineExample:
+    'Example — Paris Proof target: [{type:"line", scaleID:"y", value:70, borderColor:"#d32f2f", borderDash:[6,6], label:{content:"Paris Proof", display:true}}]. ',
+};
+
+function chartOptionsSchema(ex: AnnotationExamples) {
+  return z
+    .object({
+      indexAxis: z
+        .enum(['x', 'y'])
+        .optional()
+        .describe(
+          '"y" = horizontal bar chart (bars grow left to right). Useful for long category labels like project names or addresses.',
+        ),
+      stacked: z
+        .boolean()
+        .optional()
+        .describe(
+          'true = stacked bar/line. Shows composition within each category. E.g. stacked bar: uren Wst + Kst + Art per project.',
+        ),
+      showLegend: z
+        .boolean()
+        .optional()
+        .describe('Show legend. Default: true for multi-dataset, false for single dataset.'),
+      showGrid: z
+        .boolean()
+        .optional()
+        .describe('Show grid lines. Default: true. Set false for cleaner pie/doughnut/radar.'),
+      aspectRatio: z
+        .number()
+        .optional()
+        .describe(
+          'Width/height ratio. Default: 2 (wide). Use 1 for square charts (pie, radar). Use 3+ for sparkline-style.',
+        ),
+      yAxisLabel: z.string().optional().describe('Y-axis title. Use units (e.g. "kWh", "Uren", "€", "m³").'),
+      xAxisLabel: z
+        .string()
+        .optional()
+        .describe('X-axis title. Use for time periods or categories (e.g. "Maand", "Project").'),
+      annotations: z
+        .array(
+          z.object({
+            type: z
+              .enum(['line', 'box', 'label'])
+              .describe(
+                '"line" = horizontal/vertical threshold; "box" = rectangular band (comfort zone, SLA band); "label" = free-floating text marker.',
+              ),
+            scaleID: z
+              .enum(['x', 'y', 'y1'])
+              .optional()
+              .describe(
+                'REQUIRED for type="line" — without it nothing renders. y = horizontal line on left y-axis, y1 = horizontal line on right y-axis (mixed charts), x = vertical line on x-axis.',
+              ),
+            value: z.union([z.number(), z.string()]).optional().describe(ex.value),
+            xMin: z.union([z.number(), z.string()]).optional().describe('For box/label: x-axis lower bound.'),
+            xMax: z.union([z.number(), z.string()]).optional().describe('For box/label: x-axis upper bound.'),
+            yMin: z.number().optional().describe('For box/label: y-axis lower bound.'),
+            yMax: z.number().optional().describe('For box/label: y-axis upper bound.'),
+            borderColor: z.string().optional().describe('Line/box border color. Default: palette warning.'),
+            borderDash: z
+              .array(z.number())
+              .optional()
+              .describe('Dash pattern [dashLen, gapLen]. E.g. [6,6] for dashed target line.'),
+            borderWidth: z.number().optional().describe('Line width in px. Default: 2.'),
+            backgroundColor: z
+              .string()
+              .optional()
+              .describe('Box fill (with alpha for transparency). E.g. "rgba(0,128,0,0.08)" for comfort zone.'),
+            label: z
+              .object({
+                content: z.string().describe('Label text shown on the annotation.'),
+                position: z
+                  .enum(['start', 'center', 'end'])
+                  .optional()
+                  .describe('Position along the line/edge. Default: end.'),
+                display: z.boolean().optional().describe('Show the label. Default: false (bare line).'),
+              })
+              .optional()
+              .describe('Optional label rendered on the annotation.'),
+          }),
+        )
+        .optional()
+        .describe(
+          'Threshold lines, bands, and labels overlaid on the chart. Supported on bar / line / scatter / bubble / matrix only — unsupported on pie / doughnut / radar / polarArea / sankey / treemap / funnel / graph. ' +
+            'For type="line" annotations, scaleID is REQUIRED or the annotation silently renders nothing. ' +
+            ex.lineExample +
+            'Example — comfort band: [{type:"box", yMin:18, yMax:22, backgroundColor:"rgba(0,128,0,0.08)"}]. ' +
+            'Example — event marker on a categorical x-axis (e.g. labels=["1 apr","2 apr",...,"30 apr"]): [{type:"line", scaleID:"x", value:"30 apr", borderColor:"#d32f2f", label:{content:"Wapenstilstand", display:true}}]. The string MUST match a value in labels[] exactly.',
+        ),
+    })
+    .optional()
+    .describe('Chart options. Most have sensible defaults — only set what you need to override.');
+}
 
 // ── Input schema ─────────────────────────────────────────────────────────────
 // Raw Zod shape (NOT z.object()) — required by registerAppTool
@@ -533,97 +638,7 @@ const inputSchema = {
       'Graph config. Use ONLY with type=graph. ' +
         'Perfect for relational data: element dependencies, network graphs, hierarchical trees.',
     ),
-  options: z
-    .object({
-      indexAxis: z
-        .enum(['x', 'y'])
-        .optional()
-        .describe(
-          '"y" = horizontal bar chart (bars grow left to right). Useful for long category labels like project names or addresses.',
-        ),
-      stacked: z
-        .boolean()
-        .optional()
-        .describe(
-          'true = stacked bar/line. Shows composition within each category. E.g. stacked bar: uren Wst + Kst + Art per project.',
-        ),
-      showLegend: z
-        .boolean()
-        .optional()
-        .describe('Show legend. Default: true for multi-dataset, false for single dataset.'),
-      showGrid: z
-        .boolean()
-        .optional()
-        .describe('Show grid lines. Default: true. Set false for cleaner pie/doughnut/radar.'),
-      aspectRatio: z
-        .number()
-        .optional()
-        .describe(
-          'Width/height ratio. Default: 2 (wide). Use 1 for square charts (pie, radar). Use 3+ for sparkline-style.',
-        ),
-      yAxisLabel: z.string().optional().describe('Y-axis title. Use units (e.g. "kWh", "Uren", "€", "m³").'),
-      xAxisLabel: z
-        .string()
-        .optional()
-        .describe('X-axis title. Use for time periods or categories (e.g. "Maand", "Project").'),
-      annotations: z
-        .array(
-          z.object({
-            type: z
-              .enum(['line', 'box', 'label'])
-              .describe(
-                '"line" = horizontal/vertical threshold; "box" = rectangular band (comfort zone, SLA band); "label" = free-floating text marker.',
-              ),
-            scaleID: z
-              .enum(['x', 'y', 'y1'])
-              .optional()
-              .describe(
-                'REQUIRED for type="line" — without it nothing renders. y = horizontal line on left y-axis, y1 = horizontal line on right y-axis (mixed charts), x = vertical line on x-axis.',
-              ),
-            value: z
-              .union([z.number(), z.string()])
-              .optional()
-              .describe(
-                'For type="line": the position on scaleID. Number for numeric/time axes (e.g. value:70 for Paris Proof). For a categorical x-axis (labels[] is strings, e.g. dates), pass the label string verbatim (e.g. value:"30 apr") — Chart.js resolves it against the category scale.',
-              ),
-            xMin: z.union([z.number(), z.string()]).optional().describe('For box/label: x-axis lower bound.'),
-            xMax: z.union([z.number(), z.string()]).optional().describe('For box/label: x-axis upper bound.'),
-            yMin: z.number().optional().describe('For box/label: y-axis lower bound.'),
-            yMax: z.number().optional().describe('For box/label: y-axis upper bound.'),
-            borderColor: z.string().optional().describe('Line/box border color. Default: palette warning.'),
-            borderDash: z
-              .array(z.number())
-              .optional()
-              .describe('Dash pattern [dashLen, gapLen]. E.g. [6,6] for dashed target line.'),
-            borderWidth: z.number().optional().describe('Line width in px. Default: 2.'),
-            backgroundColor: z
-              .string()
-              .optional()
-              .describe('Box fill (with alpha for transparency). E.g. "rgba(0,128,0,0.08)" for comfort zone.'),
-            label: z
-              .object({
-                content: z.string().describe('Label text shown on the annotation.'),
-                position: z
-                  .enum(['start', 'center', 'end'])
-                  .optional()
-                  .describe('Position along the line/edge. Default: end.'),
-                display: z.boolean().optional().describe('Show the label. Default: false (bare line).'),
-              })
-              .optional()
-              .describe('Optional label rendered on the annotation.'),
-          }),
-        )
-        .optional()
-        .describe(
-          'Threshold lines, bands, and labels overlaid on the chart. Supported on bar / line / scatter / bubble / matrix only — unsupported on pie / doughnut / radar / polarArea / sankey / treemap / funnel / graph. ' +
-            'For type="line" annotations, scaleID is REQUIRED or the annotation silently renders nothing. ' +
-            'Example — Paris Proof target: [{type:"line", scaleID:"y", value:70, borderColor:"#d32f2f", borderDash:[6,6], label:{content:"Paris Proof", display:true}}]. ' +
-            'Example — comfort band: [{type:"box", yMin:18, yMax:22, backgroundColor:"rgba(0,128,0,0.08)"}]. ' +
-            'Example — event marker on a categorical x-axis (e.g. labels=["1 apr","2 apr",...,"30 apr"]): [{type:"line", scaleID:"x", value:"30 apr", borderColor:"#d32f2f", label:{content:"Wapenstilstand", display:true}}]. The string MUST match a value in labels[] exactly.',
-        ),
-    })
-    .optional()
-    .describe('Chart options. Most have sensible defaults — only set what you need to override.'),
+  options: chartOptionsSchema(RICH_ANNOTATION_EXAMPLES),
   width: z
     .number()
     .optional()
@@ -816,7 +831,7 @@ function normalizeTreemapRow(
 
 // ── Tool registration ────────────────────────────────────────────────────────
 
-export function registerRenderChartTool(server: McpServer, opts: { minimal?: boolean } = {}): void {
+export function registerRenderChartTool(server: McpServer, opts: { minimal?: boolean; best?: boolean } = {}): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
   registerAppResource(server, 'Chart App', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({
     contents: [
@@ -834,8 +849,8 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
     'render_chart',
     {
       title: 'Render Chart',
-      description: opts.minimal ? 'Render data as a chart.' : description,
-      inputSchema,
+      description: opts.best ? bestChartDescription : opts.minimal ? 'Render data as a chart.' : description,
+      inputSchema: opts.best ? { ...inputSchema, options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES) } : inputSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -1062,6 +1077,14 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
           );
         }
 
+        // A line annotation without scaleID renders nothing and reports success; refuse it instead.
+        const unplaced = args.options?.annotations?.find((a) => a.type === 'line' && !a.scaleID);
+        if (unplaced) {
+          return fail(
+            'Every type="line" annotation needs scaleID: "y" for a horizontal line, "x" for a vertical one, "y1" for the right axis. Without it nothing is drawn.',
+          );
+        }
+
         // String annotation values must match a category label exactly — otherwise
         // Chart.js silently renders nothing and the agent gets "success" without a marker.
         if (args.options?.annotations?.length) {
@@ -1102,7 +1125,12 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
           content: [
             {
               type: 'text' as const,
-              text: `Chart rendered: ${args.type} — "${args.title ?? 'Untitled'}"`,
+              text: opts.best
+                ? JSON.stringify({
+                    interpretation: { alerts: chartAlerts({ ...args, datasets }), notes: [] },
+                    rendered: `${args.type} — "${args.title ?? 'Untitled'}"`,
+                  })
+                : `Chart rendered: ${args.type} — "${args.title ?? 'Untitled'}"`,
             },
           ],
           // Ship normalized keyed shapes to the UI so it doesn't need to re-implement

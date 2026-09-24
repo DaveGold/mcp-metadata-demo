@@ -105,6 +105,7 @@ if (isMain) {
       'opaque-words',
       'guidance-recipe',
       'best',
+      'best-v1',
     ] as const
   ).includes(rawVariant as never)
     ? (rawVariant as ServerVariant)

@@ -244,7 +244,8 @@ const inputSchema = {
   urls: z.array(z.string()).describe('Array of image URLs to fetch. Max 50 per call.'),
 };
 
-export function registerFetchImageTool(server: McpServer): void {
+/** `openWorld`: the tool fetches arbitrary external URLs, so the reference declares it (older tiers keep their measured bytes). */
+export function registerFetchImageTool(server: McpServer, opts: { openWorld?: boolean } = {}): void {
   registerAppTool(
     server,
     'fetch_image',
@@ -258,7 +259,7 @@ export function registerFetchImageTool(server: McpServer): void {
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: false,
+        openWorldHint: opts.openWorld ?? false,
       },
       _meta: {
         ui: {

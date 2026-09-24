@@ -13,6 +13,7 @@ const EXAMPLE_CODE = [
   'src/tools/get-building-profile-best.ts',
   'src/tools/get-weather-context-best.ts',
   'src/tools/best-instructions.ts',
+  'src/tools/app-tools-best.ts',
   'src/domain/best-rules.ts',
   'src/domain/best-building-rules.ts',
   'src/domain/best-weather-rules.ts',

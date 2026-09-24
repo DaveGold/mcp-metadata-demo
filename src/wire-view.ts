@@ -1,6 +1,6 @@
 /**
- * What a tier actually sends to the model, as readable markdown: server instructions and each data
- * tool's description, with Claude Code's 2,048-char cut marked (Q7), plus the input parameters.
+ * What a tier actually sends to the model, as readable markdown: server instructions and every
+ * model-visible tool's description, with Claude Code's 2,048-char cut marked (Q7), plus the input parameters.
  * The output schema is listed by size only, because the model never receives it (Q11).
  *
  * Generated from the live server factory, never written by hand: `npm run wire-view` rewrites
@@ -25,7 +25,9 @@ export const WIRE_VIEW_ARMS: { arm: ServerVariant; blurb: string }[] = [
   },
   { arm: 'minimal', blurb: 'The thin wrapper: same data, one-line descriptions, no guidance.' },
 ];
-const DATA_TOOLS = ['get_building_profile', 'get_weather_context'];
+/** App-only tools (`_meta.ui.visibility: ['app']`) are called by the UI, never shown to the model. */
+const modelVisible = (t: { _meta?: unknown }) =>
+  !(t._meta as { ui?: { visibility?: string[] } } | undefined)?.ui?.visibility?.every((v) => v === 'app');
 
 const noBag: BagClientLike = {
   findAddress: async () => [],
@@ -72,9 +74,8 @@ export async function renderWireView(arm: ServerVariant, blurb: string): Promise
     '',
     instructions ? markCut(instructions) : '_none_',
   ];
-  for (const name of DATA_TOOLS) {
-    const tool = tools.find((t) => t.name === name);
-    if (!tool) continue;
+  for (const tool of tools.filter(modelVisible)) {
+    const name = tool.name;
     const description = tool.description ?? '';
     const props = ((tool.inputSchema as { properties?: Record<string, Prop> }).properties ?? {}) as Record<
       string,

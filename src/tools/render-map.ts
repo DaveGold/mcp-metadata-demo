@@ -12,6 +12,7 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { bestMapDescription, mapAlerts } from './app-tools-best.js';
 import { z } from 'zod';
 import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -266,7 +267,7 @@ function normalizeMarkers(raw: MapMarker[] | unknown[][]): MapMarker[] {
 
 // ── Tool registration ────────────────────────────────────────────────────────
 
-export function registerRenderMapTool(server: McpServer, opts: { minimal?: boolean } = {}): void {
+export function registerRenderMapTool(server: McpServer, opts: { minimal?: boolean; best?: boolean } = {}): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
   registerAppResource(server, 'Map App', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({
     contents: [
@@ -294,7 +295,7 @@ export function registerRenderMapTool(server: McpServer, opts: { minimal?: boole
     'render_map',
     {
       title: 'Render Map',
-      description: opts.minimal ? 'Render data as a map with markers.' : description,
+      description: opts.best ? bestMapDescription : opts.minimal ? 'Render data as a map with markers.' : description,
       inputSchema,
       annotations: {
         readOnlyHint: true,
@@ -378,7 +379,12 @@ export function registerRenderMapTool(server: McpServer, opts: { minimal?: boole
           content: [
             {
               type: 'text' as const,
-              text: `Map rendered: ${markers.length} marker(s) — "${args.title ?? 'Untitled'}"`,
+              text: opts.best
+                ? JSON.stringify({
+                    interpretation: { alerts: mapAlerts(markers), notes: [] },
+                    rendered: `${markers.length} marker(s) — "${args.title ?? 'Untitled'}"`,
+                  })
+                : `Map rendered: ${markers.length} marker(s) — "${args.title ?? 'Untitled'}"`,
             },
           ],
           // Pass the normalized keyed shape to the UI so it doesn't need to

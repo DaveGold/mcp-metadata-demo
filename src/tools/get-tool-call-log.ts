@@ -8,6 +8,7 @@
  * when deployed, an in-memory ring buffer (this process only) when local.
  */
 
+import { bestLogDescription, bestLogVariantDescription } from './app-tools-best.js';
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { logger } from '../logger.js';
@@ -129,13 +130,17 @@ const outputSchema = {
   }),
 };
 
-export function registerGetToolCallLogTool(server: McpServer, opts: { minimal?: boolean } = {}): void {
+export function registerGetToolCallLogTool(server: McpServer, opts: { minimal?: boolean; best?: boolean } = {}): void {
   server.registerTool(
     'get_tool_call_log',
     {
       title: 'Tool-call log',
-      description: opts.minimal ? minimalDescription : description,
-      inputSchema: z.object(inputSchema),
+      description: opts.best ? bestLogDescription : opts.minimal ? minimalDescription : description,
+      inputSchema: z.object(
+        opts.best
+          ? { ...inputSchema, variant: z.string().optional().describe(bestLogVariantDescription) }
+          : inputSchema,
+      ),
       outputSchema: z.object(outputSchema),
       annotations: {
         readOnlyHint: true,

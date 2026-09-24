@@ -27,5 +27,6 @@ export {
   mcpOpaqueWords,
   mcpGuidanceRecipe,
   mcpBest,
+  mcpBestV1,
 } from './functions.js';
 export { createServer } from './server.js';

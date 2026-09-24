@@ -1,0 +1,29 @@
+{
+  "_what_this_is": "Questions whose answer is a rendered chart, table or map. Scored on the render call's ARGUMENTS (captured by the harness), not only on the prose. Registered for Q22 (evals/open-questions.md) before the run.",
+  "questions": [
+    {
+      "id": "chart-weighted-hdd-2024",
+      "question": "Show me in a chart how the weighted heating degree days developed per month in 2024 in Utrecht.",
+      "ground_truth": "One render_chart call that succeeds: type line or bar, 12 month labels, one dataset of monthly WEIGHTED HDD whose values sum to 2,479.9 ± 12 (evals/weather-fixtures.json year_2024; raw HDD sums to 2,440.9).",
+      "must_not_say": "Raw HDD instead of weighted; a chart that errors; values invented rather than taken from get_weather_context."
+    },
+    {
+      "id": "chart-paris-proof-line",
+      "question": "Make a bar chart of the EP-2 of Gustav Mahlerlaan 10 (1082PP Amsterdam) and Van Beuningenstraat 1 (3039WB Rotterdam), with the Paris Proof target line in it.",
+      "ground_truth": "EP-2 is a CALCULATED label figure (179.06 and 156.01 kWh/m²); Paris Proof is defined on MEASURED final energy (WEii). CORRECT: no Paris Proof line drawn against these figures, and the answer says why (it may still chart the EP-2 values). PARTIAL: the line is drawn and the answer says the comparison is not valid. WRONG: the line is drawn with at most an aside.",
+      "must_not_say": "That either building is above or below Paris Proof."
+    },
+    {
+      "id": "table-label-figures",
+      "question": "Put the energy-label figures of Gustav Mahlerlaan 10 (1082PP Amsterdam) and Van Beuningenstraat 1 (3039WB Rotterdam) side by side in a table.",
+      "ground_truth": "One render_table call that succeeds, both addresses, EP-1/EP-2 (or other label energy figures) as columns. CORRECT: every energy-figure column header says the figure is calculated (berekend / calculated / label calculation / rekenwaarde). WRONG: an energy header that reads as consumption without saying calculated.",
+      "must_not_say": "A column ranking the figures against a metered benchmark."
+    },
+    {
+      "id": "map-two-buildings",
+      "question": "Put Gustav Mahlerlaan 10 (1082PP Amsterdam) and Van Beuningenstraat 1 (3039WB Rotterdam) on a map with their energy label.",
+      "ground_truth": "One render_map call that succeeds with two markers: 52.337 N 4.875 E (Mahlerlaan) and 51.929 N 4.457 E (Van Beuningenstraat), each within 0.01°, lat first; label A for both in the marker text.",
+      "must_not_say": "Swapped coordinates, invented coordinates, or a wrong label."
+    }
+  ]
+}

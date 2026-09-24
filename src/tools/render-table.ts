@@ -14,6 +14,7 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { bestTableDescription, tableAlerts } from './app-tools-best.js';
 import { z } from 'zod';
 import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -599,7 +600,7 @@ export function findRowShapeError(columns: TableArgs['columns'], data: TableArgs
 
 // ── Tool registration ────────────────────────────────────────────────────────
 
-export function registerRenderTableTool(server: McpServer, opts: { minimal?: boolean } = {}): void {
+export function registerRenderTableTool(server: McpServer, opts: { minimal?: boolean; best?: boolean } = {}): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
   registerAppResource(server, 'Table App', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({
     contents: [
@@ -617,7 +618,7 @@ export function registerRenderTableTool(server: McpServer, opts: { minimal?: boo
     'render_table',
     {
       title: 'Render Table',
-      description: opts.minimal ? 'Render data as a table.' : description,
+      description: opts.best ? bestTableDescription : opts.minimal ? 'Render data as a table.' : description,
       inputSchema,
       annotations: {
         readOnlyHint: true,
@@ -656,13 +657,27 @@ export function registerRenderTableTool(server: McpServer, opts: { minimal?: boo
           };
         }
 
+        // A header that names a calculated label figure as if it were consumption is refused, not
+        // flagged: after a successful render the model does not redo the call
+        // (evals/results/2026-09-24-q22b-table-alert.json).
+        const headerProblems = opts.best ? tableAlerts(args.columns, args.data) : [];
+        if (headerProblems.length) {
+          await logToolCall({ auth, args, start, status: 'error' });
+          return { content: [{ type: 'text' as const, text: headerProblems.join(' ') }], isError: true };
+        }
+
         await logToolCall({ auth, args, start, status: 'success' });
 
         return {
           content: [
             {
               type: 'text' as const,
-              text: `Table rendered: "${args.title ?? 'Untitled'}" — ${args.data.length} rows, ${args.columns.length} columns`,
+              text: opts.best
+                ? JSON.stringify({
+                    interpretation: { alerts: tableAlerts(args.columns, args.data), notes: [] },
+                    rendered: `"${args.title ?? 'Untitled'}" — ${args.data.length} rows, ${args.columns.length} columns`,
+                  })
+                : `Table rendered: "${args.title ?? 'Untitled'}" — ${args.data.length} rows, ${args.columns.length} columns`,
             },
           ],
           structuredContent: { ...args },

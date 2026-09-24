@@ -96,3 +96,138 @@ ALERTS: interpretation.alerts — the correction valid for THIS window, all figh
 ### Output schema (not delivered)
 
 4,610 chars, 4 top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.
+
+## `render_chart`
+
+### Description (1,541 chars)
+
+````text
+WHEN TO USE: a chart of data already fetched from this server — a trend (monthly weightedHDD or GHI from get_weather_context summary.monthlyBreakdown), a ranking or comparison across addresses (get_building_profile), a distribution. Pick `type` with the rules on that parameter.
+
+WHEN NOT TO USE: a single number or a short list → answer in text. Records to browse or sort → render_table. Locations → render_map. It fetches nothing: call the data tool first.
+
+RELATED TOOLS: get_weather_context, get_building_profile (the data); render_table (the rows behind a chart); render_map.
+
+QUERY STRATEGY: pass the prepared data directly; do not echo it in the conversation first. Use the tuple shorthand: datasets ["<label>", [n, n, …]], sankey flows ["from", "to", n], matrix cells [x, y, v]. bar, line, pie, doughnut, radar, polarArea, boxplot and funnel need labels[] with one entry per value. Pre-aggregate: at most 500 points per dataset (line 3,000) and 5 series.
+
+RETURNS: the chart, rendered inline for the user, and `interpretation.alerts`. Read the alerts: they name a determinate problem with the call (too many slices, a target line of the wrong kind) and how to fix it.
+
+INTERPRETATION: draw a target or benchmark line only against data of the same kind. Every energy figure from get_building_profile is CALCULATED by the label method; Paris Proof and other consumption benchmarks are defined on MEASURED energy, so never draw them against label figures.
+
+ALERTS: interpretation.alerts — problems found in this call, each with its fix.
+````
+
+### Input parameters (delivered)
+
+| parameter | type | description |
+|---|---|---|
+| `type` * | `bar` · `line` · `pie` · `doughnut` · `radar` · `polarArea` · `bubble` · `scatter` · `sankey` · `matrix` · `treemap` · `boxplot` · `funnel` · `graph` | Chart type. Each rule has a primary trigger and a hard rejection — pick the type whose trigger matches the question, then check the rejection clause: - bar: rankings and 'hoeveel per X'. Horizontal for >8 items or long labels (projectnamen, adressen); vertical for time buckets. Sort desc for ranking, stacked cap 4 segments. REFUSE on continuous x-axis (use line) or truncated y-axis. - line: trend over continuous x-axis (time/numeric). ≤5 series; otherwise filter top-N or split. Area (fill=true) only for 1 series or a meaningful stacked total. REFUSE on categorical x-axis (use bar). - pie: 2-5 slices with one clear dominance. Hard cap 5 — aggregate to 'top 4 + overig' beyond that. REFUSE for ranking questions, similar-sized slices, or side-by-side period comparison. - doughnut: pie with a KPI in the center hole. Without a center value, use pie instead. - radar: one profile across ≤6 axes with the same scale, OR ≤3 overlays normalized to a shared scale (0-100). REFUSE on >8 axes, >3 series, mixed units, or ranking questions. - polarArea: cyclical data only (months, weekdays, hours). REFUSE on non-cyclical categories (leveranciers, projecten) — use bar. - bubble: 3 numeric dimensions (x, y, size). Size = area (plot √value), normalize r to 5-40px. REFUSE when size ranking is the actual question (use scatter + label) or when sizes vary >10×. - scatter: correlation/distribution of 2 numeric variables. Add a trendline for correlation questions; add a 45° diagonal for actual-vs-target. REFUSE on categorical x-axis. - sankey: flows across 2-3 tiers, ≤10 flows per tier, consistent unit across flows. Use the sankey field. REFUSE without a natural flow (sales per regio is not flow), >3 tiers (hairball), or cycles/loops (use graph). - matrix: 2 categorical dimensions + numeric intensity per cell. Use the matrix field. Sweet spots 7×24, 12×N, 52×N. REFUSE on one dense continuous dimension (365 daily dates → line) or on two numeric dimensions (→ scatter). - treemap: hierarchical part-to-whole, 6+ items, area = value. Use the treemap field. Max 3 levels. REFUSE on flat data (→ bar), on one item >80% (it swallows the rest), or on precise-ranking questions. - boxplot: distribution (median, IQR, outliers) per category, n≥5 per box. Use samples or stats on each dataset. REFUSE on n<5 (→ dot plot) or when the question is only about the mean. - funnel: 3-6 strictly decreasing stages where each stage is a subset of the previous one. REFUSE on non-linear processes, branching, or stages that can grow (→ bar). - graph: relational networks where edges carry meaning (dependencies, many-to-many, cross-tier). Use the graph field; layouts: force / tree / dendrogram. REFUSE on strict parent-child hierarchy (→ treemap) or on plain list views (→ table). |
+| `title` | string | Chart title displayed above the visualization. Use Dutch, concise (e.g. "Energieverbruik per maand", "Uren per medewerker Q1 2025"). |
+| `labels` | array | Category labels for the x-axis (bar, line) or segments (pie, doughnut, radar, polarArea). REQUIRED for all chart types except scatter, bubble, and sankey — omitting labels causes an invisible chart. Must have the same length as the data array. Examples: month names ["Jan", "Feb", ...], employee names, project numbers, energy types. |
+| `datasets` | array | Chart datasets. Each dataset is one series/legend entry. Omit for sankey type (use sankey field instead). Two accepted shapes per entry: - Tuple shorthand: [label, data]  — preferred for simple bar/line series. Use default palette default.   Example: ["Elektriciteit (kWh)", [1800, 1620, 1240, null, null, 120]] - Full object: {label, data, backgroundColor?, borderColor?, borderDash?, fill?, tension?, scatterData?, type?, order?, spanGaps?}   Required when you need styling overrides, scatter/bubble data, dashed lines, mixed charts, or area fills. |
+| `sankey` | object | Sankey-specific config. Use ONLY with type=sankey. Perfect for energy flow analysis (bron→systeem→toepassing), cost allocation (budget→afdeling→post), or any source→destination flow. Nodes are auto-discovered from flow from/to values. |
+| `matrix` | object | Matrix (heatmap) config. Use ONLY with type=matrix. Each cell combines an x, y, and value — color intensity encodes the value. Perfect for 2D density patterns: uur × dag kWh (calendar heatmap), week × installatietype storingen, voertuig × dag bezetting. |
+| `treemap` | object | Treemap config. Use ONLY with type=treemap. Hierarchical nested rectangles where area is proportional to the value. Perfect for: kosten project→fase→post, BIM discipline→category→family, portfolio gebruikstype→energielabel. |
+| `graph` | object | Graph config. Use ONLY with type=graph. Perfect for relational data: element dependencies, network graphs, hierarchical trees. |
+| `options` | object | Chart options. Most have sensible defaults — only set what you need to override. |
+| `width` | number | Chart width in pixels. Default: 600. Use 800 for data-dense charts, 400 for compact dashboards. |
+| `height` | number | Chart height in pixels. Default: 400. Use 300 for sparklines, 500 for complex charts with many labels. |
+| `queryIntent` | string | Describe what this call is being used for. Used for observability. |
+
+### Output schema (not delivered)
+
+_none_
+
+## `render_table`
+
+### Description (1,251 chars)
+
+````text
+WHEN TO USE: records the user wants to read, sort or compare field by field — several addresses side by side (get_building_profile), daily weather rows (get_weather_context records with select). Prefer it over a markdown table for anything with numbers, units or dates.
+
+WHEN NOT TO USE: one or two values → answer in text. A trend or a ranking at a glance → render_chart. Locations → render_map. It fetches nothing: call the data tool first.
+
+RELATED TOOLS: get_building_profile, get_weather_context (the data); render_chart (the picture of the same rows).
+
+QUERY STRATEGY: pass the rows directly; do not echo them first. Above ~20 rows use positional rows (values in the order of columns[]). At most 500 rows: filter or aggregate first. Pick a column type per field (number, percentage, date, badge) and keep the unit and provenance from the field name in the header: "EP-2 berekend (kWh/m²)", not "Energy use".
+
+RETURNS: the table, rendered inline for the user, with a one-line confirmation of rows and columns.
+
+INTERPRETATION: a header must not claim more than the field does. Label figures from get_building_profile are CALCULATED, not metered consumption; say so in the header and never add a column that ranks them against a metered benchmark.
+````
+
+### Input parameters (delivered)
+
+| parameter | type | description |
+|---|---|---|
+| `columns` * | array | Column definitions. Order determines display order left to right. Tip: put the most important identifying column first (e.g. id, name, reference number), status/badge columns near the end, numeric totals right-aligned. |
+| `data` * |  | Row data. Two accepted shapes (do not mix them — all rows must use the same shape): 1. Array of ARRAYS (positional, preferred for datasets >20 rows — ~40% smaller payload):    Each inner array is one row. Values are in the SAME ORDER as "columns[]" and each row must have exactly one value per column.    Example: columns=[{key:"id"},{key:"name"},{key:"email"}], data=[["3451","André","andre@example.com"], ["3452","Jane","jane@example.com"]] 2. Array of OBJECTS (keyed, fine for small tables):    Each object is one row. Keys must match column key values.    Example: [{"id":"3451","name":"André","email":"andre@example.com"}] Maximum 500 rows — pre-aggregate or filter before calling for larger datasets. Dates as ISO strings (YYYY-MM-DD). Booleans as true/false. Numbers as numbers (not strings). |
+| `features` | object | Interactive features. Enable only what adds value — too many features clutters the UI. Recommended defaults: sorting=true, pagination=true, rest=false. Add filtering/globalSearch for tables with >50 rows or many text columns. Add selection when the user needs to pick items. |
+| `title` | string | Table title. Use the language of the conversation, descriptive (e.g. "Q1 2025 Hours", "Invoice Overview", "Team Members"). |
+| `emptyMessage` | string | Message shown when data array is empty or all rows are filtered out. |
+| `density` | `compact` · `normal` · `comfortable` | Row height density: - compact: minimal padding, small font — for data-heavy tables with many rows/columns - normal: balanced padding — default for most tables - comfortable: spacious padding, larger font — for dashboard-style overviews with few rows |
+| `striped` | boolean | Alternating row background colors for readability. Default: true. Set false for very short tables (<5 rows). |
+| `bordered` | boolean | Add borders between cells. Default: false (cleaner look). Set true for data-dense tables where column separation helps. |
+| `maxHeight` | string | CSS max-height for scrollable table body (e.g. "400px", "60vh"). Header stays sticky. Omit for auto height. |
+| `queryIntent` | string | Describe what this call is being used for. Used for observability. |
+
+### Output schema (not delivered)
+
+_none_
+
+## `render_map`
+
+### Description (881 chars)
+
+````text
+WHEN TO USE: where one or more addresses are — a building (get_building_profile coordinaten.lat/lon), several addresses to compare spatially, the location a weather query used.
+
+WHEN NOT TO USE: one address the user only needs named → answer in text. Coordinates in a list → render_table. No coordinates yet → call get_building_profile first; it returns them.
+
+RELATED TOOLS: get_building_profile (coordinaten.lat / coordinaten.lon per address); get_weather_context (takes the same coordinates).
+
+QUERY STRATEGY: markers are [lat, lng, label, description?, type?] — lat first. Use type "building" for addresses. Put what the user asked about in the description (energielabel, bouwjaar), not the whole profile. At most 500 markers.
+
+RETURNS: the map, rendered inline for the user, and `interpretation.alerts` when a marker looks wrong (lat and lng swapped, outside the Netherlands).
+````
+
+### Input parameters (delivered)
+
+| parameter | type | description |
+|---|---|---|
+| `markers` * |  | Array of markers to place on the map. Two accepted shapes: 1. Array of ARRAYS (positional, preferred for >10 markers — ~40-50% smaller payload):    [[lat, lng, label, description?, type?, color?], ...]  — values in this fixed order. Trailing fields may be omitted.    Example: [[52.09, 5.11, "Utrecht hub"], [52.37, 4.90, "Amsterdam", "Hoofdkantoor", "building"]] 2. Array of OBJECTS (keyed, fine for small sets):    [{lat, lng, label, description?, type?, color?}, ...] Each marker has a position (lat/lng), label, and optional description/type/color. Maximum 500 markers. |
+| `title` | string | Map title displayed above the map. Use the language of the conversation, concise (e.g. "Fleet positions", "Project locations"). |
+| `center` | object | Manual map center. Default: auto-fit to show all markers. Only set when you want a specific view (e.g. centered on Utrecht: {lat: 52.09, lng: 5.11}). |
+| `zoom` | number | Zoom level 1-18. Default: auto-fit to show all markers. Guide: 6=country, 10=province, 13=city, 16=street, 18=building. Only set together with center for a specific view. |
+| `height` | number | Map height in pixels. Default: 500. Use 400 for compact views, 600 for detail-rich maps. |
+| `queryIntent` | string | Describe what this call is being used for. Used for observability. |
+
+### Output schema (not delivered)
+
+_none_
+
+## `get_tool_call_log`
+
+### Description (781 chars)
+
+````text
+WHEN TO USE: to read how this server is used — the queryIntent of recent calls, which tools, which optional parameters, which calls failed. The Iterate step: consecutive queryIntent values read as a narrative name the gap in a tool's metadata.
+
+WHEN NOT TO USE: to get a past call's data — the log keeps the shape of a call (tool, queryIntent, status, duration, parameter NAMES), never parameter values or responses.
+
+RETURNS: records (most recent first) and a summary: environment, count per tool and per server variant, time span.
+
+INTERPRETATION: environment "local" is this process's in-memory buffer (last 50 calls, reset on restart); "cloud" is the persisted history across every caller. An empty local log means no tool has been called yet in this process, not a broken log.
+````
+
+### Input parameters (delivered)
+
+| parameter | type | description |
+|---|---|---|
+| `tool` | string | Filter to calls for this exact tool name (e.g. "get_building_profile"). |
+| `variant` | string | Filter to calls served by one server variant, e.g. "best". Read summary.countByVariant first. |
+| `limit` | integer | Maximum number of calls to return, most recent first. Default 20, max 500. One eval batch does not fit in 100 rows — size this to the whole window you are auditing. |
+
+### Output schema (not delivered)
+
+2,656 chars, 3 top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.
