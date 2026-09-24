@@ -4047,3 +4047,24 @@ questions × 3 arms × n=5 = 330 runs, haiku.
 | P6 | the pointer is followed: get_chart_guidance is called before render_chart in ≥ 4/5 runs of every non-bar/line path, and in ≤ 2/5 of the plain bar/line questions | < 3/5 on any non-bar/line path |
 | P7 | every shape refusal in `best-guided` is followed by a rendered chart | any refused run that ends without a chart |
 | P8 | cost: on the Q23 questions (mostly text, bar, line), `best-guided` median tokens ≤ `best-lean`; on the 12 non-bar/line paths `best-guided` ≤ `best-lean` + 5% despite the extra call | guided > lean + 5% on the Q23 group |
+
+> **ANSWERED 2026-09-24 — a smaller schema loses nothing measurable and saves a fifth to a third
+> of every run.** See [`results/2026-09-24-q25-lean-vs-guided-schemas.json`](results/2026-09-24-q25-lean-vs-guided-schemas.json).
+> 330 runs, haiku, n=5; audit 41/44 waves exact, 554 of 557 calls in the log (the 3 missing never
+> reached a handler, or could not be traced).
+>
+> | | best | best-lean | best-guided |
+> |---|---|---|---|
+> | 14 chart paths correct | 66/70 | 70/70 | 67/70 |
+> | 6 form-choice questions | 29/30 | 30/30 | 29/30 |
+> | 2 traps (Paris Proof line, label headers) | 7/10 | 9/10 | 9/10 |
+> | median tokens, 12 non-bar/line paths | 34.2k | 26.3k (−23%) | 24.4k (−29%) |
+> | median tokens, form choice | 36.5k | 28.6k (−22%) | 26.3k (−28%) |
+>
+> P1–P5, P7, P8 hold. P6 mostly: the REQUIRED pointer was followed in 58/62 runs on the 12
+> non-bar/line paths (pie 3/5, the rest 4–5/5) and 0/10 on plain bar/line. Guided's extra call is
+> cheaper than the schema it replaces (−7% against lean). Guided missed three runs that lean did
+> not (funnel drawn as sankey, boxplot as line without fetching guidance, polarArea as bar); at
+> n=5 that is direction, not size. The lesson for the skill: the input schema is paid on every
+> turn by every question, so it carries what forming a call needs and no more; a type-specific
+> shape can move behind a REQUIRED guidance call without loss.

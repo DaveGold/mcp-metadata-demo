@@ -282,6 +282,10 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
   and line (and text, most often); its 2,769 characters of per-type rules changed one thing, a
   12-slice pie, 3/10 → 0/10 [Q23]. Keep the rules for the tempting wrong choices on your data, cut
   the menu to what your data can use.
+- **Size the input schema to what forming the call needs.** It is re-sent every turn for every
+  tool, so every question pays for it: the same structure in fewer words saved 21–23% of each run
+  and lost nothing; the shapes only some calls need can move behind a REQUIRED guidance call
+  (−26–29%, followed 58/62) [Q25]. The handler still validates the full shape and refuses with it.
 - **Audit the app tools too.** Their input schema is delivered, so an example there is advice: a
   "Paris Proof target" annotation example on a server of calculated figures got the line drawn
   20/20, and the fixed tool left it out 16/20 [Q22].

@@ -32,6 +32,12 @@ not fit in the description. Interpretation of results belongs in the response, w
 only when the tool is called. On `best`, render_chart and render_table alone are 42k of the 73.6k
 characters every request carries [IS].
 
+Trimming it is safe and pays on every run: the same structure in fewer words (tools/list 73.6k →
+48.3k) lost nothing and cost 21–23% fewer tokens on every question group, including questions
+that never draw a chart; moving the shapes of the rarer chart types behind a REQUIRED
+`get_chart_guidance(type)` (41.4k) saved 26–29%, and the pointer was followed 58/62 times where it
+applied [Q25].
+
 ## What follows from it
 
 1. **The variable is delivery, not channel.** Delivered in both channels, the same sentence

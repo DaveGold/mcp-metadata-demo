@@ -1,0 +1,785 @@
+{
+ "_comment": "Q25: does a smaller app-tool input schema lose anything, and what does it save? best (the full render_chart/render_table schema, 21.7k + 20.2k chars) vs best-lean (same structure, fewer words: 10.6k + 5.9k) vs best-guided (render_chart schema 4.9k: the decision tree plus plain labels/tuple datasets; every other shape from get_chart_guidance(type), a REQUIRED first call; the handler validates the full shape and refuses with the shape in the message). Registered before the run; the third arm was an amendment before any run.",
+ "date": "2026-09-24",
+ "model": "haiku",
+ "n_per_cell": 5,
+ "total_runs": 330,
+ "tools_list_chars": {
+  "best": 73600,
+  "best-lean": 48300,
+  "best-guided": 41400
+ },
+ "protocol": "Portable harness, 44 waves, the three arms interleaved per wave. Waves 7–44 were re-run after the account session limit stopped the first attempt; no wave was run twice to completion. Every 'check' and 'partial' verdict read by hand (corrections below).",
+ "headline": [
+  "Neither smaller schema loses anything measurable. Correct on the 14 chart paths: best 66/70, best-lean 70/70, best-guided 67/70; on the six form-choice questions 29/30, 30/30, 29/30. No cell of either smaller arm is 2 or more below best (P1, P5 hold).",
+  "Both save a fifth to a third of every run. Median tokens against best: best-lean −20.5% to −22.8%, best-guided −26.1% to −29.2% per question group, also on the questions where no chart is drawn: the schema is paid on every turn.",
+  "The REQUIRED pointer is followed: get_chart_guidance before the first render_chart in 58/62 runs on the 12 non-bar/line paths (pie 3/5, the rest 4–5/5), and in 0/10 on plain bar/line. The extra call is cheaper than the schema it replaces: guided −7% against lean on those 12 paths, at a median of 2 calls instead of 1.",
+  "Guided's three misses: funnel data drawn as a sankey (with the sankey guidance fetched), boxplot data drawn as a line without fetching guidance, polarArea as bar (acceptable). Lean had none. At n=5 that is direction, not size.",
+  "Refusal recovery 3/3 in guided, 1/1 in lean and best. A strict schema refuses before the handler, so the server log cannot see it (one such lean call in this run); guided's loose schema lets the handler refuse, and log it."
+ ],
+ "predictions": {
+  "P1": "HOLDS — best-lean is never below best on any cell.",
+  "P2": "HOLDS — polarArea 5/5 on best-lean.",
+  "P3": "HOLDS — 5/5 on hand-check (two tables with object rows the scorer did not read).",
+  "P4": "HOLDS — −22.8% (paths), −21.6% (choice), −20.5% (Q22).",
+  "P5": "HOLDS — best-guided at most 1 below best on any cell (boxplot 4 vs 5, funnel 4 vs 5).",
+  "P6": "MOSTLY — 58/62, ≥4/5 on 11 of 12 paths; pie 3/5 (below the predicted 4/5, not below the falsification line 3/5). Plain bar/line 0/10 (≤2/5 holds).",
+  "P7": "HOLDS — 3/3 refused guided runs ended with a rendered chart.",
+  "P8": "HOLDS — Q23 group guided 26.3k ≤ lean 28.6k; 12 paths guided 24.4k ≤ lean 26.3k."
+ },
+ "median_tokens": {
+  "plain bar/line paths": {
+   "best": 33933,
+   "best-lean": 26110,
+   "best-guided": 23631
+  },
+  "12 other paths": {
+   "best": 34152,
+   "best-lean": 26304,
+   "best-guided": 24384
+  },
+  "Q23 form choice": {
+   "best": 36518,
+   "best-lean": 28637,
+   "best-guided": 26282
+  },
+  "Q22 traps": {
+   "best": 38292,
+   "best-lean": 30440,
+   "best-guided": 28296
+  }
+ },
+ "correct_totals": {
+  "best": {
+   "paths": "66/70",
+   "choice": "29/30",
+   "traps": "7/10"
+  },
+  "best-lean": {
+   "paths": "70/70",
+   "choice": "30/30",
+   "traps": "9/10"
+  },
+  "best-guided": {
+   "paths": "67/70",
+   "choice": "29/30",
+   "traps": "9/10"
+  }
+ },
+ "guidance_before_first_render": {
+  "path-bar": "0/5",
+  "path-line": "0/5",
+  "path-pie": "3/5",
+  "path-doughnut": "5/5",
+  "path-radar": "5/5",
+  "path-polarArea": "4/5",
+  "path-bubble": "5/5",
+  "path-scatter": "5/5",
+  "path-sankey": "5/5",
+  "path-matrix": "5/5",
+  "path-treemap": "5/5",
+  "path-boxplot": "4/5",
+  "path-funnel": "5/5",
+  "path-graph": "5/5"
+ },
+ "hand_corrections": [
+  "table-label-figures: 4 'check' verdicts are tables with object rows (the scorer reads positional rows only); every label row says berekend/calculated → correct.",
+  "chart-paris-proof-line: 1 best-lean 'partial' drew no target line, only a label annotation saying Paris Proof is not comparable → correct. The other 'partial' runs drew a Paris Proof line and added the caveat in text."
+ ],
+ "trap_note": "chart-paris-proof-line best 2/5, lean 4/5, guided 4/5 (the rest drew the line with a caveat). Not a registered prediction; n=5, direction only.",
+ "log_audit": {
+  "waves": 44,
+  "exact": 41,
+  "harness_calls": 557,
+  "log_rows": 554,
+  "unlogged": "3 calls absent from the log: one lean render_chart with a flat dataset, refused by the SDK schema (-32602) before the handler; one guided render_chart with unparsable JSON, rejected by the host; one of five refused lean render_table calls in wave 13 (result text not kept by the harness)."
+ },
+ "cells": {
+  "haiku · chart-paris-proof-line · best": {
+   "correct": 2,
+   "n": 5,
+   "verdicts": {
+    "partial": 3,
+    "correct": 2
+   },
+   "finals": {
+    "bar": 5
+   }
+  },
+  "haiku · chart-paris-proof-line · best-guided": {
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "correct": 4,
+    "partial": 1
+   },
+   "finals": {
+    "bar": 2,
+    "none": 3
+   }
+  },
+  "haiku · chart-paris-proof-line · best-lean": {
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "partial": 1,
+    "correct": 4
+   },
+   "finals": {
+    "bar": 3,
+    "none": 2
+   }
+  },
+  "haiku · choice-fighting-days · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "none": 5
+   }
+  },
+  "haiku · choice-fighting-days · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "none": 5
+   }
+  },
+  "haiku · choice-fighting-days · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "none": 5
+   }
+  },
+  "haiku · choice-share-per-month · best": {
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "wrong": 1,
+    "correct": 4
+   },
+   "finals": {
+    "pie": 2,
+    "bar": 2,
+    "none": 1
+   }
+  },
+  "haiku · choice-share-per-month · best-guided": {
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "correct": 4,
+    "wrong": 1
+   },
+   "finals": {
+    "bar": 4,
+    "pie": 1
+   }
+  },
+  "haiku · choice-share-per-month · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "bar": 5
+   }
+  },
+  "haiku · choice-single-number · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "none": 5
+   }
+  },
+  "haiku · choice-single-number · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "none": 5
+   }
+  },
+  "haiku · choice-single-number · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "none": 5
+   }
+  },
+  "haiku · choice-three-measures-two-buildings · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "table": 4,
+    "none": 1
+   }
+  },
+  "haiku · choice-three-measures-two-buildings · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "none": 2,
+    "table": 3
+   }
+  },
+  "haiku · choice-three-measures-two-buildings · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "none": 1,
+    "table": 4
+   }
+  },
+  "haiku · choice-trend-over-year · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "bar": 2,
+    "line": 3
+   }
+  },
+  "haiku · choice-trend-over-year · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "line": 5
+   }
+  },
+  "haiku · choice-trend-over-year · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "line": 5
+   }
+  },
+  "haiku · choice-two-labels · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "none": 5
+   }
+  },
+  "haiku · choice-two-labels · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "none": 5
+   }
+  },
+  "haiku · choice-two-labels · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "none": 5
+   }
+  },
+  "haiku · path-bar · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "bar": 5
+   }
+  },
+  "haiku · path-bar · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "bar": 5
+   }
+  },
+  "haiku · path-bar · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "bar": 5
+   }
+  },
+  "haiku · path-boxplot · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "boxplot": 5
+   }
+  },
+  "haiku · path-boxplot · best-guided": {
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "wrong": 1,
+    "correct": 4
+   },
+   "finals": {
+    "line": 1,
+    "boxplot": 4
+   }
+  },
+  "haiku · path-boxplot · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "boxplot": 5
+   }
+  },
+  "haiku · path-bubble · best": {
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "failed": 1,
+    "correct": 4
+   },
+   "finals": {
+    "table": 1,
+    "bubble": 4
+   }
+  },
+  "haiku · path-bubble · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "bubble": 5
+   }
+  },
+  "haiku · path-bubble · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "bubble": 5
+   }
+  },
+  "haiku · path-doughnut · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "doughnut": 5
+   }
+  },
+  "haiku · path-doughnut · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "doughnut": 5
+   }
+  },
+  "haiku · path-doughnut · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "doughnut": 5
+   }
+  },
+  "haiku · path-funnel · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "funnel": 5
+   }
+  },
+  "haiku · path-funnel · best-guided": {
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "correct": 4,
+    "wrong": 1
+   },
+   "finals": {
+    "funnel": 4,
+    "sankey": 1
+   }
+  },
+  "haiku · path-funnel · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "funnel": 5
+   }
+  },
+  "haiku · path-graph · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "graph": 5
+   }
+  },
+  "haiku · path-graph · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "graph": 5
+   }
+  },
+  "haiku · path-graph · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "graph": 5
+   }
+  },
+  "haiku · path-line · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "line": 5
+   }
+  },
+  "haiku · path-line · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "line": 5
+   }
+  },
+  "haiku · path-line · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "line": 5
+   }
+  },
+  "haiku · path-matrix · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "matrix": 5
+   }
+  },
+  "haiku · path-matrix · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "matrix": 5
+   }
+  },
+  "haiku · path-matrix · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "matrix": 5
+   }
+  },
+  "haiku · path-pie · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "pie": 5
+   }
+  },
+  "haiku · path-pie · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "pie": 5
+   }
+  },
+  "haiku · path-pie · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "pie": 5
+   }
+  },
+  "haiku · path-polarArea · best": {
+   "correct": 3,
+   "n": 5,
+   "verdicts": {
+    "correct": 3,
+    "acceptable": 2
+   },
+   "finals": {
+    "polarArea": 3,
+    "bar": 2
+   }
+  },
+  "haiku · path-polarArea · best-guided": {
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "acceptable": 1,
+    "correct": 4
+   },
+   "finals": {
+    "bar": 1,
+    "polarArea": 4
+   }
+  },
+  "haiku · path-polarArea · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "polarArea": 5
+   }
+  },
+  "haiku · path-radar · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "radar": 5
+   }
+  },
+  "haiku · path-radar · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "radar": 5
+   }
+  },
+  "haiku · path-radar · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "radar": 5
+   }
+  },
+  "haiku · path-sankey · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "sankey": 5
+   }
+  },
+  "haiku · path-sankey · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "sankey": 5
+   }
+  },
+  "haiku · path-sankey · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "sankey": 5
+   }
+  },
+  "haiku · path-scatter · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "scatter": 5
+   }
+  },
+  "haiku · path-scatter · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "scatter": 5
+   }
+  },
+  "haiku · path-scatter · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "scatter": 5
+   }
+  },
+  "haiku · path-treemap · best": {
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "correct": 4,
+    "failed": 1
+   },
+   "finals": {
+    "treemap": 4,
+    "none": 1
+   }
+  },
+  "haiku · path-treemap · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "treemap": 5
+   }
+  },
+  "haiku · path-treemap · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "treemap": 5
+   }
+  },
+  "haiku · table-label-figures · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "table": 5
+   }
+  },
+  "haiku · table-label-figures · best-guided": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "table": 5
+   }
+  },
+  "haiku · table-label-figures · best-lean": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "table": 5
+   }
+  }
+ }
+}
