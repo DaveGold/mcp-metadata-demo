@@ -10,9 +10,9 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer } from '../server.js';
 import { emptyProfile } from '../domain/build-profile.js';
 import type { ProfileCore } from '../domain/generate-alerts.js';
-import { BUILDING_RULES, buildingCtx } from '../domain/best-building-rules.js';
+import { BUILDING_RULES, UNCOVERED_BY_DESIGN, buildingCtx } from '../domain/best-building-rules.js';
 import { WEATHER_RULES } from '../domain/best-weather-rules.js';
-import { BUILDING_FIELD_NAMES, WEATHER_FIELD_NAMES, allBuildingResponseNames } from '../domain/best-field-names.js';
+import { BUILDING_FIELD_NAMES, WEATHER_FIELD_NAMES, allBuildingResponseNames, buildingName } from '../domain/best-field-names.js';
 import { bestBuildingDescription, bestBuildingOutputSchema, buildBestBuildingResponse } from './get-building-profile-best.js';
 import { bestWeatherDescription, buildBestWeatherResponse, MAX_RESPONSE_CHARS, RECORD_FIELDS } from './get-weather-context-best.js';
 import { outputSchema as richOutputSchema } from './get-building-profile.js';
@@ -151,6 +151,24 @@ describe('best — rule registry', () => {
         const upstreamOk = BUILDING_FIELD_NAMES.some((x) => x.upstream === f) || keys.has(f) || f.startsWith('derived.');
         expect(upstreamOk, `${r.id} → ${f}`).toBe(true);
       }
+  });
+
+  it('coverage: every response field is explained by a rule or listed as uncovered by design', () => {
+    const covered = new Set(BUILDING_RULES.flatMap((r) => r.relates_to_fields.map((f) => buildingName(f, { berekeningstype: null }))));
+    for (const r of BUILDING_RULES) for (const f of r.relates_to_fields) covered.add(f);
+    const fields = Object.keys(bestBuildingOutputSchema.shape).filter((k) => !['interpretation', 'derived', 'candidates'].includes(k));
+    const upstreamOf = (k: string) => BUILDING_FIELD_NAMES.find((x) => x.name === k)?.upstream;
+    const missing = fields.filter((k) => !covered.has(k) && !covered.has(upstreamOf(k) ?? '') && !(k in UNCOVERED_BY_DESIGN));
+    expect(missing).toEqual([]);
+    for (const k of Object.keys(UNCOVERED_BY_DESIGN)) expect(fields, `stale entry ${k}`).toContain(k);
+  });
+
+  it('no rule metadata is serialized: only rendered lines reach the model', () => {
+    for (const key of Object.keys(addresses.addresses) as Key[]) {
+      const json = text(buildBestBuildingResponse(fixture(key)));
+      expect(json).not.toMatch(/relates_to_fields|provenance"\s*:\s*"20\d\d|"applies"|"bp\.[a-z_.]+"/);
+      for (const r of BUILDING_RULES) expect(json).not.toContain(r.provenance);
+    }
   });
 
   it('rendered lines are single-line, bounded, and never carry provenance', () => {

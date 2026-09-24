@@ -143,7 +143,7 @@ The two levels use the metadata layer differently, and the difference matters. `
 
 Also included: standalone [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md) and [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md) skills teaching the method behind this repo (Scaffold or Audit → Examine → Flag → Validate → Encode → Iterate), generalized so they're useful for building *your own* rich-domain MCP server, not just for maintaining this one. Since 2026-09-23 the skill is rewritten on the eval results: what actually reaches the model (the 2,048-char description cut, the undelivered output schema, the response-size limit), field naming, response-side interpretation, shipping the data a rule needs, and provenance per rule.
 
-The **`best`** arm (`/mcpBest`, [`get-building-profile-best.ts`](src/tools/get-building-profile-best.ts), [`get-weather-context-best.ts`](src/tools/get-weather-context-best.ts)) is what that skill produces when run on this repo's own tools — the reference implementation, with its audit written up in [`docs/`](docs/).
+The **`best`** arm (`/mcpBest`, [`get-building-profile-best.ts`](src/tools/get-building-profile-best.ts), [`get-weather-context-best.ts`](src/tools/get-weather-context-best.ts)) is what that skill produces when run on this repo's own tools — the reference implementation, with its audit written up in [`docs/`](docs/). Its interpretation comes from a rule registry ([`best-rules.ts`](src/domain/best-rules.ts)): each rule has a gate (`applies`), a rendered line, a `relates_to_fields` list and a `provenance` line, and **only the rendered line is sent to the model** — the rest is for tests and for whoever maintains the server.
 
 ## Run it locally
 

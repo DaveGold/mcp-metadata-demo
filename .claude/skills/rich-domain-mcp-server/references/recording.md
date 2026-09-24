@@ -21,7 +21,7 @@ Two readers, two destinations:
 | Renames of upstream fields | `FIELD_NAMES` table in source (e.g. [`best-field-names.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-field-names.ts)) | `{ upstream, name, reason, provenance }` | maintainer |
 | What the tool is/is not, input conventions, record-independent rules | description head (≤ 2,048) | prose, fact + instruction per rule | model |
 | Formats, valid values, misbehaving params, valid `select` names | input schema `.describe()`/`.meta()` | one sentence + a working example | model |
-| Rules that interpret returned values | **rule registry** in source (e.g. [`best-building-rules.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-building-rules.ts)) | `{ id, relates_to_fields, applies, render, provenance }` | maintainer (source), model (the rendered line in `interpretation`) |
+| Rules that interpret returned values | **rule registry** in source (e.g. [`best-building-rules.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-building-rules.ts)) | `{ id, relates_to_fields, applies, render, provenance }` | maintainer: all of it, in source. Model: **only the line `render()` returns**, in `interpretation` — `relates_to_fields` and `provenance` are never serialized |
 | Determinate derived values and verdicts | `transform` / `summarize` code | computed field with `unit`, `basis`, `provenance`, or `null` + `reason` | model |
 | Constants the model needs (conversion factors, thresholds) | `interpretation.constants` in the response, defined once in source | named constant with its source in a comment | both |
 | API behaviour, quirks, null patterns, broken endpoints | `docs/<name>-findings.md` | dated section, reproduction command per claim | maintainer |
@@ -45,9 +45,9 @@ decided; without it, it re-derived a rationale and asked for the test to be re-r
 a history.
 
 So: **one provenance line per rule, rename and alert** — the date and the eval result, incident or
-expert answer behind it. Explicit `relates_to_fields` lists are cheap and still useful (they drive
-record-conditional selection, coverage tests, and links prose leaves implicit), but they are not
-what the maintainer needs.
+expert answer behind it. Explicit `relates_to_fields` lists are cheap and still useful — for
+coverage and orphan tests, and for links the prose leaves implicit — but they are not what the
+maintainer needs, and they do not reach the model. (Selection is `applies`, not the field list.)
 
 Provenance stays in **source**. Nothing measured shows it helps the answering model, and anything
 in the response is paid for on every call [Q5].

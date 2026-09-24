@@ -266,7 +266,7 @@ export const BUILDING_RULES: readonly Rule<BuildingCtx>[] = [
   {
     id: 'bp.heat_pump',
     kind: 'verdict',
-    relates_to_fields: ['warmtebehoefte_berekend_kwh_m2', 'derived.heatPump'],
+    relates_to_fields: ['warmtebehoefte_berekend_kwh_m2', 'gebouwklasse', 'gebruiksdoel', 'derived.heatPump'],
     applies: (c) => isValue(c.d.heatPump),
     render: (c) => {
       const h = c.d.heatPump as HeatPumpBand;
@@ -277,7 +277,7 @@ export const BUILDING_RULES: readonly Rule<BuildingCtx>[] = [
   {
     id: 'bp.gas',
     kind: 'verdict',
-    relates_to_fields: ['warmtebehoefte_berekend_kwh_m2', 'gebruiksoppervlakte_thermische_zone_m2', 'derived.spaceHeatingGasM3PerYear'],
+    relates_to_fields: ['warmtebehoefte_berekend_kwh_m2', 'gebruiksoppervlakte_thermische_zone_m2', 'gebouwklasse', 'gebruiksdoel', 'derived.spaceHeatingGasM3PerYear'],
     applies: (c) => c.d.spaceHeatingGasM3PerYear.value !== null,
     render: (c) => {
       const g = c.d.spaceHeatingGasM3PerYear as Extract<Derived, { unit: string }>;
@@ -369,7 +369,7 @@ export const BUILDING_RULES: readonly Rule<BuildingCtx>[] = [
   {
     id: 'bp.calc_vs_measured',
     kind: 'fact',
-    relates_to_fields: ENERGY_FIELDS.map((f) => f),
+    relates_to_fields: [...ENERGY_FIELDS, 'aandeel_hernieuwbaar_pct', 'aandeel_hernieuwbaar_emg_forfaitair_pct'],
     applies: (c) => ENERGY_FIELDS.some((f) => c.p[f] !== null),
     render: (c) =>
       `CALCULATED vs MEASURED: every EP-Online energy figure here is CALCULATED by the ${c.method ?? 'label'} method, not a meter reading; nothing in this response is MEASURED. Paris Proof and other metered benchmarks are defined on MEASURED final energy, so none of these figures can be ranked against such a target — same unit, different quantity. Where a question asks for that comparison, say it cannot be made from this data and why, rather than producing a ratio.`,
@@ -437,3 +437,19 @@ export const BUILDING_RULES: readonly Rule<BuildingCtx>[] = [
     provenance: '2026-04-13 interpretation block ("delta can go EITHER direction"); reason not recorded.',
   },
 ];
+
+/**
+ * Response fields no rule explains — on purpose. Each is a self-describing register fact
+ * (identity, address, dates, the adviser's name) for which no misreading was ever observed in the
+ * eval set. The coverage test fails when a NEW field appears that is neither explained by a rule
+ * nor listed here, so every field gets a decision. Moving a field out of this list needs a rule
+ * and a reason (provenance).
+ */
+export const UNCOVERED_BY_DESIGN: Readonly<Record<string, string>> = {
+  adres: 'formatted BAG address', gemeente: 'register fact', provincie: 'register fact',
+  coordinaten: 'feeds get_weather_context; the join is in the description head',
+  bag_vbo_id: 'identifier', bag_pand_id: 'identifier', pand_status: 'register status; vbo_status carries the in-use rule',
+  soort_opname: 'label assessment type; no misreading observed', label_status: 'Bestaand/Nieuw; no misreading observed',
+  label_opnamedatum: 'date', label_registratiedatum: 'date', gebouwtype: 'residential type; no misreading observed',
+  gebouwsubtype: 'refinement of gebouwtype', certificaathouder: 'adviser name',
+};

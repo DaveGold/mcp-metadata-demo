@@ -164,6 +164,19 @@ can be **conditional on the record** [delivery.md]. Standard shape:
   line, fact + instruction [Q4]. One line is enough [Q14]; 100 rules are no worse than one [Q17];
   the form (prose vs field-addressed) does not matter [Q10] — so optimise for correctness and
   maintainability, not for size.
+- **Only the rendered line reaches the model.** Everything else on a rule stays in source:
+
+  | rule field | reaches the model? | used by |
+  |---|---|---|
+  | `render(record)` → one string in `interpretation.alerts` / `.notes` | **yes** | the model |
+  | `kind` | no — only decides alerts vs notes, and the order | the selector |
+  | `applies(record)` | no | the selector (record-conditional) |
+  | `relates_to_fields` | **no** | tests: coverage (every output field explained or listed as uncovered), orphans after a rename or schema change |
+  | `id`, `provenance` | no | the maintainer — why the rule exists [Q18] |
+
+  Do not ship `relates_to_fields` or `provenance` in the response "to help the model": Q10 put
+  field-addressing in the response and it moved nothing, and every response byte is paid for on
+  every call [Q5].
 - **Prune by relevance, but never drop notes about NULL decision fields.** Pruning notes for
   populated-but-irrelevant fields is free [Q2]; pruning the note about a null sizing input cost
   haiku 18/20 → 10/20 [AS]. Gate null-notes on the field BEING null.

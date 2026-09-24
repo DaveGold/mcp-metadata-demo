@@ -34,11 +34,13 @@ export interface Rule<Ctx> {
   /** Stable id, `<tool prefix>.<topic>`, e.g. 'bp.calc_vs_measured'. */
   id: string;
   kind: RuleKind;
-  /** Response field names (post-rename) the rule reads or explains. Drives coverage tests. */
+  /** Response field names (post-rename) the rule reads or explains. Source only — never serialized;
+   *  it drives the coverage and orphan tests, not selection (that is `applies`). Q10: field-addressing
+   *  in the response moved nothing. */
   relates_to_fields: string[];
-  /** Pure gate on the finished record. */
+  /** Pure gate on the finished record. Source only. */
   applies: (ctx: Ctx) => boolean;
-  /** One line, no newline. May interpolate computed values. */
+  /** One line, no newline. May interpolate computed values. The ONLY part of a rule the model sees. */
   render: (ctx: Ctx) => string;
   /** Date + the eval result, incident or observation behind the rule. Source only. */
   provenance: string;
