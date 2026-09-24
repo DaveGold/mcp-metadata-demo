@@ -17,6 +17,14 @@ description: >-
 
 # rich-domain-mcp-server — build, audit and measure MCP tools
 
+> **REQUIRED before anything else — local overlays.** Find `<repo-root>`: the root of the current
+> git worktree (`git rev-parse --show-toplevel`; in Claude Code also `${CLAUDE_PROJECT_DIR}`),
+> never a path relative to this skill's folder or the cwd. If
+> `<repo-root>/.skill-local/rich-domain-mcp-server/README.md` exists, read it NOW, before any
+> other file, and check its contract version (*Local overlays* below). Then, every time you open
+> a reference file, read the overlay it names on its first lines before its content. No such
+> file: this skill applies as written.
+
 A good MCP codebase gives you transport, logging and auth. What you actually build is the layer a
 model reasons over at call time: **field names, the description head, the input schema, and the
 response**. Plumbing is a day; that layer is the product.
@@ -29,6 +37,7 @@ Every rule below carries a tag (`[Q7]`, `[BT]`, `[N2]`) that resolves in
 [`references/evidence.md`](references/evidence.md) to the eval result behind it. Read that row
 before weakening a rule. The eval set is this repo's `evals/`; the paper it accompanies is
 ["The Missing Layer"](https://davidgolverdingen.nl/en/the-missing-layer).
+
 
 ---
 
@@ -291,6 +300,53 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
 - **Deploy before testing hosted tools, then prove the new code is running** (a call-log row
   stamped with the variant), not just that the tool is listed [D].
 
+## Local overlays
+
+A codebase plugs its own knowledge into this skill without editing it: platform and deploy
+wiring, auth, known vendor quirks, conventions, telemetry, reference implementations, local
+evidence. The skill folder is copied unchanged; the overlays live outside it, so replacing the
+folder on a sync never touches them.
+
+**Where.** `<repo-root>/.skill-local/rich-domain-mcp-server/`, where `<repo-root>` is the root of
+the current git worktree (`git rev-parse --show-toplevel`; in Claude Code also
+`${CLAUDE_PROJECT_DIR}`) — never relative to this skill's folder, the cwd or a user-level
+install. Read overlays by exact path; a glob may skip a dot-folder.
+
+**What.** One overlay per document, same file name; `README.md` overlays this file and is read
+first. Each reference file names its overlay in its first lines — read it when you open that
+file, not all of them up front. The machine-readable contract is `overlays.json` next to this
+file; a starter set is in `local-template/`.
+
+| document | overlay | typically holds |
+|---|---|---|
+| `SKILL.md` | `README.md` | who, contract version, filled overlays, boundaries with other skills, reference implementations, example requests |
+| `references/audit.md` | `audit.md` | known state of the existing servers, known deviations and their tickets |
+| `references/delivery.md` | `delivery.md` | measured surfaces for the hosts this codebase targets |
+| `references/scaffolding.md` | `scaffolding.md` | shared app factory, auth patterns, secrets, deploy, CI, UI wiring, adding a variant |
+| `references/handlers.md` | `handlers.md` | shared handler factory, permissions, log store and fields, feedback wording |
+| `references/discovery.md` | `discovery.md` | known vendor quirks, sentinels, operator semantics, cross-server joins, probe scripts |
+| `references/metadata.md` | `metadata.md` | title and description language, schema idiom, server-instructions skeleton |
+| `references/recording.md` | `recording.md` | where findings docs, tickets and provenance live |
+| `references/validation.md` | `validation.md` | telemetry store, triage commands, feedback tool, domain experts |
+| `references/evaluation.md` | `evaluation.md` | how this codebase runs an eval and adds a variant |
+| `references/evidence.md` | `evidence.md` | local evidence rows, tagged `[X-…]` |
+
+**Precedence.** An overlay fills in what this skill leaves open and may tighten any rule. It may
+relax or replace a rule that carries an evidence tag only through a row in its own `evidence.md`
+that points at a reproducible artifact (result file or protocol, date, scope, result, status).
+Experience without a measurement never relaxes a rule. Where an overlay contradicts this skill
+and no such row exists, this skill holds — and say so to the user, because the overlay is stale.
+
+**Contract.** The local `README.md` starts with front matter `contract: <major>` and `overlays:`
+(the files it fills). If the major differs from `overlays.json`, tell the user and do not read
+the overlays until they are migrated. A major bump renames or removes an overlay, or changes when
+it is read or what wins; a minor bump adds one.
+
+**Trigger.** The frontmatter above triggers on request phrasing. If this skill must run before a
+code change, also put a state-based trigger in the always-loaded project guide (`CLAUDE.md`,
+`AGENTS.md`), outside any block a tool regenerates: "invoke `rich-domain-mcp-server` before
+creating or editing anything under `<servers dir>`" [U6].
+
 ## Routing
 
 | you are doing… | open |
@@ -305,11 +361,13 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
 | Expert session, telemetry, feedback | `references/validation.md` |
 | Measuring a change with an eval | `references/evaluation.md` |
 | Why a rule exists / whether it was refuted | `references/evidence.md` |
+| Plugging this codebase's own knowledge in | *Local overlays* above, `local-template/` |
 
 ## Reference implementation in this repo
 
 The **`best`** variant applies every rule above to two tools, and is measured against the older
-variants in `evals/`:
+variants in `evals/`. This table is the public reference; a local `README.md` overlay may list
+the codebase's own implementations, and those come first where the pattern matches.
 
 | pattern | file |
 |---|---|
