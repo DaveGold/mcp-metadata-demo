@@ -18,6 +18,60 @@ A Rich Domain MCP Server layers *agent-facing capabilities* on top of the raw re
 
 > ⚠️ **This is a condensed public demo — not the full system.** It shows a *subset* of the capability set: rich **metadata**, curated **alerts**, **derived values** (the gas/CO₂/heat-pump estimates in `generate-alerts.ts`), **self-describing UI** (the render apps), **selective retrieval** (`select` on `get_weather_context`), **summaries** (its `summary` block), a real `queryIntent` param on every tool, and a small, live version of the **Iterate** step — `get_tool_call_log` reads those queryIntent values back. What's still production-only: months of real telemetry across every caller, and the [articles](https://davidgolverdingen.nl/en/insights/mcp-server-smarter-every-week)' larger dashboards — even the capabilities shown here are deliberately lighter than production.
 
+## What the evals found
+
+This repo also carries an **eval set** that measures what the metadata layer actually does to an
+agent's answers: 18 questions, more than 3,700 scored live runs, haiku, sonnet and opus, every
+prediction registered before its run and every run audited against the server's own call log.
+The method and the full findings are in [`evals/README.md`](evals/README.md), the register of
+questions and predictions in [`evals/open-questions.md`](evals/open-questions.md), and each run
+in [`evals/results/`](evals/results/). The short version, one line per finding:
+
+- **rich-Haiku beats thin-Opus.** On a question the thin schema cannot even express, the weakest
+  model with the layer answers right; the strongest without it can only refuse. The layer makes
+  the weak model right and the strong model safe. ([§ strongest single result](evals/README.md#the-strongest-single-result))
+- **Volume does not hurt. Wrongness does.** Cutting half the prose changed 0 of 180 answers; one
+  plausible-looking line (`EP-1 … Paris Proof: 70 kWh/m²`) made 59 of 60 answers wrong, and one
+  sentence saying the figures are CALCULATED, not MEASURED, took the same question 0/60 → 59/60.
+  ([§5](evals/README.md#5--semantics-carry-behaviour--an-instruction-alone-is-inert), [§7](evals/README.md#7--conditional-pruning-is-free--and-only-bites-the-weakest-model))
+- **Protocol-visible is not model-effective.** Claude Code sends only the first **2,048
+  characters** of a tool description, and never the output schema: 72% of this repo's richest
+  description never reached the model. ([§14](evals/README.md#14--where-this-host-drops-what-you-ship--one-table))
+- **Delivered is delivered.** Inside that cut, a sentence in the description works exactly as well
+  as the same sentence in the response — 20/20 against 20/20. Placement matters only because of
+  what arrives. ([§10](evals/README.md#10--delivered-is-delivered-the-channel-test-finally-run))
+- **An instruction without its fact is inert.** "Say it cannot be compared" alone: 10/30. With the
+  fact that tells the model *when* it applies: 30/30. ([§5](evals/README.md#5--semantics-carry-behaviour--an-instruction-alone-is-inert))
+- **Ship the data, not just the rule.** A rule that sends the model off to fetch history: haiku
+  2/20. The same rule with the server-computed reference figure: 15/20 — and sonnet and opus
+  needed 87% fewer calls. ([§15](evals/README.md#15--rounds-3-and-4-structure-the-rest-of-the-cap-the-model-split-and-cost))
+- **Richer metadata can be cheaper — when it answers the question asked.** The model has less to
+  think about; metadata that answers nothing is paid for on every call. ([§6](evals/README.md#6--richer-metadata-can-be-cheaper-and-not-for-the-reason-anyone-guessed))
+- **A misleading name is worse than no name,** and a name is the one thing that reaches the model
+  in every response. ([§2](evals/README.md#2--a-misleading-name-is-worse-than-no-name))
+- **Word the pointer as a requirement.** A hint to call a guidance tool: haiku 0/10. "REQUIRED:
+  call it first": 10/10. ([§11](evals/README.md#11--a-guidance-call-works-if-it-is-called--and-the-pointer-decides-that))
+- **Evals find bugs that tests cannot.** The 2,048 cut, a stale deploy, a quota the tool itself
+  exhausted — and this repo's own computed alert, which ranked a calculated figure against a
+  measured target and was repeated by the models (0/20). All tests were green.
+- **Most of the predictions were wrong** — 13 of the first 23. Measure; do not reason about what a
+  model reads.
+
+**Processed into the skill.** The [`rich-domain-mcp-server`](.claude/skills/rich-domain-mcp-server/SKILL.md)
+skill is rewritten on these results: every rule carries a tag that resolves to the run behind it
+in [`references/evidence.md`](.claude/skills/rich-domain-mcp-server/references/evidence.md),
+together with the rules the evals refuted. It covers building a new server and auditing an
+existing one, naming fields, where each kind of knowledge reaches the model, how to find which
+fields need explanation (a field-reading probe), and a portable eval harness.
+
+**And measured with it.** Running that skill's audit on this repo's own tools produced the
+**`best`** arm ([`get-building-profile-best.ts`](src/tools/get-building-profile-best.ts),
+[`get-weather-context-best.ts`](src/tools/get-weather-context-best.ts)). Against the previous
+reference, in the same batches: the calculated-vs-measured trap **20/20 · 10/10 · 10/10 against
+0/20 · 0/10 · 6/10** (haiku · sonnet · opus), a held-out question **19/20 against 0/20**, cheaper in
+30 of 32 cells — and two defects the runs found in `best` itself, fixed and re-measured
+([Q19–Q20](evals/results/README.md)).
+
 ## Try it live (no install, no API key)
 
 Two hosted endpoints — a **Rich Domain MCP Server** and a **thin wrapper** over the same data. Point Claude Code — or any MCP client — at them and ask the **same question** to feel the difference.
@@ -26,6 +80,7 @@ Two hosted endpoints — a **Rich Domain MCP Server** and a **thin wrapper** ove
 |---|---|---|
 | **rich** | full description + input schema (both model-visible), curated `alerts[]` + interpretation | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp` |
 | **minimal** | one sentence, no schema, no alerts | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal` |
+| **best** | the reference built with the skill: descriptions inside the 2,048 cut, `interpretation`-first responses, computed values, fields named so they cannot be misread | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest` |
 
 Same Firebase project, same code — only the function name (`/mcp` vs `/mcpMinimal`) and the metadata tier it serves differ.
 
@@ -35,7 +90,8 @@ Add **both** to your `.mcp.json` (Claude Code) so you can aim a prompt at each:
 {
   "mcpServers": {
     "metadata-demo-rich": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp" },
-    "metadata-demo-minimal": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal" }
+    "metadata-demo-minimal": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal" },
+    "metadata-demo-best": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest" }
   }
 }
 ```
@@ -53,11 +109,11 @@ Add **both** to your `.mcp.json` (Claude Code) so you can aim a prompt at each:
 
 Same registers, same building (it's the Rijksmuseum, bouwjaar 1885) — the only difference is the metadata layer.
 
-**2 — Domain reasoning without priming (rich):**
+**2 — Domain reasoning without priming (best, or rich):**
 
-> *"Get the building profile for 3543AR 1 and tell me whether it's on track for Paris Proof 2040."*
+> *"Gustav Mahlerlaan 10, 1082PP Amsterdam — how does it stack up against the Paris Proof 2040 office target of 70 kWh/m²?"*
 
-The tool's `INTERPRETATION` block and `alerts[]` carry the Paris Proof thresholds and label semantics, so the agent reasons about Dutch energy regulation it was never separately taught.
+The right answer is that it **cannot be ranked from this data**: every EP-Online figure is CALCULATED by the label method, and Paris Proof is defined on MEASURED energy at the meter — same unit, different quantity. `best` states that fact where the model reads it and scores 20/20 on haiku. Until 2026-09-24 `rich` itself carried a computed alert that made exactly this comparison, and the models repeated it (0/20). It is removed now. This is the eval set's headline trap ([`benchmark-trap`](evals/questions.json)).
 
 **3 — Self-describing visualization (rich):**
 
@@ -103,7 +159,7 @@ The metadata layer is just code — read the exact pieces the agent consumes, an
 - **Rich tool description** — the `RETURNS` / `WHEN TO USE` / `QUERY STRATEGY` / `INTERPRETATION` / `ALERTS` prose the model reads before it ever calls the tool (on Claude Code, only its first 2,048 characters — see the evals): [`get-building-profile.ts` L23–71](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L23-L71)
 - **Input schema** — model-visible, a `.describe()` on every field: [`get-building-profile.ts` L75–83](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L75-L83)
 - **Output schema — deliberately shape-only** — the model never sees this (validation + `structuredContent` shape only); every field's `.describe()` is a short identity, not interpretation. That interpretation used to live here for several fields (`temperatuuroverschrijding`, `compactheid`, the `co2_emissie_kg_m2` unit caveat, and others) until it was moved into the description above — the exact fix this repo's paper argues for, applied to itself. **Measured since (evals Q7, Q11):** on Claude Code the model indeed never receives `outputSchema`, but it also receives only the first **2,048 characters** of each tool description, so most of that INTERPRETATION block does not arrive there either. Guidance has to sit inside that cut or in the response; see [`evals/README.md`](evals/README.md) §10–§14: [`get-building-profile.ts` L88–201](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts#L88-L201)
-- **Server-side interpretation** — the `alerts[]` rules (regulation eras, Paris Proof thresholds, the Nader Voorschrift MJ-unit trap): [`generate-alerts.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/generate-alerts.ts)
+- **Server-side interpretation** — the `alerts[]` rules (regulation eras, heat-pump bands, overheating, the Nader Voorschrift MJ-unit trap): [`generate-alerts.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/generate-alerts.ts). Its EP-1 vs Paris Proof alert was removed on 2026-09-24: it compared a calculated figure with a measured target. The reference version is a rule registry with a provenance line per rule: [`best-building-rules.ts`](src/domain/best-building-rules.ts)
 - **The minimal twin** — the whole ablated tool, ~60 lines, none of the above: [`get-building-profile-minimal.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-minimal.ts)
 - **Selective retrieval (Select)** — the field-projection mechanism itself, with its safety rails (never silently fall back to full records, alert on unknown fields): `project-fields.ts`, used by [`get-weather-context.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context.ts)
 - **queryIntent + Iterate** — the per-environment persisted log (Firestore when deployed, in-memory locally) and the tool that reads it back: [`log-store.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/shared/log-store.ts), [`get-tool-call-log.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-tool-call-log.ts)
@@ -200,7 +256,7 @@ Single `createServer({ variant })` factory in [src/server.ts](src/server.ts), ex
 
 - **Tools** (`src/tools/`) — each tool's `description` and Zod `inputSchema` (`.describe()` on every field) carry the metadata that drives agent reasoning; `outputSchema` is deliberately **shape-only** — it validates `structuredContent` and drives UI rendering, but the model never reads a single `.describe()` on an output field, so all output-field interpretation lives in the description instead (see [Two levels, one strategy](#two-levels-one-strategy)). `get-building-profile.ts` encodes `RETURNS` / `WHEN TO USE` / `INTERPRETATION` / `ALERTS`; the render tools register a `ui://` resource + tool pair and return `structuredContent` for the iframe. `get-building-profile-minimal.ts` is the ablated twin — same data path (`resolveBuildingProfile`), none of the metadata.
 - **Clients** (`src/clients/`) — one class per upstream, each owning its URL, auth, timeout, and Zod-validated response parsing, so upstream wire-format drift surfaces here rather than silently downstream. `BagClient` is auth-free; `EpOnlineClient` needs an API key.
-- **Domain** (`src/domain/`) — pure functions: `buildProfile` (raw registers → `BuildingProfile`), `selectBestLabel`, and `generateAlerts` (regulation eras, Paris Proof 2040 thresholds, BENG, heat-pump suitability — knowledge moved server-side, to where the data lives).
+- **Domain** (`src/domain/`) — pure functions: `buildProfile` (raw registers → `BuildingProfile`), `selectBestLabel`, and `generateAlerts` (regulation eras, BENG, heat-pump suitability, overheating — knowledge moved server-side, to where the data lives; `best` uses a rule registry instead, `best-rules.ts`).
 - **Logger** (`src/logger.ts`) — stderr-only structured JSON. **Never** writes to stdout, which stdio MCP framing owns; a stray `console.log` would corrupt the JSON-RPC stream.
 
 ### How an MCP app gets to the client
