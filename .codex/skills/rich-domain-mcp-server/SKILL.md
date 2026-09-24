@@ -307,9 +307,9 @@ variants in `evals/`:
 | Audit record written the way `recording.md` prescribes | [docs/building-profile-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/building-profile-findings.md), [docs/weather-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/weather-findings.md) |
 
 Contrast cases, kept frozen because results were measured on them:
-[get-building-profile.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts) (`rich`: a 7,360-char
-description of which the first 2,048 arrive, and an EP-1 vs Paris Proof alert that the audit
-flags as the calculated-vs-measured defect) and
+`rich` ([wire view](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/wire/rich.md): an ~8,000-char
+description of which the first 2,048 arrive; its EP-1 vs Paris Proof alert, the calculated-vs-measured
+defect the audit flagged, was removed on 2026-09-24) and
 [get-building-profile-minimal.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-minimal.ts) (no metadata
 layer). [render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart.ts) is the MCP App (render) example.
 

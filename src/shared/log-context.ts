@@ -19,8 +19,8 @@ interface RequestContext {
   environment: string;
   /**
    * Which server variant served this request ('rich' | 'words' | 'inline' | ...).
-   * Every arm writes to ONE Firestore collection, so without this a log row
-   * cannot be attributed to an arm — which made the log useless for the eval.
+   * Every variant writes to ONE Firestore collection, so without this a log row
+   * cannot be attributed to the variant that served it.
    * Stamped in http.ts, where the variant is already known.
    */
   variant?: string;

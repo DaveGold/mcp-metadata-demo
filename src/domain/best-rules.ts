@@ -1,23 +1,19 @@
 /**
- * Rule registry for the `best` arm — record-conditional interpretation, with provenance.
+ * Rule registry — record-conditional interpretation, with provenance (reference implementation).
  *
- * Each rule is one line of guidance that the tool RESPONSE carries under
- * `interpretation`, emitted only when `applies(ctx)` is true for the returned record.
+ * Each rule is one line of guidance that the tool RESPONSE carries under `interpretation`,
+ * emitted only when `applies(ctx)` is true for the returned record.
  *
- * Why this shape (see .claude/skills/rich-domain-mcp-server/references/evidence.md):
- * - In the response, not the description: only the first 2,048 description chars reach
- *   the model on Claude Code (Q7), and a delivered line is applied either way (Q15).
- * - Record-conditional: pruning irrelevant lines is free (Q2) — but notes about NULL
- *   decision fields are gated on the field BEING null, never pruned (absent-sizing:
- *   haiku 18/20 with the note vs 10/20 without).
- * - One line, fact + instruction: one line is enough (Q14); an instruction without its
- *   fact is inert (Q4: 10/30 vs 30/30).
- * - Form and volume do not matter at runtime (Q10, Q17), so the registry is optimised
- *   for correctness and maintenance, not size.
- * - `provenance` is for whoever improves the server — the one field that changed an
- *   improving agent's decisions (Q18: 16/16 vs 0/16). It stays in source and is never
- *   serialized: nothing shows it helps the answering model, and every response byte is
- *   paid for on every call (Q5).
+ * Why this shape (the evidence behind each point: .claude/skills/rich-domain-mcp-server/references/evidence.md):
+ * - In the response, not the description: a host may deliver only the first 2,048 description
+ *   characters, and a response line arrives whole.
+ * - Record-conditional: a line about a field this record does not have is noise. But a note about
+ *   a NULL decision field is gated on the field BEING null, never pruned: without it the model
+ *   fills the gap with an invented figure.
+ * - One line, fact + instruction: an instruction without the fact that says when it applies is
+ *   ignored.
+ * - `provenance` is for whoever improves the server: date · reason · source. It stays in source
+ *   and is never serialized; every response byte is paid for on every call.
  */
 
 export type RuleKind =
@@ -35,14 +31,13 @@ export interface Rule<Ctx> {
   id: string;
   kind: RuleKind;
   /** Response field names (post-rename) the rule reads or explains. Source only — never serialized;
-   *  it drives the coverage and orphan tests, not selection (that is `applies`). Q10: field-addressing
-   *  in the response moved nothing. */
+   *  it drives the coverage and orphan tests, not selection (that is `applies`). */
   relates_to_fields: string[];
   /** Pure gate on the finished record. Source only. */
   applies: (ctx: Ctx) => boolean;
   /** One line, no newline. May interpolate computed values. The ONLY part of a rule the model sees. */
   render: (ctx: Ctx) => string;
-  /** Date + the eval result, incident or observation behind the rule. Source only. */
+  /** `YYYY-MM-DD · why the rule exists · source` (an eval result, incident, doc or expert). Source only. */
   provenance: string;
 }
 
@@ -68,7 +63,7 @@ export type Derived<T = number> =
   | { value: T; unit: string; basis: string; provenance: 'calculated' | 'register' }
   | { value: null; reason: string };
 
-/** The fixed response key every best-arm tool leads with (Q9: guidance under a named key). */
+/** The fixed response key every tool leads with, so the model always knows where the guidance is. */
 export interface Interpretation {
   alerts: string[];
   notes: string[];

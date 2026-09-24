@@ -1,10 +1,22 @@
 /**
- * MCP tool: get_building_profile
+ * MCP tool: get_building_profile — the `rich` tier, and the shared source of the eval arms.
  *
- * Combines BAG (Kadaster) and EP-Online (RVO) data into a single building
- * profile. Looks up by postcode + huisnummer.
+ * Looking for an example to copy? Read get-building-profile-best.ts: the reference implementation.
+ * This file is the older, description-heavy tier. Its text is split into named pieces because the
+ * measured eval arms compose different subsets of the SAME bytes (src/server.ts picks per arm).
+ * What each arm actually sends, with the 2,048-char cut marked: docs/wire/.
  *
- * Flow: PDOK Locatieserver → BAG OGC v2 (VBO + Pand) → EP-Online V5.
+ * Pieces, in the order they appear in the rich description:
+ *   descriptionPreamble  RETURNS, WHEN TO USE, WHEN NOT TO USE, QUERY STRATEGY
+ *   calcVsMeasured*      the CALCULATED vs MEASURED line, and its two halves (Q4 arms)
+ *   interpretationBlock  INTERPRETATION: how to read each field
+ *   derivedFiguresBlock  a recipe the model must execute itself (Q1b arms only)
+ *   alertsParagraph      the promise of `alerts` (omitted by arms that return none)
+ *
+ * The bytes of every measured arm are frozen (src/arms-frozen.test.ts). Why each piece exists, and
+ * what it measured: evals/open-questions.md, under the Q number in its comment.
+ *
+ * Data flow: PDOK Locatieserver → BAG OGC v2 (VBO + Pand) → EP-Online V5.
  */
 
 import { z } from 'zod';
@@ -40,50 +52,22 @@ QUERY STRATEGY:
 4. EP-Online coverage: most labeled utility buildings (kantoor, industrie) have data. Residential without recent certification often lacks a label — energielabel null is normal for pre-2008 homes.
 5. Large panden (aantal_verblijfsobjecten > 10, e.g. shopping centers, office parks, care complexes): the returned VBO is the first match — it may be an individual unit with a small oppervlakte_m2. The energielabel and bouwjaar are pand-level and reliable; oppervlakte_m2 is VBO-level and may represent only one unit. For the full-building area, query by huisletter/toevoeging or use BAG directly.`;
 
-/**
- * The INTERPRETATION block, kept separate so the 'inline' variant can ship the
- * SAME BYTES in its tool RESPONSE instead of its description. That variant exists
- * to test whether guidance is read more strongly from a response than from a tool
- * description; the comparison only means anything if the text is identical, so it
- * is composed here rather than copied. See evals/open-questions.md, Q1.
- */
-/**
- * open-questions.md Q4 — the CALCULATED vs MEASURED line, split into its two halves.
- *
- * The line added on 2026-09-21 took `benchmark-trap` from 0 of 60 to 59 of 60. It
- * bundles two different kinds of content, and Q4 asks which one did the work:
- *
- *   FACT        — what the quantities ARE, and the inference that they are therefore
- *                 not rankable against a metered target. Pure semantics.
- *   INSTRUCTION — what to OUTPUT when asked. Says nothing about why.
- *
- * Before the line existed, `opus`/`inline` NAMED the mismatch in 7 of 10 runs and
- * still returned the forbidden verdict in 10 of 10 — it had the fact and lacked the
- * instruction. Hence the ablation.
- *
- * These are exported so the two Q4 arms SLICE them rather than retyping them, and
- * `interpretationBlock` below is COMPOSED from them, so `both` is by construction
- * exactly fact + instruction. `get-building-profile-calculated-vs-measured.test.ts`
- * pins that equality; nothing can drift.
- *
- * NOTE the label lives with the FACT, not the instruction: "CALCULATED vs MEASURED"
- * is itself a two-word statement of the distinction, so leaving it on the
- * instruction-only arm would leak the fact that arm is supposed to withhold.
- */
+/** CALCULATED vs MEASURED, as FACT + INSTRUCTION; the Q4 arms ship one half each. The label belongs to the fact half. */
 export const calcVsMeasuredLabel = '- CALCULATED vs MEASURED — ';
 export const calcVsMeasuredFact = 'ep1_energiebehoefte, ep2_fossiel and berekend_energieverbruik are all CALCULATED NTA 8800 figures, not meter readings: ep1 is net energy DEMAND, ep2 is PRIMARY FOSSIL energy, berekend is modelled total use. Paris Proof and other metered benchmarks are defined on MEASURED FINAL energy at the meter, and this server holds NO metered data, so none of these three can be ranked against such a target as though it were measured consumption — the unit (kWh/m²) matches and the quantity does not.';
 export const calcVsMeasuredInstruction = 'Where a question asks how a building compares to a metered benchmark, say that the comparison cannot be made from this data and why, rather than producing a ratio.';
 
-/** `both` — the line as deployed 2026-09-21. Composed, never retyped. */
+/** The whole line, as deployed 2026-09-21. */
 export const calcVsMeasuredLine =
   calcVsMeasuredLabel + calcVsMeasuredFact + ' ' + calcVsMeasuredInstruction;
 
-/** Q4 arm `inline-fact`: the semantics, with no guidance on what to output. */
+/** Q4 `inline-fact`. */
 export const calcVsMeasuredFactOnly = calcVsMeasuredLabel + calcVsMeasuredFact;
 
-/** Q4 arm `inline-instruction`: the directive alone, with no reason and no label. */
+/** Q4 `inline-instruction`. */
 export const calcVsMeasuredInstructionOnly = '- ' + calcVsMeasuredInstruction;
 
+/** Shared by the description arms and, byte-identical, by the inline (response) arms (Q1). */
 const interpretationBlock = `\
 INTERPRETATION:
 Which fields are populated depends on the berekeningstype:
@@ -117,53 +101,16 @@ ${calcVsMeasuredLine}
 /** Arm B prose: preamble + interpretation, byte-identical to what it always was. */
 const descriptionCore = descriptionPreamble + '\n\n' + interpretationBlock;
 
-/**
- * The DERIVED FIGURES recipe — a PROCEDURE, deliberately, as opposed to the facts
- * that fill `interpretationBlock`.
- *
- * Authored for open-questions.md Q1b, which asks whether a procedure works in the
- * tool RESPONSE when it demonstrably does not work in the tool DESCRIPTION: the
- * equivalent block on the OPAQUE axis was applied by 0 of 13 runs across two
- * models while sitting verbatim in the description those runs had just read.
- *
- * It is a deliberate transliteration of that opaque block — same header, same two
- * bullets, same constants, same caveat, in the same order — with the terse codes
- * replaced by the readable field names this axis uses:
- *
- *     wb    → warmtebehoefte_kwh_m2
- *     f_ga  → gebruiksoppervlakte_thermische_zone_m2
- *     opp   → oppervlakte_m2
- *
- * Nothing else changed. If it is reworded to read better, the comparison with the
- * 0-of-13 result dies and Q1b answers nothing.
- *
- * It must NOT state the answer. The whole question is whether the model will
- * EXECUTE this; a block containing "~253 m³" would be an alert wearing a recipe's
- * clothes, and would measure the rich tier a second time.
- *
- * Shipped in exactly two places, from this one constant, so the channels cannot
- * drift: the `words-recipe` description and the `inline-recipe` response.
- */
+/** A procedure the model must execute (Q1b). Transliterated from the opaque arm's block — do not reword it. */
 const derivedFiguresBlock = `\
 DERIVED FIGURES YOU MUST COMPUTE YOURSELF (nothing below is returned):
 - Whole-building or whole-unit totals: multiply a per-m\u00b2 figure by gebruiksoppervlakte_thermische_zone_m2, not by oppervlakte_m2.
 - Annual gas for space heating: (warmtebehoefte_kwh_m2 \u00d7 gebruiksoppervlakte_thermische_zone_m2) \u00f7 0.95 boiler efficiency \u00f7 8.79 kWh per m\u00b3 of Dutch gas (31.65 MJ \u00f7 3.6). This covers SPACE HEATING ONLY and excludes hot water and cooking.`;
 
-/**
- * The ALERTS paragraph, kept separate so the 'words' variant can omit it.
- * That variant returns no `alerts` field, and a description promising one
- * would be describing a field that is not there.
- */
+/** The promise of `alerts`; arms that return no alerts omit it. */
 const alertsParagraph = `ALERTS: Always check interpretation.alerts — they contain bouwjaar era warnings (suppressed for good labels A/A+/A++/A+++/A++++), multiple-VBO disambiguation, large pand oppervlakte warning (>10 VBOs), label expiry notices, BENG compliance violations, VBO status warnings, bouwjaar discrepancies, and district heating impact notes. For residential buildings alerts also include an estimated annual gas consumption (m³), total CO₂ emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.`;
 
-/**
- * rich only (2026-09-24, Q21): the CALCULATED vs MEASURED line is ALSO placed right after WHEN NOT
- * TO USE, so it lands inside the 2,048-char cut (Q7). In the shared interpretationBlock it sits at
- * char ~3,380 and never arrived: Q20 measured rich at 0/10 (haiku) on benchmark-trap even after its
- * false Paris Proof alert was removed. descriptionCore / interpretationBlock stay byte-identical for
- * the other arms; the price is QUERY STRATEGY item 5 (large panden), now past the cut — rich's
- * large-pand ALERT still carries it in the response.
- */
+/** rich only (Q21): the CALCULATED vs MEASURED line also sits before QUERY STRATEGY, inside the 2,048-char cut. */
 const richPreamble = descriptionPreamble.replace('\n\nQUERY STRATEGY:', '\n\n' + calcVsMeasuredLine + '\n\nQUERY STRATEGY:');
 if (richPreamble === descriptionPreamble) throw new Error('rich description: QUERY STRATEGY anchor not found');
 
@@ -173,20 +120,7 @@ export const description = richPreamble + '\n\n' + interpretationBlock + '\n\n' 
 /** Arm B description: identical prose, minus the promise of a field it does not return. */
 export { descriptionCore, interpretationBlock, derivedFiguresBlock };
 
-/**
- * The one INTERPRETATION line about `temperatuuroverschrijding`, SLICED out of
- * `interpretationBlock` rather than retyped — the `inline-oneline` arm of
- * open-questions.md Q14 ships exactly these bytes and no others in its response,
- * so it cannot drift from the block the description carries.
- *
- * Q13 showed the whole block in the RESPONSE scores 20/20 where the same block in
- * the DESCRIPTION scores 5/20. Q14 asks whether ONE line buys the same thing, which
- * is the question a production server actually faces: it is the cheap fix, and
- * nobody has measured whether it works.
- *
- * Throws at module load if the line is not found, because an arm that silently
- * ships an empty response is worse than one that fails to start.
- */
+/** The overheating line, sliced from interpretationBlock (never retyped) for the Q14 one-line arm. Throws if missing. */
 export const overheatingLabel = '- temperatuuroverschrijding (TOjuli/GTO overheating-risk indicator):';
 
 export const overheatingLine = (() => {
@@ -341,14 +275,7 @@ export type BagClientLike = Pick<BagClient, 'findAddress' | 'getVerblijfsobject'
 /** Minimum surface of the EP-Online client used by this tool. Eases testing. */
 export type EpOnlineClientLike = Pick<EpOnlineClient, 'getByBagVboId'>;
 
-/**
- * Shared data path for every metadata tier: BAG address → VBO/EP/Pand → profile.
- *
- * Returns the profile *without* alerts — each tier decides what metadata layer to
- * add on top (the rich tier adds `generateAlerts`; the minimal tier adds nothing).
- * `notFound` is true when BAG has no match, in which case `profile` is the empty
- * placeholder and the caller supplies any not-found messaging.
- */
+/** Shared data path for every tier: BAG address → VBO/EP/Pand → profile, without alerts. `notFound` = no BAG match. */
 export async function resolveBuildingProfile(
   bagClient: BagClientLike,
   epOnlineClient: EpOnlineClientLike,
@@ -402,8 +329,7 @@ export function registerGetBuildingProfileTool(
       title: 'Building Profile (BAG + Energy Label)',
       description,
       inputSchema: z.object(inputSchema),
-      // rich only (2026-09-24, Q20): the shared schema's ep1 describe names a Paris Proof target;
-      // the other arms keep it frozen, rich states what the figure is.
+      // rich only (Q20): ep1's describe says CALCULATED; the frozen arms keep the shared one.
       outputSchema: outputSchema.extend({
         ep1_energiebehoefte_kwh_m2: z
           .number()

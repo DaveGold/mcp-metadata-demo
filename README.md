@@ -159,47 +159,49 @@ The failure it prevents is concrete: a residential *Nader Voorschrift* label ret
 ### See it in the source
 
 The metadata layer is just code. Read it by the moment the model needs it. Links go to the
-reference implementation (`best`), then the older `rich` and `minimal` tiers for contrast.
+reference implementation (`best`). To see what a tier actually sends, with the 2,048-character cut
+marked, read its wire view: [`best`](docs/wire/best.md) · [`rich`](docs/wire/rich.md) · [`minimal`](docs/wire/minimal.md).
 
 **1 · WHEN — before the call.** Does this tool fit the question, what is it not for, what does it
 join with? These must be in the first 2,048 characters of the description, because the model
 decides before it has any response:
-- building: [`WHEN TO USE` · `WHEN NOT TO USE` · `RELATED TOOLS`](src/tools/get-building-profile-best.ts#L34-L38), including the
+- building: [`WHEN TO USE` · `WHEN NOT TO USE` · `RELATED TOOLS`](src/tools/get-building-profile-best.ts#L32-L36), including the
   refusal that must be possible without a call ("this server has NO metered energy consumption")
 - weather: [the same three blocks](src/tools/get-weather-context-best.ts#L48-L52)
 
 **2 · HOW — calling it.** How to form the arguments, and what comes back:
-- building: [`QUERY STRATEGY` · `RETURNS`](src/tools/get-building-profile-best.ts#L40-L42) and [a `.describe` on every input](src/tools/get-building-profile-best.ts#L137-L144)
-  (the input schema is delivered; the output schema is not)
+- building: [`QUERY STRATEGY` · `RETURNS`](src/tools/get-building-profile-best.ts#L38-L40) and [the input schema](src/tools/get-building-profile-best.ts#L52-L58), a `.describe`
+  on every parameter (the input schema is delivered)
 - weather: [`QUERY STRATEGY` · `RETURNS`](src/tools/get-weather-context-best.ts#L54-L56) and [the input schema](src/tools/get-weather-context-best.ts#L67-L85), including
   `select` with its exact field names, and `energyUse` / `solarKwp` so the server computes the verdict
 
 **3 · WHAT — meaning and interpretation, after the answer.** What a value is, and how to read it
 for this record. Most of it travels in the response, where there is no 2,048 cut:
-- **names first** — [the rename table](src/domain/best-field-names.ts#L34-L133): upstream name → name
+- **names first** — [the rename table](src/domain/best-field-names.ts#L31-L130): upstream name → name
   that says quantity, scope, provenance and unit, with a reason and provenance per row
-  ([weather](src/domain/best-field-names.ts#L165-L172))
-- **rules that hold for every record** — [`INTERPRETATION` in the description head](src/tools/get-building-profile-best.ts#L44-L50),
+  ([weather](src/domain/best-field-names.ts#L162-L169)); the [output schema](src/tools/get-building-profile-best.ts#L67-L123) lists the
+  resulting names (shape only: the model never receives it)
+- **rules that hold for every record** — [`INTERPRETATION` in the description head](src/tools/get-building-profile-best.ts#L42-L48),
   each a fact plus an instruction (CALCULATED vs MEASURED, which area totals use, what null means)
-- **rules for this record** — [the rule shape](src/domain/best-rules.ts#L33-L47) (`applies`, `render`,
+- **rules for this record** — [the rule shape](src/domain/best-rules.ts#L29-L42) (`applies`, `render`,
   `relates_to_fields`, `provenance`; only `render()` reaches the model) and the registries:
-  [building](src/domain/best-building-rules.ts#L208-L439), [weather](src/domain/best-weather-rules.ts#L106-L227)
-- **computed values** — [`computeBuildingDerived`](src/domain/best-building-rules.ts#L100-L183): each with unit,
+  [building](src/domain/best-building-rules.ts#L206-L437), [weather](src/domain/best-weather-rules.ts#L105-L226)
+- **computed values** — [`computeBuildingDerived`](src/domain/best-building-rules.ts#L98-L181): each with unit,
   basis and provenance, or `null` plus the reason; the server-computed
   [reference period](src/domain/reference-period.ts) for a partial year
-- **the response, `interpretation` first** — [building](src/tools/get-building-profile-best.ts#L111-L125), [weather](src/tools/get-weather-context-best.ts#L135-L271)
+- **the response, `interpretation` first** — [building](src/tools/get-building-profile-best.ts#L159-L173), [weather](src/tools/get-weather-context-best.ts#L135-L271)
   (including the size guard that drops records rather than lose the interpretation to a file notice)
 - **proof it holds** — [`best-arm.test.ts`](src/tools/best-arm.test.ts) pins every computed value to
-  the eval ground truth, and checks the description budget and rule coverage
+  the ground truth, and checks the description budget and rule coverage
 
 **For contrast — the older tiers:**
-- **`rich`** puts all three moments in one description of ~8,000 characters: [`get-building-profile.ts`](src/tools/get-building-profile.ts#L23-L171).
-  On Claude Code only the first 2,048 characters arrive, so the INTERPRETATION block it carries
-  never reaches the model. Its [`alerts[]`](src/domain/generate-alerts.ts) are the first version of the
-  response-side rules (the EP-1 vs Paris Proof alert was removed on 2026-09-24: it compared a
-  calculated figure with a measured target). Its [output schema](src/tools/get-building-profile.ts#L219-L332)
-  is shape-only, because the model never receives it (evals Q7, Q11; [`evals/README.md`](evals/README.md) §10–§14).
-- **`minimal`** — the whole ablated tool, ~60 lines, none of the above: [`get-building-profile-minimal.ts`](src/tools/get-building-profile-minimal.ts)
+- **`rich`** puts all three moments in one description of ~8,000 characters. Its [wire view](docs/wire/rich.md)
+  shows the cut: 74% of that description never reaches the model on Claude Code. Its source,
+  [`get-building-profile.ts`](src/tools/get-building-profile.ts), is also the shared source of the eval
+  arms, so it is built from named fragments. Its [`alerts[]`](src/domain/generate-alerts.ts) are the
+  first version of the response-side rules.
+- **`minimal`** — the whole ablated tool, ~60 lines, none of the above: [`get-building-profile-minimal.ts`](src/tools/get-building-profile-minimal.ts),
+  and its [wire view](docs/wire/minimal.md)
 - **Select** — field projection with its safety rails (never fall back silently to full records, alert on
   unknown fields): [`project-fields.ts`](src/domain/project-fields.ts)
 - **queryIntent + Iterate** — the persisted call log and the tool that reads it back:

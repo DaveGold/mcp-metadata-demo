@@ -1,4 +1,7 @@
 /**
+ * EVAL ARM — not example code. It exists to measure one variable against the others (evals/).
+ * The reference implementation is src/tools/get-building-profile-best.ts.
+ *
  * MCP tool: get_building_profile — GUIDANCE-RECIPE variant (open-questions.md Q8).
  *
  * The third channel for the DERIVED FIGURES recipe. Q1b shipped the same bytes in

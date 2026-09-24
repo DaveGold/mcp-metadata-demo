@@ -42,7 +42,8 @@
     "dev:inline": "MCP_VARIANT=inline tsx watch src/stdio.ts",
     "dev:inline-recipe": "MCP_VARIANT=inline-recipe tsx watch src/stdio.ts",
     "dev:words-recipe": "MCP_VARIANT=words-recipe tsx watch src/stdio.ts",
-    "dev:best": "MCP_VARIANT=best tsx watch src/stdio.ts"
+    "dev:best": "MCP_VARIANT=best tsx watch src/stdio.ts",
+    "wire-view": "tsx scripts/wire-view.ts"
   },
   "keywords": [
     "mcp",

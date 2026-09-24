@@ -1,4 +1,7 @@
 /**
+ * EVAL ARM — not example code. It exists to measure one variable against the others (evals/).
+ * The reference implementation is src/tools/get-building-profile-best.ts.
+ *
  * MCP tool: get_building_profile — SCHEMA variant.
  *
  * The rung that was missing from the ladder. Until this existed, the only way

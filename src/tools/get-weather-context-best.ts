@@ -1,15 +1,15 @@
 /**
- * MCP tool: get_weather_context — `best` arm (reference implementation).
+ * MCP tool: get_weather_context — reference implementation.
  *
- * Same data path and numbers as get-weather-context.ts (executeWeatherQuery +
- * summarizeWeather), with every eval lesson applied to what the model receives:
- * - description ≤ 2,048 chars, load-bearing rules first (Q7, Q15);
+ * Same data path and numbers as get-weather-context.ts (executeWeatherQuery + summarizeWeather).
+ * What changes is what the model receives:
+ * - a description within the 2,048 characters a host delivers, the rules that matter first;
  * - `interpretation` first in the response, lines from a rule registry (best-weather-rules.ts);
- * - the partial-period REFERENCE shipped as data (Q16, Q16b), the annual factor null outside
- *   a full year and renamed so its validity is in its name;
+ * - the partial-period REFERENCE shipped as data, the annual factor null outside a full year and
+ *   renamed so its validity is in its name;
  * - determinate steps computed when the caller passes the inputs (energyUse, solar);
- * - fighting-system days returned complete (Q11);
- * - response-size guard below the host's ~25k-token replacement limit (Q9);
+ * - fighting-system days returned complete, never truncated;
+ * - a response-size guard below the ~25k-token limit at which hosts replace a result by a file;
  * - zero measured days → nulls, never 0 read as a measurement.
  */
 

@@ -98,18 +98,10 @@ export function generateAlerts(profile: ProfileCore): string[] {
     }
   }
 
-  // REMOVED 2026-09-24: an EP-1 vs Paris Proof alert ("EP-1 above Paris Proof 2040 target
-  // (70 kWh/m² for offices / 100 residential)") and an "EP-1 > 150 = well above benchmark" alert.
-  // EP-1 is the CALCULATED NTA 8800 net energy demand; Paris Proof is defined on MEASURED final
-  // energy use at the meter — same unit, different quantity — and the 150 had no source. As a
-  // computed verdict it was repeated by the models: benchmark-trap rich 0/20 (haiku), 0/10
-  // (sonnet), 0/10 (opus, hand-read) in evals/results/2026-09-24-q19-best-arm.json. Q20
-  // (evals/results/2026-09-24-q20-rich-alert-removed.json): removing it did NOT fix rich on that
-  // question (haiku 0/10, sonnet 1/10) — the missing CALCULATED vs MEASURED fact sits past rich's
-  // 2,048 cut. Removing a wrong line is not the same as delivering the right one. Q21
-  // (evals/results/2026-09-24-q21-rich-line-delivered.json): with that line moved inside the cut
-  // (get-building-profile.ts, richPreamble), rich went to 10/10 on haiku and on sonnet.
+  // No EP-1 benchmark alert (removed 2026-09-24). EP-1 is the CALCULATED NTA 8800 net demand;
+  // Paris Proof is defined on MEASURED final energy at the meter: same unit, different quantity.
   // Do not reintroduce a numeric benchmark comparison for calculated label figures.
+  // Record: docs/building-profile-findings.md §7.
 
   if (profile.label_geldig_tot) {
     // Parse as Date — string compare would treat "2026-04-13" as earlier than
@@ -195,23 +187,10 @@ export function generateAlerts(profile: ProfileCore): string[] {
     }
   }
 
-  // Overheating risk — computed, not left to the reader.
-  //
-  // WHY THIS IS COMPUTED RATHER THAN DESCRIBED. The interpretation block already
-  // states the thresholds ("0 = no risk, 0-1.5 = minor risk, >1.5 = significant"),
-  // and evals/results/2026-09-22-q6-overheating-naming.json shows that is not
-  // enough: across three arms and 21 runs on a record with temperatuuroverschrijding
-  // 3.59, only 2 answers were correct. Models read 3.59 as degrees ("below the
-  // typical 5-6 C threshold") or as hours per year ("well below the 40-hour
-  // standard") and conclude the risk is low. Renaming does not help — the arm with
-  // a neutral field name AND an explicit "unitless" glossary scored 0 of 7.
-  //
-  // So the verdict is stated here, in words, the same way the gas figure and the
-  // heat-pump indicatie are. The "not °C, not hours" clause is not padding: those
-  // are the two misreadings actually observed.
-  //
-  // Applies to any record carrying the field, not residential only — the NTA 8800
-  // thresholds are not tenure-specific.
+  // Overheating risk — computed, not left to the reader. The bare 3.59 is read as degrees or as
+  // hours per year and judged negligible, so the verdict is stated in words; the "not °C, not hours"
+  // clause names those two readings. Applies to every record carrying the field: the NTA 8800
+  // thresholds are not tenure-specific. Record: evals/results/2026-09-22-q6-overheating-naming.json.
   if (profile.temperatuuroverschrijding !== null) {
     const to = profile.temperatuuroverschrijding;
     const verdict =

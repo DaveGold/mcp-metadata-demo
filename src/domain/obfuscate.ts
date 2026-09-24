@@ -1,4 +1,7 @@
 /**
+ * EVAL ARM — not example code. It exists to measure one variable against the others (evals/).
+ * The reference implementation is src/tools/get-building-profile-best.ts.
+ *
  * Field-name obfuscation for the `opaque` arms of the ablation.
  *
  * WHY THIS EXISTS

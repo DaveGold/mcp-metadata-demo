@@ -1,4 +1,7 @@
 /**
+ * EVAL ARM — not example code. It exists to measure one variable against the others (evals/).
+ * The reference implementation is src/tools/get-building-profile-best.ts.
+ *
  * MCP tool: get_building_profile — INLINE-CONDITIONAL variant.
  *
  * open-questions.md Q2. `inline` ships the whole INTERPRETATION block in every
