@@ -3623,3 +3623,33 @@ skill's `references/harness/`):
 
 Comparisons with Q19's `best` cells are cross-sitting: quote the direction only. The within-batch
 `best` vs `rich` gap is the controlled comparison.
+
+### Q19c — Do the remaining misses disappear once the head says "call it directly"? Registered 2026-09-24, BEFORE the run
+
+> **REGISTERED before any run.** Deployed and verified live: 1,776 chars, containing "CALL IT
+> DIRECTLY".
+
+**Why.** Every miss that remained after Q19b happened BEFORE the first call:
+- haiku asked for an address and called nothing (3 of 30 runs);
+- on a window ending in the future it asked for the gas figure and called nothing (8 of 10 in
+  Q19).
+
+No response rule can fix a call that is never made. Only the description head can.
+
+**Change.** Two sentences go in the head:
+- no address is needed — use city coordinates or the Utrecht default;
+- call the tool even when the window ends in the future, because the response separates archive
+  from forecast days.
+
+The stand-alone "never weather-correct against forecast days" line leaves the head. The
+response's forecast alert still says it.
+
+**Run.** haiku, `best` vs `rich`, n=10 per arm, on `weather-partial-normalization`,
+`weather-single-quarter` and `forecast-normalization`. 60 runs, the skill's portable harness,
+same scoring as Q19/Q19b.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | No `best` run on the two quarter questions asks for an address without calling (Q19b: 3 of 30) | ≥ 3 of 20 |
+| P2 | `forecast-normalization`: `best` calls the weather tool in ≥ 8/10 and is CORRECT in ≥ 6/10 (Q19: 2/10, 0 calls in 8) | CORRECT ≤ 3/10 |
+| P3 | No regression: `best` ≥ 8/10 on both quarter questions | either ≤ 6/10 |
