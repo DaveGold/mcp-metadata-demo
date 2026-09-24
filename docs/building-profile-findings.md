@@ -41,9 +41,13 @@ Repro: `npx tsx scripts/smoke.ts 3543AR 1` (NEN 7120), `1082PP 10` (NTA 8800 off
   unsourced value (fires on Rijnlaan 28 / 28A). The same claim appears in `interpretationBlock`,
   the ep1 output-schema describe, `alertsParagraph`, and the `rich` instructions' alerts bullet.
   This is the defect class that produced 0/60 on `benchmark-trap` (skill evidence [BT]), made
-  worse by being a computed verdict. **Not fixed in `rich`**: that arm is hash-frozen because
-  results were measured on it; fixing it needs a re-baseline on every ep1/ep2 question. The
-  production Duurzaam server has the same defect (MCPSER-81).
+  worse by being a computed verdict. **Fixed in `rich` on 2026-09-24, after Q19** (commit after
+  `33d24fc`). Removed: the alert, the Paris Proof promise in `alertsParagraph` and in the
+  instructions' alerts bullet; the rich-only output-schema describe for ep1 now says CALCULATED.
+  **Kept, deliberately:** the `ep1 … Paris Proof 2040 targets` line in the shared
+  `interpretationBlock`. Six eval arms carry that block, and that line is what benchmark-trap
+  measured (0/60 → 59/60). In `rich` it sits past char 2,048, so it is not delivered.
+  Measured as Q20. The production Duurzaam server has the same defect (MCPSER-81).
 - **BAG-area fallback for totals** — `benchmarkArea()` falls back to the BAG area when there is
   no thermal zone, mixing scopes by up to 1.8×.
 - **Large-pand alert threshold** — fires only above 10 verblijfsobjecten; the scope problem

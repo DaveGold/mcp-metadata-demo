@@ -97,8 +97,8 @@ export interface CreateServerOptions {
  */
 function buildInstructions(includeAlerts: boolean): string {
   const usageAlertsBullet = includeAlerts
-    ? '- Always read the `alerts` array — it contains bouwjaar-era warnings, Paris Proof ' +
-        'threshold breaches, BENG compliance summaries, and (for residential) estimated gas ' +
+    ? '- Always read the `alerts` array — it contains bouwjaar-era warnings, ' +
+        'BENG compliance summaries, and (for residential) estimated gas ' +
         'consumption + warmtepomp-geschiktheidsindicatie.\n'
     : '';
   return (

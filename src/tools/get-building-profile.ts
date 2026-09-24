@@ -154,7 +154,7 @@ DERIVED FIGURES YOU MUST COMPUTE YOURSELF (nothing below is returned):
  * That variant returns no `alerts` field, and a description promising one
  * would be describing a field that is not there.
  */
-const alertsParagraph = `ALERTS: Always check interpretation.alerts — they contain bouwjaar era warnings (suppressed for good labels A/A+/A++/A+++/A++++), multiple-VBO disambiguation, large pand oppervlakte warning (>10 VBOs), Paris Proof threshold breaches (differentiated by gebouwklasse), label expiry notices, BENG compliance violations, VBO status warnings, bouwjaar discrepancies, and district heating impact notes. For residential buildings alerts also include an estimated annual gas consumption (m³), total CO₂ emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.`;
+const alertsParagraph = `ALERTS: Always check interpretation.alerts — they contain bouwjaar era warnings (suppressed for good labels A/A+/A++/A+++/A++++), multiple-VBO disambiguation, large pand oppervlakte warning (>10 VBOs), label expiry notices, BENG compliance violations, VBO status warnings, bouwjaar discrepancies, and district heating impact notes. For residential buildings alerts also include an estimated annual gas consumption (m³), total CO₂ emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.`;
 
 /** Full rich description: domain prose plus the alerts promise. */
 export const description = descriptionCore + '\n\n' + alertsParagraph;
@@ -391,7 +391,14 @@ export function registerGetBuildingProfileTool(
       title: 'Building Profile (BAG + Energy Label)',
       description,
       inputSchema: z.object(inputSchema),
-      outputSchema,
+      // rich only (2026-09-24, Q20): the shared schema's ep1 describe names a Paris Proof target;
+      // the other arms keep it frozen, rich states what the figure is.
+      outputSchema: outputSchema.extend({
+        ep1_energiebehoefte_kwh_m2: z
+          .number()
+          .nullable()
+          .describe('EP-1: CALCULATED net energy demand in kWh/m²/year (NTA 8800). Not a measured value.'),
+      }),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,

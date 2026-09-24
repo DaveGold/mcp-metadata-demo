@@ -66,6 +66,15 @@ Read that before quoting any number from this directory.
 | [`2026-09-24-q19d-canonical-blocks.json`](2026-09-24-q19d-canonical-blocks.json) | **Q19d: renaming `best`'s description heads to the talk's eight canonical blocks breaks nothing.** haiku, 60 runs, audit exact 12/12. `best` 10/10 on benchmark-trap, 10/10 on metered-vs-model, 9/10 on weather-single-quarter; `rich` 0/10, 10/10, 0/10. The metered refusal is still answered without a call in 6/10 (P2 partial). |
 | [`2026-09-24-field-probe-best.json`](2026-09-24-field-probe-best.json) | **The field-reading probe on `best`.** A tool-less haiku read one bare response per field (3 records × 3). No calculated energy field was read as measured (0/99), and all 14 fields left unexplained on purpose read right. **The auto-score missed a real scope misread:** `oppervlakte_bag_verblijfsobject_m2` was taken as the building's area in 2 of 9 readings, so the response rule is needed and the name alone is not enough. It also flagged 7 weather fields whose meanings were right (unit spelling, kind choice). Read the flagged meanings; do not trust the score. |
 
+> ### ⚠️ 2026-09-24 — `rich` CHANGED: the EP-1 vs Paris Proof alert is removed
+>
+> After Q19 the `rich` arm lost its computed "EP-1 above Paris Proof 2040 target" and "EP-1 >
+> 150 above benchmark" alerts, and the Paris Proof promise in its description's ALERTS paragraph,
+> its instructions and its ep1 output-schema describe. Every `rich` number above on a question
+> touching ep1 or ep2 — benchmark-trap, heat-pump-triage — is from the version WITH the alert.
+> Do not compare it with a `rich` number scored afterwards. No other arm changed; the hash
+> freeze proves it. See `docs/building-profile-findings.md` §7 and Q20.
+
 > ### ⚠️ DESCRIPTION TRUNCATION — read before quoting ANY description-channel number
 >
 > Found 2026-09-22 by Q7. The host every run here used sends only the **first 2,048

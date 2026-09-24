@@ -3,7 +3,6 @@
  *
  * This is where generic upstream data becomes actionable advice:
  *   - "Pre-Bouwbesluit 1992 — likely limited insulation"
- *   - "EP-1 above Paris Proof 2040 target (70 kWh/m² for offices)"
  *   - BENG compliance pass/fail summary
  *   - Heat-pump suitability indicator (residential only)
  *
@@ -99,20 +98,13 @@ export function generateAlerts(profile: ProfileCore): string[] {
     }
   }
 
-  if (profile.ep1_energiebehoefte_kwh_m2 !== null) {
-    if (profile.ep1_energiebehoefte_kwh_m2 > 150) {
-      alerts.push('EP-1 well above benchmark (>150 kWh/m²) — large savings potential.');
-    } else {
-      const isResidential = profile.gebouwklasse === 'Woningbouw';
-      const isOffice = profile.gebruiksdoel?.toLowerCase().includes('kantoorfunctie') ?? false;
-
-      if (isResidential && profile.ep1_energiebehoefte_kwh_m2 > 100) {
-        alerts.push('EP-1 above Paris Proof 2040 target (100 kWh/m² for residential).');
-      } else if (isOffice && profile.ep1_energiebehoefte_kwh_m2 > 70) {
-        alerts.push('EP-1 above Paris Proof 2040 target (70 kWh/m² for offices).');
-      }
-    }
-  }
+  // REMOVED 2026-09-24: an EP-1 vs Paris Proof alert ("EP-1 above Paris Proof 2040 target
+  // (70 kWh/m² for offices / 100 residential)") and an "EP-1 > 150 = well above benchmark" alert.
+  // EP-1 is the CALCULATED NTA 8800 net energy demand; Paris Proof is defined on MEASURED final
+  // energy use at the meter — same unit, different quantity — and the 150 had no source. As a
+  // computed verdict it was repeated by the models: benchmark-trap rich 0/20 (haiku), 0/10
+  // (sonnet), 6/10 (opus) in evals/results/2026-09-24-q19-best-arm.json. Fix measured as Q20.
+  // Do not reintroduce a numeric benchmark comparison for calculated label figures.
 
   if (profile.label_geldig_tot) {
     // Parse as Date — string compare would treat "2026-04-13" as earlier than
