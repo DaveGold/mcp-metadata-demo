@@ -85,6 +85,14 @@ Read that before quoting any number from this directory.
 > inside the cut). From that point `rich` vs `words` is no longer a one-variable rung on ep1/ep2
 > questions, and a `rich` benchmark-trap number from before Q21 does not describe today's `rich`.
 
+> ### ⚠️ 2026-09-24 — `render_chart` CHANGED on every tier (Q24 pilot)
+>
+> Its input schema required `data` on every dataset, so no tier could call scatter, bubble or boxplot
+> in object form. `data` is now optional. The freeze of every arm was re-baselined, with proof that
+> nothing but `render_chart` moved:
+> [`2026-09-24-render-chart-schema-rebaseline.json`](2026-09-24-render-chart-schema-rebaseline.json).
+> No earlier question used those three types, so no earlier result changes.
+
 > ### ⚠️ 2026-09-24 — `best` CHANGED (Q22): the app tools are rebuilt
 >
 > Before Q22, `best` had one-line render and log descriptions and no `fetch_image`. That version is

@@ -59,6 +59,19 @@ describe('tableAlerts', () => {
         ['Bouwjaar', 1999],
       ]),
     ).toEqual([]);
+    // Measured data the user brings is not a label figure: only per-m² energy figures and register names are.
+    expect(
+      tableAlerts(
+        [
+          { key: 'e', header: 'Energy use (MWh/year)' },
+          { key: 'c', header: 'CO₂ (t/year)' },
+        ],
+        [],
+      ),
+    ).toEqual([]);
+    expect(tableAlerts([{ key: 'w', header: 'Heat demand (warmtebehoefte)' }], [])[0]).toMatch(/warmtebehoefte/);
+    expect(tableAlerts([{ key: 'c', header: 'CO₂ emissions (kg/m²)' }], [])[0]).toMatch(/CO₂ emissions/);
+    expect(tableAlerts([{ key: 'p', header: 'EP₂ Primary Fossil Energy (kWh/m²)' }], [])[0]).toMatch(/EP₂/);
   });
 });
 

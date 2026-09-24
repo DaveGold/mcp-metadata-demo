@@ -317,8 +317,9 @@ const inputSchema = {
             ),
           data: z
             .array(z.number().nullable())
+            .optional()
             .describe(
-              'Numeric values, one per label. Use null for missing data points (creates a gap in lines, skips bar). For scatter/bubble use scatterData instead.',
+              'Numeric values, one per label. Use null for missing data points (creates a gap in lines, skips bar). For scatter/bubble use scatterData instead, for boxplot samples or stats.',
             ),
           spanGaps: z
             .boolean()
@@ -783,7 +784,10 @@ interface ChartArgs {
 
 /** Normalize a dataset entry (tuple or object) to the full keyed shape. */
 function normalizeDataset(entry: ChartDataset | DatasetTuple): ChartDataset {
-  return Array.isArray(entry) ? { label: entry[0], data: entry[1] } : entry;
+  if (Array.isArray(entry)) return { label: entry[0], data: entry[1] };
+  // scatter / bubble carry scatterData and boxplot carries samples or stats, so `data` may be absent.
+  // The label-based checks below still refuse a missing `data` there (0 entries vs labels.length).
+  return { ...entry, data: entry.data ?? [] };
 }
 
 /** Normalize a sankey flow entry (tuple or object) to the keyed shape. */
