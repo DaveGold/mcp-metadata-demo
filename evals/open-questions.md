@@ -3663,3 +3663,23 @@ same scoring as Q19/Q19b.
 | P1 | No `best` run on the two quarter questions asks for an address without calling (Q19b: 3 of 30) | ≥ 3 of 20 |
 | P2 | `forecast-normalization`: `best` calls the weather tool in ≥ 8/10 and is CORRECT in ≥ 6/10 (Q19: 2/10, 0 calls in 8) | CORRECT ≤ 3/10 |
 | P3 | No regression: `best` ≥ 8/10 on both quarter questions | either ≤ 6/10 |
+
+### Q19d — Does renaming the description heads to the eight canonical blocks break anything? Registered 2026-09-24, BEFORE the run
+
+> **REGISTERED before any run.** Deployed and verified live: building 1,800 chars, weather 1,781,
+> both opening with `WHEN TO USE:`.
+
+**Change.** The same content as in Q19c, now under the talk's eight block names, in the talk's
+order. Weather RETURNS now lists the literal record fields. The load-bearing lines therefore sit
+later in the description (≤ 1,500), but still inside the cut.
+
+**Run.** haiku, `best` vs `rich`, n=10 per arm, 60 runs, on the three questions that lean most on
+the description head:
+- `metered-vs-model` — a refusal answered from the head alone, median 0 calls in Q19;
+- `benchmark-trap` — the rule for every record, now under INTERPRETATION, after RETURNS;
+- `weather-single-quarter` — the reference rule, now after RETURNS.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | No regression: `best` ≥ 9/10 on each question (Q19/Q19c: 10/10, 20/20, 9/10) | any `best` cell ≤ 7/10 |
+| P2 | `metered-vs-model` is still answered without a building call in ≥ 7/10 `best` runs | ≤ 4/10 |
