@@ -4068,3 +4068,23 @@ questions × 3 arms × n=5 = 330 runs, haiku.
 > n=5 that is direction, not size. The lesson for the skill: the input schema is paid on every
 > turn by every question, so it carries what forming a call needs and no more; a type-specific
 > shape can move behind a REQUIRED guidance call without loss.
+
+## Q25b — Is the guided schema as reliable as the lean one where it differs? Registered 2026-09-24, BEFORE the run
+
+> **REGISTERED before any run.** Q25 left one question open: guided missed 3 of 70 chart-path runs
+> where lean missed none (funnel as sankey, boxplot as line without fetching guidance, polarArea
+> as bar). At n=5 that is noise or direction. This run decides which of the two goes into `best`.
+
+**Run.** `best-lean` vs `best-guided`, haiku, n=10 per cell, the 12 chart paths other than bar and
+line (the only paths where the two differ in what the model must do), interleaved 5+5 per wave, 24
+waves, 240 runs.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | both arms reach ≥ 9/10 on at least 11 of the 12 paths | either arm below 9/10 on 2 or more paths |
+| P2 | no reliability gap: guided never ≥ 3 below lean on a path | a path with lean − guided ≥ 3 |
+| P3 | the pointer is followed: get_chart_guidance before the first render_chart ≥ 8/10 on every path | < 6/10 on any path |
+| P4 | cost: guided median tokens ≤ lean over the 12 paths, despite the extra call | guided > lean + 5% |
+
+**Decision rule, fixed before the run:** guided goes into `best` if P1 and P2 hold for guided;
+otherwise lean does. P3 and P4 inform the skill, not the choice.
