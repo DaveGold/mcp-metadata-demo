@@ -3576,3 +3576,42 @@ there to catch that. P2 is the strongest claim, because it predicts the old refe
 getting WORSE than `best` on a question the old reference was built to win.
 
 **Cost:** 790 subagent runs.
+
+### Q19b — Do the two fixes repair the two weather defects Q19 found? Registered 2026-09-24, BEFORE the run
+
+> **REGISTERED before any run.** The fixes are deployed and verified live:
+> - Q1 2023 and Q1 2024 now share one reference (1,231.3, windows ending 2014–2023), and the live
+>   two-period improvement is 3.6%.
+> - Held-out is unchanged (2,188.4 → 9,899).
+
+**What changed in `best`:**
+1. The reference span is fixed (`REFERENCE_END_YEARS`) instead of "the 10 years before this
+   window".
+2. The partial-window alert, the normalization alert and the description say the corrected figure
+   is for that window and must not be scaled to a year.
+
+The measured Q19 values do not move. Only comparability between calls and the annualising
+instruction change.
+
+**Run.** haiku, `best` vs `rich`, one batch per wave, same harness as Q19 (the portable one in the
+skill's `references/harness/`):
+- `weather-partial-normalization`, n=10 per arm;
+- `weather-single-quarter`, n=20 per arm.
+
+60 runs.
+
+**Scoring.** As in Q19:
+- `weather-single-quarter` is scored on the lead figure. Every correct answer that also offers a
+  full-year extrapolation is counted as `annualised`.
+- `weather-partial-normalization` is CORRECT at 3.6 ± 1% (or ~4,434 ± 60 m³).
+
+**Predictions**
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `weather-partial-normalization`: `best` ≥ 8/10 (Q19: 0/10) | `best` ≤ 4/10 |
+| P2 | `weather-single-quarter`: `best` ≥ 17/20, and ≤ 3 of its correct answers annualised (Q19: 16/20, 10 annualised) | `best` ≤ 12/20, or ≥ 8 annualised |
+| P3 | `rich` replicates Q19 in the same batches: partial ≥ 8/10, single-quarter ≤ 3/20 | `rich` partial ≤ 5/10 or single-quarter ≥ 7/20 |
+
+Comparisons with Q19's `best` cells are cross-sitting: quote the direction only. The within-batch
+`best` vs `rich` gap is the controlled comparison.
