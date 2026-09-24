@@ -635,26 +635,23 @@ export function registerRenderTableTool(server: McpServer, opts: { minimal?: boo
       try {
         auth = getAuthExtra(extra.authInfo);
 
+        // Every refusal is logged, so the call log shows what was refused and in what shape.
+        const refuse = async (text: string) => {
+          await logToolCall({ auth, args, start, status: 'error' });
+          return { content: [{ type: 'text' as const, text }], isError: true as const };
+        };
+
         // ── Validate payload limits ──────────────────────────────────
         if (args.data && args.data.length > 500) {
-          return {
-            content: [
-              {
-                type: 'text' as const,
-                text: `Too many rows (${args.data.length}). Maximum 500. Pre-aggregate or filter before calling render_table.`,
-              },
-            ],
-            isError: true,
-          };
+          return refuse(
+            `Too many rows (${args.data.length}). Maximum 500. Pre-aggregate or filter before calling render_table.`,
+          );
         }
 
         // ── Validate row shape (positional length, mixed shapes) ─────
         const rowShapeError = findRowShapeError(args.columns, args.data);
         if (rowShapeError) {
-          return {
-            content: [{ type: 'text' as const, text: rowShapeError }],
-            isError: true,
-          };
+          return refuse(rowShapeError);
         }
 
         // A header that names a calculated label figure as if it were consumption is refused, not
@@ -734,6 +731,7 @@ async function logToolCall({
       take: 0,
       status,
       rowCount: args.data.length,
+      shape: { columns: args.columns.length, rows: args.data.length },
       hasMore: false,
       durationMs: Date.now() - start,
       errorType: status === 'error' ? 'ToolError' : null,

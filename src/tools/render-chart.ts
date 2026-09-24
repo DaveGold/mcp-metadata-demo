@@ -831,7 +831,10 @@ function normalizeTreemapRow(
 
 // ── Tool registration ────────────────────────────────────────────────────────
 
-export function registerRenderChartTool(server: McpServer, opts: { minimal?: boolean; best?: boolean } = {}): void {
+export function registerRenderChartTool(
+  server: McpServer,
+  opts: { minimal?: boolean; best?: boolean; typeRules?: boolean } = {},
+): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
   registerAppResource(server, 'Chart App', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({
     contents: [
@@ -850,7 +853,14 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
     {
       title: 'Render Chart',
       description: opts.best ? bestChartDescription : opts.minimal ? 'Render data as a chart.' : description,
-      inputSchema: opts.best ? { ...inputSchema, options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES) } : inputSchema,
+      inputSchema: opts.best
+        ? {
+            ...inputSchema,
+            // A measured variant without the per-type rules, to see whether the rules do the work.
+            ...(opts.typeRules === false ? { type: inputSchema.type.describe('Chart type.') } : {}),
+            options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES),
+          }
+        : inputSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -872,10 +882,11 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
       try {
         auth = getAuthExtra(extra.authInfo);
 
-        const fail = (text: string) => ({
-          content: [{ type: 'text' as const, text }],
-          isError: true as const,
-        });
+        // Every refusal is logged, so the call log shows what was refused and in what shape.
+        const fail = async (text: string) => {
+          await logToolCall({ auth, args, start, status: 'error' });
+          return { content: [{ type: 'text' as const, text }], isError: true as const };
+        };
 
         // Treemap tuple rows require `columns` for positional interpretation.
         // Check before normalization — otherwise normalizeTreemapRow silently
@@ -1189,6 +1200,12 @@ async function logToolCall({
       take: 0,
       status,
       rowCount: 1,
+      shape: {
+        chartType: args.type,
+        labels: args.labels?.length ?? 0,
+        datasets: args.datasets?.length ?? 0,
+        annotations: args.options?.annotations?.length ?? 0,
+      },
       hasMore: false,
       durationMs: Date.now() - start,
       errorType: status === 'error' ? 'ToolError' : null,

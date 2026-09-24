@@ -1,0 +1,53 @@
+{
+  "_what_this_is": "Questions whose right answer is a CHOICE of form (text, table, which chart type) that follows from the data, not from the question. None names the form. Scored on the render calls' arguments against the rules on render_chart's `type` parameter. Registered for Q23 (evals/open-questions.md); not yet run.",
+  "questions": [
+    {
+      "id": "choice-share-per-month",
+      "question": "Which share of the 2024 weighted heating degree days in Utrecht fell in each month?",
+      "data_shape": "12 shares of one total (get_weather_context summary.monthlyBreakdown)",
+      "acceptable": ["render_chart bar", "render_chart polarArea (months are cyclical)", "render_table", "text"],
+      "wrong": ["render_chart pie or doughnut (12 slices; hard cap 5)", "render_chart radar"],
+      "ground_truth": "Monthly weighted HDD ÷ 2,479.9 (evals/weather-fixtures.json year_2024); shares sum to 100%."
+    },
+    {
+      "id": "choice-trend-over-year",
+      "question": "How did the weighted heating degree days develop through 2024 in Utrecht?",
+      "data_shape": "a time series of 12 monthly values",
+      "acceptable": ["render_chart line", "render_chart bar (vertical, time buckets)", "text with the monthly values"],
+      "wrong": ["render_chart pie or doughnut", "render_chart radar", "render_chart polarArea (cyclical form hides a trend)"],
+      "ground_truth": "Monthly weighted HDD summing to 2,479.9."
+    },
+    {
+      "id": "choice-three-measures-two-buildings",
+      "question": "Compare the EP-1, EP-2 and heat demand of Gustav Mahlerlaan 10 (1082PP Amsterdam) and Van Beuningenstraat 1 (3039WB Rotterdam).",
+      "data_shape": "3 measures × 2 objects, all kWh/m², all calculated",
+      "acceptable": ["render_chart bar (grouped)", "render_table", "text", "render_chart radar (≤6 axes, same unit, 2 overlays — allowed by the rules)"],
+      "wrong": ["render_chart line (categorical x-axis)", "render_chart pie or doughnut", "any Paris Proof or other metered benchmark drawn against the figures"],
+      "ground_truth": "EP-1 81.68 / 110.74, EP-2 179.06 / 156.01, warmtebehoefte 16.46 / 99.12 kWh/m² (live 2026-09-24)."
+    },
+    {
+      "id": "choice-two-labels",
+      "question": "Which energy label do Gustav Mahlerlaan 10 (1082PP Amsterdam) and Van Beuningenstraat 1 (3039WB Rotterdam) have?",
+      "data_shape": "2 categorical values",
+      "acceptable": ["text", "render_table"],
+      "wrong": ["render_chart of any type"],
+      "ground_truth": "A and A."
+    },
+    {
+      "id": "choice-fighting-days",
+      "question": "On which days in April and May 2024 were heating and cooling likely fighting each other in Utrecht?",
+      "data_shape": "a list of dates (get_weather_context summary.fightingSystemDays)",
+      "acceptable": ["text list", "render_table", "render_chart line or bar of tempMin/tempMax with the 14/20 °C band marked"],
+      "wrong": ["render_chart pie, doughnut, radar or polarArea", "a truncated list"],
+      "ground_truth": "The 11 dates in evals/weather-fixtures.json apr_may_2024."
+    },
+    {
+      "id": "choice-single-number",
+      "question": "What was the total weighted heating degree days in 2024 in Utrecht?",
+      "data_shape": "one number",
+      "acceptable": ["text"],
+      "wrong": ["render_chart or render_table"],
+      "ground_truth": "2,479.9 (evals/weather-fixtures.json year_2024)."
+    }
+  ]
+}

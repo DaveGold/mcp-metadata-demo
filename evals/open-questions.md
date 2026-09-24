@@ -3866,3 +3866,69 @@ LAST successful render_table call.
 | P2 | every refused `best` run retries, and ≥ 9/10 end with a rendered table | ≤ 7/10 rendered |
 | P3 | `best-v1` ≤ 2/10 (control) | ≥ 5/10 |
 | P4 | `best` median tokens ≤ +20% of `best-v1` (the retry costs a call) | > +35% |
+
+## Q23 — Does the chart and table guidance make the model choose the right FORM from the data? Registered 2026-09-24, NOT YET RUN
+
+> **ANSWERED 2026-09-24 — of 14 chart types, 2 are used, and the rules do one thing.** See
+> [`results/2026-09-24-q23-chart-choice.json`](results/2026-09-24-q23-chart-choice.json). 240 runs.
+>
+> **Which forms were chosen.** Text 137, bar 50, line 26, table 24, pie 3, polarArea 2. Every chart
+> was a bar or a line, apart from 3 pies and 2 polarArea (sonnet, on months, which the rules allow).
+>
+> **What the rules changed.** On 12 monthly shares, haiku without the per-type rules drew a
+> 12-slice pie in 3/10 runs; with the rules, 0/10 in both arms. Every other cell was identical in
+> all three arms: 10/10 no chart for a single number or two labels, 10/10 line or bar for the
+> trend, sonnet 10/10 everywhere.
+>
+> **Cost.** Without the rules, 1.9–4.6% fewer tokens in all 8 cells.
+>
+> P2–P5 confirmed; P1 partial (3/10 without the rules, where ≥ 5 was predicted). The pies came
+> back with the pie alert and were not re-rendered, the Q22b pattern again. Audit 38/40 exact: the
+> two extra calls were validation refusals the handlers did not log, now fixed.
+>
+> **Caveat.** One domain. Its data is series, a few categories or single values; hierarchies, flows
+> or distributions would give treemap, sankey and boxplot a chance this set does not.
+
+> **REGISTERED before any run.** Question set: `evals/questions-chart-choice.json`. Arm C is built
+> as the frozen variant `best-no-type-rules`: the `type` describe drops from 2,769 characters to 11
+> ("Chart type."), and `tools/list` from 72.5k to 69.8k. The render tools now also log the shape
+> they were called with (chart type, counts), so the demo's own traffic answers "which types are
+> used" alongside this run.
+>
+> **Tiers (fixed now).** haiku n=10 per arm on all six questions (180 runs); sonnet n=10 per arm on
+> `choice-share-per-month` and `choice-three-measures-two-buildings` (60 runs). 240 runs, waves of
+> 3 arms × 2, interleaved.
+
+**Why.** Q22 never tested the choice itself. Its questions named the form ("in a chart", "in a
+table", "on a map"), and its chart question accepted line and bar alike. Three things are
+unmeasured:
+- the per-type REFUSE rules on `render_chart`'s `type` parameter (delivered in the input schema:
+  pie at most 5 slices, no line on a categorical axis, radar at most 3 overlays, …);
+- `rich`'s question-first decision path, which mostly falls past the 2,048 cut;
+- whether the model renders at all when text or a small table would do.
+
+**Questions.** Six questions where the data shape decides the right form and the question names
+none: 12 shares of a year, a trend, 3 measures × 2 buildings, 2 labels, a list of dates, a single
+number. Each has an acceptable and a wrong list, taken from the `type` rules themselves.
+
+**Arms.** Three, to see where the guidance comes from:
+- A — `best-v1`: no chart description, the REFUSE rules in the input schema;
+- B — `best`: a short description, the same schema rules;
+- C — `best` with the REFUSE rules stripped from `type` (to build; wire-frozen as its own
+  variant). C separates "the schema rules work" from "models choose well on their own".
+
+**Scoring.** From the captured arguments: the tool called (or none), `type`, the number of slices
+or series. Each run scores CORRECT (acceptable form), WRONG (a listed wrong form), or OTHER
+(hand-read).
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `choice-share-per-month`, haiku: pie or doughnut in ≤ 2/10 with the rules (A, B), ≥ 5/10 without (C) | C ≤ 2/10 (the rules are not what prevents it) |
+| P2 | `choice-single-number` and `choice-two-labels`: no render_chart in ≥ 9/10, every arm | any arm ≤ 7/10 |
+| P3 | `choice-trend-over-year`: line or bar ≥ 9/10, every arm (ceiling) | any arm ≤ 7/10 |
+| P4 | B ≥ A on every question (the description's WHEN NOT TO USE adds to the schema rules) | A > B by ≥ 3 on any question |
+| P5 | sonnet chooses correctly ≥ 9/10 on every question in every arm | sonnet ≤ 7/10 anywhere |
+
+**Failure mode to expect.** Models may choose well without any rules (C at ceiling). The honest
+result is then that the `type` rules are volume, paid on every turn (~3k characters), and a
+candidate to trim.

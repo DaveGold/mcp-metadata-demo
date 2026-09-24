@@ -264,6 +264,10 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
   alert as a note: 0/10 re-rendered a table whose headers the alert said were wrong [Q22b]. The
   same check as a refusal with the fix in the message: 10/10, every refused run retried [Q22c].
   Keep alerts for what the user should know.
+- **Size render guidance to the mistakes the data invites.** A chart tool offering 14 types got bar
+  and line (and text, most often); its 2,769 characters of per-type rules changed one thing, a
+  12-slice pie, 3/10 → 0/10 [Q23]. Keep the rules for the tempting wrong choices on your data, cut
+  the menu to what your data can use.
 - **Audit the app tools too.** Their input schema is delivered, so an example there is advice: a
   "Paris Proof target" annotation example on a server of calculated figures got the line drawn
   20/20, and the fixed tool left it out 16/20 [Q22].
