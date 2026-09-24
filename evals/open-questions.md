@@ -3985,3 +3985,18 @@ A path counts as REACHED when at least 2 of its 3 runs are CORRECT.
 | P2 | B reaches fewer paths than A, and the gap is in the structure paths (sankey, funnel, graph, treemap, matrix, boxplot, bubble) | B ≥ A |
 | P3 | C reaches ≥ as many paths as A, and at least one path A misses | C < A |
 | P4 | line, bar, scatter and sankey are reached by every arm (the data leaves little choice) | any of them missed by 2+ arms |
+
+**Confirmation, registered 2026-09-24 BEFORE its run.** Limited to the two arms that matter:
+- A — `best`;
+- C — `best-decision-tree`.
+
+It runs on haiku AND sonnet, n=10 per path per arm per model: 14 × 2 × 2 × 10 = 560 runs, waves of
+10 (5 + 5, interleaved), on the repaired schema. A path is REACHED at ≥ 8/10 CORRECT.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P5 | haiku: C reaches all 14 paths | any path ≤ 5/10 in C |
+| P6 | polarArea: A ≤ 3/10 and C ≥ 7/10, on haiku; on sonnet A ≤ 5/10 and C ≥ 8/10 | C ≤ A + 3 on either model |
+| P7 | the 13 other paths: A and C within 2 of each other on every path and model (the tree changes only the path it was written for) | a gap ≥ 4 on any other path |
+| P8 | 0 schema refusals (-32602) on scatter, bubble and boxplot, in both arms | any |
+| P9 | C costs ≤ +3% median tokens over A (the tree adds ~1,060 characters to `type`) | > +6% |
