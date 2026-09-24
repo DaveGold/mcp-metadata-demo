@@ -87,6 +87,13 @@ Read that before quoting any number from this directory.
 > inside the cut). From that point `rich` vs `words` is no longer a one-variable rung on ep1/ep2
 > questions, and a `rich` benchmark-trap number from before Q21 does not describe today's `rich`.
 
+> ### ⚠️ 2026-09-24 — `best` CHANGED (after Q24): render_chart's `type` leads with the decision tree
+>
+> The decision path measured as arm `best-decision-tree` in Q24 is now part of `best`. `best`'s wire
+> hash equals the measured one, so that variant is removed. `best` numbers from before this change
+> were measured without the tree. Only polarArea moved in Q24, so no chart-choice result other
+> than that path changes.
+
 > ### ⚠️ 2026-09-24 — `render_chart` CHANGED on every tier (Q24 pilot)
 >
 > Its input schema required `data` on every dataset, so no tier could call scatter, bubble or boxplot

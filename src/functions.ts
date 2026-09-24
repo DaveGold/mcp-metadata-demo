@@ -139,9 +139,3 @@ export const mcpBestNoTypeRules = onRequest(
   functionOptions,
   createHttpApp({ hosted: true, variant: 'best-no-type-rules' }),
 );
-
-/** `best` with a decision path on render_chart's `type`: Q24 arm C. */
-export const mcpBestDecisionTree = onRequest(
-  functionOptions,
-  createHttpApp({ hosted: true, variant: 'best-decision-tree' }),
-);

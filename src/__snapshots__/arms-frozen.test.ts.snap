@@ -4,10 +4,6 @@ exports[`frozen arms — wire surface unchanged > tools/list and instructions ha
 {
   "best": {
     "instructions": "3bd554dd32969922c8efbede582e0e2e01774a5cf1c2e40b6b8f09c4c439368d",
-    "tools": "c9c94a04fa656a12838403d464fd694effcef6c485f10ffca0d3db304bf2f721",
-  },
-  "best-decision-tree": {
-    "instructions": "3bd554dd32969922c8efbede582e0e2e01774a5cf1c2e40b6b8f09c4c439368d",
     "tools": "dbfa482475c961f91faa077b313d8722a8ad105085253301793449a747f5b37b",
   },
   "best-no-type-rules": {
