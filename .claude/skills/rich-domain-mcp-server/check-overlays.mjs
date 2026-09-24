@@ -7,7 +7,7 @@
  *
  * No overlay folder is valid (the skill applies as written). Exit 1 on any error.
  */
-import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync, realpathSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -90,7 +90,17 @@ export function checkOverlays({ root, skillDir = SKILL_DIR } = {}) {
   return { errors, warnings, localDir, present: true };
 }
 
-const invokedDirectly = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+// Compare real paths: node resolves symlinks in import.meta.url but not in argv[1], so through a
+// symlinked path (a linked skill folder, macOS /var → /private/var) a plain comparison is false and
+// the check would silently not run — and exit 0.
+const realpath = (p) => {
+  try {
+    return realpathSync(p);
+  } catch {
+    return undefined;
+  }
+};
+const invokedDirectly = Boolean(process.argv[1]) && realpath(process.argv[1]) === realpath(fileURLToPath(import.meta.url));
 if (invokedDirectly) {
   const i = process.argv.indexOf('--root');
   const root =
