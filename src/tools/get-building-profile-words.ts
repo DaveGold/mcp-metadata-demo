@@ -1,4 +1,7 @@
 /**
+ * EVAL ARM — not example code. It exists to measure one variable against the others (evals/).
+ * The reference implementation is src/tools/get-building-profile-best.ts.
+ *
  * MCP tool: get_building_profile — WORDS variant (arm B of the ablation).
  *
  * The middle tier between `get-building-profile-minimal.ts` (arm A) and

@@ -153,11 +153,10 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
   const variant = options.variant ?? 'rich';
 
   if (variant === 'best') {
-    // The reference implementation: every eval lesson applied to BOTH data tools
-    // (rich-domain-mcp-server skill, references/audit.md). A composite, measured
-    // against rich/inline in evals/ — not a one-variable rung. Render and log tools
-    // are the minimal ones: irrelevant metadata is charged on every turn (Q5), and
-    // fetch_image is left out for the same reason.
+    // The reference implementation, built with the rich-domain-mcp-server skill's audit flow
+    // (references/audit.md) for both data tools. The render and log tools use their minimal
+    // descriptions and fetch_image is left out: metadata no question needs is paid for on
+    // every turn.
     const server = new McpServer({ name: 'metadata-demo-best', version: VERSION }, { instructions: bestInstructions });
     registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
     registerGetWeatherContextBestTool(server);

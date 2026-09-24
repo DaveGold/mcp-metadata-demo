@@ -1,16 +1,16 @@
 /**
- * MCP tool: get_building_profile — `best` arm (reference implementation).
+ * MCP tool: get_building_profile — reference implementation.
  *
- * Same registers and data path as get-building-profile.ts (BAG → VBO/Pand → EP-Online),
- * built with the rich-domain-mcp-server skill's audit flow. What changes is what the
+ * BAG → VBO/Pand → EP-Online, the same registers and data path as the other tiers. What the
  * model receives:
  * - field names that say quantity, scope, provenance and unit (best-field-names.ts);
- * - a description ≤ 2,048 chars carrying only what must be known BEFORE a call (Q7);
- * - `interpretation` first in the response: record-conditional lines from a rule
- *   registry with provenance in source (best-building-rules.ts);
+ * - a description within the 2,048 characters a host delivers, carrying only what must be known
+ *   BEFORE a call;
+ * - `interpretation` first in the response: record-conditional lines from a rule registry with
+ *   provenance in source (best-building-rules.ts);
  * - computed `derived` values with unit, basis and provenance, or null + reason;
  * - `candidates` when an address matches several units;
- * - no numeric Paris Proof threshold anywhere (the calculated-vs-measured defect).
+ * - no numeric Paris Proof threshold anywhere: label figures are calculated, Paris Proof is metered.
  */
 
 import { z } from 'zod';
@@ -19,12 +19,10 @@ import { logger } from '../logger.js';
 import { selectBestLabel } from '../domain/select-best-label.js';
 import { buildProfile, emptyProfile } from '../domain/build-profile.js';
 import type { ProfileCore } from '../domain/generate-alerts.js';
-import { BUILDING_FIELD_NAMES, renameBuildingProfile } from '../domain/best-field-names.js';
+import { renameBuildingProfile } from '../domain/best-field-names.js';
 import { selectRules, type Interpretation } from '../domain/best-rules.js';
 import { BUILDING_CONSTANTS, BUILDING_RULES, buildingCtx, type BuildingDerived } from '../domain/best-building-rules.js';
 import {
-  inputSchema as richInputSchema,
-  outputSchema as richOutputSchema,
   logToolCall,
   type BagClientLike,
   type EpOnlineClientLike,
@@ -49,17 +47,22 @@ INTERPRETATION — read \`interpretation\` FIRST: this record's computed values 
 
 ALERTS: interpretation.alerts — computed verdicts and this record's branch (not found, several units, no label).`;
 
-// ── Output schema: shape-only (Q11: not delivered to the model; validation + UI only) ──
+// ── Schemas ──────────────────────────────────────────────────────────────────
 
-const profileShape: Record<string, z.ZodTypeAny> = {};
-for (const [key, type] of Object.entries(richOutputSchema.shape)) {
-  if (key === 'alerts') continue;
-  const rows = BUILDING_FIELD_NAMES.filter((r) => r.upstream === key);
-  const identity = `Upstream field ${key}`;
-  if (rows.length === 0) profileShape[key] = (type as z.ZodTypeAny).describe(identity);
-  // A field with a per-method variant appears under exactly one of its names per record.
-  for (const r of rows) profileShape[r.name] = rows.length > 1 ? (type as z.ZodTypeAny).optional().describe(identity) : (type as z.ZodTypeAny).describe(identity);
-}
+export const bestBuildingInputSchema = {
+  postcode: z.string().regex(/^\d{4}[A-Z]{2}$/).describe('Dutch postcode: 4 digits + 2 capital letters, no space. Example: "3543AR".'),
+  huisnummer: z.number().int().positive().describe('House number, integer only. For "28A" pass 28 here and "A" as huisletter.'),
+  huisletter: z.string().optional().describe('House letter, e.g. "A" for 28A.'),
+  toevoeging: z.string().optional().describe('House-number addition, e.g. "bis", "I", "II".'),
+  queryIntent: z.string().optional().describe('The business question this call answers. Used for observability.'),
+};
+
+// Shape only: hosts do not pass the output schema to the model, so it validates and drives the UI,
+// and carries no meaning. Field meaning lives in the names and in `interpretation`.
+const str = z.string().nullable();
+const num = z.number().nullable();
+/** A figure whose name depends on the label method (best-field-names.ts): one of the pair per record. */
+const numPerMethod = z.number().nullable().optional();
 
 export const bestBuildingOutputSchema = z.object({
   interpretation: z.object({
@@ -71,7 +74,52 @@ export const bestBuildingOutputSchema = z.object({
   candidates: z
     .array(z.object({ adres: z.string(), huisletter: z.string().nullable(), toevoeging: z.string().nullable() }))
     .optional(),
-  ...profileShape,
+  matchStatus: z.enum(['exact', 'multiple_vbos', 'not_found']).describe('Upstream field matchStatus'),
+  candidateCount: z.number().describe('Upstream field candidateCount'),
+  labelCount: z.number().describe('Upstream field labelCount'),
+  adres: z.string().describe('Upstream field adres'),
+  gemeente: str.describe('Upstream field gemeente'),
+  provincie: str.describe('Upstream field provincie'),
+  oppervlakte_bag_verblijfsobject_m2: num.describe('Upstream field oppervlakte_m2'),
+  gebruiksdoel: str.describe('Upstream field gebruiksdoel'),
+  coordinaten: z.object({ lat: z.number().describe('Latitude (WGS84)'), lon: z.number().describe('Longitude (WGS84)') }).nullable().describe('Upstream field coordinaten'),
+  bag_vbo_id: str.describe('Upstream field bag_vbo_id'),
+  vbo_status: str.describe('Upstream field vbo_status'),
+  bouwjaar: num.describe('Upstream field bouwjaar'),
+  pand_status: str.describe('Upstream field pand_status'),
+  aantal_verblijfsobjecten_in_pand: num.describe('Upstream field aantal_verblijfsobjecten'),
+  bag_pand_id: str.describe('Upstream field bag_pand_id'),
+  energielabel: str.describe('Upstream field energielabel'),
+  ep1_energiebehoefte_berekend_kwh_m2: num.describe('Upstream field ep1_energiebehoefte_kwh_m2'),
+  ep2_primair_fossiel_berekend_kwh_m2: num.describe('Upstream field ep2_fossiel_kwh_m2'),
+  aandeel_hernieuwbare_energie_berekend_pct: num.describe('Upstream field aandeel_hernieuwbaar_pct'),
+  co2_emissie_berekend_kg_m2: numPerMethod.describe('Upstream field co2_emissie_kg_m2'),
+  co2_emissie_berekend_totaal_kg_jaar: numPerMethod.describe('Upstream field co2_emissie_kg_m2'),
+  energieverbruik_berekend_niet_gemeten_kwh_m2: numPerMethod.describe('Upstream field berekend_energieverbruik_kwh_m2'),
+  energieverbruik_berekend_niet_gemeten_totaal_mj: numPerMethod.describe('Upstream field berekend_energieverbruik_kwh_m2'),
+  warmtebehoefte_berekend_kwh_m2: num.describe('Upstream field warmtebehoefte_kwh_m2'),
+  temperatuuroverschrijding_indicator_eenheidloos: num.describe('Upstream field temperatuuroverschrijding'),
+  compactheid_als_ag_eenheidloos: num.describe('Upstream field compactheid'),
+  gebruiksoppervlakte_thermische_zone_m2: num.describe('Upstream field gebruiksoppervlakte_thermische_zone_m2'),
+  gebouwklasse: str.describe('Upstream field gebouwklasse'),
+  soort_opname: str.describe('Upstream field soort_opname'),
+  berekeningstype: str.describe('Upstream field berekeningstype'),
+  label_status: str.describe('Upstream field label_status'),
+  op_basis_van_referentiegebouw: z.boolean().nullable().describe('Upstream field op_basis_van_referentiegebouw'),
+  label_geldig_tot: str.describe('Upstream field label_geldig_tot'),
+  label_opnamedatum: str.describe('Upstream field label_opnamedatum'),
+  label_registratiedatum: str.describe('Upstream field label_registratiedatum'),
+  gebouwtype: str.describe('Upstream field gebouwtype'),
+  gebouwsubtype: str.describe('Upstream field gebouwsubtype'),
+  sbi_sector_omschrijving: str.describe('Upstream field sbi_code'),
+  energie_index_berekend_eenheidloos: num.describe('Upstream field energie_index'),
+  ep2_primair_fossiel_emg_forfaitair_berekend_kwh_m2: num.describe('Upstream field ep2_fossiel_emg_forfaitair_kwh_m2'),
+  aandeel_hernieuwbare_energie_emg_forfaitair_berekend_pct: num.describe('Upstream field aandeel_hernieuwbaar_emg_forfaitair_pct'),
+  eis_energiebehoefte_kwh_m2: num.describe('Upstream field eis_energiebehoefte_kwh_m2'),
+  eis_primaire_fossiele_energie_kwh_m2: num.describe('Upstream field eis_primaire_fossiele_energie_kwh_m2'),
+  eis_aandeel_hernieuwbare_energie_pct: num.describe('Upstream field eis_aandeel_hernieuwbare_energie_pct'),
+  certificaathouder: str.describe('Upstream field certificaathouder'),
+  ep_online_bouwjaar: num.describe('Upstream field ep_online_bouwjaar'),
 });
 
 const MAX_CANDIDATES = 20;
@@ -134,14 +182,7 @@ export function registerGetBuildingProfileBestTool(
     {
       title: 'Building Profile (BAG + Energy Label)',
       description: bestBuildingDescription,
-      inputSchema: z.object({
-        ...richInputSchema,
-        postcode: richInputSchema.postcode.describe('Dutch postcode: 4 digits + 2 capital letters, no space. Example: "3543AR".'),
-        huisnummer: richInputSchema.huisnummer.describe('House number, integer only. For "28A" pass 28 here and "A" as huisletter.'),
-        huisletter: richInputSchema.huisletter.describe('House letter, e.g. "A" for 28A.'),
-        toevoeging: richInputSchema.toevoeging.describe('House-number addition, e.g. "bis", "I", "II".'),
-        queryIntent: richInputSchema.queryIntent.describe('The business question this call answers. Used for observability.'),
-      }),
+      inputSchema: z.object(bestBuildingInputSchema),
       outputSchema: bestBuildingOutputSchema,
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     },

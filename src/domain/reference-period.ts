@@ -4,23 +4,14 @@
  * `fullYearGasNormalizationFactor` divides an ANNUAL reference (2800 weighted HDD) by a
  * period's degree days, so it is only valid for a full 12-month window. Weather-correcting
  * a quarter needs a reference for THAT quarter — the mean of the same calendar window over
- * previous years — which no model can produce without many extra calls.
+ * previous years — which a model cannot produce without many extra calls. So the server
+ * computes it and ships it as data (evals/results/2026-09-23-q16-fetch-vs-apply.json).
  *
- * Why the server computes it (skill references/evidence.md):
- * - Q16 (2026-09-23): rule only, haiku 2/20; rule + this server-computed figure 15/20; a
- *   finished period factor on top of it added nothing (11/20). Ship the DATA.
- * - Q16b: sonnet/opus 10/10 either way, but with it one call instead of 4–16, −23% tokens,
- *   and every answer converged on one value.
+ * Upstream cost: Open-Meteo weighs requests by data volume (~1 call per 14 days of data per
+ * location). Fetching one span over all ten years costs ~260 weighted calls and exhausts the
+ * hourly limit, so only the reference windows themselves are fetched (10 × ~7 weighted calls
+ * for a quarter), and the result is cached: past years do not change.
  *
- * Upstream cost (found in the Q19 run, 2026-09-24): Open-Meteo weighs requests by data
- * volume (~1 call per 14 days of data per location). An earlier version of this file fetched
- * ONE span covering all ten years — ~260 weighted calls per request — and under eval load it
- * exhausted Open-Meteo's hourly limit, after which EVERY weather call of the arm failed with
- * a 429. So: fetch only the reference windows themselves (10 × ~7 weighted calls for a
- * quarter), and cache the result — past years do not change.
- *
- * Differences from the throwaway Q16 arm (commit 61c73a8):
- * - The result is cached per location + window + year range.
  * - The span is FIXED (see REFERENCE_END_YEARS), so every call's reference is comparable.
  * - Windows that cross a year boundary (a heating season Oct–Mar) are supported.
  * - A 29 February at either end maps to 28 February in non-leap years.
@@ -65,15 +56,11 @@ function dateIn(year: number, md: string): string {
 /**
  * The reference span: every reference window whose END falls in these years (inclusive).
  *
- * FIXED, not relative to the query. Q19 (2026-09-24) measured the relative version — "the 10 years
- * before this window" — and it gave Q1 2023 a 2013–2022 reference and Q1 2024 a 2014–2023 one.
- * Normalising both to their own reference and comparing them reported a 6.6% improvement where
- * 3.6% is right: weather-partial-normalization 0/10 against the old arm's 10/10. A normal must be
- * the SAME number for every call, like a climatological normal.
- *
- * 2014–2023 keeps the values Q16 and Q19 measured unchanged (Q1: 1,231.3; Oct–Mar: 2,188.4, the
- * seasons ending 2014–2023). Roll it forward deliberately, as a new measured change — never by
- * making it relative to today, which would move every figure silently each January.
+ * FIXED, not relative to the query, like a climatological normal. A relative span ("the 10 years
+ * before this window") gives Q1 2023 and Q1 2024 different references, and comparing two periods
+ * each normalised to its own reference then reports 6.6% improvement where 3.6% is right
+ * (docs/weather-findings.md). Roll the span forward deliberately, never by making it relative to
+ * today, which would move every figure silently each January.
  */
 export const REFERENCE_END_YEARS = { from: 2014, to: 2023 } as const;
 
@@ -112,7 +99,7 @@ export async function referencePeriodWeightedHDD(
   if (hit) return hit;
 
   // Sequential on purpose: ten parallel requests trip Open-Meteo's concurrency limit
-  // ("Too many concurrent requests", Q19 2026-09-24). The cache makes the latency one-off.
+  // ("Too many concurrent requests"). The cache makes the latency one-off.
   const perWindow: DayWeightedHdd[][] = [];
   try {
     for (const { from, to } of windows) perWindow.push(await fetchArchive(from, to));

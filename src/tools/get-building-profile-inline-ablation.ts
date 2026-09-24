@@ -1,4 +1,7 @@
 /**
+ * EVAL ARM — not example code. It exists to measure one variable against the others (evals/).
+ * The reference implementation is src/tools/get-building-profile-best.ts.
+ *
  * MCP tool: get_building_profile — the two Q4 ABLATION variants.
  *
  * open-questions.md Q4. The CALCULATED vs MEASURED line took `benchmark-trap`

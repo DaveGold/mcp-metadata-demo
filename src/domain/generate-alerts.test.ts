@@ -80,7 +80,7 @@ describe('generateAlerts', () => {
     expect(co2Alert).toMatch(/~4200 kg\/year/);
   });
 
-  it('never ranks a CALCULATED EP-1 against Paris Proof or an unsourced benchmark (Q19/Q20)', () => {
+  it('never ranks a CALCULATED EP-1 against Paris Proof or an unsourced benchmark', () => {
     for (const [ep1, gebruiksdoel, gebouwklasse] of [
       [85, 'kantoorfunctie', 'Utiliteitsbouw'],
       [132, 'woonfunctie', 'Woningbouw'],
@@ -240,7 +240,7 @@ describe('generateAlerts', () => {
   });
 });
 
-describe('overheating alert (evals Q6 — computed because prose did not work)', () => {
+describe('overheating alert (computed: the bare value is misread)', () => {
   const base = { ...baseProfile, gebruiksdoel: 'woonfunctie' };
 
   it('states SIGNIFICANT above the 1.5 threshold, with the value', () => {

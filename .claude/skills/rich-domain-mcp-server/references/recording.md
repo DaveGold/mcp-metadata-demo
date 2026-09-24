@@ -44,9 +44,12 @@ changed outcomes: when the rule's recorded history was present, the agent cited 
 decided; without it, it re-derived a rationale and asked for the test to be re-run. None invented
 a history.
 
-So: **one provenance line per rule, rename and alert** — the date and the eval result, incident or
-expert answer behind it. Explicit `relates_to_fields` lists are cheap and still useful — for
-coverage and orphan tests, and for links the prose leaves implicit — but they are not what the
+So: **one provenance line per rule, rename and alert**, in the form
+`YYYY-MM-DD · why the rule exists · source`. The reason is written in domain terms, and the source
+is where the evidence lives: an eval result file, an incident, a findings-doc section or an expert
+answer. Scores, model names and run narratives stay in that source. The code explains the domain;
+the evals explain the experiments. Explicit `relates_to_fields` lists are cheap and still useful,
+for coverage and orphan tests and for links the prose leaves implicit. But they are not what the
 maintainer needs, and they do not reach the model. (Selection is `applies`, not the field list.)
 
 Provenance stays in **source**. Nothing measured shows it helps the answering model, and anything
@@ -55,9 +58,10 @@ in the response is paid for on every call [Q5].
 Good provenance lines:
 
 ```
-'2026-09-21 benchmark-trap: 0/60 → 59/60 with this sentence; 2026-09-22 Q4: fact 25/30, instruction 10/30, both 30/30'
-'2026-09-22 absent-sizing: haiku 18/20 with this note vs 10/20 pruned; sonnet/opus 20/20 either way'
-'2026-09-23 audit: upstream name read as measured consumption (evals/README §2); no eval of the rename yet'
+'2026-09-21 · label figures are calculated; Paris Proof is defined on metered energy · evals/results/2026-09-21-benchmark-trap-calculated-vs-measured.json'
+'2026-09-22 · without this note, sizing questions got invented figures · evals/results/2026-09-22-absent-sizing-input-haiku-n20.json'
+'2026-09-23 · the upstream name reads as metered consumption · docs/<name>-findings.md §11'
+'2026-04-13 · reason not recorded · initial commit'
 ```
 
 Bad: `'important'`, `'see docs'`, `'added after feedback'` (whose? when? what happened?).

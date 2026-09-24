@@ -17,7 +17,7 @@ describe('referencePeriodWeightedHDD', () => {
   it('fetches ONLY the reference windows (ending 2014–2023), never the span between them', async () => {
     const archive = unitArchive();
     const r = await referencePeriodWeightedHDD('2024-01-01', '2024-03-31', archive);
-    // Open-Meteo weighs by data volume: ten 90-day windows, not one 10-year span (Q19, 2026-09-24).
+    // Open-Meteo weighs by data volume: ten 90-day windows, not one 10-year span.
     expect(archive).toHaveBeenCalledTimes(10);
     expect(archive).toHaveBeenCalledWith('2014-01-01', '2014-03-31');
     expect(archive).toHaveBeenCalledWith('2023-01-01', '2023-03-31');
@@ -41,7 +41,7 @@ describe('referencePeriodWeightedHDD', () => {
     expect(r).toMatchObject({ referencePeriodWeightedHDD: 28.2 });
   });
 
-  it('uses the SAME fixed span for every query year, so two periods are comparable (Q19b)', async () => {
+  it('uses the SAME fixed span for every query year, so two periods are comparable', async () => {
     const archive = unitArchive();
     const q1_2024 = await referencePeriodWeightedHDD('2024-01-01', '2024-03-31', archive, 'utrecht');
     const q1_2023 = await referencePeriodWeightedHDD('2023-01-01', '2023-03-31', archive, 'utrecht');

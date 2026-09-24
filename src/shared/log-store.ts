@@ -42,9 +42,8 @@ export interface ToolCallLogEntry {
   /**
    * Which OPTIONAL parameters the caller actually supplied, by name only —
    * never their values. Shape, not data, per the doctrine at the top of this
-   * file. For the eval this is the highest-value field on the whole row: the
-   * `wrong-unit` question turns entirely on whether `huisletter` was passed,
-   * and nothing else in the log could answer that.
+   * file. It answers questions nothing else in the log can, such as whether a
+   * caller passed `huisletter` to disambiguate a multi-unit address.
    */
   paramsPresent?: string[];
 }
@@ -55,7 +54,7 @@ export interface ToolCallRecord {
   status: 'success' | 'error';
   durationMs: number;
   timestamp: string;
-  /** Which arm served the call. 'unknown' for stdio, which opens no context. */
+  /** Which server variant served the call. 'unknown' for stdio, which opens no context. */
   variant: string;
   /** Names of the optional parameters supplied — never their values. */
   paramsPresent: string[];

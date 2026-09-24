@@ -1,8 +1,7 @@
 /**
- * Server instructions for the `best` arm. Cut at 2,048 chars on Claude Code like tool
- * descriptions (Q7); kept far below. Deliberately overlaps the tool descriptions on the
- * two things that must hold before any call: what the server does NOT have, and where
- * the guidance is.
+ * Server instructions (reference implementation). Hosts cut these at 2,048 characters like tool
+ * descriptions; kept far below. They deliberately repeat the two things that must hold before any
+ * call: what the server does NOT have, and where the guidance is.
  */
 export const bestInstructions = `\
 Dutch building and weather data for energy questions, plus chart/table/map rendering.

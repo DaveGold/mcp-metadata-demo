@@ -1,5 +1,5 @@
 /**
- * The `best` arm's contract: what reaches the model, and what it says about each record.
+ * The reference implementation's contract: what reaches the model, and what it says about each record.
  *
  * Budgets are measured through the real transport (listTools / getInstructions), not only
  * on the constants, because what matters is what the host receives (skill delivery.md).
@@ -53,7 +53,7 @@ const text = (r: ReturnType<typeof buildBestBuildingResponse>) => JSON.stringify
 
 // ── Delivery ───────────────────────────────────────────────────────────────────
 
-describe('best — delivery budgets (Q7: the host cuts at 2,048)', () => {
+describe('best — delivery budgets (the host cuts at 2,048)', () => {
   it('both descriptions and the instructions fit the cut, with a working ceiling, on the wire', async () => {
     const client = await connectBest();
     const { tools } = await client.listTools();
@@ -69,7 +69,7 @@ describe('best — delivery budgets (Q7: the host cuts at 2,048)', () => {
     expect(bestBuildingDescription.indexOf('NO metered')).toBeGreaterThan(-1);
     expect(bestBuildingDescription.indexOf('NO metered')).toBeLessThan(400);
     // The eight-block order (WHEN TO USE … RETURNS, then INTERPRETATION) puts the rules after
-    // RETURNS; they must still sit at least ~500 chars inside the 2,048 cut (Q7).
+    // RETURNS; they must still sit at least ~500 chars inside the 2,048 cut.
     expect(bestBuildingDescription.indexOf('CALCULATED vs MEASURED')).toBeLessThan(1500);
     expect(bestWeatherDescription.indexOf('referencePeriodWeightedHDD')).toBeLessThan(1500);
     expect(bestWeatherDescription.indexOf('never apply the annual 2800')).toBeLessThan(1500);
@@ -90,7 +90,7 @@ describe('best — delivery budgets (Q7: the host cuts at 2,048)', () => {
     }
   });
 
-  it('the select field list is in the INPUT description (Q11: load-bearing for haiku)', async () => {
+  it('the select field list is in the INPUT description, where it is delivered', async () => {
     const { tools } = await (await connectBest()).listTools();
     const select = (tools.find((t) => t.name === 'get_weather_context')!.inputSchema.properties as Record<string, { description?: string }>).select;
     for (const f of RECORD_FIELDS) expect(select.description).toContain(f);
@@ -103,14 +103,23 @@ describe('best — delivery budgets (Q7: the host cuts at 2,048)', () => {
   });
 });
 
+/** `YYYY-MM-DD · why · source`: a reason and where the evidence lives, no scores. */
+const PROVENANCE = /^\d{4}-\d{2}-\d{2} · [^·]{8,} · \S.+$/;
+
 // ── Names ──────────────────────────────────────────────────────────────────────
 
 describe('best — field names (the always-delivered layer)', () => {
-  it('every rename has a reason and a dated provenance', () => {
+  it('every rename has a reason and a provenance of the form date · reason · source', () => {
     for (const r of [...BUILDING_FIELD_NAMES, ...WEATHER_FIELD_NAMES]) {
       expect(r.reason.length, r.name).toBeGreaterThan(10);
-      expect(r.provenance, r.name).toMatch(/\d{4}-\d{2}-\d{2}|evals\//);
+      expect(r.provenance, r.name).toMatch(PROVENANCE);
     }
+  });
+
+  it('the written-out output schema has exactly the names the rename table produces', () => {
+    const fromTable = allBuildingResponseNames(Object.keys(richOutputSchema.shape).filter((k) => k !== 'alerts'));
+    const inSchema = Object.keys(bestBuildingOutputSchema.shape).filter((k) => !['interpretation', 'derived', 'candidates'].includes(k));
+    expect(inSchema).toEqual(fromTable);
   });
 
   it('every EP-Online energy field says it is calculated, and every numeric field carries a unit', () => {
@@ -147,7 +156,7 @@ describe('best — rule registry', () => {
 
   it('ids are unique and every rule has a dated provenance', () => {
     expect(new Set(all.map((r) => r.id)).size).toBe(all.length);
-    for (const r of all) expect(r.provenance, r.id).toMatch(/\d{4}-\d{2}-\d{2}/);
+    for (const r of all) expect(r.provenance, r.id).toMatch(PROVENANCE);
   });
 
   it('building relates_to_fields exist in the response schema or under derived', () => {
@@ -286,14 +295,14 @@ describe('best — weather', () => {
     expect(r.summary.degreeDays.fullYearGasNormalizationFactor).toBeNull();
     expect(r.summary.degreeDays.referencePeriodWeightedHDD).toBeCloseTo(1231.3, 0);
     expect(r.summary.degreeDays.referencePeriod).toMatchObject({ fromYear: 2014, toYear: 2023, yearsUsed: 10 });
-    // 4,200 × 1,231.3 ÷ 1,106.3 — the value sonnet and opus converged on in Q16b (20/20).
+    // 4,200 × 1,231.3 ÷ 1,106.3.
     expect(r.summary.normalization?.normalizedEnergyUse).toBe(4675);
     expect(r.interpretation.alerts.join(' ')).toMatch(/NOT a full year/);
     expect(JSON.stringify(r)).not.toContain('2.53');
     expect(Object.keys(r)[0]).toBe('interpretation');
   });
 
-  it('two quarters get the SAME reference, so the real improvement is 3.6% (Q19b), and it says not to annualise', async () => {
+  it('two quarters get the SAME reference, so the real improvement is 3.6%, and it says not to annualise', async () => {
     const q1_2023 = days('2023-01-01', 90, (d) => row(d, 2, 10, 1167.9 / 90));
     const r24 = await buildBestWeatherResponse({ dateFrom: '2024-01-01', dateTo: '2024-03-31', summaryOnly: true, energyUse: 4200 }, { query: async () => q1, archive });
     const r23 = await buildBestWeatherResponse({ dateFrom: '2023-01-01', dateTo: '2023-03-31', summaryOnly: true, energyUse: 4600 }, { query: async () => q1_2023, archive });

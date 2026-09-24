@@ -1,4 +1,7 @@
 /**
+ * EVAL ARM — not example code. It exists to measure one variable against the others (evals/).
+ * The reference implementation is src/tools/get-building-profile-best.ts.
+ *
  * MCP tool: get_building_profile — INLINE-ONELINE variant.
  *
  * open-questions.md Q14. The MINIMUM VIABLE RESPONSE arm.
