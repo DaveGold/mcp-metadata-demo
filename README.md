@@ -37,26 +37,23 @@ the architecture that survived the experiments. `rich` is the talk's version, fi
 
 ## thin → rich → best
 
-```text
-THIN   the raw API as a tool: one-line description, bare schema
-       → the model reconstructs the domain itself, and guesses
+**Thin** — the raw API as a tool: a one-line description, a bare schema. The model reconstructs
+the domain itself, and guesses. Level 1 of the talk's ladder, the API wrapper.
 
-RICH   long descriptions, typed schemas, curated alerts   (the talk)
-       → much better, but most of the description never arrived,
-         and one computed alert was confidently wrong
+**Rich** — long descriptions, typed schemas, curated alerts: the tier from the talk (levels 2–3).
+Much better — but most of the description never arrived, and one computed alert was confidently
+wrong.
 
-BEST   what the evals left standing:
-       a description head that fits the delivered budget
-       + an input schema that can express every valid call
-       + field names that cannot be misread
-       + interpretation first in the response, for this record
-       + the reference data a rule needs, shipped with it
-       + determinate values computed by the server
-       + a refusal when the call must be corrected
-       + provenance per rule, and evals as regression tests
-```
+**Best** — what the evals left standing:
 
-Thin is level 1 of the talk's ladder (the API wrapper); rich is levels 2–3.
+- a description head that fits the delivered budget
+- an input schema that can express every valid call
+- field names that cannot be misread
+- `interpretation` first in the response, for this record
+- the reference data a rule needs, shipped with it
+- determinate values computed by the server
+- a refusal when the call must be corrected
+- provenance per rule, and evals as regression tests
 
 ## What the evals changed
 
@@ -130,9 +127,10 @@ Then ask each the **same question**:
 
 > _"What's the energy label of Museumstraat 1, 1071XX Amsterdam, and what should I keep in mind about this building?"_
 
-The talk's opening example. Every tier gets `energielabel: null`. Rich and best explain that no
-label is _registered_ and flag the pre-1992 insulation caveat; on thin, an unprimed agent typically
-says the building _has_ no label — wrong.
+The talk's opening example. Every tier gets `energielabel: null`. Rich says no label is
+_registered_ and flags the pre-1992 insulation caveat; best says no label is known and not to infer
+one from the building's age; on thin, an unprimed agent typically says the building _has_ no label
+— wrong.
 
 > _"Gustav Mahlerlaan 10, 1082PP Amsterdam — how does it stack up against the Paris Proof 2040 office target of 70 kWh/m²?"_
 
