@@ -3728,3 +3728,30 @@ and its ep1 schema describe. The shared `interpretationBlock` line stays, but it
 **Why P1 could fail.** Without the alert and without a delivered CALCULATED vs MEASURED line
 (`rich`'s sits past the cut), haiku may compare 81.68 with 70 unaided. In that case the fix
 removes a false claim, but it does not add the missing fact.
+
+## Q21 — Once the correcting fact is DELIVERED, does `rich` pass benchmark-trap? Registered 2026-09-24, BEFORE the run
+
+> **REGISTERED before any run.** Deployed and verified live: in `rich`'s description the CALCULATED
+> vs MEASURED line starts at char 766 and its instruction ends at ~1,445, inside the 2,048 cut.
+
+**Why.** Q20 removed `rich`'s false alert and `rich` still scored 0/10 (haiku), because the
+correcting line sat at char ~3,380 and was never delivered. This adds the delivered half, and
+changes nothing else. The shared `descriptionCore` / `interpretationBlock` are byte-identical;
+only `rich`'s tools hash moves. The cost is QUERY STRATEGY item 5 (large panden), which now falls
+past `rich`'s cut. `rich`'s large-pand alert still carries it in the response.
+
+**Run.** `rich` vs `best`, same batches, the portable harness, 60 runs:
+- `benchmark-trap` on haiku and on sonnet, n=10 per arm each;
+- `building-size` on haiku, n=10 per arm, as the check on the cost.
+
+Same hand rule as Q20: CORRECT declines a verdict, PARTIAL hedges one, WRONG gives it.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `benchmark-trap`, haiku: `rich` ≥ 7/10 (Q20: 0/10) | ≤ 3/10 |
+| P2 | `benchmark-trap`, sonnet: `rich` ≥ 7/10 (Q20: 1/10) | ≤ 3/10 |
+| P3 | `building-size`, haiku: `rich` ≥ 9/10 (Q19: 20/20) with QUERY STRATEGY item 5 now past the cut | ≤ 7/10 |
+| P4 | `best` ≥ 9/10 in every cell | any `best` cell ≤ 7/10 |
+
+**If P1 holds,** Q20 + Q21 together are the cleanest two-step result in the set. Removing a wrong
+line leaves the error in place; delivering the right one fixes it.
