@@ -4,10 +4,12 @@ Examine and Flag produce observations. Observations are not knowledge until some
 business confirms them, and they stop being true the moment the source system changes. These two
 steps are what keep the metadata honest.
 
-In production practice roughly **90% of AI-discovered metadata holds up under expert review**
-(experience from the Warmtebouw servers, not a measurement in this repo). The other 10% is exactly
-the part that would otherwise ship as confident, plausible and wrong — and nobody would ever catch
-it, because a wrong description produces a fluent answer, not an error.
+In production practice the agent settles most findings against the data itself, and roughly
+**10% of the metadata is what it flags and puts to the expert** (experience from the Warmtebouw
+servers, not a measurement in this repo). That 10% is where the agent knows it is unsure, not
+where every error is: the expert still reads the finished text end to end, because a wrong line
+nobody flagged ships as confident, plausible and wrong — and nobody would ever catch it, because a
+wrong description produces a fluent answer, not an error.
 
 Validation has two halves. The expert tells you whether the metadata is **true**. A measurement
 tells you whether a model **uses** it — see [`evaluation.md`](evaluation.md). A true sentence past
