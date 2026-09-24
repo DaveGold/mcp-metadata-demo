@@ -79,7 +79,8 @@ export type ServerVariant =
   | 'guidance-recipe'
   | 'best'
   | 'best-v1'
-  | 'best-no-type-rules';
+  | 'best-no-type-rules'
+  | 'best-lean';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -167,6 +168,22 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
     registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
+  if (variant === 'best-lean') {
+    // Temporary measurement arm: `best` with the lean chart and table input schemas.
+    const server = new McpServer(
+      { name: 'metadata-demo-best-lean', version: VERSION },
+      { instructions: bestInstructions },
+    );
+    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
+    registerGetWeatherContextBestTool(server);
+    registerRenderChartTool(server, { best: true, decisionTree: true, leanSchema: true });
+    registerRenderTableTool(server, { best: true, leanSchema: true });
+    registerRenderMapTool(server, { best: true });
+    registerFetchImageTool(server, { openWorld: true });
+    registerGetToolCallLogTool(server, { best: true });
     return server;
   }
 

@@ -139,3 +139,6 @@ export const mcpBestNoTypeRules = onRequest(
   functionOptions,
   createHttpApp({ hosted: true, variant: 'best-no-type-rules' }),
 );
+
+/** Temporary: `best` with lean app-tool input schemas, for the Q25 measurement. */
+export const mcpBestLean = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'best-lean' }));

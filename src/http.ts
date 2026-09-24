@@ -107,6 +107,7 @@ if (isMain) {
       'best',
       'best-v1',
       'best-no-type-rules',
+      'best-lean',
     ] as const
   ).includes(rawVariant as never)
     ? (rawVariant as ServerVariant)

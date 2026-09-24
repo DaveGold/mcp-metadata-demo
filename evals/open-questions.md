@@ -4011,3 +4011,23 @@ It runs on haiku AND sonnet, n=10 per path per arm per model: 14 × 2 × 2 × 10
 | P7 | the 13 other paths: A and C within 2 of each other on every path and model (the tree changes only the path it was written for) | a gap ≥ 4 on any other path |
 | P8 | 0 schema refusals (-32602) on scatter, bubble and boxplot, in both arms | any |
 | P9 | C costs ≤ +3% median tokens over A (the tree adds ~1,060 characters to `type`) | > +6% |
+
+## Q25 — Do the lean app-tool input schemas lose anything, and what do they save? Registered 2026-09-24, BEFORE the run
+
+> **REGISTERED before any run.** Input schemas are delivered in full and re-sent every turn
+> (`results/2026-09-24-input-schema-delivery.json`). So their size is paid on every call, used or
+> not. `best-lean` (temporary) has the same schema structure as `best`, and a test pins it; only
+> the words differ. Chart input 21.7k → 10.6k characters, table input 20.2k → 5.9k, `tools/list`
+> 73.6k → 48.3k (−34%). The decision tree stays; the per-type rules shrink to the caps.
+
+**Run.** `best` vs `best-lean`, haiku, n=5 per cell, same batches, interleaved. 220 runs:
+- the 14 chart paths of Q24;
+- the six form-choice questions of Q23;
+- `table-label-figures` and `chart-paris-proof-line` of Q22.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | no loss: `best-lean` within 1 of `best` on every cell (n=5) | a cell with `best-lean` ≥ 2 below `best` |
+| P2 | polarArea still reached by `best-lean` (the tree is unchanged) ≥ 3/5 | ≤ 1/5 |
+| P3 | table headers still carry "berekend/calculated" in the final table: `best-lean` ≥ 4/5 (the refusal is unchanged) | ≤ 2/5 |
+| P4 | cost: `best-lean` median tokens ≥ 10% below `best` on every question group | < 5% on any group |

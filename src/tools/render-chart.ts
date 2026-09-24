@@ -18,6 +18,7 @@ import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
 import { BEST_ANNOTATION_EXAMPLES, CHART_DECISION_TREE, bestChartDescription, chartAlerts } from './app-tools-best.js';
+import { bestChartInputSchema } from './render-chart-schema-best.js';
 import { registerAppTool, registerAppResource, RESOURCE_MIME_TYPE } from '@modelcontextprotocol/ext-apps/server';
 import { getAuthExtra } from '../shared/auth.js';
 import { requestContext } from '../shared/log-context.js';
@@ -837,7 +838,7 @@ function normalizeTreemapRow(
 
 export function registerRenderChartTool(
   server: McpServer,
-  opts: { minimal?: boolean; best?: boolean; typeRules?: boolean; decisionTree?: boolean } = {},
+  opts: { minimal?: boolean; best?: boolean; typeRules?: boolean; decisionTree?: boolean; leanSchema?: boolean } = {},
 ): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
   registerAppResource(server, 'Chart App', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({
@@ -857,21 +858,23 @@ export function registerRenderChartTool(
     {
       title: 'Render Chart',
       description: opts.best ? bestChartDescription : opts.minimal ? 'Render data as a chart.' : description,
-      inputSchema: opts.best
-        ? {
-            ...inputSchema,
-            // A measured variant without the per-type rules, to see whether the rules do the work.
-            ...(opts.typeRules === false ? { type: inputSchema.type.describe('Chart type.') } : {}),
-            ...(opts.decisionTree
-              ? {
-                  type: inputSchema.type.describe(
-                    CHART_DECISION_TREE + (inputSchema.type.description ?? '').replace(/^[^\n]*\n/, ''),
-                  ),
-                }
-              : {}),
-            options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES),
-          }
-        : inputSchema,
+      inputSchema: opts.leanSchema
+        ? bestChartInputSchema
+        : opts.best
+          ? {
+              ...inputSchema,
+              // A measured variant without the per-type rules, to see whether the rules do the work.
+              ...(opts.typeRules === false ? { type: inputSchema.type.describe('Chart type.') } : {}),
+              ...(opts.decisionTree
+                ? {
+                    type: inputSchema.type.describe(
+                      CHART_DECISION_TREE + (inputSchema.type.description ?? '').replace(/^[^\n]*\n/, ''),
+                    ),
+                  }
+                : {}),
+              options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES),
+            }
+          : inputSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,

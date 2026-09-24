@@ -147,7 +147,7 @@ const TABLE_COLUMNS: { type: string; col: Record<string, unknown>; value: unknow
   { type: 'image', col: {}, value: 'data:image/png;base64,iVBORw0KGgo=' },
 ];
 
-describe.each(['best', 'rich'] as ServerVariant[])('every enum value is reachable on %s', (variant) => {
+describe.each(['best', 'rich', 'best-lean'] as ServerVariant[])('every enum value is reachable on %s', (variant) => {
   it.each(Object.entries(CHART_PAYLOADS))('render_chart type=%s', async (type, payload) => {
     const r = await call(await connect(variant), 'render_chart', { type, title: 't', ...payload });
     expect(r.ok, r.text.slice(0, 300)).toBe(true);
