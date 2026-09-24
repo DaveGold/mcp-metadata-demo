@@ -249,14 +249,15 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
 - **Ship the data a rule needs** [Q16]; ship constants in `interpretation.constants` [L2].
 - **Shipped data must be comparable across calls.** A reference that moves with the query (the
   previous 10 years of *each* window) gives two periods different denominators: 0/10 against
-  10/10 on a two-period comparison [Q19b]. Fix the reference period, or say that two calls'
-  references are not comparable.
+  10/10 on a two-period comparison; with one fixed span, 8/10 [Q19b]. Fix the reference period,
+  or say that two calls' references are not comparable.
 - **Shipped data has an upstream cost.** Know how the source meters requests (Open-Meteo weighs by
   data volume and caps concurrency); fetch only what the computation needs, and cache data that
   cannot change. One un-cached 10-year fetch per call exhausted the quota and failed every call
   [Q19c].
 - **Say what NOT to do with shipped data when the question invites misuse.** With the right
-  quarter figure in hand, 10 of 16 correct haiku answers still extrapolated it to a year [Q19d].
+  quarter figure in hand, 10 of 16 correct haiku answers still extrapolated it to a year; with an
+  explicit "do not scale it to a year", 5 of 18 [Q19d]. It reduces the misuse; it does not end it.
 - **Never prune the note about a null decision field** [AS].
 - **Thresholded results are returned complete** [Q11b].
 - **Responses stay under the host limit**; guidance lives under the fixed key `interpretation` [Q9].
@@ -299,7 +300,7 @@ variants in `evals/`:
 | Rule registry, record-conditional selection, provenance | [best-rules.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-rules.ts), [best-building-rules.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-building-rules.ts), [best-weather-rules.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-weather-rules.ts) |
 | Description ≤ 2,048 + `interpretation`-first response + computed `derived` values | [get-building-profile-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-best.ts) |
 | Shipping the data a rule needs (reference-period degree days), size guard, complete lists | [get-weather-context-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context-best.ts), [reference-period.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/reference-period.ts) |
-| Known defect, kept visible: the reference period moves with the query year (Q19: two-period normalisation 0/10) | [docs/weather-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/weather-findings.md) §7 |
+| Defects an eval found in the reference itself, and their fixes (query-relative reference 0/10 → fixed span 8/10; annualising 10/16 → 5/18) | [docs/weather-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/weather-findings.md) §7 |
 | Budget, name and rule tests | [best-arm.test.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/best-arm.test.ts) |
 | Wire-surface freeze of measured variants | [arms-frozen.test.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/arms-frozen.test.ts) |
 | Audit record written the way `recording.md` prescribes | [docs/building-profile-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/building-profile-findings.md), [docs/weather-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/weather-findings.md) |

@@ -43,17 +43,20 @@ without new findings are omitted.
   same window over the 10 years BEFORE the window, so Q1 2023 is referenced to 2013–2022 and Q1
   2024 to 2014–2023. Normalising both quarters to their own reference and comparing them gives a
   6.6% real improvement where 3.6% is right. `weather-partial-normalization`: `best` 0/10,
-  `rich` 10/10 (evals/results/2026-09-24-q19-best-arm.json). **Not fixed**: `best` is the measured
-  arm. Candidate fixes: one fixed reference span for every window (e.g. the last 10 complete years
-  before today), or a rule saying two calls' references are not comparable, and to use the HDD
-  ratio instead. Either must be re-measured on this question.
+  `rich` 10/10 (evals/results/2026-09-24-q19-best-arm.json). **Fixed 2026-09-24:** a fixed span
+  (`REFERENCE_END_YEARS`, windows ending 2014–2023) for every query; measured values unchanged.
+  Re-measured (Q19b, evals/results/2026-09-24-q19b-weather-fixes.json): `best` 8/10, `rich` 8/10;
+  the 2 `best` misses asked for an address without calling.
 - **Upstream cost (fixed).** The first version fetched one 10-year span per call (~260 Open-Meteo
   weighted calls). Under eval load it exhausted the hourly quota, and every weather call of the arm
   then returned 429. Now: window-sized fetches, sequential (10 concurrent requests return "Too many
   concurrent requests"), cached per location + window. Repro: `src/domain/reference-period.test.ts`.
 - **Annualising.** With 4,675 m³ in hand for the quarter, 10 of 16 correct haiku answers went on to
   extrapolate to a full year (~10,600 m³, arithmetically the forbidden 4,200 × 2.53). The response
-  says what the reference is for, but not what NOT to do with it. Not fixed.
+  says what the reference is for, but not what NOT to do with it. **Fixed 2026-09-24** with a
+  "do not scale it to a full year" clause in the alert, the normalization line and the
+  description. Q19b: 18/20 correct, annualising among correct answers 10/16 → 5/18. Reduced, not
+  gone — several runs quote the caveat and annualise anyway.
 - **Forecast window.** On a window ending in the future, haiku made no call at all in 8 of 10 runs
   and asked for the gas figure: the description's "never weather-correct against forecast days"
   was read, and the forecast tail was never shown. `best` 2/10, `rich` 4/10 (a gap under the

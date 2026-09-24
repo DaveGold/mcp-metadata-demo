@@ -1,5 +1,5 @@
 /**
- * Byte-freeze guard for every eval arm that existed before `best`.
+ * Byte-freeze guard for every measured eval arm (the 14 pre-`best` arms, and `best` after Q19b).
  *
  * Every number in evals/results/ was measured against a specific wire surface:
  * the `tools/list` payload and the server instructions of one arm. Changing an
@@ -30,6 +30,8 @@ const FROZEN_ARMS: ServerVariant[] = [
   'opaque',
   'opaque-words',
   'guidance-recipe',
+  // Frozen after Q19b (2026-09-24): measured as the post-fix reference implementation.
+  'best',
 ];
 
 const noBag: BagClientLike = {

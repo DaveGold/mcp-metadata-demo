@@ -3579,6 +3579,14 @@ getting WORSE than `best` on a question the old reference was built to win.
 
 ### Q19b — Do the two fixes repair the two weather defects Q19 found? Registered 2026-09-24, BEFORE the run
 
+> **ANSWERED 2026-09-24.** See [`results/2026-09-24-q19b-weather-fixes.json`](results/2026-09-24-q19b-weather-fixes.json).
+> 60 runs, haiku; audit exact.
+> - **P1 confirmed.** `weather-partial-normalization` `best` 8/10 (Q19: 0/10). The 2 misses asked
+>   for an address without calling.
+> - **P2 partial.** `weather-single-quarter` `best` 18/20, but 5 of the 18 still annualised
+>   (predicted ≤ 3).
+> - **P3 confirmed.** `rich` scores 8/10 and 0/20.
+
 > **REGISTERED before any run.** The fixes are deployed and verified live:
 > - Q1 2023 and Q1 2024 now share one reference (1,231.3, windows ending 2014–2023), and the live
 >   two-period improvement is 3.6%.
