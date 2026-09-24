@@ -98,7 +98,7 @@ export function registerGetBuildingProfileOpaqueTool(
   server: McpServer,
   bagClient: BagClientLike,
   epOnlineClient: EpOnlineClientLike,
-  options: { withProse: boolean }
+  options: { withProse: boolean },
 ): void {
   const variant = options.withProse ? 'opaque-words' : 'opaque';
 
@@ -126,6 +126,6 @@ export function registerGetBuildingProfileOpaqueTool(
           isError: true,
         };
       }
-    }
+    },
   );
 }

@@ -62,10 +62,7 @@ const str = (p: Profile, k: string): string => (typeof p[k] === 'string' ? (p[k]
 const GATES: Array<[string, (p: Profile) => boolean]> = [
   // ── the three mutually exclusive berekeningstype branches ──
   ['- NTA 8800 (', (p) => str(p, 'berekeningstype').includes('NTA 8800')],
-  [
-    '- NEN 7120 / ISSO 75.3',
-    (p) => /NEN 7120|ISSO 75\.3/.test(str(p, 'berekeningstype')),
-  ],
+  ['- NEN 7120 / ISSO 75.3', (p) => /NEN 7120|ISSO 75\.3/.test(str(p, 'berekeningstype'))],
   ['- Nader Voorschrift', (p) => str(p, 'berekeningstype').includes('Nader Voorschrift')],
 
   // ── field-level notes, gated on the field being populated ──
@@ -91,9 +88,7 @@ const GATES: Array<[string, (p: Profile) => boolean]> = [
   [
     '- CALCULATED vs MEASURED',
     (p) =>
-      has(p, 'ep1_energiebehoefte_kwh_m2') ||
-      has(p, 'ep2_fossiel_kwh_m2') ||
-      has(p, 'berekend_energieverbruik_kwh_m2'),
+      has(p, 'ep1_energiebehoefte_kwh_m2') || has(p, 'ep2_fossiel_kwh_m2') || has(p, 'berekend_energieverbruik_kwh_m2'),
   ],
   ['- energie_index (pre-NTA 8800)', (p) => has(p, 'energie_index')],
   ['- gebruiksoppervlakte_thermische_zone_m2', (p) => has(p, 'gebruiksoppervlakte_thermische_zone_m2')],
@@ -135,7 +130,7 @@ export function conditionalInterpretation(profile: Profile): string {
 export function registerGetBuildingProfileInlineConditionalTool(
   server: McpServer,
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
+  epOnlineClient: EpOnlineClientLike,
 ): void {
   server.registerTool(
     'get_building_profile',
@@ -192,6 +187,6 @@ export function registerGetBuildingProfileInlineConditionalTool(
           isError: true,
         };
       }
-    }
+    },
   );
 }

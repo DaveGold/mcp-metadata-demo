@@ -42,9 +42,13 @@ const TRACES: [string, RegExp][] = [
 describe('example code carries no eval traces', () => {
   it.each(EXAMPLE_CODE)('%s', (file) => {
     // A pointer to an evidence file is allowed; its file name is not prose.
-    const lines = readFileSync(join(ROOT, file), 'utf8').replace(/evals\/results\/[\w.-]+\.json/g, '<evidence>').split('\n');
+    const lines = readFileSync(join(ROOT, file), 'utf8')
+      .replace(/evals\/results\/[\w.-]+\.json/g, '<evidence>')
+      .split('\n');
     const hits = lines.flatMap((line, i) =>
-      TRACES.filter(([, re]) => re.test(line)).map(([what]) => `${file}:${i + 1} ${what}: ${line.trim().slice(0, 100)}`)
+      TRACES.filter(([, re]) => re.test(line)).map(
+        ([what]) => `${file}:${i + 1} ${what}: ${line.trim().slice(0, 100)}`,
+      ),
     );
     expect(hits).toEqual([]);
   });

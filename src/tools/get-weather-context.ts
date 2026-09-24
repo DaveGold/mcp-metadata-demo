@@ -229,7 +229,7 @@ const inputSchema = {
     .optional()
     .describe(
       'Latitude in decimal degrees. Netherlands range: 50.75–53.55. Default: 52.09 (Utrecht). ' +
-        'Get from get_building_profile coordinaten.lat, or use the regional default.'
+        'Get from get_building_profile coordinaten.lat, or use the regional default.',
     ),
   longitude: z
     .number()
@@ -239,14 +239,14 @@ const inputSchema = {
     .describe(
       'Longitude in decimal degrees. Netherlands range: 3.36–7.23. Default: 5.11 (Utrecht). ' +
         'Reference points: Amsterdam 52.37/4.90, Rotterdam 51.92/4.48, Den Haag 52.07/4.30, ' +
-        'Utrecht 52.09/5.11, Eindhoven 51.44/5.48, Groningen 53.22/6.57.'
+        'Utrecht 52.09/5.11, Eindhoven 51.44/5.48, Groningen 53.22/6.57.',
     ),
   dateFrom: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be yyyy-MM-dd')
     .describe(
       'Start date in yyyy-MM-dd format. Historical data available from 1940-01-01. ' +
-        'Europe/Amsterdam timezone. For annual normalization: use YYYY-01-01.'
+        'Europe/Amsterdam timezone. For annual normalization: use YYYY-01-01.',
     ),
   dateTo: z
     .string()
@@ -255,7 +255,7 @@ const inputSchema = {
       'End date in yyyy-MM-dd format (inclusive). Max range: 730 days from dateFrom. ' +
         'May be today or up to 14 days in the future: recent/upcoming dates are served by the forecast API ' +
         '(flagged isForecast=true), which also bridges the archive’s ~2 day lag so measured days stay ' +
-        'complete. Dates beyond today+14 are rejected. For annual normalization: use YYYY-12-31.'
+        'complete. Dates beyond today+14 are rejected. For annual normalization: use YYYY-12-31.',
     ),
   summaryOnly: z
     .boolean()
@@ -263,7 +263,7 @@ const inputSchema = {
     .default(false)
     .describe(
       'If true, returns only aggregated summary without daily records. ' +
-        'Recommended true for periods >30 days when only gasNormalizationFactor or degree-day totals are needed.'
+        'Recommended true for periods >30 days when only gasNormalizationFactor or degree-day totals are needed.',
     ),
   select: z
     .array(z.string())
@@ -272,11 +272,13 @@ const inputSchema = {
       'Return only these fields per daily record — a token saver for a long range where you need per-day ' +
         'detail (e.g. a full-year calendar or chart), not just the summary. Fields: date, tempMean, tempMin, ' +
         'tempMax, hdd, cdd, weightedHdd, ghiKwhM2, sunshineDurationHours, weatherCode, weatherLabel, isForecast. ' +
-        'Ignored when summaryOnly=true (no records returned either way).'
+        'Ignored when summaryOnly=true (no records returned either way).',
     ),
-  queryIntent: z.string().optional().describe('Describe what this weather data is being used for. Used for observability.'),
+  queryIntent: z
+    .string()
+    .optional()
+    .describe('Describe what this weather data is being used for. Used for observability.'),
 };
-
 
 // ── Output schema ─────────────────────────────────────────────────────────────
 
@@ -322,7 +324,7 @@ const outputSchema = {
           weightedHDD: z.number().describe('Total Dutch weighted HDD for this month'),
           totalGHI_kWhM2: z.number().describe('Total solar irradiance for this month (kWh/m²)'),
           avgTempMean: z.number().describe('Average mean daily temperature for this month (°C)'),
-        })
+        }),
       )
       .describe('Weather aggregated per calendar month'),
   }),
@@ -340,15 +342,17 @@ const outputSchema = {
           ghiKwhM2: z.number().describe('Global Horizontal Irradiance for this day (kWh/m²)'),
           sunshineDurationHours: z.number().describe('Sunshine duration for this day (hours)'),
           weatherCode: z.number().nullable().describe('Raw WMO weather code (0–99). Null when unavailable.'),
-          weatherLabel: z.string().describe('Dutch weather label derived from weatherCode ("Onbekend" if null/unknown)'),
+          weatherLabel: z
+            .string()
+            .describe('Dutch weather label derived from weatherCode ("Onbekend" if null/unknown)'),
           isForecast: z.boolean().describe('true = FORECAST (predicted); false = MEASURED (archive)'),
         })
-        .partial()
+        .partial(),
     )
     .optional()
     .describe(
       'Daily weather records, chronologically sorted. Omitted when summaryOnly=true. A subset of fields ' +
-        'when select is used — see interpretation.alerts for which fields were selected.'
+        'when select is used — see interpretation.alerts for which fields were selected.',
     ),
   interpretation: z.object({
     alerts: z.array(z.string()).describe('Weather context warnings and normalization guidance'),
@@ -453,7 +457,7 @@ async function fetchOpenMeteoDaily(url: string): Promise<OpenMeteoResponse['dail
   if (!response.ok) {
     const body = await response.text().catch(() => '');
     throw new Error(
-      `Open-Meteo API error: ${response.status} ${response.statusText}${body ? ` — ${body.slice(0, 200)}` : ''}`
+      `Open-Meteo API error: ${response.status} ${response.statusText}${body ? ` — ${body.slice(0, 200)}` : ''}`,
     );
   }
 
@@ -462,7 +466,12 @@ async function fetchOpenMeteoDaily(url: string): Promise<OpenMeteoResponse['dail
 }
 
 /** Archive (measured) rows for [startDate, endDate] inclusive. */
-export async function fetchArchive(lat: number, lon: number, startDate: string, endDate: string): Promise<WeatherDayRow[]> {
+export async function fetchArchive(
+  lat: number,
+  lon: number,
+  startDate: string,
+  endDate: string,
+): Promise<WeatherDayRow[]> {
   const params = new URLSearchParams({
     latitude: String(lat),
     longitude: String(lon),
@@ -479,7 +488,7 @@ async function fetchForecast(
   lat: number,
   lon: number,
   pastDays: number,
-  forecastDays: number
+  forecastDays: number,
 ): Promise<WeatherDayRow[]> {
   const params = new URLSearchParams({
     latitude: String(lat),
@@ -515,7 +524,7 @@ export function summarizeWeather(records: WeatherDayRow[], args: Record<string, 
     alerts.push(
       `${forecastDays} of ${records.length} day(s) are FORECAST (predicted), flagged isForecast=true in records. ` +
         `Degree-days, gasNormalizationFactor and solar totals are computed over the ${measuredDays} measured day(s) only. ` +
-        'Do not use forecast values for energy normalization.'
+        'Do not use forecast values for energy normalization.',
     );
   }
 
@@ -581,7 +590,7 @@ export function summarizeWeather(records: WeatherDayRow[], args: Record<string, 
     alerts.push(
       `Very low average heating intensity (${hddDensity.toFixed(1)} weighted HDD/day, ${totalWeightedHDD} total) — ` +
         'energy use in this period is largely base load, not space heating. ' +
-        'Do not apply gasNormalizationFactor to base load.'
+        'Do not apply gasNormalizationFactor to base load.',
     );
   } else if (gasNormalizationFactor >= 1.2 || gasNormalizationFactor <= 0.8) {
     const roundedFactor = Math.round(gasNormalizationFactor * 100) / 100;
@@ -591,7 +600,7 @@ export function summarizeWeather(records: WeatherDayRow[], args: Record<string, 
       alerts.push(
         `${direction} than average Dutch year (factor ${roundedFactor}×, ${totalWeightedHDD} vs 2800 annual reference HDD). ` +
           `Raw heating energy use appears ${rawEffect} than a typical year. ` +
-          `Multiply heating energy use by ${roundedFactor} for a weather-corrected comparison.`
+          `Multiply heating energy use by ${roundedFactor} for a weather-corrected comparison.`,
       );
     } else {
       alerts.push(
@@ -599,7 +608,7 @@ export function summarizeWeather(records: WeatherDayRow[], args: Record<string, 
           `gasNormalizationFactor = ${roundedFactor}× (= 2800 / ${totalWeightedHDD}). ` +
           'Note: gasNormalizationFactor is designed for full-year (Jan 1–Dec 31) normalization. ' +
           'For same-period year-over-year comparison, use the HDD ratio directly: ' +
-          'normalizedEnergy = actualEnergy × (periodHDD_referenceYear / periodHDD_thisYear).'
+          'normalizedEnergy = actualEnergy × (periodHDD_referenceYear / periodHDD_thisYear).',
       );
     }
   }
@@ -613,12 +622,14 @@ export function summarizeWeather(records: WeatherDayRow[], args: Record<string, 
     const more = fightingDays.length > 5 ? ` (+${fightingDays.length - 5} more)` : '';
     alerts.push(
       `${fightingDays.length} fighting-system risk day(s) detected (tempMin < 14°C AND tempMax > 20°C): ${dayList}${more}. ` +
-        'A simultaneous morning heating peak and afternoon cooling peak on these days is the signature to look for.'
+        'A simultaneous morning heating peak and afternoon cooling peak on these days is the signature to look for.',
     );
   }
 
   if (usingDefault) {
-    alerts.push('Using default coordinates (Utrecht 52.09°N, 5.11°E). Provide latitude/longitude for a specific location.');
+    alerts.push(
+      'Using default coordinates (Utrecht 52.09°N, 5.11°E). Provide latitude/longitude for a specific location.',
+    );
   }
 
   const monthMap = new Map<string, WeatherDayRow[]>();
@@ -647,8 +658,18 @@ export function summarizeWeather(records: WeatherDayRow[], args: Record<string, 
       },
       period: { dateFrom, dateTo, days: records.length, measuredDays, forecastDays, archiveLagNote },
       temperature: { periodMean, periodMin, periodMax, coldestDay, hottestDay },
-      degreeDays: { totalHDD, totalWeightedHDD, totalCDD, referenceAnnualHDD: NL_REFERENCE_HDD, gasNormalizationFactor },
-      solarRadiation: { totalGHI_kWhM2: totalGHI, avgDailyGHI_kWhM2: avgDailyGHI, totalSunshineDurationHours: totalSunshine },
+      degreeDays: {
+        totalHDD,
+        totalWeightedHDD,
+        totalCDD,
+        referenceAnnualHDD: NL_REFERENCE_HDD,
+        gasNormalizationFactor,
+      },
+      solarRadiation: {
+        totalGHI_kWhM2: totalGHI,
+        avgDailyGHI_kWhM2: avgDailyGHI,
+        totalSunshineDurationHours: totalSunshine,
+      },
       monthlyBreakdown,
     },
     interpretation: { alerts },
@@ -686,7 +707,7 @@ export async function executeWeatherQuery(args: Record<string, unknown>): Promis
   if (dateTo > forecastHorizon) {
     throw new Error(
       `dateTo (${dateTo}) is beyond the forecast horizon (${forecastHorizon}, today+${FORECAST_MAX_DAYS - 1}). ` +
-        `Weather forecast is only available up to ${FORECAST_MAX_DAYS - 1} days ahead.`
+        `Weather forecast is only available up to ${FORECAST_MAX_DAYS - 1} days ahead.`,
     );
   }
 
@@ -702,7 +723,7 @@ export async function executeWeatherQuery(args: Record<string, unknown>): Promis
   const returned = new Set(archiveRows.map((row) => row.date));
   const windowStart = addDays(today, -FORECAST_MAX_PAST_DAYS);
   const missing = enumerateDates(dateFrom, dateTo).filter(
-    (date) => !returned.has(date) && date >= windowStart && date <= forecastHorizon
+    (date) => !returned.has(date) && date >= windowStart && date <= forecastHorizon,
   );
 
   // 3. One forecast call sized to span the missing dates; keep only the days we actually need.
@@ -726,10 +747,7 @@ export async function executeWeatherQuery(args: Record<string, unknown>): Promis
 
 // ── Tool registration ─────────────────────────────────────────────────────────
 
-export function registerGetWeatherContextTool(
-  server: McpServer,
-  opts: { minimal?: boolean } = {}
-): void {
+export function registerGetWeatherContextTool(server: McpServer, opts: { minimal?: boolean } = {}): void {
   server.registerTool(
     'get_weather_context',
     {
@@ -777,7 +795,7 @@ export function registerGetWeatherContextTool(
           isError: true,
         };
       }
-    }
+    },
   );
 }
 

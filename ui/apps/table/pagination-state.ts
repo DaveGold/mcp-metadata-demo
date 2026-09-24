@@ -73,7 +73,7 @@ export function resolveInitialPageSize(features?: PaginationFeatures): number | 
  */
 export function resolvePagination(
   features: PaginationFeatures | undefined,
-  current: PaginationStateShape
+  current: PaginationStateShape,
 ): ResolvedPagination {
   const pageSize = sanitizePageSize(current.pageSize);
 

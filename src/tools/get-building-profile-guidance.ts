@@ -45,8 +45,6 @@ export const guidancePointer =
   'Call it once with no arguments first: that returns how to derive figures from the lookup result.';
 export const guidanceDescription = schemaTierDescription + ' ' + guidancePointer;
 
-
-
 /** Every profile field optional, so the guidance-only result validates too. */
 export const outputSchemaWithGuidance = outputSchemaWithoutAlerts.partial().extend({
   guidance: z
@@ -58,7 +56,7 @@ export const outputSchemaWithGuidance = outputSchemaWithoutAlerts.partial().exte
 export function registerGetBuildingProfileGuidanceTool(
   server: McpServer,
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
+  epOnlineClient: EpOnlineClientLike,
 ): void {
   server.registerTool(
     'get_building_profile',
@@ -135,6 +133,6 @@ export function registerGetBuildingProfileGuidanceTool(
           isError: true,
         };
       }
-    }
+    },
   );
 }

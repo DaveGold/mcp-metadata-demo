@@ -98,52 +98,52 @@ export interface CreateServerOptions {
 function buildInstructions(includeAlerts: boolean): string {
   const usageAlertsBullet = includeAlerts
     ? '- Always read the `alerts` array — it contains bouwjaar-era warnings, ' +
-        'BENG compliance summaries, and (for residential) estimated gas ' +
-        'consumption + warmtepomp-geschiktheidsindicatie.\n'
+      'BENG compliance summaries, and (for residential) estimated gas ' +
+      'consumption + warmtepomp-geschiktheidsindicatie.\n'
     : '';
   return (
-        'You are connected to the metadata-demo MCP server — a demonstration of a ' +
-        'rich-metadata strategy for AI tooling, applied at two levels at once:\n\n' +
-        '1. RICH-DOMAIN TOOL — `get_building_profile` shows how dense tool metadata ' +
-        '(input/output schemas, curated alerts, interpretation guidance) lets you reason ' +
-        'about a domain (Dutch building data: BAG + EP-Online) without external priming.\n' +
-        '2. SELF-DESCRIBING MCP APPS — `render_chart`, `render_table`, `render_map` apply ' +
-        'the same approach to UI configuration. The schemas tell you which chart type fits ' +
-        'which data shape, how cell formatters work, when to choose a stacked variant.\n\n' +
-        'BUILDING-PROFILE TOOL:\n' +
-        'This tool exposes Dutch building data from two open government registers:\n' +
-        '- BAG (Basisregistratie Adressen en Gebouwen) via PDOK — postcode/huisnummer → ' +
-        'bouwjaar, oppervlakte, gebruiksdoel, coordinates.\n' +
-        '- EP-Online (RVO) — registered energielabels, EP-1/EP-2, warmtebehoefte, CO₂ emissie.\n\n' +
-        'USAGE:\n' +
-        '- Call `get_building_profile` with a Dutch postcode (e.g. "3543AR") and a huisnummer ' +
-        '(integer only). Optionally include huisletter and/or toevoeging to disambiguate ' +
-        'multi-unit buildings.\n' +
-        usageAlertsBullet +
-        '\n' +
-        'RENDER TOOLS (MCP APPS):\n' +
-        '- `render_chart` — render data as a chart (bar/line/pie/sankey/etc.). Read the ' +
-        'schema descriptions to choose the right chart type for your data shape.\n' +
-        '- `render_table` — render data as an interactive table with cell formatters ' +
-        '(currency, dates, badges, icons).\n' +
-        '- `render_map` — render geographic data on an interactive map with markers.\n' +
-        '- `fetch_image` — server-side image proxy with SSRF protection (used by render_table ' +
-        'for image cells when the host iframe CSP blocks external img-src).\n\n' +
-        'WEATHER TOOL:\n' +
-        '- `get_weather_context` — daily weather + degree-day/solar metrics for a Dutch location ' +
-        'and date range (Open-Meteo). Demonstrates the Select mechanism: pass `select` to project ' +
-        'daily records down to only the fields you need instead of the full row set.\n\n' +
-        'OBSERVABILITY TOOL:\n' +
-        '- `get_tool_call_log` — reads back recent tool calls (queryIntent, status, duration). Every ' +
-        'other tool accepts a `queryIntent` param describing the business question it answers.\n\n' +
-        'LIMITATIONS:\n' +
-        '- This server returns a snapshot of public-register data and weather data only. It does ' +
-        'not provide metered energy consumption or building automation data.\n' +
-        '- EP-Online coverage is incomplete for older residential buildings — `energielabel: null` ' +
-        'does not mean the building has no label, just that none is registered in EP-Online.\n\n' +
-        'This server demonstrates the metadata strategy from the paper "The Missing Layer" ' +
-        '(https://davidgolverdingen.nl/en/the-missing-layer). The tool descriptions below are ' +
-        'the strategy in practice.'
+    'You are connected to the metadata-demo MCP server — a demonstration of a ' +
+    'rich-metadata strategy for AI tooling, applied at two levels at once:\n\n' +
+    '1. RICH-DOMAIN TOOL — `get_building_profile` shows how dense tool metadata ' +
+    '(input/output schemas, curated alerts, interpretation guidance) lets you reason ' +
+    'about a domain (Dutch building data: BAG + EP-Online) without external priming.\n' +
+    '2. SELF-DESCRIBING MCP APPS — `render_chart`, `render_table`, `render_map` apply ' +
+    'the same approach to UI configuration. The schemas tell you which chart type fits ' +
+    'which data shape, how cell formatters work, when to choose a stacked variant.\n\n' +
+    'BUILDING-PROFILE TOOL:\n' +
+    'This tool exposes Dutch building data from two open government registers:\n' +
+    '- BAG (Basisregistratie Adressen en Gebouwen) via PDOK — postcode/huisnummer → ' +
+    'bouwjaar, oppervlakte, gebruiksdoel, coordinates.\n' +
+    '- EP-Online (RVO) — registered energielabels, EP-1/EP-2, warmtebehoefte, CO₂ emissie.\n\n' +
+    'USAGE:\n' +
+    '- Call `get_building_profile` with a Dutch postcode (e.g. "3543AR") and a huisnummer ' +
+    '(integer only). Optionally include huisletter and/or toevoeging to disambiguate ' +
+    'multi-unit buildings.\n' +
+    usageAlertsBullet +
+    '\n' +
+    'RENDER TOOLS (MCP APPS):\n' +
+    '- `render_chart` — render data as a chart (bar/line/pie/sankey/etc.). Read the ' +
+    'schema descriptions to choose the right chart type for your data shape.\n' +
+    '- `render_table` — render data as an interactive table with cell formatters ' +
+    '(currency, dates, badges, icons).\n' +
+    '- `render_map` — render geographic data on an interactive map with markers.\n' +
+    '- `fetch_image` — server-side image proxy with SSRF protection (used by render_table ' +
+    'for image cells when the host iframe CSP blocks external img-src).\n\n' +
+    'WEATHER TOOL:\n' +
+    '- `get_weather_context` — daily weather + degree-day/solar metrics for a Dutch location ' +
+    'and date range (Open-Meteo). Demonstrates the Select mechanism: pass `select` to project ' +
+    'daily records down to only the fields you need instead of the full row set.\n\n' +
+    'OBSERVABILITY TOOL:\n' +
+    '- `get_tool_call_log` — reads back recent tool calls (queryIntent, status, duration). Every ' +
+    'other tool accepts a `queryIntent` param describing the business question it answers.\n\n' +
+    'LIMITATIONS:\n' +
+    '- This server returns a snapshot of public-register data and weather data only. It does ' +
+    'not provide metered energy consumption or building automation data.\n' +
+    '- EP-Online coverage is incomplete for older residential buildings — `energielabel: null` ' +
+    'does not mean the building has no label, just that none is registered in EP-Online.\n\n' +
+    'This server demonstrates the metadata strategy from the paper "The Missing Layer" ' +
+    '(https://davidgolverdingen.nl/en/the-missing-layer). The tool descriptions below are ' +
+    'the strategy in practice.'
   );
 }
 
@@ -174,7 +174,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     // only variable versus the rich tier is the metadata itself.
     const server = new McpServer(
       { name: 'metadata-demo-minimal', version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' },
     );
     registerGetBuildingProfileMinimalTool(server, bagClient, epOnlineClient);
     registerRenderChartTool(server, { minimal: true });
@@ -190,7 +190,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     const withProse = variant === 'opaque-words';
     const server = new McpServer(
       { name: `metadata-demo-${variant}`, version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' },
     );
     registerGetBuildingProfileOpaqueTool(server, bagClient, epOnlineClient, { withProse });
     registerRenderChartTool(server, { minimal: true });
@@ -208,7 +208,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     // variable against `minimal`.
     const server = new McpServer(
       { name: 'metadata-demo-schema', version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' },
     );
     registerGetBuildingProfileSchemaTool(server, bagClient, epOnlineClient);
     registerRenderChartTool(server, { minimal: true });
@@ -226,7 +226,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     // exactly as in the `schema` branch it is compared against.
     const server = new McpServer(
       { name: `metadata-demo-${variant}`, version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' },
     );
     registerGetBuildingProfileInlineTool(server, bagClient, epOnlineClient, {
       withRecipe: variant === 'inline-recipe',
@@ -247,7 +247,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     // would sit next to the behaviour being measured.
     const server = new McpServer(
       { name: 'metadata-demo-g-recipe', version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' },
     );
     registerGetBuildingProfileGuidanceTool(server, bagClient, epOnlineClient);
     registerRenderChartTool(server, { minimal: true });
@@ -265,7 +265,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     // server could ship and the one Q13 left untested.
     const server = new McpServer(
       { name: `metadata-demo-${variant}`, version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' },
     );
     registerGetBuildingProfileInlineOnelineTool(server, bagClient, epOnlineClient);
     registerRenderChartTool(server, { minimal: true });
@@ -283,7 +283,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     // render tools as `inline` — the only variable is how much of the prose ships.
     const server = new McpServer(
       { name: 'metadata-demo-inline-conditional', version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' },
     );
     registerGetBuildingProfileInlineConditionalTool(server, bagClient, epOnlineClient);
     registerRenderChartTool(server, { minimal: true });
@@ -301,7 +301,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     // so the comparison is three-way with only that one line varying.
     const server = new McpServer(
       { name: `metadata-demo-${variant}`, version: VERSION },
-      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' }
+      { instructions: 'Dutch building data lookup, plus chart/table/map rendering.' },
     );
     registerGetBuildingProfileInlineAblationTool(server, bagClient, epOnlineClient, {
       mode: variant === 'inline-fact' ? 'fact' : 'instruction',
@@ -320,7 +320,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     // absent `alerts` field and the one bullet that would have promised it.
     const server = new McpServer(
       { name: `metadata-demo-${variant}`, version: VERSION },
-      { instructions: buildInstructions(false) }
+      { instructions: buildInstructions(false) },
     );
     registerGetBuildingProfileWordsTool(server, bagClient, epOnlineClient, {
       withRecipe: variant === 'words-recipe',
@@ -337,9 +337,8 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
   const server = new McpServer(
     { name: 'metadata-demo', version: VERSION },
     {
-      instructions:
-        buildInstructions(true),
-    }
+      instructions: buildInstructions(true),
+    },
   );
 
   registerGetBuildingProfileTool(server, bagClient, epOnlineClient);

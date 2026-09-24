@@ -62,7 +62,11 @@ export function solarCheck(totalGhiKwhM2: number, kwp: number, actualKwh: number
   const lo = Math.round(totalGhiKwhM2 * kwp * SOLAR_PERFORMANCE_RATIO[0]);
   const hi = Math.round(totalGhiKwhM2 * kwp * SOLAR_PERFORMANCE_RATIO[1]);
   const verdict: SolarCheck['verdict'] =
-    actualKwh >= SOLAR_INVESTIGATE_BELOW * hi ? 'normal' : actualKwh < SOLAR_INVESTIGATE_BELOW * lo ? 'investigate' : 'borderline';
+    actualKwh >= SOLAR_INVESTIGATE_BELOW * hi
+      ? 'normal'
+      : actualKwh < SOLAR_INVESTIGATE_BELOW * lo
+        ? 'investigate'
+        : 'borderline';
   return {
     installedKwp: kwp,
     actualYieldKwh: actualKwh,
@@ -110,7 +114,8 @@ export const WEATHER_RULES: readonly Rule<WeatherCtx>[] = [
     applies: (c) => c.measuredDays === 0,
     render: () =>
       'No MEASURED (archive) days in this window: every temperature, degree-day and solar aggregate is null — not zero. Nothing can be weather-corrected yet.',
-    provenance: '2026-09-23 · with no measured days the summarizer returns 0 °C and factor 0, which read as measurements; say null instead · docs/weather-findings.md',
+    provenance:
+      '2026-09-23 · with no measured days the summarizer returns 0 °C and factor 0, which read as measurements; say null instead · docs/weather-findings.md',
   },
   {
     id: 'wx.forecast',
@@ -133,13 +138,18 @@ export const WEATHER_RULES: readonly Rule<WeatherCtx>[] = [
   {
     id: 'wx.partial.reference',
     kind: 'verdict',
-    relates_to_fields: ['summary.degreeDays.referencePeriodWeightedHDD', 'summary.degreeDays.totalWeightedHDD', 'summary.degreeDays.fullYearGasNormalizationFactor'],
+    relates_to_fields: [
+      'summary.degreeDays.referencePeriodWeightedHDD',
+      'summary.degreeDays.totalWeightedHDD',
+      'summary.degreeDays.fullYearGasNormalizationFactor',
+    ],
     applies: (c) => !c.fullYear && c.measuredDays > 0 && hasRef(c.reference),
     render: (c) => {
       const r = c.reference as ReferencePeriod;
       return `This ${c.requestedDays}-day window is NOT a full year, so fullYearGasNormalizationFactor is null — never apply 2800 to part of a year. Its reference is referencePeriodWeightedHDD ${r.referencePeriodWeightedHDD} (mean of ${r.window} over the fixed span ${r.fromYear}–${r.toYear}, the same for every query year, so two periods corrected this way are comparable). Weather-corrected energy = actual × ${r.referencePeriodWeightedHDD} ÷ totalWeightedHDD ${c.totalWeightedHDD}. That is the figure for THIS window in a normal year — do not scale it to a full year: a window's share of annual use depends on base load and the heating season, which this data does not contain.`;
     },
-    provenance: '2026-09-23 · for a partial year the fix is the same window\'s reference, shipped as data, not the annual factor · evals/results/2026-09-23-q16-fetch-vs-apply.json',
+    provenance:
+      "2026-09-23 · for a partial year the fix is the same window's reference, shipped as data, not the annual factor · evals/results/2026-09-23-q16-fetch-vs-apply.json",
   },
   {
     id: 'wx.partial.no_reference',
@@ -148,7 +158,8 @@ export const WEATHER_RULES: readonly Rule<WeatherCtx>[] = [
     applies: (c) => !c.fullYear && c.measuredDays > 0 && !hasRef(c.reference),
     render: (c) =>
       `This ${c.requestedDays}-day window is NOT a full year and no reference period could be computed (${c.reference && 'reason' in c.reference ? c.reference.reason : 'not available'}). Never apply 2800 to part of a year; compare against the same window in another year by the ratio of their totalWeightedHDD.`,
-    provenance: '2026-08-29 · when the reference cannot be fetched, degrade with a reason instead of failing the call · PR #20',
+    provenance:
+      '2026-08-29 · when the reference cannot be fetched, degrade with a reason instead of failing the call · PR #20',
   },
   {
     id: 'wx.normalization',
@@ -159,15 +170,18 @@ export const WEATHER_RULES: readonly Rule<WeatherCtx>[] = [
       const n = c.normalization as Normalization;
       return `Weather-corrected energy use: ${n.normalizedEnergyUse} (from ${n.energyUse}; ${n.formula}). This is the weather-corrected use for this window only; do not scale it to a year. Base load (hot water, cooking) is scaled too, so treat small differences with care.`;
     },
-    provenance: '2026-09-23 · when the caller passes energyUse the correction is determinate, so the server computes it · evals/results/2026-09-21-readable-ladder-gas.json',
+    provenance:
+      '2026-09-23 · when the caller passes energyUse the correction is determinate, so the server computes it · evals/results/2026-09-21-readable-ladder-gas.json',
   },
   {
     id: 'wx.energy_without_reference',
     kind: 'branch',
     relates_to_fields: ['summary.normalization'],
     applies: (c) => c.energyUseRequestedWithoutReference,
-    render: () => 'energyUse was passed but no valid reference exists for this window, so no normalized figure is returned.',
-    provenance: '2026-09-23 · an input that did nothing must say so · .claude/skills/rich-domain-mcp-server/references/discovery.md',
+    render: () =>
+      'energyUse was passed but no valid reference exists for this window, so no normalized figure is returned.',
+    provenance:
+      '2026-09-23 · an input that did nothing must say so · .claude/skills/rich-domain-mcp-server/references/discovery.md',
   },
   {
     id: 'wx.solar',
@@ -185,8 +199,10 @@ export const WEATHER_RULES: readonly Rule<WeatherCtx>[] = [
     kind: 'branch',
     relates_to_fields: ['summary.solarCheck'],
     applies: (c) => c.solarRequestedWithoutData,
-    render: () => 'solarKwp and solarYieldKwh must both be passed, over a window with measured days, for a solar check; none was computed.',
-    provenance: '2026-09-23 · an input that did nothing must say so · .claude/skills/rich-domain-mcp-server/references/discovery.md',
+    render: () =>
+      'solarKwp and solarYieldKwh must both be passed, over a window with measured days, for a solar check; none was computed.',
+    provenance:
+      '2026-09-23 · an input that did nothing must say so · .claude/skills/rich-domain-mcp-server/references/discovery.md',
   },
   {
     id: 'wx.fighting',
@@ -195,7 +211,8 @@ export const WEATHER_RULES: readonly Rule<WeatherCtx>[] = [
     applies: (c) => c.fighting.length > 0,
     render: (c) =>
       `${c.fighting.length} fighting-system day(s) (tempMin < 14 °C AND tempMax > 20 °C, both strict), COMPLETE list: ${c.fighting.map((d) => d.date).join(', ')}. Values per day in summary.fightingSystemDays.days.`,
-    provenance: '2026-09-23 · a truncated list ("+6 more") hid the boundary days; ship the whole list · evals/results/2026-09-23-q11-select.json',
+    provenance:
+      '2026-09-23 · a truncated list ("+6 more") hid the boundary days; ship the whole list · evals/results/2026-09-23-q11-select.json',
   },
   {
     id: 'wx.base_load',
@@ -220,7 +237,8 @@ export const WEATHER_RULES: readonly Rule<WeatherCtx>[] = [
     kind: 'fact',
     relates_to_fields: ['summary.location'],
     applies: (c) => c.usingDefaultLocation,
-    render: () => 'Default coordinates used (Utrecht 52.09 N, 5.11 E). For a specific building pass coordinaten.lat/lon from get_building_profile.',
+    render: () =>
+      'Default coordinates used (Utrecht 52.09 N, 5.11 E). For a specific building pass coordinaten.lat/lon from get_building_profile.',
     provenance: '2026-08-29 · reason not recorded · PR #20',
   },
 ];

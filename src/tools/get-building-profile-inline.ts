@@ -62,7 +62,7 @@ export const outputSchemaWithInterpretation = outputSchemaWithoutAlerts.extend({
   interpretation: z
     .string()
     .describe(
-      'How to read the fields above: which are populated for this berekeningstype, which units apply, and which comparisons are invalid.'
+      'How to read the fields above: which are populated for this berekeningstype, which units apply, and which comparisons are invalid.',
     ),
 });
 
@@ -75,7 +75,7 @@ export function registerGetBuildingProfileInlineTool(
   server: McpServer,
   bagClient: BagClientLike,
   epOnlineClient: EpOnlineClientLike,
-  opts: { withRecipe?: boolean } = {}
+  opts: { withRecipe?: boolean } = {},
 ): void {
   const interpretationPayload = opts.withRecipe
     ? interpretationBlock + '\n\n' + derivedFiguresBlock
@@ -128,13 +128,17 @@ export function registerGetBuildingProfileInlineTool(
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error('tool.error', { tool: 'get_building_profile', variant: opts.withRecipe ? 'inline-recipe' : 'inline', error: errorMessage });
+        logger.error('tool.error', {
+          tool: 'get_building_profile',
+          variant: opts.withRecipe ? 'inline-recipe' : 'inline',
+          error: errorMessage,
+        });
         await logToolCall({ args, start, status: 'error', rowCount: 0 });
         return {
           content: [{ type: 'text' as const, text: `Error in get_building_profile: ${errorMessage}` }],
           isError: true,
         };
       }
-    }
+    },
   );
 }

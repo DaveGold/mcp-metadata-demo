@@ -210,7 +210,7 @@ async function fetchWithTimeout(rawUrl: string): Promise<CachedImage | null> {
 }
 
 async function resolveImage(
-  rawUrl: string
+  rawUrl: string,
 ): Promise<{ url: string; data: string | null; mime: string | null; reason?: string }> {
   const safety = await validateUrl(rawUrl);
   if (!safety.ok) {
@@ -297,7 +297,7 @@ export function registerFetchImageTool(server: McpServer): void {
           },
         ],
       };
-    }
+    },
   );
 }
 

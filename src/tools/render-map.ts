@@ -124,7 +124,7 @@ export const inputSchema = {
           label: z
             .string()
             .describe(
-              'Marker popup title. Use the language of the conversation (e.g. "Van #12-AB-34", "Office building", "Project ABC").'
+              'Marker popup title. Use the language of the conversation (e.g. "Van #12-AB-34", "Office building", "Project ABC").',
             ),
           description: z
             .string()
@@ -132,7 +132,7 @@ export const inputSchema = {
             .describe(
               'Popup body text. Supports simple HTML (<br>, <b>, <i>). ' +
                 'Use for details like address, project number, driver name, energy label, status. ' +
-                'Example: "Driver: Jane Doe<br>Speed: 65 km/h<br>Last update: 14:32"'
+                'Example: "Driver: Jane Doe<br>Speed: 65 km/h<br>Last update: 14:32"',
             ),
           type: z
             .enum(['car', 'building', 'project', 'pin'])
@@ -143,13 +143,13 @@ export const inputSchema = {
                 '- building: building icon (green) — buildings / addresses\n' +
                 '- project: construction icon (petrol) — project sites\n' +
                 '- pin: default pin icon (blue) — anything else\n' +
-                'Default: pin'
+                'Default: pin',
             ),
           color: z
             .string()
             .optional()
             .describe('Custom marker color (hex, e.g. "#e82b21"). Overrides the default type color.'),
-        })
+        }),
       ),
       // Positional shorthand: array of [lat, lng, label, description?, type?, color?]
       // rows. Each row is modeled as a loose positional array (NOT z.tuple().rest())
@@ -178,8 +178,8 @@ export const inputSchema = {
             {
               message:
                 'Invalid positional marker row. Expected [lat:number, lng:number, label:string, description?:string, type?:"car"|"building"|"project"|"pin", color?:string].',
-            }
-          )
+            },
+          ),
       ),
     ])
     .describe(
@@ -189,13 +189,13 @@ export const inputSchema = {
         '   Example: [[52.09, 5.11, "Utrecht hub"], [52.37, 4.90, "Amsterdam", "Hoofdkantoor", "building"]]\n' +
         '2. Array of OBJECTS (keyed, fine for small sets):\n' +
         '   [{lat, lng, label, description?, type?, color?}, ...]\n' +
-        'Each marker has a position (lat/lng), label, and optional description/type/color. Maximum 500 markers.'
+        'Each marker has a position (lat/lng), label, and optional description/type/color. Maximum 500 markers.',
     ),
   title: z
     .string()
     .optional()
     .describe(
-      'Map title displayed above the map. Use the language of the conversation, concise (e.g. "Fleet positions", "Project locations").'
+      'Map title displayed above the map. Use the language of the conversation, concise (e.g. "Fleet positions", "Project locations").',
     ),
   center: z
     .object({
@@ -205,7 +205,7 @@ export const inputSchema = {
     .optional()
     .describe(
       'Manual map center. Default: auto-fit to show all markers. ' +
-        'Only set when you want a specific view (e.g. centered on Utrecht: {lat: 52.09, lng: 5.11}).'
+        'Only set when you want a specific view (e.g. centered on Utrecht: {lat: 52.09, lng: 5.11}).',
     ),
   zoom: z
     .number()
@@ -213,7 +213,7 @@ export const inputSchema = {
     .describe(
       'Zoom level 1-18. Default: auto-fit to show all markers. ' +
         'Guide: 6=country, 10=province, 13=city, 16=street, 18=building. ' +
-        'Only set together with center for a specific view.'
+        'Only set together with center for a specific view.',
     ),
   height: z
     .number()
@@ -404,7 +404,7 @@ export function registerRenderMapTool(server: McpServer, opts: { minimal?: boole
           isError: true,
         };
       }
-    }
+    },
   );
 }
 

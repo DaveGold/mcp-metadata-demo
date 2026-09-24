@@ -14,11 +14,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import express, {
-  type Express,
-  type Request,
-  type Response,
-} from 'express';
+import express, { type Express, type Request, type Response } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { createServer, type ServerVariant } from './server.js';
 import { logger } from './logger.js';
@@ -97,7 +93,19 @@ if (isMain) {
   const HOST = process.env.HOST ?? '127.0.0.1';
   const rawVariant = process.env.MCP_VARIANT;
   const variant: ServerVariant = (
-    ['minimal', 'schema', 'inline', 'inline-recipe', 'inline-conditional', 'words', 'words-recipe', 'opaque', 'opaque-words', 'guidance-recipe', 'best'] as const
+    [
+      'minimal',
+      'schema',
+      'inline',
+      'inline-recipe',
+      'inline-conditional',
+      'words',
+      'words-recipe',
+      'opaque',
+      'opaque-words',
+      'guidance-recipe',
+      'best',
+    ] as const
   ).includes(rawVariant as never)
     ? (rawVariant as ServerVariant)
     : 'rich';
@@ -107,7 +115,7 @@ if (isMain) {
     logger.info('server.started', { transport: 'http', host: HOST, port: PORT, variant });
     process.stderr.write(
       `\nmcp-metadata-demo (${variant}) listening on http://${HOST}:${PORT}/mcp\n` +
-        `⚠️  No auth — keep this bound to localhost.\n\n`
+        `⚠️  No auth — keep this bound to localhost.\n\n`,
     );
   });
 }

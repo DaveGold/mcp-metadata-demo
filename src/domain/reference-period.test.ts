@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { clearReferenceCache, referencePeriodWeightedHDD, REFERENCE_END_YEARS, type DayWeightedHdd } from './reference-period.js';
+import {
+  clearReferenceCache,
+  referencePeriodWeightedHDD,
+  REFERENCE_END_YEARS,
+  type DayWeightedHdd,
+} from './reference-period.js';
 
 /** Every day in [s, e] carries weightedHdd 1, so a window's total is its length in days. */
 function unitArchive() {
@@ -48,7 +53,11 @@ describe('referencePeriodWeightedHDD', () => {
     const q1_1990 = await referencePeriodWeightedHDD('1990-01-01', '1990-03-31', archive, 'utrecht');
     expect(q1_2023).toEqual(q1_2024);
     expect(q1_1990).toEqual(q1_2024);
-    expect(q1_2024).toMatchObject({ fromYear: REFERENCE_END_YEARS.from, toYear: REFERENCE_END_YEARS.to, yearsUsed: 10 });
+    expect(q1_2024).toMatchObject({
+      fromYear: REFERENCE_END_YEARS.from,
+      toYear: REFERENCE_END_YEARS.to,
+      yearsUsed: 10,
+    });
     // One fetch set for all three: the cache key no longer depends on the query year.
     expect(archive).toHaveBeenCalledTimes(10);
   });

@@ -267,7 +267,7 @@ export class MapComponent implements OnInit, OnDestroy {
   private buildMap(
     container: HTMLElement,
     input: Omit<MapInput, 'markers'> & { markers: MapMarker[] },
-    theme: 'light' | 'dark'
+    theme: 'light' | 'dark',
   ): void {
     if (this.map) {
       this.map.remove();

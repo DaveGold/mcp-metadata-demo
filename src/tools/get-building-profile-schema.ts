@@ -45,7 +45,7 @@ const description = 'Look up a Dutch building by postcode and house number.';
 export function registerGetBuildingProfileSchemaTool(
   server: McpServer,
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
+  epOnlineClient: EpOnlineClientLike,
 ): void {
   server.registerTool(
     'get_building_profile',
@@ -93,6 +93,6 @@ export function registerGetBuildingProfileSchemaTool(
           isError: true,
         };
       }
-    }
+    },
   );
 }

@@ -21,12 +21,13 @@ import { buildProfile, emptyProfile } from '../domain/build-profile.js';
 import type { ProfileCore } from '../domain/generate-alerts.js';
 import { renameBuildingProfile } from '../domain/best-field-names.js';
 import { selectRules, type Interpretation } from '../domain/best-rules.js';
-import { BUILDING_CONSTANTS, BUILDING_RULES, buildingCtx, type BuildingDerived } from '../domain/best-building-rules.js';
 import {
-  logToolCall,
-  type BagClientLike,
-  type EpOnlineClientLike,
-} from './get-building-profile.js';
+  BUILDING_CONSTANTS,
+  BUILDING_RULES,
+  buildingCtx,
+  type BuildingDerived,
+} from '../domain/best-building-rules.js';
+import { logToolCall, type BagClientLike, type EpOnlineClientLike } from './get-building-profile.js';
 
 export const bestBuildingDescription = `\
 WHEN TO USE: what building is at a Dutch address — label, bouwjaar, area, and label-based estimates (CO₂, space-heating gas, heat-pump readiness, overheating).
@@ -50,8 +51,15 @@ ALERTS: interpretation.alerts — computed verdicts and this record's branch (no
 // ── Schemas ──────────────────────────────────────────────────────────────────
 
 export const bestBuildingInputSchema = {
-  postcode: z.string().regex(/^\d{4}[A-Z]{2}$/).describe('Dutch postcode: 4 digits + 2 capital letters, no space. Example: "3543AR".'),
-  huisnummer: z.number().int().positive().describe('House number, integer only. For "28A" pass 28 here and "A" as huisletter.'),
+  postcode: z
+    .string()
+    .regex(/^\d{4}[A-Z]{2}$/)
+    .describe('Dutch postcode: 4 digits + 2 capital letters, no space. Example: "3543AR".'),
+  huisnummer: z
+    .number()
+    .int()
+    .positive()
+    .describe('House number, integer only. For "28A" pass 28 here and "A" as huisletter.'),
   huisletter: z.string().optional().describe('House letter, e.g. "A" for 28A.'),
   toevoeging: z.string().optional().describe('House-number addition, e.g. "bis", "I", "II".'),
   queryIntent: z.string().optional().describe('The business question this call answers. Used for observability.'),
@@ -82,7 +90,10 @@ export const bestBuildingOutputSchema = z.object({
   provincie: str.describe('Upstream field provincie'),
   oppervlakte_bag_verblijfsobject_m2: num.describe('Upstream field oppervlakte_m2'),
   gebruiksdoel: str.describe('Upstream field gebruiksdoel'),
-  coordinaten: z.object({ lat: z.number().describe('Latitude (WGS84)'), lon: z.number().describe('Longitude (WGS84)') }).nullable().describe('Upstream field coordinaten'),
+  coordinaten: z
+    .object({ lat: z.number().describe('Latitude (WGS84)'), lon: z.number().describe('Longitude (WGS84)') })
+    .nullable()
+    .describe('Upstream field coordinaten'),
   bag_vbo_id: str.describe('Upstream field bag_vbo_id'),
   vbo_status: str.describe('Upstream field vbo_status'),
   bouwjaar: num.describe('Upstream field bouwjaar'),
@@ -96,7 +107,9 @@ export const bestBuildingOutputSchema = z.object({
   co2_emissie_berekend_kg_m2: numPerMethod.describe('Upstream field co2_emissie_kg_m2'),
   co2_emissie_berekend_totaal_kg_jaar: numPerMethod.describe('Upstream field co2_emissie_kg_m2'),
   energieverbruik_berekend_niet_gemeten_kwh_m2: numPerMethod.describe('Upstream field berekend_energieverbruik_kwh_m2'),
-  energieverbruik_berekend_niet_gemeten_totaal_mj: numPerMethod.describe('Upstream field berekend_energieverbruik_kwh_m2'),
+  energieverbruik_berekend_niet_gemeten_totaal_mj: numPerMethod.describe(
+    'Upstream field berekend_energieverbruik_kwh_m2',
+  ),
   warmtebehoefte_berekend_kwh_m2: num.describe('Upstream field warmtebehoefte_kwh_m2'),
   temperatuuroverschrijding_indicator_eenheidloos: num.describe('Upstream field temperatuuroverschrijding'),
   compactheid_als_ag_eenheidloos: num.describe('Upstream field compactheid'),
@@ -114,7 +127,9 @@ export const bestBuildingOutputSchema = z.object({
   sbi_sector_omschrijving: str.describe('Upstream field sbi_code'),
   energie_index_berekend_eenheidloos: num.describe('Upstream field energie_index'),
   ep2_primair_fossiel_emg_forfaitair_berekend_kwh_m2: num.describe('Upstream field ep2_fossiel_emg_forfaitair_kwh_m2'),
-  aandeel_hernieuwbare_energie_emg_forfaitair_berekend_pct: num.describe('Upstream field aandeel_hernieuwbaar_emg_forfaitair_pct'),
+  aandeel_hernieuwbare_energie_emg_forfaitair_berekend_pct: num.describe(
+    'Upstream field aandeel_hernieuwbaar_emg_forfaitair_pct',
+  ),
   eis_energiebehoefte_kwh_m2: num.describe('Upstream field eis_energiebehoefte_kwh_m2'),
   eis_primaire_fossiele_energie_kwh_m2: num.describe('Upstream field eis_primaire_fossiele_energie_kwh_m2'),
   eis_aandeel_hernieuwbare_energie_pct: num.describe('Upstream field eis_aandeel_hernieuwbare_energie_pct'),
@@ -127,8 +142,11 @@ const MAX_CANDIDATES = 20;
 export async function resolveBestBuilding(
   bagClient: BagClientLike,
   epOnlineClient: EpOnlineClientLike,
-  args: { postcode: string; huisnummer: number; huisletter?: string; toevoeging?: string }
-): Promise<{ profile: ProfileCore; candidates?: { adres: string; huisletter: string | null; toevoeging: string | null }[] }> {
+  args: { postcode: string; huisnummer: number; huisletter?: string; toevoeging?: string },
+): Promise<{
+  profile: ProfileCore;
+  candidates?: { adres: string; huisletter: string | null; toevoeging: string | null }[];
+}> {
   const addresses = await bagClient.findAddress(args.postcode, args.huisnummer, args.huisletter, args.toevoeging);
   if (addresses.length === 0) {
     const adres = `${args.postcode} ${args.huisnummer}${args.huisletter ?? ''}${args.toevoeging ? ' ' + args.toevoeging : ''}`;
@@ -137,7 +155,9 @@ export async function resolveBestBuilding(
   const first = addresses[0];
   const vboPromise = bagClient.getVerblijfsobject(first.vboId);
   const epPromise = epOnlineClient.getByBagVboId(first.vboId);
-  const pandPromise = vboPromise.then((vbo) => (vbo && vbo.pandLinks.length > 0 ? bagClient.getPand(vbo.pandLinks[0]) : null));
+  const pandPromise = vboPromise.then((vbo) =>
+    vbo && vbo.pandLinks.length > 0 ? bagClient.getPand(vbo.pandLinks[0]) : null,
+  );
   const [vbo, labels, pand] = await Promise.all([vboPromise, epPromise, pandPromise]);
   const profile = buildProfile({
     matchStatus: addresses.length === 1 ? 'exact' : 'multiple_vbos',
@@ -150,7 +170,9 @@ export async function resolveBestBuilding(
   });
   const candidates =
     addresses.length > 1
-      ? addresses.slice(0, MAX_CANDIDATES).map((a) => ({ adres: a.weergavenaam, huisletter: a.houseLetter, toevoeging: a.houseNumberAddition }))
+      ? addresses
+          .slice(0, MAX_CANDIDATES)
+          .map((a) => ({ adres: a.weergavenaam, huisletter: a.houseLetter, toevoeging: a.houseNumberAddition }))
       : undefined;
   return { profile, candidates };
 }
@@ -158,7 +180,7 @@ export async function resolveBestBuilding(
 /** The full response for one record: interpretation first, then derived, candidates, renamed fields. */
 export function buildBestBuildingResponse(
   profile: ProfileCore,
-  candidates?: { adres: string; huisletter: string | null; toevoeging: string | null }[]
+  candidates?: { adres: string; huisletter: string | null; toevoeging: string | null }[],
 ) {
   const ctx = buildingCtx(profile);
   const { alerts, notes } = selectRules(BUILDING_RULES, ctx);
@@ -175,7 +197,7 @@ export function buildBestBuildingResponse(
 export function registerGetBuildingProfileBestTool(
   server: McpServer,
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
+  epOnlineClient: EpOnlineClientLike,
 ): void {
   server.registerTool(
     'get_building_profile',
@@ -186,19 +208,31 @@ export function registerGetBuildingProfileBestTool(
       outputSchema: bestBuildingOutputSchema,
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     },
-    async (args: { postcode: string; huisnummer: number; huisletter?: string; toevoeging?: string; queryIntent?: string }) => {
+    async (args: {
+      postcode: string;
+      huisnummer: number;
+      huisletter?: string;
+      toevoeging?: string;
+      queryIntent?: string;
+    }) => {
       const start = Date.now();
       try {
         const { profile, candidates } = await resolveBestBuilding(bagClient, epOnlineClient, args);
         const output = buildBestBuildingResponse(profile, candidates);
         await logToolCall({ args, start, status: 'success', rowCount: profile.candidateCount });
-        return { structuredContent: output, content: [{ type: 'text' as const, text: JSON.stringify(output, null, 2) }] };
+        return {
+          structuredContent: output,
+          content: [{ type: 'text' as const, text: JSON.stringify(output, null, 2) }],
+        };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         logger.error('tool.error', { tool: 'get_building_profile', variant: 'best', error: message });
         await logToolCall({ args, start, status: 'error', rowCount: 0 });
-        return { content: [{ type: 'text' as const, text: `Error in get_building_profile: ${message}` }], isError: true };
+        return {
+          content: [{ type: 'text' as const, text: `Error in get_building_profile: ${message}` }],
+          isError: true,
+        };
       }
-    }
+    },
   );
 }

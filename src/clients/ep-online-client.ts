@@ -75,7 +75,7 @@ export class EpOnlineClient {
         'EP-Online client: missing API key.\n\n' +
           'Register for a free key at https://public.ep-online.nl\n' +
           'Then set EP_ONLINE_API_KEY in your environment (or .env file), or ' +
-          'pass { apiKey } to new EpOnlineClient(...).'
+          'pass { apiKey } to new EpOnlineClient(...).',
       );
     }
   }

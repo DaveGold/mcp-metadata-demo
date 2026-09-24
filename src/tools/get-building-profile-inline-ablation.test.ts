@@ -17,15 +17,11 @@ import { ablatedInterpretation } from './get-building-profile-inline-ablation.js
 
 const lines = (s: string) => s.split('\n');
 const calcLine = (s: string) =>
-  lines(s).find(
-    (l) => l.startsWith('- CALCULATED vs MEASURED') || l.includes('rather than producing a ratio')
-  );
+  lines(s).find((l) => l.startsWith('- CALCULATED vs MEASURED') || l.includes('rather than producing a ratio'));
 
 describe('Q4 ablation arms', () => {
   it('both = fact + instruction, byte for byte', () => {
-    expect(calcVsMeasuredLine).toBe(
-      calcVsMeasuredLabel + calcVsMeasuredFact + ' ' + calcVsMeasuredInstruction
-    );
+    expect(calcVsMeasuredLine).toBe(calcVsMeasuredLabel + calcVsMeasuredFact + ' ' + calcVsMeasuredInstruction);
   });
 
   it('the deployed block carries the composed line verbatim', () => {

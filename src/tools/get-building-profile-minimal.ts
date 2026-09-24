@@ -17,11 +17,7 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { logger } from '../logger.js';
-import {
-  resolveBuildingProfile,
-  type BagClientLike,
-  type EpOnlineClientLike,
-} from './get-building-profile.js';
+import { resolveBuildingProfile, type BagClientLike, type EpOnlineClientLike } from './get-building-profile.js';
 
 const description = 'Look up a Dutch building by postcode and house number.';
 
@@ -35,7 +31,7 @@ const inputSchema = {
 export function registerGetBuildingProfileMinimalTool(
   server: McpServer,
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
+  epOnlineClient: EpOnlineClientLike,
 ): void {
   server.registerTool(
     'get_building_profile',
@@ -58,6 +54,6 @@ export function registerGetBuildingProfileMinimalTool(
           isError: true,
         };
       }
-    }
+    },
   );
 }

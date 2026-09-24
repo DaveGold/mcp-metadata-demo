@@ -40,8 +40,18 @@ const DEFAULT_LON = 5.11;
 export const MAX_RESPONSE_CHARS = 50_000;
 
 export const RECORD_FIELDS = [
-  'date', 'tempMean', 'tempMin', 'tempMax', 'hdd', 'cdd', 'weightedHdd',
-  'ghiKwhM2', 'sunshineDurationHours', 'weatherCode', 'weatherLabel', 'isForecast',
+  'date',
+  'tempMean',
+  'tempMin',
+  'tempMax',
+  'hdd',
+  'cdd',
+  'weightedHdd',
+  'ghiKwhM2',
+  'sunshineDurationHours',
+  'weatherCode',
+  'weatherLabel',
+  'isForecast',
 ] as const;
 
 export const bestWeatherDescription = `\
@@ -65,22 +75,56 @@ INTERPRETATION — read \`interpretation\` FIRST; quote its computed values:
 ALERTS: interpretation.alerts — the correction valid for THIS window, all fighting days, the forecast split.`;
 
 const inputSchema = {
-  latitude: z.number().min(50.75).max(53.55).optional()
-    .describe('Latitude, decimal degrees, Netherlands 50.75–53.55. Default 52.09 (Utrecht). Use get_building_profile coordinaten.lat.'),
-  longitude: z.number().min(3.36).max(7.23).optional()
-    .describe('Longitude, decimal degrees, Netherlands 3.36–7.23. Default 5.11 (Utrecht). Use get_building_profile coordinaten.lon.'),
-  dateFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be yyyy-MM-dd')
+  latitude: z
+    .number()
+    .min(50.75)
+    .max(53.55)
+    .optional()
+    .describe(
+      'Latitude, decimal degrees, Netherlands 50.75–53.55. Default 52.09 (Utrecht). Use get_building_profile coordinaten.lat.',
+    ),
+  longitude: z
+    .number()
+    .min(3.36)
+    .max(7.23)
+    .optional()
+    .describe(
+      'Longitude, decimal degrees, Netherlands 3.36–7.23. Default 5.11 (Utrecht). Use get_building_profile coordinaten.lon.',
+    ),
+  dateFrom: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be yyyy-MM-dd')
     .describe('Start date yyyy-MM-dd (Europe/Amsterdam), from 1940-01-01. A full year: YYYY-01-01.'),
-  dateTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be yyyy-MM-dd')
-    .describe('End date yyyy-MM-dd, inclusive, at most 730 days after dateFrom and at most today+14. A full year: YYYY-12-31.'),
-  summaryOnly: z.boolean().optional().default(false)
+  dateTo: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be yyyy-MM-dd')
+    .describe(
+      'End date yyyy-MM-dd, inclusive, at most 730 days after dateFrom and at most today+14. A full year: YYYY-12-31.',
+    ),
+  summaryOnly: z
+    .boolean()
+    .optional()
+    .default(false)
     .describe('true = summary + interpretation only, no per-day records.'),
-  select: z.array(z.string()).optional()
-    .describe(`Keep only these per-day fields. Exact, case-sensitive names: ${RECORD_FIELDS.join(', ')}. Unknown names are reported with the valid list.`),
-  energyUse: z.number().positive().optional()
-    .describe('Heating energy used in this window (any unit, e.g. m³ gas). If passed, the weather-corrected figure is computed in summary.normalization.'),
+  select: z
+    .array(z.string())
+    .optional()
+    .describe(
+      `Keep only these per-day fields. Exact, case-sensitive names: ${RECORD_FIELDS.join(', ')}. Unknown names are reported with the valid list.`,
+    ),
+  energyUse: z
+    .number()
+    .positive()
+    .optional()
+    .describe(
+      'Heating energy used in this window (any unit, e.g. m³ gas). If passed, the weather-corrected figure is computed in summary.normalization.',
+    ),
   solarKwp: z.number().positive().optional().describe('Installed solar capacity (kWp), for the computed solar check.'),
-  solarYieldKwh: z.number().nonnegative().optional().describe('Actual solar production in this window (kWh), for the computed solar check.'),
+  solarYieldKwh: z
+    .number()
+    .nonnegative()
+    .optional()
+    .describe('Actual solar production in this window (kWh), for the computed solar check.'),
   queryIntent: z.string().optional().describe('The business question this call answers. Used for observability.'),
 };
 
@@ -95,37 +139,81 @@ const outputSchema = {
   summary: z.object({
     location: z.object({ latitude: z.number(), longitude: z.number(), note: z.string() }),
     period: z.object({
-      dateFrom: z.string(), dateTo: z.string(), days: z.number(), measuredDays: z.number(),
-      forecastDays: z.number(), archiveLagNote: z.string().nullable(), isFullYearWindow: z.boolean(),
+      dateFrom: z.string(),
+      dateTo: z.string(),
+      days: z.number(),
+      measuredDays: z.number(),
+      forecastDays: z.number(),
+      archiveLagNote: z.string().nullable(),
+      isFullYearWindow: z.boolean(),
     }),
-    temperature: z.object({ periodMean: n, periodMin: n, periodMax: n, coldestDay: z.string().nullable(), hottestDay: z.string().nullable() }),
+    temperature: z.object({
+      periodMean: n,
+      periodMin: n,
+      periodMax: n,
+      coldestDay: z.string().nullable(),
+      hottestDay: z.string().nullable(),
+    }),
     degreeDays: z.object({
-      totalHDD: n, totalWeightedHDD: n, totalCDD: n,
+      totalHDD: n,
+      totalWeightedHDD: n,
+      totalCDD: n,
       referenceAnnualWeightedHDD: z.number(),
       fullYearGasNormalizationFactor: n,
       referencePeriodWeightedHDD: n,
-      referencePeriod: z.object({ window: z.string(), fromYear: z.number(), toYear: z.number(), yearsUsed: z.number(), source: z.string() }).nullable(),
+      referencePeriod: z
+        .object({
+          window: z.string(),
+          fromYear: z.number(),
+          toYear: z.number(),
+          yearsUsed: z.number(),
+          source: z.string(),
+        })
+        .nullable(),
     }),
-    normalization: z.object({
-      energyUse: z.number(), normalizedEnergyUse: z.number(), reference: z.number(), referenceKind: z.string(), formula: z.string(),
-    }).optional(),
+    normalization: z
+      .object({
+        energyUse: z.number(),
+        normalizedEnergyUse: z.number(),
+        reference: z.number(),
+        referenceKind: z.string(),
+        formula: z.string(),
+      })
+      .optional(),
     solarRadiation: z.object({ totalGHI_kWhM2: n, avgDailyGHI_kWhM2: n, totalSunshineDurationHours: n }),
-    solarCheck: z.object({
-      installedKwp: z.number(), actualYieldKwh: z.number(), expectedYieldKwh: z.array(z.number()),
-      actualPctOfExpected: z.array(z.number()), verdict: z.string(), basis: z.string(),
-    }).optional(),
+    solarCheck: z
+      .object({
+        installedKwp: z.number(),
+        actualYieldKwh: z.number(),
+        expectedYieldKwh: z.array(z.number()),
+        actualPctOfExpected: z.array(z.number()),
+        verdict: z.string(),
+        basis: z.string(),
+      })
+      .optional(),
     fightingSystemDays: z.object({
-      rule: z.string(), count: z.number(),
+      rule: z.string(),
+      count: z.number(),
       days: z.array(z.object({ date: z.string(), tempMin: z.number(), tempMax: z.number() })),
     }),
-    monthlyBreakdown: z.array(z.object({ month: z.string(), weightedHDD: z.number(), totalGHI_kWhM2: z.number(), avgTempMean: z.number() })),
+    monthlyBreakdown: z.array(
+      z.object({ month: z.string(), weightedHDD: z.number(), totalGHI_kWhM2: z.number(), avgTempMean: z.number() }),
+    ),
   }),
   records: z.array(z.record(z.string(), z.unknown())).optional(),
 };
 
 type Args = {
-  latitude?: number; longitude?: number; dateFrom: string; dateTo: string; summaryOnly?: boolean;
-  select?: string[]; energyUse?: number; solarKwp?: number; solarYieldKwh?: number; queryIntent?: string;
+  latitude?: number;
+  longitude?: number;
+  dateFrom: string;
+  dateTo: string;
+  summaryOnly?: boolean;
+  select?: string[];
+  energyUse?: number;
+  solarKwp?: number;
+  solarYieldKwh?: number;
+  queryIntent?: string;
 };
 
 function daysBetween(from: string, to: string): number {
@@ -134,7 +222,7 @@ function daysBetween(from: string, to: string): number {
 
 export async function buildBestWeatherResponse(
   args: Args,
-  deps: { query?: typeof executeWeatherQuery; archive?: ArchiveFetcher } = {}
+  deps: { query?: typeof executeWeatherQuery; archive?: ArchiveFetcher } = {},
 ) {
   const query = deps.query ?? executeWeatherQuery;
   const lat = args.latitude ?? DEFAULT_LAT;
@@ -160,7 +248,12 @@ export async function buildBestWeatherResponse(
   let reference: WeatherCtx['reference'] = null;
   if (!fullYear && !none) {
     const lastMeasured = measured[measured.length - 1].date;
-    reference = await referencePeriodWeightedHDD(measured[0].date, lastMeasured, archive, deps.archive ? '' : `${lat.toFixed(2)},${lon.toFixed(2)}`);
+    reference = await referencePeriodWeightedHDD(
+      measured[0].date,
+      lastMeasured,
+      archive,
+      deps.archive ? '' : `${lat.toFixed(2)},${lon.toFixed(2)}`,
+    );
   }
   const ref = reference && 'referencePeriodWeightedHDD' in reference ? reference : null;
 
@@ -185,7 +278,8 @@ export async function buildBestWeatherResponse(
   }
 
   const solarInputs = args.solarKwp !== undefined && args.solarYieldKwh !== undefined;
-  const solar = solarInputs && !none ? solarCheck(s.solarRadiation.totalGHI_kWhM2, args.solarKwp!, args.solarYieldKwh!) : null;
+  const solar =
+    solarInputs && !none ? solarCheck(s.solarRadiation.totalGHI_kWhM2, args.solarKwp!, args.solarYieldKwh!) : null;
   const fighting = fightingSystemDays(rows);
 
   const ctx: WeatherCtx = {
@@ -213,7 +307,9 @@ export async function buildBestWeatherResponse(
     const selected = applySelect(rows, args.select);
     records = selected.records as Record<string, unknown>[];
     if (args.select && args.select.length > 0 && selected.records.length === 0 && rows.length > 0) {
-      alerts.unshift('select named no valid field: this is a NAMING error, not missing data — every field exists. Re-call with names from the list below.');
+      alerts.unshift(
+        'select named no valid field: this is a NAMING error, not missing data — every field exists. Re-call with names from the list below.',
+      );
     }
     alerts.unshift(...selected.alerts);
   }
@@ -241,7 +337,13 @@ export async function buildBestWeatherResponse(
         fullYearGasNormalizationFactor: factor,
         referencePeriodWeightedHDD: ref ? ref.referencePeriodWeightedHDD : null,
         referencePeriod: ref
-          ? { window: ref.window, fromYear: ref.fromYear, toYear: ref.toYear, yearsUsed: ref.yearsUsed, source: ref.source }
+          ? {
+              window: ref.window,
+              fromYear: ref.fromYear,
+              toYear: ref.toYear,
+              yearsUsed: ref.yearsUsed,
+              source: ref.source,
+            }
           : null,
       },
       ...(normalization ? { normalization } : {}),
@@ -264,7 +366,7 @@ export async function buildBestWeatherResponse(
   if (records && JSON.stringify(output).length > MAX_RESPONSE_CHARS) {
     output.records = undefined;
     output.interpretation.alerts.unshift(
-      `Records DROPPED: ${rows.length} daily rows would exceed the response size limit (a larger result is replaced by a file notice on some hosts and its interpretation is lost). The summary is complete. For per-day detail re-call with select=[the 2–4 fields you need], or a shorter window.`
+      `Records DROPPED: ${rows.length} daily rows would exceed the response size limit (a larger result is replaced by a file notice on some hosts and its interpretation is lost). The summary is complete. For per-day detail re-call with select=[the 2–4 fields you need], or a shorter window.`,
     );
   }
   return output;
@@ -285,14 +387,20 @@ export function registerGetWeatherContextBestTool(server: McpServer): void {
       try {
         const output = await buildBestWeatherResponse(args);
         await logWeatherCall(args, start, 'success', output.recordCount);
-        return { structuredContent: output, content: [{ type: 'text' as const, text: JSON.stringify(output, null, 2) }] };
+        return {
+          structuredContent: output,
+          content: [{ type: 'text' as const, text: JSON.stringify(output, null, 2) }],
+        };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         logger.error('tool.error', { tool: 'get_weather_context', variant: 'best', error: message });
         await logWeatherCall(args, start, 'error', 0);
-        return { content: [{ type: 'text' as const, text: `Error in get_weather_context: ${message}` }], isError: true };
+        return {
+          content: [{ type: 'text' as const, text: `Error in get_weather_context: ${message}` }],
+          isError: true,
+        };
       }
-    }
+    },
   );
 }
 
@@ -318,8 +426,8 @@ async function logWeatherCall(args: Args, start: number, status: 'success' | 'er
     hasMore: false,
     durationMs: Date.now() - start,
     errorType: status === 'error' ? 'ToolError' : null,
-    paramsPresent: (['latitude', 'select', 'energyUse', 'solarKwp', 'solarYieldKwh', 'summaryOnly', 'queryIntent'] as const).filter(
-      (k) => args[k] !== undefined && args[k] !== false
-    ),
+    paramsPresent: (
+      ['latitude', 'select', 'energyUse', 'solarKwp', 'solarYieldKwh', 'summaryOnly', 'queryIntent'] as const
+    ).filter((k) => args[k] !== undefined && args[k] !== false),
   });
 }

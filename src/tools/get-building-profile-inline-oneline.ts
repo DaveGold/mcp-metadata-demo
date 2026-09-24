@@ -68,7 +68,7 @@ const description = descriptionCore;
 export function registerGetBuildingProfileInlineOnelineTool(
   server: McpServer,
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
+  epOnlineClient: EpOnlineClientLike,
 ): void {
   server.registerTool(
     'get_building_profile',
@@ -126,6 +126,6 @@ export function registerGetBuildingProfileInlineOnelineTool(
           isError: true,
         };
       }
-    }
+    },
   );
 }

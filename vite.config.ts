@@ -152,9 +152,9 @@ export default defineConfig({
   define: {
     // Angular dev-mode globals — must be defined for production builds
     // loaded in sandboxed iframes (srcdoc), where the global scope is clean.
-    'ngDevMode': 'false',
-    'ngI18nClosureMode': 'false',
-    'ngJitMode': 'false',
+    ngDevMode: 'false',
+    ngI18nClosureMode: 'false',
+    ngJitMode: 'false',
   },
   build: {
     outDir: 'build/ui',

@@ -222,7 +222,7 @@ describe('the Q1b recipe arms — same procedure, two channels', () => {
     expect(fromDescription).toBe(derivedFiguresBlock);
   });
 
-  it('keeps inline-recipe\'s description at the schema one-liner', async () => {
+  it("keeps inline-recipe's description at the schema one-liner", async () => {
     // Otherwise schema -> inline-recipe would move two things at once.
     const d = await describeGetBuildingProfile('inline-recipe');
     expect(d).toBe(SCHEMA_TIER_DESCRIPTION);

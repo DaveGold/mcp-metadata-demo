@@ -31,7 +31,8 @@ describe('README links into the repo', () => {
       const [path, anchor] = target.split('#');
       const [, from, to] = anchor.match(/^L(\d+)(?:-L(\d+))?$/)!;
       const lines = readFileSync(join(ROOT, path), 'utf8').split('\n');
-      const a = Number(from), b = Number(to ?? from);
+      const a = Number(from),
+        b = Number(to ?? from);
       expect(a).toBeLessThanOrEqual(b);
       expect(b, `${target} runs past the end of the file`).toBeLessThanOrEqual(lines.length);
       expect(lines[a - 1].trim(), `${target} starts on a blank line`).not.toBe('');
@@ -40,6 +41,6 @@ describe('README links into the repo', () => {
         if (/\.(ts|md|json)$/.test(name)) continue;
         expect(range, `${target} should contain ${name}`).toContain(name);
       }
-    }
+    },
   );
 });

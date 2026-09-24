@@ -165,12 +165,12 @@ const inputSchema = {
         key: z
           .string()
           .describe(
-            'Property key in each data row object. Must match exactly (case-sensitive). E.g. "id", "name", "amount".'
+            'Property key in each data row object. Must match exactly (case-sensitive). E.g. "id", "name", "amount".',
           ),
         header: z
           .string()
           .describe(
-            'Column header text shown to the user. Use the language of the conversation (e.g. "Name", "Project", "Amount (€)").'
+            'Column header text shown to the user. Use the language of the conversation (e.g. "Name", "Project", "Amount (€)").',
           ),
         type: z
           .enum([
@@ -208,13 +208,13 @@ const inputSchema = {
               '- multi_badge: multiple colored pills per cell, flex-wrapped. Left-aligned. Data: string[] (array of keys). Reuses the same badgeMap as badge — no separate map needed. Global search matches any label. Pick over concatenated text ("priority | external | urgent") when users benefit from per-tag color. Pick over separate columns when the tags are a variable-length set that belongs together (attributes, systems, certifications).\n' +
               '- link: clickable navigation. Left-aligned. Data: a string (used as both label and href) OR { label: string, href: string }. Safe schemes only: http(s) and mailto — anything else renders as plain text (no javascript:, no data:). Opens in new tab by default (linkConfig.target="_self" to override). Pick over text when the user should navigate (record URL, contact email, external report). Pick text when the URL is reference-only or when the destination is another row in the same table.\n' +
               '- rating: filled/half/empty glyphs (★/★½/☆ or ●/◐/○). Center-aligned. Data: a number — HALF-GLYPHS SUPPORTED, values snap to nearest 0.5 via Math.round(n*2)/2 (3.4 → 3½, 3.5 → 3½, 7.6 → 7½). Configure max (default 5; common scales: 5 for sterren, 6 for Conditie-dots, 10 for 0..10 waarderingen), shape ("stars" | "dots"), color via ratingConfig. Sorts numerically. Pick over number when the value is a bounded, fixed-scale score. Pick number when the count is unbounded.\n' +
-              '- image: thumbnail (default 32×32). Center-aligned. Data: a string URL — http(s) or data:image/*. External http(s) URLs are fetched server-side via the fetch_image companion tool (bypasses iframe CSP, first-load delay, 2MB cap, allowed MIMEs: jpeg/png/webp/gif/svg+xml). data:image/* URLs render directly. URLs with other schemes, broken responses, or blocked hosts render as a grey placeholder. Configure size/shape/alt via imageConfig. Not sortable by default. Pick over text for foto, typeplaatje-thumbnail, avatar, QR-code. Pick text when the URL is display-only.'
+              '- image: thumbnail (default 32×32). Center-aligned. Data: a string URL — http(s) or data:image/*. External http(s) URLs are fetched server-side via the fetch_image companion tool (bypasses iframe CSP, first-load delay, 2MB cap, allowed MIMEs: jpeg/png/webp/gif/svg+xml). data:image/* URLs render directly. URLs with other schemes, broken responses, or blocked hosts render as a grey placeholder. Configure size/shape/alt via imageConfig. Not sortable by default. Pick over text for foto, typeplaatje-thumbnail, avatar, QR-code. Pick text when the URL is display-only.',
           ),
         align: z
           .enum(['left', 'center', 'right'])
           .optional()
           .describe(
-            'Override default alignment. Defaults: text/date/multi_badge/link/progress=left, number/currency/percentage/trend=right, boolean/badge/icon/sparkline/rating/image=center.'
+            'Override default alignment. Defaults: text/date/multi_badge/link/progress=left, number/currency/percentage/trend=right, boolean/badge/icon/sparkline/rating/image=center.',
           ),
         width: z
           .string()
@@ -230,7 +230,7 @@ const inputSchema = {
           .optional()
           .default(true)
           .describe(
-            'Whether this column shows a filter input in the header. Default: true when features.filtering=true.'
+            'Whether this column shows a filter input in the header. Default: true when features.filtering=true.',
           ),
         badgeMap: z
           .record(
@@ -240,14 +240,14 @@ const inputSchema = {
               color: z
                 .enum(['green', 'red', 'yellow', 'blue', 'gray', 'orange'])
                 .describe(
-                  'Badge color. green=success/active, red=error/critical, yellow=warning/pending, blue=info, gray=inactive, orange=attention.'
+                  'Badge color. green=success/active, red=error/critical, yellow=warning/pending, blue=info, gray=inactive, orange=attention.',
                 ),
-            })
+            }),
           )
           .optional()
           .describe(
             'Value-to-badge mapping. Only for type=badge. Keys are the raw data values, values define display.\n' +
-              'Example: {"actief": {"color": "green"}, "storing": {"color": "red"}, "onderhoud": {"color": "yellow"}}'
+              'Example: {"actief": {"color": "green"}, "storing": {"color": "red"}, "onderhoud": {"color": "yellow"}}',
           ),
         iconMap: z
           .record(
@@ -256,14 +256,14 @@ const inputSchema = {
               icon: z
                 .string()
                 .describe(
-                  'Heroicon name (kebab-case). E.g. "check-circle", "bolt", "arrow-trending-up", "exclamation-triangle".'
+                  'Heroicon name (kebab-case). E.g. "check-circle", "bolt", "arrow-trending-up", "exclamation-triangle".',
                 ),
               color: z
                 .enum(['green', 'red', 'yellow', 'blue', 'gray', 'orange', 'primary'])
                 .optional()
                 .describe('Icon color. Omit for default text color (inherits from row).'),
               label: z.string().optional().describe('Tooltip or screen reader label. Omit to use the raw value.'),
-            })
+            }),
           )
           .optional()
           .describe(
@@ -275,7 +275,7 @@ const inputSchema = {
               'building-office, currency-euro, calculator, document-text, chart-bar, chart-pie, calendar, clock, ' +
               'user, user-group, truck, map-pin, wrench, cog-6-tooth, ' +
               'bolt, bolt-slash, fire, sun, globe-europe-africa, arrow-trending-up, arrow-trending-down, ' +
-              'eye, eye-slash, star, tag, arrow-down-tray, arrow-path, funnel, magnifying-glass'
+              'eye, eye-slash, star, tag, arrow-down-tray, arrow-path, funnel, magnifying-glass',
           ),
         sparklineConfig: z
           .object({
@@ -293,7 +293,7 @@ const inputSchema = {
             'Config for type=sparkline. Only meaningful when type=sparkline.\n' +
               'Data value must be number[] — 2+ points, ≤60 recommended. Non-number entries are skipped; fewer than 2 valid points renders nothing.\n' +
               'Example config: {"color": "red", "sortBy": "last"}\n' +
-              'Example cell value: [0,1,0,2,3,2,4,5,6,5,7,8]'
+              'Example cell value: [0,1,0,2,3,2,4,5,6,5,7,8]',
           ),
         progressConfig: z
           .object({
@@ -308,7 +308,7 @@ const inputSchema = {
               .boolean()
               .optional()
               .describe(
-                'Flip color semantics: false (default) = low is good (e.g. budget-besteed, resource usage); true = high is good (e.g. compliance-score, voortgang).'
+                'Flip color semantics: false (default) = low is good (e.g. budget-besteed, resource usage); true = high is good (e.g. compliance-score, voortgang).',
               ),
           })
           .optional()
@@ -318,7 +318,7 @@ const inputSchema = {
               'Default thresholds (warn=0.7, danger=0.9) assume "up is bad" (e.g. budget-besteed, capaciteitsbenutting). Flip with invertColors=true when "up is good" (e.g. compliance-score, voortgang).\n' +
               'Example config (default up-is-bad): {"thresholds": {"warn": 0.7, "danger": 0.9}, "invertColors": false} — used for Budget besteed\n' +
               'Example config (up-is-good): {"thresholds": {"warn": 0.5, "danger": 0.3}, "invertColors": true} — used for Voortgang (below 30% is red)\n' +
-              'Example cell value: 0.88'
+              'Example cell value: 0.88',
           ),
         trendConfig: z
           .object({
@@ -330,7 +330,7 @@ const inputSchema = {
               .boolean()
               .optional()
               .describe(
-                'Flip color semantics: false (default) = up is bad (verbruik, kosten, storingen: rising = red); true = up is good (omzet, marge: rising = green).'
+                'Flip color semantics: false (default) = up is bad (verbruik, kosten, storingen: rising = red); true = up is good (omzet, marge: rising = green).',
               ),
           })
           .optional()
@@ -340,7 +340,7 @@ const inputSchema = {
               'Default colors: up=red, down=green — correct for metrics where rising is bad (verbruik, kosten, storingen, achterstand). Set invertColors=true for metrics where rising is good (omzet, marge, Paris-Proof-voortgang, tevredenheid).\n' +
               'Example config (up-is-bad): {"valueType": "number", "invertColors": false} — used for Verbruik YoY\n' +
               'Example config (up-is-good): {"valueType": "currency", "invertColors": true} — used for Omzet YoY\n' +
-              'Example cell value: {"value": 184500, "delta": -0.08}'
+              'Example cell value: {"value": 184500, "delta": -0.08}',
           ),
         linkConfig: z
           .object({
@@ -358,7 +358,7 @@ const inputSchema = {
               'Example config: {"target": "_blank"}\n' +
               'Example cell value (shorthand, URL): "https://example.com/record/12345"\n' +
               'Example cell value (shorthand, email): "person@example.com"  // → mailto link\n' +
-              'Example cell value (explicit): {"label": "Record #12345", "href": "https://example.com/record/12345"}'
+              'Example cell value (explicit): {"label": "Record #12345", "href": "https://example.com/record/12345"}',
           ),
         ratingConfig: z
           .object({
@@ -366,7 +366,7 @@ const inputSchema = {
               .number()
               .optional()
               .describe(
-                'Maximum value (number of glyphs). Common: 5 (sterren), 6 (Conditie dots), 10 (0..10 waarderingsschaal). Default: 5.'
+                'Maximum value (number of glyphs). Common: 5 (sterren), 6 (Conditie dots), 10 (0..10 waarderingsschaal). Default: 5.',
               ),
             shape: z.enum(['stars', 'dots']).optional().describe('Glyph shape. Default: stars.'),
             color: z
@@ -383,7 +383,7 @@ const inputSchema = {
               'Example config (sterren 5-schaal, halve toegestaan): {"max": 5, "shape": "stars", "color": "yellow"} — cell value 4.5 renders ★★★★½\n' +
               'Example config (0..10 schaal): {"max": 10, "shape": "stars", "color": "yellow"} — cell value 7.5 renders 7 filled + 1 half + 2 empty\n' +
               'Example config (Conditie): {"max": 6, "shape": "dots", "color": "primary"} — cell value 3 renders ●●●○○○\n' +
-              'Example cell values: 4.5  (half)  |  7  (whole)  |  3.4  (snaps up to 3½)'
+              'Example cell values: 4.5  (half)  |  7  (whole)  |  3.4  (snaps up to 3½)',
           ),
         imageConfig: z
           .object({
@@ -403,7 +403,7 @@ const inputSchema = {
               'Default size 32×32 square. Use larger sizes (48–64) for table density="comfortable", and shape="circle" for avatars.\n' +
               'Example config: {"width": 48, "height": 48, "shape": "square", "alt": "Building photo"}\n' +
               'Example cell value (http): "https://storage.example.com/vitrum.jpg"\n' +
-              'Example cell value (data): "data:image/svg+xml;base64,PHN2Zy4uLg=="'
+              'Example cell value (data): "data:image/svg+xml;base64,PHN2Zy4uLg=="',
           ),
         footer: z
           .enum(['sum', 'avg', 'count', 'min', 'max'])
@@ -414,14 +414,14 @@ const inputSchema = {
               '- avg: average of visible rows\n' +
               '- count: number of visible rows\n' +
               '- min / max: minimum/maximum value\n' +
-              'Footer value is formatted using the same column type (e.g. currency footer shows € total).'
+              'Footer value is formatted using the same column type (e.g. currency footer shows € total).',
           ),
-      })
+      }),
     )
     .describe(
       'Column definitions. Order determines display order left to right.\n' +
         'Tip: put the most important identifying column first (e.g. id, name, reference number), ' +
-        'status/badge columns near the end, numeric totals right-aligned.'
+        'status/badge columns near the end, numeric totals right-aligned.',
     ),
   data: z
     .union([z.array(z.record(z.string(), z.unknown())), z.array(z.array(z.unknown()))])
@@ -434,7 +434,7 @@ const inputSchema = {
         '   Each object is one row. Keys must match column key values.\n' +
         '   Example: [{"id":"3451","name":"André","email":"andre@example.com"}]\n' +
         'Maximum 500 rows — pre-aggregate or filter before calling for larger datasets.\n' +
-        'Dates as ISO strings (YYYY-MM-DD). Booleans as true/false. Numbers as numbers (not strings).'
+        'Dates as ISO strings (YYYY-MM-DD). Booleans as true/false. Numbers as numbers (not strings).',
     ),
   features: z
     .object({
@@ -453,14 +453,14 @@ const inputSchema = {
         .optional()
         .default(false)
         .describe(
-          'Enable a search box above the table that filters across ALL columns simultaneously. Useful for "find record matching X" type queries. Default: false.'
+          'Enable a search box above the table that filters across ALL columns simultaneously. Useful for "find record matching X" type queries. Default: false.',
         ),
       pagination: z
         .boolean()
         .optional()
         .default(true)
         .describe(
-          'Enable pagination with page size selector (10/25/50/100). Default: true. Disable only for very small datasets (<20 rows).'
+          'Enable pagination with page size selector (10/25/50/100). Default: true. Disable only for very small datasets (<20 rows).',
         ),
       pageSize: z
         .number()
@@ -472,14 +472,14 @@ const inputSchema = {
         .optional()
         .default(false)
         .describe(
-          'Enable row selection with checkboxes. Adds a checkbox column on the left. Useful when user needs to select items for follow-up action.'
+          'Enable row selection with checkboxes. Adds a checkbox column on the left. Useful when user needs to select items for follow-up action.',
         ),
       columnVisibility: z
         .boolean()
         .optional()
         .default(false)
         .describe(
-          'Enable column visibility toggles. Adds a dropdown to show/hide columns. Useful for wide tables with many columns.'
+          'Enable column visibility toggles. Adds a dropdown to show/hide columns. Useful for wide tables with many columns.',
         ),
     })
     .optional()
@@ -487,13 +487,13 @@ const inputSchema = {
       'Interactive features. Enable only what adds value — too many features clutters the UI.\n' +
         'Recommended defaults: sorting=true, pagination=true, rest=false.\n' +
         'Add filtering/globalSearch for tables with >50 rows or many text columns.\n' +
-        'Add selection when the user needs to pick items.'
+        'Add selection when the user needs to pick items.',
     ),
   title: z
     .string()
     .optional()
     .describe(
-      'Table title. Use the language of the conversation, descriptive (e.g. "Q1 2025 Hours", "Invoice Overview", "Team Members").'
+      'Table title. Use the language of the conversation, descriptive (e.g. "Q1 2025 Hours", "Invoice Overview", "Team Members").',
     ),
   emptyMessage: z
     .string()
@@ -508,27 +508,27 @@ const inputSchema = {
       'Row height density:\n' +
         '- compact: minimal padding, small font — for data-heavy tables with many rows/columns\n' +
         '- normal: balanced padding — default for most tables\n' +
-        '- comfortable: spacious padding, larger font — for dashboard-style overviews with few rows'
+        '- comfortable: spacious padding, larger font — for dashboard-style overviews with few rows',
     ),
   striped: z
     .boolean()
     .optional()
     .default(true)
     .describe(
-      'Alternating row background colors for readability. Default: true. Set false for very short tables (<5 rows).'
+      'Alternating row background colors for readability. Default: true. Set false for very short tables (<5 rows).',
     ),
   bordered: z
     .boolean()
     .optional()
     .default(false)
     .describe(
-      'Add borders between cells. Default: false (cleaner look). Set true for data-dense tables where column separation helps.'
+      'Add borders between cells. Default: false (cleaner look). Set true for data-dense tables where column separation helps.',
     ),
   maxHeight: z
     .string()
     .optional()
     .describe(
-      'CSS max-height for scrollable table body (e.g. "400px", "60vh"). Header stays sticky. Omit for auto height.'
+      'CSS max-height for scrollable table body (e.g. "400px", "60vh"). Header stays sticky. Omit for auto height.',
     ),
   queryIntent: z.string().optional().describe('Describe what this call is being used for. Used for observability.'),
 };
@@ -686,7 +686,7 @@ export function registerRenderTableTool(server: McpServer, opts: { minimal?: boo
           isError: true,
         };
       }
-    }
+    },
   );
 }
 

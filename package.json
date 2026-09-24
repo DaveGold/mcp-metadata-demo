@@ -43,7 +43,9 @@
     "dev:inline-recipe": "MCP_VARIANT=inline-recipe tsx watch src/stdio.ts",
     "dev:words-recipe": "MCP_VARIANT=words-recipe tsx watch src/stdio.ts",
     "dev:best": "MCP_VARIANT=best tsx watch src/stdio.ts",
-    "wire-view": "tsx scripts/wire-view.ts"
+    "wire-view": "tsx scripts/wire-view.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "keywords": [
     "mcp",
@@ -121,6 +123,7 @@
     "chartjs-chart-treemap": "^3.1.0",
     "chartjs-plugin-annotation": "^3.1.0",
     "leaflet": "^1.9.4",
+    "prettier": "^3.9.9",
     "tailwindcss": "^4.3.0",
     "tslib": "^2.8.1",
     "tsx": "^4.20.4",

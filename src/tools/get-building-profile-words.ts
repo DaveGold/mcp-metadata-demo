@@ -53,11 +53,9 @@ export function registerGetBuildingProfileWordsTool(
   server: McpServer,
   bagClient: BagClientLike,
   epOnlineClient: EpOnlineClientLike,
-  opts: { withRecipe?: boolean } = {}
+  opts: { withRecipe?: boolean } = {},
 ): void {
-  const toolDescription = opts.withRecipe
-    ? descriptionCore + '\n\n' + derivedFiguresBlock
-    : descriptionCore;
+  const toolDescription = opts.withRecipe ? descriptionCore + '\n\n' + derivedFiguresBlock : descriptionCore;
 
   server.registerTool(
     'get_building_profile',
@@ -100,13 +98,17 @@ export function registerGetBuildingProfileWordsTool(
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error('tool.error', { tool: 'get_building_profile', variant: opts.withRecipe ? 'words-recipe' : 'words', error: errorMessage });
+        logger.error('tool.error', {
+          tool: 'get_building_profile',
+          variant: opts.withRecipe ? 'words-recipe' : 'words',
+          error: errorMessage,
+        });
         await logToolCall({ args, start, status: 'error', rowCount: 0 });
         return {
           content: [{ type: 'text' as const, text: `Error in get_building_profile: ${errorMessage}` }],
           isError: true,
         };
       }
-    }
+    },
   );
 }

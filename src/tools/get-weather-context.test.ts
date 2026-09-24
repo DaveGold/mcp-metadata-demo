@@ -77,7 +77,7 @@ describe('summarizeWeather', () => {
         sunshine_duration: [36000],
         weather_code: [1],
       },
-      true
+      true,
     );
     const result = summarizeWeather(forecastOnly, { dateFrom: '2024-06-01', dateTo: '2024-06-01' });
     expect(result.summary.period.measuredDays).toBe(0);
@@ -96,7 +96,7 @@ describe('summarizeWeather', () => {
         sunshine_duration: [20000],
         weather_code: [2],
       },
-      false
+      false,
     );
     const result = summarizeWeather(rows, { dateFrom: '2024-05-01', dateTo: '2024-05-01' });
     expect(result.interpretation.alerts.some((a) => /fighting-system risk/.test(a))).toBe(true);

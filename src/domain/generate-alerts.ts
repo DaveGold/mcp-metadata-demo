@@ -40,9 +40,7 @@ const HR_BOILER_EFFICIENCY = 0.95;
  * BAG area is the fallback only, for profiles EP-Online has no thermal zone for.
  * The source is reported in the alert so the reader can see which was used.
  */
-function benchmarkArea(
-  profile: ProfileCore
-): { m2: number; source: 'EP-Online thermische zone' | 'BAG' } | null {
+function benchmarkArea(profile: ProfileCore): { m2: number; source: 'EP-Online thermische zone' | 'BAG' } | null {
   if (profile.gebruiksoppervlakte_thermische_zone_m2 !== null) {
     return { m2: profile.gebruiksoppervlakte_thermische_zone_m2, source: 'EP-Online thermische zone' };
   }
@@ -60,22 +58,21 @@ export function generateAlerts(profile: ProfileCore): string[] {
 
   if (profile.matchStatus === 'multiple_vbos') {
     alerts.push(
-      `Multiple verblijfsobjecten (${profile.candidateCount}) at this address — profile shown is the first match. Specify huisletter/toevoeging for an exact match.`
+      `Multiple verblijfsobjecten (${profile.candidateCount}) at this address — profile shown is the first match. Specify huisletter/toevoeging for an exact match.`,
     );
   }
 
   // Large multi-unit building: oppervlakte_m2 is just one VBO, not the total building
   if (profile.aantal_verblijfsobjecten !== null && profile.aantal_verblijfsobjecten > 10) {
     alerts.push(
-      `Large pand with ${profile.aantal_verblijfsobjecten} verblijfsobjecten — oppervlakte_m2 (${profile.oppervlakte_m2} m²) is only one VBO, not the total building. Use bouwjaar and energielabel for quality analysis; do NOT use oppervlakte_m2 as a benchmark denominator.`
+      `Large pand with ${profile.aantal_verblijfsobjecten} verblijfsobjecten — oppervlakte_m2 (${profile.oppervlakte_m2} m²) is only one VBO, not the total building. Use bouwjaar and energielabel for quality analysis; do NOT use oppervlakte_m2 as a benchmark denominator.`,
     );
   }
 
   if (profile.bouwjaar !== null) {
     // Suppress era alerts when the label already proves good performance
     const goodLabel =
-      profile.energielabel !== null &&
-      ['A++++', 'A+++', 'A++', 'A+', 'A'].includes(profile.energielabel);
+      profile.energielabel !== null && ['A++++', 'A+++', 'A++', 'A+', 'A'].includes(profile.energielabel);
 
     if (!goodLabel) {
       if (profile.bouwjaar < 1992) {
@@ -90,10 +87,7 @@ export function generateAlerts(profile: ProfileCore): string[] {
 
   if (profile.energielabel) {
     const letter = profile.energielabel.replace(/\+/g, '');
-    if (
-      ['D', 'E', 'F', 'G'].includes(letter) &&
-      profile.gebruiksdoel?.toLowerCase().includes('kantoor')
-    ) {
+    if (['D', 'E', 'F', 'G'].includes(letter) && profile.gebruiksdoel?.toLowerCase().includes('kantoor')) {
       alerts.push('Possibly Label-C relevant — verify whether office share >50% and area >100m².');
     }
   }
@@ -122,7 +116,7 @@ export function generateAlerts(profile: ProfileCore): string[] {
 
   if (profile.vbo_status && !profile.vbo_status.toLowerCase().includes('in gebruik')) {
     alerts.push(
-      `VBO status: "${profile.vbo_status}" — building may not be in use. Check whether the analysis is relevant.`
+      `VBO status: "${profile.vbo_status}" — building may not be in use. Check whether the analysis is relevant.`,
     );
   }
 
@@ -138,28 +132,21 @@ export function generateAlerts(profile: ProfileCore): string[] {
     if (profile.eis_energiebehoefte_kwh_m2 !== null && profile.ep1_energiebehoefte_kwh_m2 !== null) {
       const pass = profile.ep1_energiebehoefte_kwh_m2 <= profile.eis_energiebehoefte_kwh_m2;
       lines.push(
-        `  BENG-1 Energy demand: ${profile.ep1_energiebehoefte_kwh_m2} kWh/m² (max ${profile.eis_energiebehoefte_kwh_m2}) ${pass ? '✓' : '✗ EXCEEDED'}`
+        `  BENG-1 Energy demand: ${profile.ep1_energiebehoefte_kwh_m2} kWh/m² (max ${profile.eis_energiebehoefte_kwh_m2}) ${pass ? '✓' : '✗ EXCEEDED'}`,
       );
     }
 
-    if (
-      profile.eis_primaire_fossiele_energie_kwh_m2 !== null &&
-      profile.ep2_fossiel_kwh_m2 !== null
-    ) {
+    if (profile.eis_primaire_fossiele_energie_kwh_m2 !== null && profile.ep2_fossiel_kwh_m2 !== null) {
       const pass = profile.ep2_fossiel_kwh_m2 <= profile.eis_primaire_fossiele_energie_kwh_m2;
       lines.push(
-        `  BENG-2 Fossil energy use: ${profile.ep2_fossiel_kwh_m2} kWh/m² (max ${profile.eis_primaire_fossiele_energie_kwh_m2}) ${pass ? '✓' : '✗ EXCEEDED'}`
+        `  BENG-2 Fossil energy use: ${profile.ep2_fossiel_kwh_m2} kWh/m² (max ${profile.eis_primaire_fossiele_energie_kwh_m2}) ${pass ? '✓' : '✗ EXCEEDED'}`,
       );
     }
 
-    if (
-      profile.eis_aandeel_hernieuwbare_energie_pct !== null &&
-      profile.aandeel_hernieuwbaar_pct !== null
-    ) {
-      const pass =
-        profile.aandeel_hernieuwbaar_pct >= profile.eis_aandeel_hernieuwbare_energie_pct;
+    if (profile.eis_aandeel_hernieuwbare_energie_pct !== null && profile.aandeel_hernieuwbaar_pct !== null) {
+      const pass = profile.aandeel_hernieuwbaar_pct >= profile.eis_aandeel_hernieuwbare_energie_pct;
       lines.push(
-        `  BENG-3 Renewable energy share: ${profile.aandeel_hernieuwbaar_pct}% (min ${profile.eis_aandeel_hernieuwbare_energie_pct}%) ${pass ? '✓' : '✗ NOT MET'}`
+        `  BENG-3 Renewable energy share: ${profile.aandeel_hernieuwbaar_pct}% (min ${profile.eis_aandeel_hernieuwbare_energie_pct}%) ${pass ? '✓' : '✗ NOT MET'}`,
       );
     }
 
@@ -173,7 +160,7 @@ export function generateAlerts(profile: ProfileCore): string[] {
     profile.bouwjaar !== profile.ep_online_bouwjaar
   ) {
     alerts.push(
-      `Bouwjaar discrepancy: BAG ${profile.bouwjaar} vs EP-Online ${profile.ep_online_bouwjaar} — possible renovation or registration error.`
+      `Bouwjaar discrepancy: BAG ${profile.bouwjaar} vs EP-Online ${profile.ep_online_bouwjaar} — possible renovation or registration error.`,
     );
   }
 
@@ -182,7 +169,7 @@ export function generateAlerts(profile: ProfileCore): string[] {
     const delta = profile.ep2_fossiel_kwh_m2 - profile.ep2_fossiel_emg_forfaitair_kwh_m2;
     if (delta > 5) {
       alerts.push(
-        `Area-bound measure (district heating / WKO / collective PV) lowers EP-2 by ${Math.round(delta)} kWh/m².`
+        `Area-bound measure (district heating / WKO / collective PV) lowers EP-2 by ${Math.round(delta)} kWh/m².`,
       );
     }
   }
@@ -200,7 +187,7 @@ export function generateAlerts(profile: ProfileCore): string[] {
           ? `minor — ${to} is between 0 and the 1.5 threshold`
           : `none — ${to}`;
     alerts.push(
-      `Overheating risk: ${verdict} (TOjuli/GTO). This is a unitless index — not °C and not hours per year. Relevant for cooling load and heat pump sizing.`
+      `Overheating risk: ${verdict} (TOjuli/GTO). This is a unitless index — not °C and not hours per year. Relevant for cooling load and heat pump sizing.`,
     );
   }
 
@@ -213,23 +200,20 @@ export function generateAlerts(profile: ProfileCore): string[] {
       const heatDemandKwh = profile.warmtebehoefte_kwh_m2 * area.m2;
       const gasM3 = Math.round(heatDemandKwh / HR_BOILER_EFFICIENCY / KWH_PER_M3_GAS);
       alerts.push(
-        `Estimated space-heating gas equivalent: ~${gasM3} m³/year (warmtebehoefte ${profile.warmtebehoefte_kwh_m2} kWh/m² × ${area.m2} m² ${area.source}, HR boiler 95%). SPACE HEATING ONLY — excludes hot water and cooking, so an actual gas bill will be higher.`
+        `Estimated space-heating gas equivalent: ~${gasM3} m³/year (warmtebehoefte ${profile.warmtebehoefte_kwh_m2} kWh/m² × ${area.m2} m² ${area.source}, HR boiler 95%). SPACE HEATING ONLY — excludes hot water and cooking, so an actual gas bill will be higher.`,
       );
     }
 
     if (profile.co2_emissie_kg_m2 !== null) {
-      const isNaderVoorschrift =
-        profile.berekeningstype?.toLowerCase().includes('nader voorschrift') ?? false;
+      const isNaderVoorschrift = profile.berekeningstype?.toLowerCase().includes('nader voorschrift') ?? false;
       if (isNaderVoorschrift) {
         // Nader Voorschrift: co2_emissie is already a total (kg/year), not per m²
         const totalCo2 = Math.round(profile.co2_emissie_kg_m2);
-        alerts.push(
-          `Total CO₂ emissions: ~${totalCo2} kg/year (Nader Voorschrift — value is whole-building total).`
-        );
+        alerts.push(`Total CO₂ emissions: ~${totalCo2} kg/year (Nader Voorschrift — value is whole-building total).`);
       } else if (area !== null) {
         const totalCo2 = Math.round(profile.co2_emissie_kg_m2 * area.m2);
         alerts.push(
-          `Total CO₂ emissions: ~${totalCo2} kg/year (${profile.co2_emissie_kg_m2} kg/m² × ${area.m2} m² ${area.source}).`
+          `Total CO₂ emissions: ~${totalCo2} kg/year (${profile.co2_emissie_kg_m2} kg/m² × ${area.m2} m² ${area.source}).`,
         );
       }
     }

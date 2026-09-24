@@ -79,7 +79,7 @@ describe('get_tool_call_log', () => {
     };
     expect(parsed.records).toEqual([]);
     expect(parsed.interpretation.alerts.some((a) => /No calls found for tool "get_building_profile"/.test(a))).toBe(
-      true
+      true,
     );
 
     await client.close();

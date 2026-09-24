@@ -25,7 +25,8 @@ const frontmatter = (s: string) => s.match(/^---\n([\s\S]*?)\n---\n/)?.[1];
 describe('rich-domain-mcp-server skill copies', () => {
   it('.claude and .codex are byte-identical', () => {
     expect(files(CODEX)).toEqual(files(CLAUDE));
-    for (const f of files(CLAUDE)) expect(readFileSync(join(CODEX, f), 'utf8'), f).toBe(readFileSync(join(CLAUDE, f), 'utf8'));
+    for (const f of files(CLAUDE))
+      expect(readFileSync(join(CODEX, f), 'utf8'), f).toBe(readFileSync(join(CLAUDE, f), 'utf8'));
   });
 
   it('the .agents pointer carries the same frontmatter and points at an existing file', () => {

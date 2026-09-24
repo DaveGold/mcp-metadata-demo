@@ -75,7 +75,7 @@ export async function referencePeriodWeightedHDD(
   windowTo: string,
   fetchArchive: ArchiveFetcher,
   cacheScope = '',
-  span: { from: number; to: number } = REFERENCE_END_YEARS
+  span: { from: number; to: number } = REFERENCE_END_YEARS,
 ): Promise<ReferencePeriod | { value: null; reason: string }> {
   const yFrom = Number(windowFrom.slice(0, 4));
   const yTo = Number(windowTo.slice(0, 4));
@@ -83,14 +83,16 @@ export async function referencePeriodWeightedHDD(
   if (cross < 0 || cross > 1) return { value: null, reason: 'window longer than one year boundary crossing' };
   const mdFrom = windowFrom.slice(4);
   const mdTo = windowTo.slice(4);
-  if (cross === 1 && mdTo >= mdFrom) return { value: null, reason: 'window is a year or longer; use the annual reference' };
+  if (cross === 1 && mdTo >= mdFrom)
+    return { value: null, reason: 'window is a year or longer; use the annual reference' };
 
   const firstEnd = Math.max(ARCHIVE_START_YEAR + cross, span.from);
   const lastEnd = span.to;
   if (lastEnd < firstEnd) return { value: null, reason: 'reference span lies outside the archive' };
 
   const windows: Array<{ from: string; to: string }> = [];
-  for (let end = firstEnd; end <= lastEnd; end++) windows.push({ from: dateIn(end - cross, mdFrom), to: dateIn(end, mdTo) });
+  for (let end = firstEnd; end <= lastEnd; end++)
+    windows.push({ from: dateIn(end - cross, mdFrom), to: dateIn(end, mdTo) });
   const firstYear = firstEnd - cross;
   const lastYear = lastEnd - cross;
 
@@ -104,7 +106,10 @@ export async function referencePeriodWeightedHDD(
   try {
     for (const { from, to } of windows) perWindow.push(await fetchArchive(from, to));
   } catch (error) {
-    return { value: null, reason: `reference archive fetch failed: ${error instanceof Error ? error.message : String(error)}` };
+    return {
+      value: null,
+      reason: `reference archive fetch failed: ${error instanceof Error ? error.message : String(error)}`,
+    };
   }
 
   // A year with no rows at all means the archive did not cover it; do not average in a zero.
