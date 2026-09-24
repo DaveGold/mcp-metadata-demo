@@ -734,6 +734,7 @@ async function logToolCall({
       take: 0,
       status,
       rowCount: args.data.length,
+      shape: { columns: args.columns.length, rows: args.data.length },
       hasMore: false,
       durationMs: Date.now() - start,
       errorType: status === 'error' ? 'ToolError' : null,

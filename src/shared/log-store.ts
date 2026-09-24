@@ -46,6 +46,12 @@ export interface ToolCallLogEntry {
    * caller passed `huisletter` to disambiguate a multi-unit address.
    */
   paramsPresent?: string[];
+  /**
+   * The SHAPE of a render call — the form chosen and how big it is (chart type; counts of
+   * labels, series, annotations, columns, rows, markers). Never a label, title or value.
+   * Persisted to Firestore and the Cloud log only; get_tool_call_log does not return it.
+   */
+  shape?: Record<string, string | number>;
 }
 
 export interface ToolCallRecord {
@@ -112,6 +118,7 @@ export async function writeToolCallLog(entry: ToolCallLogEntry): Promise<void> {
     variant,
     paramsPresent,
     rowCount: entry.rowCount,
+    ...(entry.shape ? { shape: entry.shape } : {}),
   });
 
   if (entry.environment === 'cloud') {
@@ -129,6 +136,7 @@ export async function writeToolCallLog(entry: ToolCallLogEntry): Promise<void> {
       variant,
       paramsPresent,
       rowCount: entry.rowCount,
+      ...(entry.shape ? { shape: entry.shape } : {}),
       createdAt: FieldValue.serverTimestamp(),
     });
     return;

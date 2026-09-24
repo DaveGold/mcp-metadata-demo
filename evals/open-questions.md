@@ -3869,8 +3869,15 @@ LAST successful render_table call.
 
 ## Q23 — Does the chart and table guidance make the model choose the right FORM from the data? Registered 2026-09-24, NOT YET RUN
 
-> **REGISTERED, not yet run.** Question set: `evals/questions-chart-choice.json`. Before the run:
-> build arm C below and register the arm list and model tiers.
+> **REGISTERED before any run.** Question set: `evals/questions-chart-choice.json`. Arm C is built
+> as the frozen variant `best-no-type-rules`: the `type` describe drops from 2,769 characters to 11
+> ("Chart type."), and `tools/list` from 72.5k to 69.8k. The render tools now also log the shape
+> they were called with (chart type, counts), so the demo's own traffic answers "which types are
+> used" alongside this run.
+>
+> **Tiers (fixed now).** haiku n=10 per arm on all six questions (180 runs); sonnet n=10 per arm on
+> `choice-share-per-month` and `choice-three-measures-two-buildings` (60 runs). 240 runs, waves of
+> 3 arms × 2, interleaved.
 
 **Why.** Q22 never tested the choice itself. Its questions named the form ("in a chart", "in a
 table", "on a map"), and its chart question accepted line and bar alike. Three things are

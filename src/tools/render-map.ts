@@ -443,6 +443,7 @@ async function logToolCall({
       take: 0,
       status,
       rowCount: args.markers.length,
+      shape: { markers: args.markers.length },
       hasMore: false,
       durationMs: Date.now() - start,
       errorType: status === 'error' ? 'ToolError' : null,
