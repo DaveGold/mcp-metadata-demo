@@ -3935,6 +3935,24 @@ candidate to trim.
 
 ## Q24 — Can the decision tree reach all 14 chart types when the data calls for them? Registered 2026-09-24, BEFORE the pilot
 
+> **PILOT ANSWERED 2026-09-24.** See [`results/2026-09-24-q24-chart-paths-pilot.json`](results/2026-09-24-q24-chart-paths-pilot.json).
+>
+> **Three paths were broken on every tier by the input schema, not by the choice.** The model
+> picked scatter, bubble and boxplot correctly, and render_chart refused the call (every dataset
+> required `data`; these types carry `scatterData` or `samples`). It then fell back to line or bar.
+> Repaired: `data` is optional. After that, 3/3 in every arm.
+>
+> **The one real choice problem was polarArea.** On a weekly cycle, the decision-tree arm chose it
+> 5/6; the other two arms chose bar 6/6.
+>
+> **Paths reached:** decision tree 14/14; `best` and no-rules 13/14. The per-type rules alone
+> changed nothing measurable.
+>
+> **Why the schema defect stayed hidden.** A schema refusal happens in the SDK, before the handler,
+> so it never reaches the server's call log: 54 calls in round 1 exist only in the transcripts.
+>
+> P1 and P3 confirmed, P2 and P4 falsified. Next: confirm at n=10 on haiku and sonnet.
+
 > **REGISTERED before any run. Pilot first**, per the loop: find the broken paths, repair only
 > those, then confirm at n=10 with new predictions.
 

@@ -90,3 +90,19 @@ rules removed from `type`, 2,769 → 11 characters. Result: [`q23`](../evals/res
   not logged. Every refusal is now logged with status `error` and its shape, and the render tools
   log their shape (chart type and counts, never values) on every call.
 
+### 2026-09-24 — every chart path, with data built for it (Q24 pilot)
+
+One prompt per chart type, with the data in the prompt; results in
+[`q24`](../evals/results/2026-09-24-q24-chart-paths-pilot.json). What it found:
+- **Defect: `data` required on every dataset.** scatter, bubble and boxplot could not be called in
+  object form on any tier. Fixed; every arm's freeze re-baselined, with proof that only
+  render_chart moved ([`rebaseline`](../evals/results/2026-09-24-render-chart-schema-rebaseline.json)).
+  **The production Utility server has the same schema line**, so take it along in the migration.
+- **Defect: schema refusals are invisible in the call log.** The SDK rejects the call before the
+  handler runs. Only the harness transcripts showed the 54 refused calls.
+- **Defect: the Q22c header refusal hit measured data** the user brought. Narrowed to register
+  names and per-m² figures.
+- **Choice:** only polarArea failed on the choice itself. A decision path above the rules fixes it
+  (`CHART_DECISION_TREE` in `src/tools/app-tools-best.ts`). `[CONFIDENCE: MEDIUM — pilot, n=3;
+  confirmation at n=10 pending.]`
+
