@@ -1,5 +1,7 @@
 # Capability architecture — the layer above the interface
 
+_By [David Golverdingen](https://davidgolverdingen.nl/en) — companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
+
 The rest of this repo is about one capability at a time: what a good agent-facing interface
 carries, and whether it reaches the model. This page is about what happens when there are many of
 them, and when people start building on top of them. It is the architecture the project argues

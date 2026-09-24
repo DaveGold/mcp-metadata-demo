@@ -1,5 +1,7 @@
 # Terminology
 
+_By [David Golverdingen](https://davidgolverdingen.nl/en) — companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
+
 This repository uses the terms below with specific meanings. When this repo says **X**, this page
 says what X means. It does not argue for the ideas; for that:
 
@@ -30,6 +32,9 @@ capabilities. Use _Rich Domain MCP_ for the pattern and _Rich Domain MCP Server_
 implementation. The skill's identifier, `rich-domain-mcp-server`, is a name, not a third variant.
 Avoid new variants such as _domain-rich MCP_ or _rich metadata MCP_; older talks and posts keep
 their original wording.
+
+The pattern was named by David Golverdingen (2026), in this repo and in
+[_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer).
 
 ### Agent-facing capability
 
@@ -164,6 +169,10 @@ result into a surface the model receives, and measure again.
 The domain expert validates what the agent could not settle; production telemetry
 (`queryIntent`) picks the next gap. _Rich Domain MCP_ is the destination; _ICE_ is the method for
 getting there. Use _ICE_ only after the full name has been given once.
+
+The method was named by David Golverdingen (2026) and presented in
+[_Most MCP servers are empty_](../talks/most-mcp-servers-are-empty-mcpcon-europe-2026.md#11--introspective-context-engineering-for-mcp),
+MCPCon Europe 2026.
 
 ### Evals
 

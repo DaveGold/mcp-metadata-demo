@@ -1,6 +1,6 @@
 # Most MCP servers are empty
 
-**MCPCon Europe 2026** · Amsterdam · 18 September 2026 ·
+[David Golverdingen](https://davidgolverdingen.nl/en) · **MCPCon Europe 2026** · Amsterdam · 18 September 2026 ·
 [session page](https://agntconmcpconeu26.sched.com/event/2VmKE) ·
 [slides, PDF](most-mcp-servers-are-empty-mcpcon-europe-2026.pdf) (19 slides) ·
 recording: link follows
