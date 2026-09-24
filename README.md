@@ -244,6 +244,23 @@ Also included: standalone [Claude Code](.claude/skills/rich-domain-mcp-server/SK
 
 The **`best`** arm (`/mcpBest`, [`get-building-profile-best.ts`](src/tools/get-building-profile-best.ts), [`get-weather-context-best.ts`](src/tools/get-weather-context-best.ts)) is what that skill produces when run on this repo's own tools — the reference implementation, with its audit written up in [`docs/`](docs/). Its interpretation comes from a rule registry ([`best-rules.ts`](src/domain/best-rules.ts)): each rule has a gate (`applies`), a rendered line, a `relates_to_fields` list and a `provenance` line, and **only the rendered line is sent to the model** — the rest is for tests and for whoever maintains the server.
 
+### Using the skill in your own repo
+
+Copy the skill folder unchanged (`.claude/skills/rich-domain-mcp-server/`, and the `.codex/` copy
+if you use Codex) and pin the commit you took. Put your own knowledge — platform and deploy
+wiring, auth, vendor quirks, conventions, telemetry, your own reference implementations — in
+`.skill-local/rich-domain-mcp-server/` at your repo root, starting from the skill's
+[`local-template/`](.claude/skills/rich-domain-mcp-server/local-template/README.md). The skill
+reads one overlay per document at fixed points (contract in
+[`overlays.json`](.claude/skills/rich-domain-mcp-server/overlays.json)), so a later sync replaces
+the skill folder without touching yours. Check after every sync:
+
+```bash
+node .claude/skills/rich-domain-mcp-server/check-overlays.mjs
+```
+
+This repo's own overlays are in [`.skill-local/rich-domain-mcp-server/`](.skill-local/rich-domain-mcp-server/README.md).
+
 ## Run it locally
 
 ```sh

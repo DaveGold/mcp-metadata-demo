@@ -1,11 +1,14 @@
 # Validate & Iterate — closing the loop with humans and production
 
+> **Local overlay:** if `<repo-root>/.skill-local/rich-domain-mcp-server/validation.md` exists, read it before
+> continuing (SKILL.md → *Local overlays*).
+
 Examine and Flag produce observations. Observations are not knowledge until someone who knows the
 business confirms them, and they stop being true the moment the source system changes. These two
 steps are what keep the metadata honest.
 
 In production practice roughly **90% of AI-discovered metadata holds up under expert review**
-(experience from the Warmtebouw servers, not a measurement in this repo). The other 10% is exactly
+(production experience, not a measurement in this repo — see `evidence.md` → *Unmeasured*). The other 10% is exactly
 the part that would otherwise ship as confident, plausible and wrong — and nobody would ever catch
 it, because a wrong description produces a fluent answer, not an error.
 

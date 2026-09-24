@@ -1,5 +1,8 @@
 # Delivery — what actually reaches the model
 
+> **Local overlay:** if `<repo-root>/.skill-local/rich-domain-mcp-server/delivery.md` exists, read it before
+> continuing (SKILL.md → *Local overlays*).
+
 > **Protocol-visible knowledge is not model-effective knowledge.** A server can expose every
 > rule the caller needs and still get bad answers, because the rule sat on a surface the host
 > never forwarded. Placement is an architecture decision, and you verify it on the model side,

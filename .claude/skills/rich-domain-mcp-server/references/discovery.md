@@ -1,5 +1,8 @@
 # Examine & Flag — interrogating an API until it confesses
 
+> **Local overlay:** if `<repo-root>/.skill-local/rich-domain-mcp-server/discovery.md` exists, read it before
+> continuing (SKILL.md → *Local overlays*).
+
 The first two steps of the EFVEI loop. **Examine** is the directed interrogation; **Flag** is
 tagging every pattern with a confidence level and a question while you find it.
 
@@ -186,7 +189,8 @@ few hundred rows it is `HIGH`.
 - Oldest and newest record — sort both ways. Is history truncated? Is there a migration cut-off
   where field population changes?
 - Sentinel dates (`0001-01-01`, `1900-01-01`, `9999-12-31`) and sentinel numbers. Normalise them
-  to null in `transform`, and say so in the field's `.meta()`.
+  to null in `transform`, and say so where the model reads it: the input `.meta()` for a
+  param, otherwise a response rule (the output schema is not delivered [Q11]).
 - Soft-deleted / inactive rows: are they returned by default? Can you filter them out?
 - Aggregation semantics: is a "meter reading" a period value (summable) or a running totalizer
   (summing it is 100× wrong)? Same unit, different meaning. Detect and route, never silently sum.

@@ -1,5 +1,8 @@
 # Encode — writing discoveries back into the tool
 
+> **Local overlay:** if `<repo-root>/.skill-local/rich-domain-mcp-server/metadata.md` exists, read it before
+> continuing (SKILL.md → *Local overlays*).
+
 The fourth step of the EFVEI loop: everything Examine found and Validate confirmed becomes tool
 metadata here. **Where** each piece goes is decided by what reaches the model — read
 [`delivery.md`](delivery.md) first. The short version for Claude Code:

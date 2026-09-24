@@ -1,5 +1,8 @@
 # Scaffolding — wiring a new server
 
+> **Local overlay:** if `<repo-root>/.skill-local/rich-domain-mcp-server/scaffolding.md` exists, read it before
+> continuing (SKILL.md → *Local overlays*).
+
 Whatever your hosting story is (one Firebase Function per server, a single long-running process, a
 multi-tenant monorepo), you write the same handful of pieces: a client (if the API needs one), a
 server file, tools, and the metadata. This file describes the portable parts; if your codebase
@@ -156,18 +159,13 @@ Co-locate as `<file>.test.ts`. Worth testing, in priority order:
 7. **Frozen variants**: once a variant has been measured, hash its `tools/list` + instructions so
    it cannot drift (this repo: [`arms-frozen.test.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/arms-frozen.test.ts)).
 
-## 7. Adding a variant to this repo
+## 7. Adding a variant beside the old one
 
-To build a new version of a tool next to the old one (the audit flow's step 6):
-
-1. `src/tools/<tool>-<variant>.ts` — reuse the shared resolver/clients; never retype shared prose.
-2. `src/server.ts` — add to `ServerVariant`, add a branch before the `rich` fall-through.
-3. `src/functions.ts` + `src/index.ts` — export the Cloud Function (a missing re-export means
-   `firebase deploy` never sees it).
-4. `src/http.ts` + `src/stdio.ts` — `MCP_VARIANT` allow-lists; `package.json` `deploy` list.
-5. `.mcp.json` entry and, for the eval, `.claude/agents/eval-<variant>.md` with only that arm's tools.
-6. Deploy, then prove the arm is reachable and stamping its variant in the call log before any run.
-The `best` variant is the worked example.
+To build a new version of a tool next to the measured one (the audit flow's step 6): a new tool
+file that reuses the shared clients and prose, a registration behind a variant name, its own
+endpoint or config entry, and — before any run — proof that the variant is reachable and
+stamps its own name in the call log [D]. The codebase-specific steps belong in the
+`scaffolding.md` overlay.
 
 ## Bundled lookup data
 
