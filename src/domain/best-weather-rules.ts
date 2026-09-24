@@ -138,9 +138,9 @@ export const WEATHER_RULES: readonly Rule<WeatherCtx>[] = [
     applies: (c) => !c.fullYear && c.measuredDays > 0 && hasRef(c.reference),
     render: (c) => {
       const r = c.reference as ReferencePeriod;
-      return `This ${c.requestedDays}-day window is NOT a full year, so fullYearGasNormalizationFactor is null — never apply 2800 to part of a year. Its reference is referencePeriodWeightedHDD ${r.referencePeriodWeightedHDD} (mean of ${r.window} over ${r.fromYear}–${r.toYear}). Weather-corrected energy = actual × ${r.referencePeriodWeightedHDD} ÷ totalWeightedHDD ${c.totalWeightedHDD}.`;
+      return `This ${c.requestedDays}-day window is NOT a full year, so fullYearGasNormalizationFactor is null — never apply 2800 to part of a year. Its reference is referencePeriodWeightedHDD ${r.referencePeriodWeightedHDD} (mean of ${r.window} over the fixed span ${r.fromYear}–${r.toYear}, the same for every query year, so two periods corrected this way are comparable). Weather-corrected energy = actual × ${r.referencePeriodWeightedHDD} ÷ totalWeightedHDD ${c.totalWeightedHDD}. That is the figure for THIS window in a normal year — do not scale it to a full year: a window's share of annual use depends on base load and the heating season, which this data does not contain.`;
     },
-    provenance: '2026-09-23 Q12b: no rule 3/20 (16 took the 2.53 factor road); Q16: rule + this shipped reference 15/20 on haiku; Q16b: sonnet/opus one call, answers converge.',
+    provenance: '2026-09-23 Q12b: no rule 3/20 (16 took the 2.53 factor road); Q16: rule + this shipped reference 15/20 on haiku; Q16b: sonnet/opus one call, answers converge. 2026-09-24 Q19: 16/20, but 10 of 16 then annualised the quarter (= 4,200 × 2.53) and the query-relative reference broke two-period comparison (0/10) — fixed span and the no-annualising clause added; re-measured as Q19b.',
   },
   {
     id: 'wx.partial.no_reference',
@@ -158,7 +158,7 @@ export const WEATHER_RULES: readonly Rule<WeatherCtx>[] = [
     applies: (c) => c.normalization !== null,
     render: (c) => {
       const n = c.normalization as Normalization;
-      return `Weather-corrected energy use: ${n.normalizedEnergyUse} (from ${n.energyUse}; ${n.formula}). Covers space-heating response to weather; base load (hot water, cooking) is scaled too, so treat small differences with care.`;
+      return `Weather-corrected energy use: ${n.normalizedEnergyUse} (from ${n.energyUse}; ${n.formula}). This is the weather-corrected use for this window only; do not scale it to a year. Base load (hot water, cooking) is scaled too, so treat small differences with care.`;
     },
     provenance: '2026-09-23 best: compute the determinate step when the caller passes energyUse (L1: computed values are the most model-uniform mechanism).',
   },

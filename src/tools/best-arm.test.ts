@@ -269,6 +269,17 @@ describe('best — weather', () => {
     expect(Object.keys(r)[0]).toBe('interpretation');
   });
 
+  it('two quarters get the SAME reference, so the real improvement is 3.6% (Q19b), and it says not to annualise', async () => {
+    const q1_2023 = days('2023-01-01', 90, (d) => row(d, 2, 10, 1167.9 / 90));
+    const r24 = await buildBestWeatherResponse({ dateFrom: '2024-01-01', dateTo: '2024-03-31', summaryOnly: true, energyUse: 4200 }, { query: async () => q1, archive });
+    const r23 = await buildBestWeatherResponse({ dateFrom: '2023-01-01', dateTo: '2023-03-31', summaryOnly: true, energyUse: 4600 }, { query: async () => q1_2023, archive });
+    expect(r23.summary.degreeDays.referencePeriod).toEqual(r24.summary.degreeDays.referencePeriod);
+    const n23 = r23.summary.normalization!.normalizedEnergyUse, n24 = r24.summary.normalization!.normalizedEnergyUse;
+    expect((n23 - n24) / n23).toBeCloseTo(0.036, 2);
+    expect(r24.interpretation.alerts.join(' ')).toMatch(/do not scale it to a full year/);
+    expect(bestWeatherDescription).toMatch(/never scale a partial window up to a year/);
+  });
+
   it('a full calendar year: the annual factor, no reference period', async () => {
     const year = days('2024-01-01', 366, (d) => row(d, 2, 10, 2479.9 / 366));
     const r = await buildBestWeatherResponse({ dateFrom: '2024-01-01', dateTo: '2024-12-31', summaryOnly: true }, { query: async () => year, archive });

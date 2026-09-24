@@ -52,7 +52,7 @@ READ \`interpretation\` FIRST: it states the weather correction that is valid fo
 WEATHER CORRECTION (gas / heating energy):
 - The Dutch convention uses weighted degree days: weightedHdd / totalWeightedHDD, never raw hdd.
 - Full 12-month window: corrected = actual × fullYearGasNormalizationFactor (2800 ÷ totalWeightedHDD).
-- Any shorter window: fullYearGasNormalizationFactor is null — never apply the annual 2800 to part of a year. Use summary.degreeDays.referencePeriodWeightedHDD (the same calendar window averaged over the previous 10 years): corrected = actual × referencePeriodWeightedHDD ÷ totalWeightedHDD.
+- Any shorter window: fullYearGasNormalizationFactor is null — never apply the annual 2800 to part of a year. Use summary.degreeDays.referencePeriodWeightedHDD (the same calendar window averaged over the fixed span 2014–2023, identical for every query year): corrected = actual × referencePeriodWeightedHDD ÷ totalWeightedHDD. The result is for that window only; never scale a partial window up to a year.
 - Two periods: compare by the ratio of their totalWeightedHDD.
 - Never weather-correct against forecast days.
 - Pass energyUse to get the corrected figure computed.
@@ -159,7 +159,7 @@ export async function buildBestWeatherResponse(
   let reference: WeatherCtx['reference'] = null;
   if (!fullYear && !none) {
     const lastMeasured = measured[measured.length - 1].date;
-    reference = await referencePeriodWeightedHDD(measured[0].date, lastMeasured, archive, 10, deps.archive ? '' : `${lat.toFixed(2)},${lon.toFixed(2)}`);
+    reference = await referencePeriodWeightedHDD(measured[0].date, lastMeasured, archive, deps.archive ? '' : `${lat.toFixed(2)},${lon.toFixed(2)}`);
   }
   const ref = reference && 'referencePeriodWeightedHDD' in reference ? reference : null;
 

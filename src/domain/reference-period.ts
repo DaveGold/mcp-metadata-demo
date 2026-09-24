@@ -21,6 +21,7 @@
  *
  * Differences from the throwaway Q16 arm (commit 61c73a8):
  * - The result is cached per location + window + year range.
+ * - The span is FIXED (see REFERENCE_END_YEARS), so every call's reference is comparable.
  * - Windows that cross a year boundary (a heating season Oct–Mar) are supported.
  * - A 29 February at either end maps to 28 February in non-leap years.
  * - Reference years never start before 1940 (archive start).
@@ -62,33 +63,51 @@ function dateIn(year: number, md: string): string {
 }
 
 /**
- * Mean weighted HDD of the calendar window [windowFrom, windowTo] over the `years` years
- * before it. `windowTo` may fall in the next calendar year (a window crossing 31 Dec).
+ * The reference span: every reference window whose END falls in these years (inclusive).
+ *
+ * FIXED, not relative to the query. Q19 (2026-09-24) measured the relative version — "the 10 years
+ * before this window" — and it gave Q1 2023 a 2013–2022 reference and Q1 2024 a 2014–2023 one.
+ * Normalising both to their own reference and comparing them reported a 6.6% improvement where
+ * 3.6% is right: weather-partial-normalization 0/10 against the old arm's 10/10. A normal must be
+ * the SAME number for every call, like a climatological normal.
+ *
+ * 2014–2023 keeps the values Q16 and Q19 measured unchanged (Q1: 1,231.3; Oct–Mar: 2,188.4, the
+ * seasons ending 2014–2023). Roll it forward deliberately, as a new measured change — never by
+ * making it relative to today, which would move every figure silently each January.
+ */
+export const REFERENCE_END_YEARS = { from: 2014, to: 2023 } as const;
+
+/**
+ * Mean weighted HDD of the calendar window [windowFrom, windowTo] over the fixed reference span.
+ * `windowTo` may fall in the next calendar year (a window crossing 31 Dec). The query year only
+ * decides the window's month-days, never which years are averaged.
  * Returns `{ value: null, reason }` when it cannot be computed.
  */
 export async function referencePeriodWeightedHDD(
   windowFrom: string,
   windowTo: string,
   fetchArchive: ArchiveFetcher,
-  years = 10,
-  cacheScope = ''
+  cacheScope = '',
+  span: { from: number; to: number } = REFERENCE_END_YEARS
 ): Promise<ReferencePeriod | { value: null; reason: string }> {
   const yFrom = Number(windowFrom.slice(0, 4));
   const yTo = Number(windowTo.slice(0, 4));
-  const span = yTo - yFrom;
-  if (span < 0 || span > 1) return { value: null, reason: 'window longer than one year boundary crossing' };
+  const cross = yTo - yFrom;
+  if (cross < 0 || cross > 1) return { value: null, reason: 'window longer than one year boundary crossing' };
   const mdFrom = windowFrom.slice(4);
   const mdTo = windowTo.slice(4);
-  if (span === 1 && mdTo >= mdFrom) return { value: null, reason: 'window is a year or longer; use the annual reference' };
+  if (cross === 1 && mdTo >= mdFrom) return { value: null, reason: 'window is a year or longer; use the annual reference' };
 
-  const firstYear = Math.max(ARCHIVE_START_YEAR, yFrom - years);
-  const lastYear = yFrom - 1;
-  if (lastYear < firstYear) return { value: null, reason: 'no reference years before this window in the archive' };
+  const firstEnd = Math.max(ARCHIVE_START_YEAR + cross, span.from);
+  const lastEnd = span.to;
+  if (lastEnd < firstEnd) return { value: null, reason: 'reference span lies outside the archive' };
 
   const windows: Array<{ from: string; to: string }> = [];
-  for (let y = firstYear; y <= lastYear; y++) windows.push({ from: dateIn(y, mdFrom), to: dateIn(y + span, mdTo) });
+  for (let end = firstEnd; end <= lastEnd; end++) windows.push({ from: dateIn(end - cross, mdFrom), to: dateIn(end, mdTo) });
+  const firstYear = firstEnd - cross;
+  const lastYear = lastEnd - cross;
 
-  const key = `${cacheScope}|${mdFrom}|${mdTo}|${span}|${firstYear}-${lastYear}`;
+  const key = `${cacheScope}|${mdFrom}|${mdTo}|${cross}|${firstEnd}-${lastEnd}`;
   const hit = cache.get(key);
   if (hit) return hit;
 
@@ -113,7 +132,7 @@ export async function referencePeriodWeightedHDD(
     referencePeriodWeightedHDD: mean,
     window: `${mdFrom.slice(1)} to ${mdTo.slice(1)}`,
     fromYear: firstYear,
-    toYear: lastYear + span,
+    toYear: lastEnd,
     yearsUsed: covered.length,
     source: 'Open-Meteo historical archive, same coordinates, same weighting as totalWeightedHDD',
   };
