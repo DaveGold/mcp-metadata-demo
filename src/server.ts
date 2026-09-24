@@ -77,7 +77,8 @@ export type ServerVariant =
   | 'opaque'
   | 'opaque-words'
   | 'guidance-recipe'
-  | 'best';
+  | 'best'
+  | 'best-v1';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -152,18 +153,34 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
   const epOnlineClient = options.epOnlineClient ?? new EpOnlineClient();
   const variant = options.variant ?? 'rich';
 
-  if (variant === 'best') {
-    // The reference implementation, built with the rich-domain-mcp-server skill's audit flow
-    // (references/audit.md) for both data tools. The render and log tools use their minimal
-    // descriptions and fetch_image is left out: metadata no question needs is paid for on
-    // every turn.
-    const server = new McpServer({ name: 'metadata-demo-best', version: VERSION }, { instructions: bestInstructions });
+  if (variant === 'best-v1') {
+    // `best` as measured in Q19–Q19d: the two data tools, minimal render and log tools, no
+    // fetch_image. Frozen, so the app-tool change in `best` (Q22) stays comparable.
+    const server = new McpServer(
+      { name: 'metadata-demo-best-v1', version: VERSION },
+      { instructions: bestInstructions },
+    );
     registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
     registerGetWeatherContextBestTool(server);
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
     registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
+  if (variant === 'best') {
+    // The reference implementation, built with the rich-domain-mcp-server skill's audit flow
+    // (references/audit.md): the two data tools, the render tools and the log tool. fetch_image
+    // is app-only (the table UI resolves image cells through it), so the model never sees it.
+    const server = new McpServer({ name: 'metadata-demo-best', version: VERSION }, { instructions: bestInstructions });
+    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
+    registerGetWeatherContextBestTool(server);
+    registerRenderChartTool(server, { best: true });
+    registerRenderTableTool(server, { best: true });
+    registerRenderMapTool(server, { best: true });
+    registerFetchImageTool(server, { openWorld: true });
+    registerGetToolCallLogTool(server, { best: true });
     return server;
   }
 

@@ -105,10 +105,11 @@ describe('best — delivery budgets (the host cuts at 2,048)', () => {
         expect(d, h).toContain(h);
   });
 
-  it('exposes six tools, each with all four annotations explicit', async () => {
+  it('exposes seven tools (fetch_image app-only), each with all four annotations explicit', async () => {
     const { tools } = await (await connectBest()).listTools();
     expect(tools.map((t) => t.name).sort()).toEqual(
       [
+        'fetch_image',
         'get_building_profile',
         'get_tool_call_log',
         'get_weather_context',
@@ -117,9 +118,35 @@ describe('best — delivery budgets (the host cuts at 2,048)', () => {
         'render_table',
       ].sort(),
     );
-    for (const name of ['get_building_profile', 'get_weather_context']) {
+    // Tools that reach outside the server say so: the two data tools and the image proxy.
+    for (const name of ['get_building_profile', 'get_weather_context', 'fetch_image']) {
       const a = tools.find((t) => t.name === name)!.annotations!;
-      expect(a).toEqual({ readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true });
+      expect(a, name).toEqual({
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      });
+    }
+    for (const name of ['render_chart', 'render_table', 'render_map', 'get_tool_call_log']) {
+      const a = tools.find((t) => t.name === name)!.annotations!;
+      expect(a, name).toEqual({
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      });
+    }
+    const fetchImage = tools.find((t) => t.name === 'fetch_image')!;
+    expect((fetchImage._meta as { ui?: { visibility?: string[] } }).ui?.visibility).toEqual(['app']);
+  });
+
+  it('every model-visible description fits the 2,048 cut with room to spare, and says what NOT to use it for', async () => {
+    const { tools } = await (await connectBest()).listTools();
+    for (const t of tools.filter((t) => t.name !== 'fetch_image')) {
+      expect(t.description!.length, t.name).toBeLessThanOrEqual(1800);
+      expect(t.description, t.name).toContain('WHEN TO USE:');
+      expect(t.description, t.name).toContain('WHEN NOT TO USE:');
     }
   });
 

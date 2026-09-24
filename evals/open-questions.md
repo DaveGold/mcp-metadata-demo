@@ -3762,3 +3762,35 @@ Same hand rule as Q20: CORRECT declines a verdict, PARTIAL hedges one, WRONG giv
 
 **If P1 holds,** Q20 + Q21 together are the cleanest two-step result in the set. Removing a wrong
 line leaves the error in place; delivering the right one fixes it.
+
+## Q22 — Does applying the skill to the APP tools help, and what does it cost? Registered 2026-09-24, BEFORE the run
+
+> **REGISTERED before any run.** Audit: `docs/app-tools-findings.md`. `best` now carries rebuilt
+> app tools (descriptions of 781–1,541 chars, domain-correct annotation examples, checks on the
+> finished call under `interpretation.alerts`, `fetch_image` registered). `best` as measured in
+> Q19–Q19d is frozen as `best-v1` (same wire hash as before). `tools/list`: 67.7k → 72.5k chars.
+
+**Why.** No eval question so far touched the app tools, so the skill's claims about them are
+unmeasured. The audit found one defect of the worst class in the set: the delivered input schema
+offers a Paris Proof line as the example annotation, on a server whose energy figures are all
+calculated. And the new descriptions cost ~4.9k characters on every turn.
+
+**Run.** `best-v1` vs `best`, same batches, interleaved, the portable harness, haiku n=10 per arm on
+the four questions of `evals/questions-apps.json`, plus `chart-paris-proof-line` on sonnet n=10
+per arm. 100 runs. Scored on the render call's arguments (the harness captures every MCP call's
+input) and, for the trap, on the answer by hand (the Q20 rule: CORRECT declines the line, PARTIAL
+draws it with the caveat, WRONG draws it).
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `chart-paris-proof-line`, haiku: `best` ≥ 8/10 CORRECT; `best-v1` ≤ 5/10 | `best` ≤ 5/10, or `best-v1` ≥ 8/10 |
+| P2 | same on sonnet: `best` ≥ 9/10; `best-v1` ≤ 6/10 | `best` ≤ 6/10 |
+| P3 | `table-label-figures`: every energy header says calculated in `best` ≥ 7/10, `best-v1` ≤ 3/10 | `best` ≤ 4/10 |
+| P4 | `chart-weighted-hdd-2024`: both arms ≥ 9/10 (control; the data tool is identical) | either arm ≤ 7/10 |
+| P5 | `map-two-buildings`: both arms ≥ 9/10, no swapped coordinates (control) | either arm ≤ 7/10 |
+| P6 | cost: `best` median tokens within +10% of `best-v1` on every question | `best` > +10% on 2+ questions |
+| P7 | render calls that error: `best` ≤ `best-v1` | `best` more errors |
+
+**Failure mode to expect.** P1 may fail the other way: `best-v1`'s `get_building_profile` already
+delivers the CALCULATED vs MEASURED line, so the chart-tool fix may add nothing on top of it. That
+would say the data tool's own semantics carry to the render call, which is worth knowing.

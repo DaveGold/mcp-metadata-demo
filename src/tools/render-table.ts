@@ -14,6 +14,7 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { bestTableDescription } from './app-tools-best.js';
 import { z } from 'zod';
 import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -599,7 +600,7 @@ export function findRowShapeError(columns: TableArgs['columns'], data: TableArgs
 
 // ── Tool registration ────────────────────────────────────────────────────────
 
-export function registerRenderTableTool(server: McpServer, opts: { minimal?: boolean } = {}): void {
+export function registerRenderTableTool(server: McpServer, opts: { minimal?: boolean; best?: boolean } = {}): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
   registerAppResource(server, 'Table App', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({
     contents: [
@@ -617,7 +618,7 @@ export function registerRenderTableTool(server: McpServer, opts: { minimal?: boo
     'render_table',
     {
       title: 'Render Table',
-      description: opts.minimal ? 'Render data as a table.' : description,
+      description: opts.best ? bestTableDescription : opts.minimal ? 'Render data as a table.' : description,
       inputSchema,
       annotations: {
         readOnlyHint: true,
