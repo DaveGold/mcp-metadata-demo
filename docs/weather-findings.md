@@ -57,7 +57,7 @@ without new findings are omitted.
   "do not scale it to a full year" clause in the alert, the normalization line and the
   description. Q19b: 18/20 correct, annualising among correct answers 10/16 → 5/18. Reduced, not
   gone — several runs quote the caveat and annualise anyway.
-- **Forecast window.** On a window ending in the future, haiku made no call at all in 8 of 10 runs
+- **Forecast window (head fixed 2026-09-24, Q19c: calls 10/10, correct 5/10).** On a window ending in the future, haiku made no call at all in 8 of 10 runs
   and asked for the gas figure: the description's "never weather-correct against forecast days"
   was read, and the forecast tail was never shown. `best` 2/10, `rich` 4/10 (a gap under the
   noise bar).

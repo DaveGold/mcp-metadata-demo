@@ -3626,6 +3626,16 @@ Comparisons with Q19's `best` cells are cross-sitting: quote the direction only.
 
 ### Q19c — Do the remaining misses disappear once the head says "call it directly"? Registered 2026-09-24, BEFORE the run
 
+> **ANSWERED 2026-09-24.** See [`results/2026-09-24-q19c-call-it-directly.json`](results/2026-09-24-q19c-call-it-directly.json).
+> - **P1 confirmed.** 0 of 20 `best` runs asked for an address; there was a weather call in 30/30.
+> - **P3 confirmed.** The quarter questions scored 10/10 and 9/10.
+> - **P2 partial.** `best` called in 10/10, but was correct in 5/10. With the call made, the
+>   remaining miss is reading: 5 runs give a whole-window factor without mentioning the 7 forecast
+>   days the response's alert names.
+>
+> The pre-call gap is closed by the head. What is left is the known limit of response guidance
+> on haiku (Q12b).
+
 > **REGISTERED before any run.** Deployed and verified live: 1,776 chars, containing "CALL IT
 > DIRECTLY".
 

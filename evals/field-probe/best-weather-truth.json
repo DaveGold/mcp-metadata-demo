@@ -1,0 +1,170 @@
+{
+ "_comment": "Ground truth for the field-reading probe on the best arm (get_weather_context).",
+ "fields": {
+  "records.date": {
+   "kinds": [
+    "metadata"
+   ],
+   "unit": "date",
+   "meaning": "calendar date",
+   "critical": false
+  },
+  "records.tempMean": {
+   "kinds": [
+    "measured"
+   ],
+   "unit": "°c",
+   "meaning": "daily mean temperature",
+   "critical": false
+  },
+  "records.tempMin": {
+   "kinds": [
+    "measured"
+   ],
+   "unit": "°c",
+   "meaning": "daily minimum temperature",
+   "critical": false
+  },
+  "records.tempMax": {
+   "kinds": [
+    "measured"
+   ],
+   "unit": "°c",
+   "meaning": "daily maximum temperature",
+   "critical": false
+  },
+  "records.hdd": {
+   "kinds": [
+    "computed_by_tool"
+   ],
+   "unit": "°c·day",
+   "meaning": "raw heating degree days, base 18 °C",
+   "critical": true
+  },
+  "records.cdd": {
+   "kinds": [
+    "computed_by_tool"
+   ],
+   "unit": "°c·day",
+   "meaning": "cooling degree days, base 18 °C",
+   "critical": false
+  },
+  "records.weightedHdd": {
+   "kinds": [
+    "computed_by_tool"
+   ],
+   "unit": "°c·day",
+   "meaning": "seasonally weighted heating degree days (Dutch convention)",
+   "critical": true
+  },
+  "records.ghiKwhM2": {
+   "kinds": [
+    "measured"
+   ],
+   "unit": "kwh/m2",
+   "meaning": "global horizontal irradiance for the day",
+   "critical": true
+  },
+  "records.sunshineDurationHours": {
+   "kinds": [
+    "measured"
+   ],
+   "unit": "hours",
+   "meaning": "sunshine duration",
+   "critical": false
+  },
+  "records.weatherCode": {
+   "kinds": [
+    "measured",
+    "identifier"
+   ],
+   "unit": "none",
+   "meaning": "WMO weather code",
+   "critical": false
+  },
+  "records.weatherLabel": {
+   "kinds": [
+    "computed_by_tool"
+   ],
+   "unit": "none",
+   "meaning": "text label for the weather code",
+   "critical": false
+  },
+  "records.isForecast": {
+   "kinds": [
+    "metadata"
+   ],
+   "unit": "none",
+   "meaning": "true = forecast day, false = archive day",
+   "critical": true
+  },
+  "summary.period.measuredDays": {
+   "kinds": [
+    "metadata",
+    "computed_by_tool"
+   ],
+   "unit": "count",
+   "meaning": "number of archive (non-forecast) days",
+   "critical": false
+  },
+  "summary.period.isFullYearWindow": {
+   "kinds": [
+    "metadata",
+    "computed_by_tool"
+   ],
+   "unit": "none",
+   "meaning": "window is exactly 12 whole months",
+   "critical": false
+  },
+  "summary.degreeDays.totalWeightedHDD": {
+   "kinds": [
+    "computed_by_tool"
+   ],
+   "unit": "°c·day",
+   "meaning": "sum of weighted HDD over archive days",
+   "critical": true
+  },
+  "summary.degreeDays.referenceAnnualWeightedHDD": {
+   "kinds": [
+    "metadata",
+    "computed_by_tool"
+   ],
+   "unit": "°c·day",
+   "meaning": "Dutch normal-year weighted HDD (2800)",
+   "critical": false
+  },
+  "summary.degreeDays.fullYearGasNormalizationFactor": {
+   "kinds": [
+    "computed_by_tool"
+   ],
+   "unit": "none",
+   "meaning": "2800 / totalWeightedHDD, only for a full 12-month window; null otherwise",
+   "critical": true
+  },
+  "summary.degreeDays.referencePeriodWeightedHDD": {
+   "kinds": [
+    "computed_by_tool"
+   ],
+   "unit": "°c·day",
+   "meaning": "normal weighted HDD for the same calendar window (fixed reference span)",
+   "critical": true
+  },
+  "summary.solarRadiation.totalGHI_kWhM2": {
+   "kinds": [
+    "measured",
+    "computed_by_tool"
+   ],
+   "unit": "kwh/m2",
+   "meaning": "total irradiance over the window",
+   "critical": true
+  },
+  "summary.fightingSystemDays.count": {
+   "kinds": [
+    "computed_by_tool"
+   ],
+   "unit": "count",
+   "meaning": "days with tempMin < 14 and tempMax > 20",
+   "critical": false
+  }
+ }
+}
