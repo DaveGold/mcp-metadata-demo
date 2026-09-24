@@ -68,9 +68,15 @@ describe('best — delivery budgets (Q7: the host cuts at 2,048)', () => {
   it('load-bearing sentences sit early in the description', () => {
     expect(bestBuildingDescription.indexOf('NO metered')).toBeGreaterThan(-1);
     expect(bestBuildingDescription.indexOf('NO metered')).toBeLessThan(400);
-    expect(bestBuildingDescription.indexOf('CALCULATED vs MEASURED')).toBeLessThan(900);
-    expect(bestWeatherDescription.indexOf('referencePeriodWeightedHDD')).toBeLessThan(1000);
-    expect(bestWeatherDescription.indexOf('never apply the annual 2800')).toBeLessThan(1000);
+    // The eight-block order (WHEN TO USE … RETURNS, then INTERPRETATION) puts the rules after
+    // RETURNS; they must still sit at least ~500 chars inside the 2,048 cut (Q7).
+    expect(bestBuildingDescription.indexOf('CALCULATED vs MEASURED')).toBeLessThan(1500);
+    expect(bestWeatherDescription.indexOf('referencePeriodWeightedHDD')).toBeLessThan(1500);
+    expect(bestWeatherDescription.indexOf('never apply the annual 2800')).toBeLessThan(1500);
+    expect(bestWeatherDescription.indexOf('no address is needed')).toBeLessThan(600);
+    for (const d of [bestBuildingDescription, bestWeatherDescription])
+      for (const h of ['WHEN TO USE:', 'WHEN NOT TO USE:', 'RELATED TOOLS:', 'QUERY STRATEGY:', 'RETURNS:', 'INTERPRETATION', 'ALERTS:'])
+        expect(d, h).toContain(h);
   });
 
   it('exposes six tools, each with all four annotations explicit', async () => {

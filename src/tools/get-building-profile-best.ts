@@ -31,19 +31,23 @@ import {
 } from './get-building-profile.js';
 
 export const bestBuildingDescription = `\
-Dutch building facts for one address from two public registers: BAG (address, bouwjaar, area, gebruiksdoel, coordinates) and the registered EP-Online energy label (label letter and its CALCULATED energy figures). This server has NO metered energy consumption — no meter readings, no actual gas or electricity use.
+WHEN TO USE: what building is at a Dutch address — label, bouwjaar, area, and label-based estimates (CO₂, space-heating gas, heat-pump readiness, overheating).
 
-READ \`interpretation\` FIRST. For this record it gives the computed values (total CO₂, space-heating gas, heat-pump band with the margin to the nearest boundary, overheating verdict) and the reading rules that apply. Quote computed values; do not recompute them another way.
+WHEN NOT TO USE: this server has NO metered energy consumption — no meter readings, no actual gas or electricity use. Not for addresses outside the Netherlands.
 
-RULES FOR EVERY RECORD:
+RELATED TOOLS: get_weather_context(latitude/longitude = coordinaten.lat/lon) for degree days and weather correction.
+
+QUERY STRATEGY: postcode = 4 digits + 2 capitals, no space ("3543AR"). huisnummer = integer only; a letter goes in huisletter (28A → 28 + "A"), an addition in toevoeging. Several units match? Retry with one from candidates.
+
+RETURNS: interpretation, derived, candidates, then BAG facts (bouwjaar, oppervlakte_bag_verblijfsobject_m2 = ONE unit, coordinaten) and the EP-Online label (energielabel, berekeningstype, *_berekend_* figures per m² of gebruiksoppervlakte_thermische_zone_m2).
+
+INTERPRETATION — read \`interpretation\` FIRST: this record's computed values and reading rules. Quote them; do not recompute. For every record:
 - CALCULATED vs MEASURED: every EP-Online energy figure is calculated by the label method, never measured. Paris Proof and other metered benchmarks are defined on measured final energy, so where a question asks for that comparison, say it cannot be made from this data and why, rather than producing a ratio.
-- Per-m² label figures are per m² of gebruiksoppervlakte_thermische_zone_m2 (the zone the label covers), not per m² of the BAG area. The BAG area is one verblijfsobject, not the building.
+- Totals use gebruiksoppervlakte_thermische_zone_m2, never the BAG area.
 - A null field was not produced by that label method. Never substitute an estimate or a different field; say the data does not contain it.
 - No registered label means no label is known. Do not infer one from bouwjaar or building type.
 
-INPUT: postcode = 4 digits + 2 capitals, no space ("3543AR"). huisnummer = integer only; a letter goes in huisletter (28A → huisnummer 28, huisletter "A"), an addition in toevoeging. If several units match, the response lists them in candidates: retry with the right huisletter/toevoeging.
-
-NOT FOR: meter readings or actual consumption; addresses outside the Netherlands.`;
+ALERTS: interpretation.alerts — computed verdicts and this record's branch (not found, several units, no label).`;
 
 // ── Output schema: shape-only (Q11: not delivered to the model; validation + UI only) ──
 
