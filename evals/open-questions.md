@@ -3932,3 +3932,38 @@ or series. Each run scores CORRECT (acceptable form), WRONG (a listed wrong form
 **Failure mode to expect.** Models may choose well without any rules (C at ceiling). The honest
 result is then that the `type` rules are volume, paid on every turn (~3k characters), and a
 candidate to trim.
+
+## Q24 — Can the decision tree reach all 14 chart types when the data calls for them? Registered 2026-09-24, BEFORE the pilot
+
+> **REGISTERED before any run. Pilot first**, per the loop: find the broken paths, repair only
+> those, then confirm at n=10 with new predictions.
+
+**Why.** Q23 showed that this server's data only ever asks for bar or line, so whether the other
+12 paths work was untested. This builds the data: `evals/questions-chart-paths.json` has one
+question per chart type, with the data in the prompt and no type named. The structure of the data
+is what should decide the type (a flow, a subset funnel, a network, a hierarchy, a grid, samples
+per category, three measures, two measures, a trend, a cycle, shares, a profile, a ranking).
+
+**Arms:**
+- A — `best`: the per-type REFUSE rules on `type`.
+- B — `best-no-type-rules`: the enum only.
+- C — `best-decision-tree`: a question-first decision path ("decide from what the data IS: flows →
+  sankey, subset stages → funnel, …") placed ABOVE the same rules on `type`, where it is delivered
+  (3,829 characters). `rich` has a comparable path in its description, but that one falls mostly
+  past the cut.
+
+**Pilot.** haiku, n=3 per path per arm, 126 runs, waves of 9 (3 arms × 3). Scoring is by the type
+of the last successful render_chart:
+- CORRECT: the target type;
+- ACCEPTABLE: a listed alternative;
+- WRONG: any other type;
+- FAILED: no chart was rendered.
+
+A path counts as REACHED when at least 2 of its 3 runs are CORRECT.
+
+| # | pilot expectation | falsified if |
+|---|---|---|
+| P1 | A reaches ≥ 9 of 14 paths | ≤ 6 |
+| P2 | B reaches fewer paths than A, and the gap is in the structure paths (sankey, funnel, graph, treemap, matrix, boxplot, bubble) | B ≥ A |
+| P3 | C reaches ≥ as many paths as A, and at least one path A misses | C < A |
+| P4 | line, bar, scatter and sankey are reached by every arm (the data leaves little choice) | any of them missed by 2+ arms |

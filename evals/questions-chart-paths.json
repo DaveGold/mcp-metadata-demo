@@ -1,0 +1,106 @@
+{
+ "_what_this_is": "One question per render_chart type, with the data in the prompt and no type named, so each walks one path of the decision tree. Scored on the type of the last successful render_chart call: the target type is CORRECT, a listed alternative is ACCEPTABLE, anything else is WRONG, and no successful chart is FAILED. Registered for Q24 (evals/open-questions.md).",
+ "questions": [
+  {
+   "id": "path-bar",
+   "target": "bar",
+   "alt": [],
+   "question": "Hours booked per project last quarter: P-101 412, P-102 388, P-103 51, P-104 240, P-105 199, P-106 97, P-107 305, P-108 143. Which projects took the most hours? Show it."
+  },
+  {
+   "id": "path-line",
+   "target": "line",
+   "alt": [
+    "bar"
+   ],
+   "question": "Monthly electricity use of an office building in kWh, 2023-01 1180, 2023-02 1105, 2023-03 1010, 2023-04 860, 2023-05 720, 2023-06 690, 2023-07 705, 2023-08 712, 2023-09 780, 2023-10 905, 2023-11 1040, 2023-12 1150, 2024-01 1120, 2024-02 1060, 2024-03 980, 2024-04 840, 2024-05 705, 2024-06 680, 2024-07 690, 2024-08 701, 2024-09 760, 2024-10 880, 2024-11 1015, 2024-12 1110. How has its electricity use developed? Show it."
+  },
+  {
+   "id": "path-pie",
+   "target": "pie",
+   "alt": [
+    "doughnut",
+    "bar"
+   ],
+   "question": "Energy use of a building last year by carrier: electricity 70%, gas 25%, district heat 5%. What does its energy use consist of? Show it."
+  },
+  {
+   "id": "path-doughnut",
+   "target": "doughnut",
+   "alt": [
+    "pie"
+   ],
+   "question": "Of the 1,240 MWh a site used last year, 38% was renewable (on-site PV and green contracts) and 62% was not. Show the renewable share, with the total of 1,240 MWh visible in the chart."
+  },
+  {
+   "id": "path-radar",
+   "target": "radar",
+   "alt": [
+    "bar"
+   ],
+   "question": "Two office buildings, each scored 0–100 on five sustainability themes. Building A: insulation 80, ventilation 65, heating 70, lighting 90, solar 40. Building B: insulation 50, ventilation 85, heating 60, lighting 55, solar 75. How do their profiles differ? Show it."
+  },
+  {
+   "id": "path-polarArea",
+   "target": "polarArea",
+   "alt": [
+    "bar"
+   ],
+   "question": "Average gas use per weekday over the heating season, in m³: Mon 412, Tue 398, Wed 405, Thu 401, Fri 380, Sat 150, Sun 140. What does the weekly cycle look like? Show it."
+  },
+  {
+   "id": "path-bubble",
+   "target": "bubble",
+   "alt": [
+    "scatter"
+   ],
+   "question": "Eight buildings with floor area (m²), energy use (MWh/year) and CO₂ (t/year): Ceres 4200/610/148, Delta 1800/310/71, Eiland 9600/1180/262, Fokker 2500/520/130, Gouda 6100/700/150, Haven 3300/290/60, IJdok 7800/1320/310, Jupiter 1200/260/66. How do size, energy use and emissions relate across these buildings? Show all three at once."
+  },
+  {
+   "id": "path-scatter",
+   "target": "scatter",
+   "alt": [],
+   "question": "Per month for two years, weighted heating degree days and gas use (m³): 412 HDD / 5210 m³, 352 HDD / 4480 m³, 301 HDD / 3920 m³, 190 HDD / 2560 m³, 88 HDD / 1320 m³, 25 HDD / 610 m³, 8 HDD / 420 m³, 12 HDD / 450 m³, 64 HDD / 1010 m³, 170 HDD / 2280 m³, 290 HDD / 3760 m³, 380 HDD / 4890 m³, 398 HDD / 5010 m³, 340 HDD / 4390 m³, 280 HDD / 3650 m³, 175 HDD / 2410 m³, 95 HDD / 1450 m³, 30 HDD / 640 m³, 10 HDD / 430 m³, 15 HDD / 470 m³, 70 HDD / 1090 m³, 160 HDD / 2150 m³, 305 HDD / 3950 m³, 371 HDD / 4760 m³. Does gas use move with the weather? Show it."
+  },
+  {
+   "id": "path-sankey",
+   "target": "sankey",
+   "alt": [],
+   "question": "Energy flows of a building last year, in MWh: grid electricity 600 goes to the heat pump 250, lighting 150 and ventilation 200; gas 400 goes to the boiler 400; the boiler delivers space heating 330 and hot water 70; the heat pump delivers space heating 250. Where does the energy go, from source through system to end use? Show it."
+  },
+  {
+   "id": "path-matrix",
+   "target": "matrix",
+   "alt": [],
+   "question": "Electricity use in kWh per weekday and 4-hour block (00–04, 04–08, 08–12, 12–16, 16–20, 20–24). Mon 40, 95, 310, 290, 140, 55. Tue 42, 98, 305, 300, 150, 52. Wed 41, 96, 315, 295, 145, 54. Thu 43, 99, 300, 285, 138, 56. Fri 40, 90, 280, 240, 110, 50. Sat 38, 40, 60, 58, 45, 41. Sun 37, 39, 45, 44, 42, 40. When in the week does the building run? Show it."
+  },
+  {
+   "id": "path-treemap",
+   "target": "treemap",
+   "alt": [
+    "sankey"
+   ],
+   "question": "Budget of project G25 in €k, by phase and cost item. Engineering: design 80, calculations 45, permits 15. Installation: heat pumps 420, pipework 260, ventilation units 310, electrical 140. Commissioning: testing 35, training 10, documentation 12. Where does the budget sit? Show the breakdown."
+  },
+  {
+   "id": "path-boxplot",
+   "target": "boxplot",
+   "alt": [],
+   "question": "Daily electricity use (kWh) of four buildings over ten days. North: 410, 420, 395, 430, 415, 405, 980, 412, 418, 400. South: 300, 520, 280, 610, 350, 290, 470, 330, 590, 310. East: 150, 155, 148, 152, 151, 149, 153, 150, 154, 147. West: 220, 240, 210, 260, 230, 225, 245, 215, 235, 228. Which building's daily use varies the most, and are there outliers? Show it."
+  },
+  {
+   "id": "path-funnel",
+   "target": "funnel",
+   "alt": [
+    "bar"
+   ],
+   "question": "Heat-pump enquiries this year: 480 leads, 210 site visits, 130 quotes, 74 orders, 61 installed. Where do enquiries drop out? Show it."
+  },
+  {
+   "id": "path-graph",
+   "target": "graph",
+   "alt": [],
+   "question": "In one building, the heat pump depends on the electrical supply and on the buffer tank. The buffer tank feeds the floor heating and the air handling unit. The air handling unit also depends on the building management system (BMS), and the BMS controls the heat pump and the floor heating. Show how these systems depend on each other."
+  }
+ ]
+}

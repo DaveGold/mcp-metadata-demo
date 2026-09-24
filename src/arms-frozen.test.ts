@@ -36,6 +36,8 @@ const FROZEN_ARMS: ServerVariant[] = [
   'best-v1',
   // Q23 arm C: best without render_chart's per-type rules.
   'best-no-type-rules',
+  // Q24 arm C: best with a decision path on render_chart's type.
+  'best-decision-tree',
 ];
 
 const noBag: BagClientLike = {
