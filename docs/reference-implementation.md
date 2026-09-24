@@ -82,7 +82,7 @@ data tools is written up in [`building-profile-findings.md`](building-profile-fi
   [`alerts[]`](../src/domain/generate-alerts.ts) are the first version of the response-side rules.
 - **thin** — the whole ablated tool, ~60 lines, none of the above:
   [`get-building-profile-minimal.ts`](../src/tools/get-building-profile-minimal.ts) (variant
-  `minimal`, endpoint `/mcpMinimal`), and its [wire view](wire/minimal.md)
+  `minimal`, endpoint `/mcpThin`, also `/mcpMinimal`), and its [wire view](wire/minimal.md)
 - **Select** — field projection with its safety rails (never fall back silently to full records,
   alert on unknown fields): [`project-fields.ts`](../src/domain/project-fields.ts)
 - **queryIntent + Iterate** — the persisted call log and the tool that reads it back:

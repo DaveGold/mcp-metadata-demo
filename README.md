@@ -109,14 +109,14 @@ Why, and at what cost: [`docs/design.md`](docs/design.md) · line by line in the
 No install, no API key. Three hosted endpoints over the same data; only the capability layer
 differs:
 
-- **thin** — `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal`
+- **thin** — `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpThin` (also at `/mcpMinimal`, the URL on the slide)
 - **rich** — `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp`
 - **best** — `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest`
 
 ```json
 {
   "mcpServers": {
-    "metadata-demo-thin": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal" },
+    "metadata-demo-thin": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpThin" },
     "metadata-demo-rich": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp" },
     "metadata-demo-best": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest" }
   }

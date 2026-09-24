@@ -53,7 +53,7 @@ three entrypoints — tool registration lives in exactly one place:
 - **Local HTTP** ([src/http.ts](../src/http.ts)) — Streamable-HTTP bound to `127.0.0.1` for
   browser-based testing, no middleware.
 - **Cloud Functions** ([src/functions.ts](../src/functions.ts)) — one Firebase Cloud Function v2 per
-  tier (`mcp` = rich, `mcpMinimal` = thin, `mcpBest` = best, plus the eval arms) wrapping the same
+  tier (`mcp` = rich, `mcpThin` and `mcpMinimal` = thin, `mcpBest` = best, plus the eval arms) wrapping the same
   HTTP app with `hosted: true`, which mounts request-logging, daily-cap, and rate-limit middleware.
   EP-Online key injected from Secret Manager.
 
@@ -111,9 +111,9 @@ The hosted endpoints run as Firebase Cloud Functions. To deploy your own:
    to push [`firestore.rules`](../firestore.rules)/[`firestore.indexes.json`](../firestore.indexes.json).
    This is what `get_tool_call_log` reads/writes to when deployed; no secret needed — Cloud
    Functions supplies credentials automatically.
-5. `npm run deploy` — ships every tier: `mcp`, `mcpMinimal`, `mcpBest` and the eval arms. To ship
+5. `npm run deploy` — ships every tier: `mcp`, `mcpThin`, `mcpMinimal`, `mcpBest` and the eval arms. To ship
    only the three public tiers:
-   `npm run build && firebase deploy --only functions:mcp,functions:mcpMinimal,functions:mcpBest`
+   `npm run build && firebase deploy --only functions:mcp,functions:mcpThin,functions:mcpMinimal,functions:mcpBest`
 
 ## Language policy
 

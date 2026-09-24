@@ -6,18 +6,18 @@ question** of each.
 
 | tier | endpoint | what it ships |
 |---|---|---|
-| **thin** | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal` | one sentence per tool, no schema descriptions, no alerts |
+| **thin** | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpThin` | one sentence per tool, no schema descriptions, no alerts |
 | **rich** | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp` | the tier from the talk: a long description, a described input schema, curated `alerts[]` |
 | **best** | `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest` | the reference built with the skill: descriptions inside the 2,048 cut, `interpretation`-first responses, computed values, fields named so they cannot be misread |
 
 Same Firebase project, same code: one `createServer({ variant })` factory, and the function name
-picks the tier (`mcpMinimal` = variant `minimal`, the thin tier; `mcp` = `rich`; `mcpBest` =
-`best`). The eval arms are deployed from the same factory.
+picks the tier (`mcpThin` = variant `minimal`, the thin tier — also served at `mcpMinimal`, the URL
+on the MCPCon slide; `mcp` = `rich`; `mcpBest` = `best`). The eval arms are deployed from the same factory.
 
 ```json
 {
   "mcpServers": {
-    "metadata-demo-thin": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal" },
+    "metadata-demo-thin": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpThin" },
     "metadata-demo-rich": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp" },
     "metadata-demo-best": { "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest" }
   }
@@ -96,7 +96,7 @@ persisted Firestore log across every caller. See [`log-store.ts`](../src/shared/
 Every tier runs the same tool names over the same data path; only the capability layer changes.
 Exact bytes per tier: [`thin`](wire/minimal.md) · [`rich`](wire/rich.md) · [`best`](wire/best.md).
 
-| | **thin** (`/mcpMinimal`) | **rich** (`/mcp`) | **best** (`/mcpBest`) |
+| | **thin** (`/mcpThin`) | **rich** (`/mcp`) | **best** (`/mcpBest`) |
 |---|---|---|---|
 | `get_building_profile` description _(model-visible up to char 2,048)_ | one sentence (~50 chars) | ~8,000 chars; 74% past the cut | 1,800 chars, all delivered |
 | Input schema _(model-visible)_ | 2 bare fields, no descriptions, no validation | 4 fields, each `.describe()`d, format-validated | each `.describe()`d; weather's `select` lists its exact field names |
