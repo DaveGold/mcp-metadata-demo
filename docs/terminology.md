@@ -211,13 +211,44 @@ The ladder from the talk _Most MCP servers are empty_, by who discovers the mean
 ## The larger thesis
 
 These terms describe the architecture the project argues for. They come from production
-experience, not from this eval set, and should be quoted as a thesis.
+experience, not from this eval set, and should be quoted as a thesis. The argument itself:
+[Capability architecture](capability-architecture.md).
 
 ### Capability reuse
 
 One domain capability composed into many workflows, agents or questions without being rebuilt
 for each. The basis for _we scaled capabilities, not agents_ and _scale capabilities, not use
 cases_.
+
+### Capability stacking
+
+Composing independently useful capabilities into questions and workflows none of them was built
+for. Its effect is **compounding optionality**: with _n_ composable capabilities there are 2ⁿ − 1
+possible sets, and each new one extends every set already present. A claim about the option space,
+not about value — most combinations are useless, and value does not grow exponentially.
+
+### Ambassador
+
+An early user chosen for the rollout: someone with a frequent real problem, enough domain
+knowledge to judge the answers, and enough credibility for colleagues to follow. Also called a
+_champion user_. Part of the discovery loop, not only of distribution: their questions show what
+the capability is missing.
+
+### Skill (procedure layer)
+
+A captured work procedure — steps, decisions, rules, approval points — that a general agent runs
+over the capabilities. Capabilities say _what the company can do_; skills say _how the work is
+done_; a prompt, a schedule or an event says _when_. Not to be confused with _the skill_ in this
+repo, [`rich-domain-mcp-server`](../.claude/skills/rich-domain-mcp-server/SKILL.md), which is an
+engineering procedure for building interfaces.
+
+### Engineering multiplier
+
+The phrase is Gregor Ojstersek's (TechLead Conference): an engineer who multiplies their impact by
+combining human skills, pragmatic problem solving and AI tools — attribute that framing to him. In
+this repo's extension: a system that turns engineering work into reusable capability, so that
+other people can compose, run and improve their own workflows without a new software project for
+each.
 
 ### General-purpose vs specialised agents
 
@@ -229,4 +260,6 @@ agent when the task demands it; enrich the interface when the domain demands it.
 
 A company that exposes its systems as composable agent-facing capabilities carrying enough domain
 meaning for a capable general agent to discover, interpret and safely operate them. Short form:
-_make the company agent-readable._
+_make the company agent-readable._ In the fuller form it also exposes how its people work —
+procedures as skills, operational rhythm as schedules and events — not only what its systems can
+do.

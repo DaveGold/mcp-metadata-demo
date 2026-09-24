@@ -43,6 +43,37 @@ an example in an app's input schema is delivered, and is copied — including a 
 drawn on calculated bars. And a fix the model _must_ make needs the call refused with the fix in
 the message; an alert after a successful render is read as a note, not as a reason to redo it.
 
+## Refuse what would mislead
+
+In industrial control, a system that reports success while the operator cannot see the result is
+badly designed; an interlock stops the action instead. The render tools apply that rule. A call
+that would render nothing, or render something wrong, is refused with the fix in the message — not
+drawn and reported as done:
+
+- `render_chart` refuses a `type="line"` annotation without `scaleID` (Chart.js draws nothing and
+  reports success), an annotation value that is not one of the category labels, and annotations on
+  a chart type that cannot show them.
+- `render_table` refuses rows whose shape does not match the columns, and — in `best` — a header
+  that presents a calculated label figure as if it were measured consumption.
+- `render_map` refuses an empty marker list and coordinates outside the valid range.
+
+**Semantic correctness is part of UI correctness.** A chart can be syntactically valid and still
+wrong: a Paris Proof line (defined on measured energy) drawn over calculated label figures looks
+convincing and compares two different quantities. The evals found exactly that, copied from an
+example in the input schema, and fixed it
+([Q22](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
+
+**Refuse or alert.** Not every problem is a refusal. Where the render is usable but could be better
+— a pie above five slices, too many line series, an overfull radar — `best` renders and returns an
+alert with the fix. Where the fix is mandatory, it refuses: an alert after a successful render was
+acted on 2/10, a refusal 10/10
+([Q22b, Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
+The details: [`app-tools-findings.md`](app-tools-findings.md).
+
+This is where the interaction design in the [capability architecture](capability-architecture.md#7--a-skill-is-a-journey)
+meets the measurements: choosing the surface is part of the journey, and a surface that misleads
+is a failed step, however cleanly it renders.
+
 ## How an MCP app gets to the client
 
 **The protocol**: MCP Apps delivers UI as a `ui://` resource. The host client (Claude Desktop,
