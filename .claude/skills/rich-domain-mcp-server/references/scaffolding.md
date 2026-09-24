@@ -1,7 +1,7 @@
 # Scaffolding — wiring a new server
 
-> **Local overlay:** if `<repo-root>/.skill-local/rich-domain-mcp-server/scaffolding.md` exists, read it before
-> continuing (SKILL.md → *Local overlays*).
+> **Local overlay:** REQUIRED — if `<repo-root>/.skill-local/rich-domain-mcp-server/scaffolding.md` exists, read it
+> before the rest of this file (SKILL.md → *Local overlays*).
 
 Whatever your hosting story is (one Firebase Function per server, a single long-running process, a
 multi-tenant monorepo), you write the same handful of pieces: a client (if the API needs one), a

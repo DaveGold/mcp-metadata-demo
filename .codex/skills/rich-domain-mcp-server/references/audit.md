@@ -1,7 +1,7 @@
 # Audit — bringing an EXISTING server or tool to the reference
 
-> **Local overlay:** if `<repo-root>/.skill-local/rich-domain-mcp-server/audit.md` exists, read it before
-> continuing (SKILL.md → *Local overlays*).
+> **Local overlay:** REQUIRED — if `<repo-root>/.skill-local/rich-domain-mcp-server/audit.md` exists, read it
+> before the rest of this file (SKILL.md → *Local overlays*).
 
 Use this when the tool already exists and already has metadata. Rich-looking metadata is not
 evidence that it works: in this repo the richest tool delivered 28% of its description, and one

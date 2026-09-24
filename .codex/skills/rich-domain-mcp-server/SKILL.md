@@ -17,6 +17,14 @@ description: >-
 
 # rich-domain-mcp-server — build, audit and measure MCP tools
 
+> **REQUIRED before anything else — local overlays.** Find `<repo-root>`: the root of the current
+> git worktree (`git rev-parse --show-toplevel`; in Claude Code also `${CLAUDE_PROJECT_DIR}`),
+> never a path relative to this skill's folder or the cwd. If
+> `<repo-root>/.skill-local/rich-domain-mcp-server/README.md` exists, read it NOW, before any
+> other file, and check its contract version (*Local overlays* below). Then, every time you open
+> a reference file, read the overlay it names on its first lines before its content. No such
+> file: this skill applies as written.
+
 A good MCP codebase gives you transport, logging and auth. What you actually build is the layer a
 model reasons over at call time: **field names, the description head, the input schema, and the
 response**. Plumbing is a day; that layer is the product.
@@ -30,12 +38,6 @@ Every rule below carries a tag (`[Q7]`, `[BT]`, `[N2]`) that resolves in
 before weakening a rule. The eval set is this repo's `evals/`; the paper it accompanies is
 ["The Missing Layer"](https://davidgolverdingen.nl/en/the-missing-layer).
 
-> **Local overlays — check this first.** Find `<repo-root>`: the root of the current git worktree
-> (`git rev-parse --show-toplevel`; in Claude Code also `${CLAUDE_PROJECT_DIR}`), never a path
-> relative to this skill's folder or the cwd. If
-> `<repo-root>/.skill-local/rich-domain-mcp-server/README.md` exists, read it now and check its
-> contract version (see *Local overlays* below). It names the codebase and its conventions, and
-> each reference file here names its own overlay. No such file: this skill applies as written.
 
 ---
 

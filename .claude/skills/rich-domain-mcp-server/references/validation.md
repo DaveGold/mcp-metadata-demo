@@ -1,7 +1,7 @@
 # Validate & Iterate — closing the loop with humans and production
 
-> **Local overlay:** if `<repo-root>/.skill-local/rich-domain-mcp-server/validation.md` exists, read it before
-> continuing (SKILL.md → *Local overlays*).
+> **Local overlay:** REQUIRED — if `<repo-root>/.skill-local/rich-domain-mcp-server/validation.md` exists, read it
+> before the rest of this file (SKILL.md → *Local overlays*).
 
 Examine and Flag produce observations. Observations are not knowledge until someone who knows the
 business confirms them, and they stop being true the moment the source system changes. These two

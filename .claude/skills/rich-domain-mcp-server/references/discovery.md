@@ -1,7 +1,7 @@
 # Examine & Flag — interrogating an API until it confesses
 
-> **Local overlay:** if `<repo-root>/.skill-local/rich-domain-mcp-server/discovery.md` exists, read it before
-> continuing (SKILL.md → *Local overlays*).
+> **Local overlay:** REQUIRED — if `<repo-root>/.skill-local/rich-domain-mcp-server/discovery.md` exists, read it
+> before the rest of this file (SKILL.md → *Local overlays*).
 
 The first two steps of the EFVEI loop. **Examine** is the directed interrogation; **Flag** is
 tagging every pattern with a confidence level and a question while you find it.

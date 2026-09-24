@@ -1,7 +1,7 @@
 # Evidence — why each rule in this skill exists
 
-> **Local overlay:** if `<repo-root>/.skill-local/rich-domain-mcp-server/evidence.md` exists, read it before
-> continuing (SKILL.md → *Local overlays*).
+> **Local overlay:** REQUIRED — if `<repo-root>/.skill-local/rich-domain-mcp-server/evidence.md` exists, read it
+> before the rest of this file (SKILL.md → *Local overlays*).
 
 The skill applies its own rule here: **every rule carries its provenance** [Q18]. When you are
 about to delete, weaken or reverse a rule, read its row first; when a new eval result lands, add
