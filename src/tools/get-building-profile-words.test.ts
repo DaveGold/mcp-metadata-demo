@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer } from '../server.js';
-import { descriptionCore, description } from './get-building-profile.js';
+import { descriptionCore, description, calcVsMeasuredLine } from './get-building-profile.js';
 import type { BagClientLike, EpOnlineClientLike } from './get-building-profile.js';
 import type { BagAddress, BagVerblijfsobject, BagPand } from '../clients/bag-client.js';
 import type { PandEnergielabelV5 } from '../clients/ep-online-client.js';
@@ -143,7 +143,10 @@ describe('get_building_profile — words variant (arm B)', () => {
 
     // Identical wording to the rich tier — any divergence would confound A→B.
     expect(bp.description).toBe(descriptionCore);
-    expect(description.startsWith(descriptionCore)).toBe(true);
+    // Since 2026-09-24 (Q21) rich ALSO carries the CALCULATED vs MEASURED line up front, inside the
+    // 2,048 cut. That is the one allowed difference: remove it and rich is words + ALERTS again.
+    // It means rich vs words is no longer a one-variable rung on ep1/ep2 questions after that date.
+    expect(description.replace(calcVsMeasuredLine + '\n\n', '').startsWith(descriptionCore)).toBe(true);
 
     // Every guidance block the rich tier has, except the promise of alerts.
     expect(bp.description).toContain('WHEN NOT TO USE:');
