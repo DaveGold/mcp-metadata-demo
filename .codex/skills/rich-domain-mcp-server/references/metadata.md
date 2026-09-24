@@ -115,6 +115,28 @@ when the budget forces it, and say which block it stands for.
 does not hurt accuracy [Q2] [Q17], but it costs tokens and budget; a wrong sentence can break
 59 answers [BT]. Spend the effort on *which* sentence, not how many.
 
+What each block prevents, so you can tell whether one has earned its place [U7]:
+
+| block | without it |
+|---|---|
+| WHEN TO USE | the model picks the wrong tool, or misses this one |
+| WHEN NOT TO USE | it calls this tool for questions that belong elsewhere, or calls where it should refuse |
+| RELATED TOOLS | it stops after the first call instead of chaining |
+| QUERY STRATEGY | it pulls full records where a summary would do, or walks pagination |
+| RETURNS | it cannot tell whether the tool has the data, or how to address a field |
+| INTERPRETATION | it returns raw numbers without conclusions, or misreads codes and derived fields |
+| ALERTS | it misses the verdict or branch that holds for this record |
+
+**Earned blocks seen in practice**, both in the description head because they matter before the
+call [U1]:
+
+- **DATA HORIZON & SCOPE** — why a query returns 0 rows: a retention window, a coverage limit
+  (a bookings source that only holds the last 10 years). Not WHEN NOT TO USE (the tool is right,
+  the data is absent) and not query strategy.
+- **PRIVACY** — handling of sensitive or regulated data (health data, personnel or financial
+  records): what to answer, what not to volunteer, when to aggregate. Compliance-critical, so it
+  sits early in the head, not in a response note a refusal never sees.
+
 **Two other grammars.** Write/action tools: WHEN TO USE / WHEN NOT TO USE / RETURNS (effects) /
 AUTH. App/render tools: WHEN TO USE / RETURNS (what renders) / INPUT (data shape) — see
 [render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart.ts).
@@ -156,6 +178,18 @@ export const inputSchema = {
   result set").
 - An unknown name in `select` must return the valid list and say it is a *naming* error, not
   missing data.
+- **Say what `select` costs.** A projection saves tokens across many rows and is overhead on a
+  single-record lookup; say so in its `.describe()` so the model does not add it by reflex [U3].
+- **One field list as the single source of truth** for filterable, selectable and returned
+  names, checked against the row type at compile time, whether or not a factory generates the
+  schema from it [U2]:
+
+  ```ts
+  const FIELDS = [
+    { name: 'CustomerName', type: 'string', filterable: false },
+    { name: 'OrderDate', type: 'date' },
+  ] as const satisfies readonly (FieldMeta & { name: keyof OrderRow })[];
+  ```
 
 ## 3. Output schema — shape-only
 
@@ -163,6 +197,11 @@ Not delivered to the model on Claude Code [Q11]. Keep it for `safeParse` validat
 type + `.optional()`/`.nullable()` + a short identity. No value meanings, no null-conditions, no
 pointer to the description. **Identify-before-removing:** before trimming an old annotation,
 confirm every fact it carried now lives in the description head, a field name, or a response rule.
+
+When you trim, keep the type and `.optional()`/`.nullable()` exactly, so validation does not
+change: freeze a baseline of every output shape with the annotation text stripped, and fail the
+build when a shape moves. Also fail on any description that mentions the output schema — a
+pointer to a surface the model never receives [U4].
 
 ## 4. The response — interpretation, derived values, constants
 
@@ -234,6 +273,8 @@ can be **conditional on the record** [delivery.md]. Standard shape:
 **Two-layer enrichment** still applies to the data itself: (1) source-side label joins
 (`CategoryName` next to `CategoryCode`) instead of code tables; (2) derived fields in `transform`
 that collapse flag combinations into one readable label. Summary keys as `"code: description"`.
+Mark each derived field in the row type as computed by the server, not returned by the source,
+so the next maintainer does not go looking for it upstream [U5].
 
 ## 5. Alerts and empty results
 
@@ -265,6 +306,19 @@ what the server is, what it does **not** have, "every data tool returns `interpr
 first", the join chain between tools (`coordinaten` → `latitude`/`longitude`). Do not make them the
 only home of anything essential; some clients do not read them.
 
+A skeleton that fits the budget, most load-bearing first — drop a line before you shorten the
+first three [U8]:
+
+```
+<what this server is, in one line> — and what it does NOT have.
+TOOL SELECTION: <entry tool> → <which ids feed which tools>.
+Every data tool returns `interpretation` first; read it.
+CROSS-REFERENCE: <join keys to your other servers' data, with verified coverage>.
+KNOWN DATA QUALITY ISSUES: <the one or two that produce confident wrong answers>.
+UNITS: <only where a name cannot carry the unit>.
+FEEDBACK: <one line, if a feedback tool exists>.
+```
+
 A guidance/meta-tool is legitimate when a procedure cannot go in the response — but only behind a
 pointer worded as a requirement ("REQUIRED: before any lookup, call … once"), or as its own
 parameterless tool [Q8b]. `z.object({})` breaks parameterless tools — use `{}` or omit
@@ -279,7 +333,8 @@ parameterless tool [Q8b]. `z.object({})` breaks parameterless tools — use `{}`
 - [ ] Description head: what it is and is NOT, "read `interpretation` first", record-independent rules as fact + instruction, input conventions
 - [ ] RETURNS names literal field identifiers
 - [ ] Input: typed, regex/enum where it prevents wrong-entity calls, working examples, valid-name lists, `queryIntent`, `summaryOnly`
-- [ ] Output schema shape-only; no model-facing meaning only there
+- [ ] Output schema shape-only; no model-facing meaning only there; shape baseline frozen when annotations are trimmed
+- [ ] Derived fields marked as computed in the row type
 - [ ] Response: `interpretation { alerts, notes, constants }` first; rules from a registry with provenance; null-field notes never pruned
 - [ ] Determinate verdicts computed with unit/basis/provenance, or null + reason; no scope-mixing fallback
 - [ ] Constants and the data each rule needs are in the response

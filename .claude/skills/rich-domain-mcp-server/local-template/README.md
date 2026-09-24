@@ -18,6 +18,11 @@ not fill, and keep `overlays:` above equal to the files that remain (a check com
 <!-- Which work belongs to another skill here (commits/PRs, review, UI, tickets), and any
 "do not commit unless asked" style rules. -->
 
+## Trigger
+
+<!-- Where the state-based trigger lives (SKILL.md → Local overlays → Trigger), e.g. a CLAUDE.md /
+AGENTS.md block outside any generated section. -->
+
 ## Reference implementations
 
 <!-- | pattern | file | — the best worked example per pattern in THIS repo. These come first

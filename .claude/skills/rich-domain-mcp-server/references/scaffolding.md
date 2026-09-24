@@ -156,7 +156,9 @@ Co-locate as `<file>.test.ts`. Worth testing, in priority order:
    reason and provenance; no upstream name leaks past the rename.
 6. **Rules**: unique ids, provenance present, `relates_to_fields` exist in the output, each rule's
    rendered line on a fixture record that triggers it.
-7. **Frozen variants**: once a variant has been measured, hash its `tools/list` + instructions so
+7. **Output-shape baseline**: every output schema with its annotation text stripped, compared
+   against a committed baseline, and no description that mentions the output schema [U4].
+8. **Frozen variants**: once a variant has been measured, hash its `tools/list` + instructions so
    it cannot drift (this repo: [`arms-frozen.test.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/arms-frozen.test.ts)).
 
 ## 7. Adding a variant beside the old one

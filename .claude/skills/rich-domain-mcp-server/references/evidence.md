@@ -156,3 +156,17 @@ Kept because they are useful practice, labelled so nobody quotes them as finding
 of AI-discovered metadata holds up under expert review", "3–4 passes per tool is normal", the
 row-count thresholds for confidence levels, "one afternoon clears three weeks of async". They come
 from production work on the Warmtebouw servers, not from this eval set.
+
+The practice rules below come from the same source. They carry a `U` tag so the rule that uses
+them can be traced; none is measured, so none can outweigh a result above.
+
+| id | rule | source | status |
+|---|---|---|---|
+| U1 | DATA HORIZON & SCOPE and PRIVACY are blocks worth their budget, in the description head | recurring in production descriptions: 0-row answers explained by a retention window; HR and health data needing handling rules before the call | experience |
+| U2 | One field list, checked against the row type (`satisfies`), is the single source of filterable, selectable and returned names | production connectors built from a shared field list; name drift caught at compile time | experience |
+| U3 | `select` is a saving across many rows and an overhead on single-record lookups; say so on the parameter | production call logs of projections on one-record lookups | experience |
+| U4 | When output annotations are trimmed, freeze the output shapes and forbid descriptions that point at the output schema | a production migration that moved interpretation out of output annotations, with a byte-identical shape baseline as its guard | experience |
+| U5 | Mark server-derived fields as computed in the row type | maintainers looking for a derived field in the upstream API | experience |
+| U6 | A skill that must run before code changes needs a trigger on the state (the path being edited), in the always-loaded project guide — a trigger on request phrasing misses work handed over from a ticket plan | a production scaffold written from a ticket plan without the skill loaded; fixed by a path-based trigger | experience (one incident) |
+| U7 | What each description block prevents (the table in `metadata.md` §1) | production review of failing calls, block by block | experience |
+| U8 | A server-instructions skeleton ordered by what must survive the budget | production instructions truncated at the 2,048 cut [Q7] | experience; the cut itself is measured |

@@ -335,6 +335,11 @@ and no such row exists, this skill holds — and say so to the user, because the
 the overlays until they are migrated. A major bump renames or removes an overlay, or changes when
 it is read or what wins; a minor bump adds one.
 
+**Trigger.** The frontmatter above triggers on request phrasing. If this skill must run before a
+code change, also put a state-based trigger in the always-loaded project guide (`CLAUDE.md`,
+`AGENTS.md`), outside any block a tool regenerates: "invoke `rich-domain-mcp-server` before
+creating or editing anything under `<servers dir>`" [U6].
+
 ## Routing
 
 | you are doing… | open |
