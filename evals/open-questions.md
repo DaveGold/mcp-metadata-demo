@@ -3840,6 +3840,14 @@ LAST successful render_table call (a re-render after the alert counts).
 
 ## Q22c — Does REFUSING the call fix what the alert could not? Registered 2026-09-24, BEFORE the run
 
+> **ANSWERED 2026-09-24 — yes.** See [`results/2026-09-24-q22c-table-refusal.json`](results/2026-09-24-q22c-table-refusal.json).
+> - **Headers:** `best` 10/10 say calculated (Q22: 1/10, Q22b: 2/10); `best-v1` 0/10.
+> - **How:** 6/10 runs were refused, retried and rendered. All 10 ended with a table.
+> - **Cost:** +4.9% tokens.
+>
+> All four predictions confirmed. Audit 4/5 exact; the one extra call was rejected by the host as
+> unparseable JSON before it reached the server.
+
 > **REGISTERED before any run.** In Q22b the alert on a successful table render fixed 2/10 headers
 > and triggered 0/10 re-renders. This tests the rule added to the skill from it — "a fix that must
 > happen is a refusal, not an alert" — before the release.
