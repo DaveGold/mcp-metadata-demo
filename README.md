@@ -13,7 +13,7 @@ reaches the model.
 Built from seven months of MCP in production at a 350-person Dutch building-services contractor —
 [who and why](#who-built-this-and-why).
 
-**[Try it live](#try-it-live)** · **[How it's built](docs/reference-implementation.md)** · **[The research](evals/README.md)**
+**[Try it live](#try-it-live)** · **[How it's built](docs/reference-implementation.md)** · **[The research](evals/README.md)** · **[From a talk?](#if-you-came-from-a-talk)**
 
 ## The larger idea
 
