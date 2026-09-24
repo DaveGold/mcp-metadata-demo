@@ -169,10 +169,17 @@ sends and where the cut falls: [`best`](docs/wire/best.md) · [`rich`](docs/wire
 **I lead an AI or platform team.** The paper, [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer),
 then [`docs/design.md`](docs/design.md) for what the evals changed.
 
+**I care about the larger architecture.** [Capability architecture](docs/capability-architecture.md):
+why this starts with one useful capability instead of a platform, why capabilities come before
+agents, how they compose, how ambassadors and skills spread the work, and where the thesis ends and
+the measurements stop.
+
 ## Concepts and language
 
 - [Terminology](docs/terminology.md) — what the terms in this repo mean, canonically
 - [Quotes & principles](docs/quotes.md) — the short formulations, each with its evidence status
+- [Capability architecture](docs/capability-architecture.md) — the thesis above the interface:
+  stacking, adoption, skills, the engineering multiplier
 
 ## Talks
 
@@ -196,6 +203,11 @@ There, twelve custom MCP servers run in production — ERP, energy, BIM, estimat
 automation, external registers — with 97 tools and 8 MCP Apps, used mostly by people who are not
 developers. One general-purpose model on top, no agent per domain: _we scaled capabilities, not
 agents_.
+
+Before this: industrial automation from 2007 (PLC, HMI, SCADA), then industrial IT — real-time
+dashboards on OSIsoft PI for energy and manufacturing — then eight years of enterprise frontend.
+The same problem throughout: help a person read a system's state and act on it safely. That is
+where the render tools' refusals come from ([refuse what would mislead](docs/mcp-apps.md#refuse-what-would-mislead)).
 
 Why this repo: someone who has never opened our ERP is going to ask it about some data. Something
 has to tell the agent what that data means, and the only thing I own is the interface. Production

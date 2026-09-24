@@ -1,5 +1,7 @@
 # Terminology
 
+_By [David Golverdingen](https://davidgolverdingen.nl/en) — companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
+
 This repository uses the terms below with specific meanings. When this repo says **X**, this page
 says what X means. It does not argue for the ideas; for that:
 
@@ -30,6 +32,9 @@ capabilities. Use _Rich Domain MCP_ for the pattern and _Rich Domain MCP Server_
 implementation. The skill's identifier, `rich-domain-mcp-server`, is a name, not a third variant.
 Avoid new variants such as _domain-rich MCP_ or _rich metadata MCP_; older talks and posts keep
 their original wording.
+
+The pattern was named by David Golverdingen (2026), in this repo and in
+[_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer).
 
 ### Agent-facing capability
 
@@ -165,6 +170,10 @@ The domain expert validates what the agent could not settle; production telemetr
 (`queryIntent`) picks the next gap. _Rich Domain MCP_ is the destination; _ICE_ is the method for
 getting there. Use _ICE_ only after the full name has been given once.
 
+The method was named by David Golverdingen (2026) and presented in
+[_Most MCP servers are empty_](../talks/most-mcp-servers-are-empty-mcpcon-europe-2026.md#11--introspective-context-engineering-for-mcp),
+MCPCon Europe 2026.
+
 ### Evals
 
 Behavioural tests of what a model actually does with an agent-facing interface. They are not unit
@@ -211,13 +220,44 @@ The ladder from the talk _Most MCP servers are empty_, by who discovers the mean
 ## The larger thesis
 
 These terms describe the architecture the project argues for. They come from production
-experience, not from this eval set, and should be quoted as a thesis.
+experience, not from this eval set, and should be quoted as a thesis. The argument itself:
+[Capability architecture](capability-architecture.md).
 
 ### Capability reuse
 
 One domain capability composed into many workflows, agents or questions without being rebuilt
 for each. The basis for _we scaled capabilities, not agents_ and _scale capabilities, not use
 cases_.
+
+### Capability stacking
+
+Composing independently useful capabilities into questions and workflows none of them was built
+for. Its effect is **compounding optionality**: with _n_ composable capabilities there are 2ⁿ − 1
+possible sets, and each new one extends every set already present. A claim about the option space,
+not about value — most combinations are useless, and value does not grow exponentially.
+
+### Ambassador
+
+An early user chosen for the rollout: someone with a frequent real problem, enough domain
+knowledge to judge the answers, and enough credibility for colleagues to follow. Also called a
+_champion user_. Part of the discovery loop, not only of distribution: their questions show what
+the capability is missing.
+
+### Skill (procedure layer)
+
+A captured work procedure — steps, decisions, rules, approval points — that a general agent runs
+over the capabilities. Capabilities say _what the company can do_; skills say _how the work is
+done_; a prompt, a schedule or an event says _when_. Not to be confused with _the skill_ in this
+repo, [`rich-domain-mcp-server`](../.claude/skills/rich-domain-mcp-server/SKILL.md), which is an
+engineering procedure for building interfaces.
+
+### Engineering multiplier
+
+The phrase is Gregor Ojstersek's (TechLead Conference): an engineer who multiplies their impact by
+combining human skills, pragmatic problem solving and AI tools — attribute that framing to him. In
+this repo's extension: a system that turns engineering work into reusable capability, so that
+other people can compose, run and improve their own workflows without a new software project for
+each.
 
 ### General-purpose vs specialised agents
 
@@ -229,4 +269,6 @@ agent when the task demands it; enrich the interface when the domain demands it.
 
 A company that exposes its systems as composable agent-facing capabilities carrying enough domain
 meaning for a capable general agent to discover, interpret and safely operate them. Short form:
-_make the company agent-readable._
+_make the company agent-readable._ In the fuller form it also exposes how its people work —
+procedures as skills, operational rhythm as schedules and events — not only what its systems can
+do.

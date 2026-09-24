@@ -1,5 +1,7 @@
 # Quotes & principles
 
+_By [David Golverdingen](https://davidgolverdingen.nl/en) — companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
+
 Short formulations from the talks, the writing and the research around this project — a
 selection, not an archive. A memorable sentence is not automatically a measured finding, so every
 line carries its status, and measured lines link to the run behind them.
@@ -213,6 +215,35 @@ things you did not build it for._
 > **Make the company agent-readable.**
 
 `THESIS` · see [agent-readable company](terminology.md#agent-readable-company).
+
+> **Start with one useful capability, not an AI platform.**
+
+`PRODUCTION` for how Warmtebouw started, `THESIS` as advice ·
+[Capability architecture §4](capability-architecture.md#4--start-with-one-useful-capability)
+
+> **You engineer the capability. You do not engineer every future use case.**
+
+`THESIS` · [Capability architecture §2](capability-architecture.md#2--capabilities-first-agents-on-top)
+
+> **Capability stacking compounds optionality.**
+
+`THESIS` · a claim about the option space, not about value:
+[capability stacking](terminology.md#capability-stacking).
+
+> **Don't remove the systems. Remove the boundaries between what can be asked of them.**
+
+`THESIS` · [Capability architecture §3](capability-architecture.md#3--capability-stacking)
+
+> **Capabilities encode what the company can do. Skills encode how it works.**
+
+`THESIS` · [Capability architecture §6](capability-architecture.md#6--skills-the-procedure-layer).
+Colleagues writing and scheduling their own skills is `PRODUCTION`; that this generalises is the
+thesis.
+
+> **The multiplier is not the model. It is the system that lets people compose reliable capabilities into their own work.**
+
+`THESIS` · extends Gregor Ojstersek's _engineering multiplier_ — attribute the phrase to him
+([terminology](terminology.md#engineering-multiplier)).
 
 ---
 
