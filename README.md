@@ -15,6 +15,20 @@ Built from seven months of MCP in production at a 350-person Dutch building-serv
 
 **[Try it live](#try-it-live)** · **[How it's built](docs/reference-implementation.md)** · **[The research](evals/README.md)**
 
+## The larger idea
+
+This repository started with one question: what does an agent-facing capability need to carry so
+a model can use it correctly?
+
+The larger architecture that emerged is capability-first: make company systems available as
+trustworthy, composable capabilities, improve them from real usage, let people capture recurring
+work as skills, and let general agents compose both around a goal. The long-term aim is an
+agent-readable company — and an [engineering multiplier](docs/terminology.md#engineering-multiplier)
+that gives more people the ability to improve and automate their own work.
+
+That part comes from production and is a thesis; the evals below measure the capability, not the
+company. → [Capability architecture](docs/capability-architecture.md)
+
 ## If you came from a talk
 
 The closing slide promised five things. Here they are:
