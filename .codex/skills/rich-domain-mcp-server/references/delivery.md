@@ -64,7 +64,7 @@ text [Q7]. Check the model side.
 - **Measure offsets in CI.** A test that asserts `description.length <= 2048` and that each
   load-bearing sentence starts before a fixed offset (`indexOf('CALCULATED') < 900`) is the only
   thing that stops a later edit silently pushing a rule past the cut. See
-  [`best-arm.test.ts`](../../../../src/tools/best-arm.test.ts).
+  [`best-arm.test.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/best-arm.test.ts).
 - **Measure the response.** Serialize a worst-case response (a full-year, unprojected weather
   call is ~79k chars) and assert a bound; drop bulk records with an alert naming the remedy
   (`select`, `summaryOnly`) rather than letting the host replace the whole result.

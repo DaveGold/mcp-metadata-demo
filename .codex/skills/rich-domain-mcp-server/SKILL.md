@@ -94,25 +94,34 @@ matter most [M2].
 
 ---
 
-## The loop: EFVEI
+## The loop: EFVEI — same shape as the talk
 
 ```
-SCAFFOLD   ship something simple (new) — or AUDIT what exists (existing)
+SCAFFOLD   ship something thin (new) — or AUDIT what exists (existing)
    │
-   ├─► EXAMINE    interrogate the live data AND what the model received, in a FRESH session
+   ├─► EXAMINE    interrogate your own deployed tool in a FRESH session: the data AND what the model received
    │      │
-   │   FLAG       tag every finding with a confidence level + a question, while you find it
+   │   FLAG       every finding carries a confidence level + a question, while you find it
    │      │
-   │   VALIDATE   an expert confirms what is TRUE; an eval measures what is USED
+   │   VALIDATE   the agent settles what it can against the data — and a small eval MEASURES
+   │      │       whether the model uses what you encoded (references/evaluation.md)
    │      │
-   │   ENCODE     names → description head → input schema → response rules/verdicts,
-   │      │       each rule with a provenance line → redeploy
+   │   ENCODE     into the channel the model actually reads (names → description head →
+   │      │       input schema → response), each rule with a provenance line → redeploy
    │      │
-   │   ITERATE    call logs, queryIntent, feedback expose the next gap
+   │   ITERATE    back to Examine; in production, telemetry picks the next gap
    │      │
-   └──────┘
-HARDEN     budget tests, name tests, rule tests, frozen variants, findings doc
+   └──────┘   3–4 passes is typical (experience, not measured)
+VALIDATE   the expert — only what the agent could not settle — then one more pass
+HARDEN     the eval set becomes a regression suite: budget, name and rule tests, frozen
+           variants, ground-truth tests, a periodic re-run, a dated findings log
 ```
+
+Measuring belongs **inside** the loop, not after it. Every large defect in this repo was found by
+a run during iteration, not by a test or a review: the 2,048-character cut [Q7], the undelivered
+output schema [Q11], a computed alert that asserted a wrong verdict [BT] [Q19], a stale deploy [D],
+and an upstream quota the tool itself exhausted [Q19]. Waiting until "the loop stabilises" means
+several passes of metadata written into a channel that does not arrive.
 
 Copy this checklist into your response and tick it off:
 
@@ -120,13 +129,14 @@ Copy this checklist into your response and tick it off:
 - [ ] S/A. Scaffold a thin tool — or run references/audit.md on the existing one
 - [ ] E. Examine the data (probe matrix) and the model (what it received, which field it used, how many calls)
 - [ ] F. Flag: every finding carries [CONFIDENCE: …  TODO: DOMAIN EXPERT — …]
-- [ ] V. Validate: expert session for truth; eval (references/evaluation.md) for use
+- [ ] V. Validate by the agent against the data; measure with a minimal eval (evaluation.md §0)
 - [ ] E. Encode: names, description ≤2,048, input schema, `interpretation` rules + computed values, provenance per rule
-- [ ] I. Iterate: fresh session, then telemetry
-- [ ] H. Harden: tests (budget, names, rules, size, freeze), docs/<name>-findings.md, agent guide
+- [ ] I. Iterate: fresh session, re-measure, then telemetry
+- [ ] V. Expert session for what the agent could not settle (validation.md), then one more pass
+- [ ] H. Harden: regression suite (evaluation.md §7), docs/<name>-findings.md, agent guide
 ```
 
-### Scaffold (new) — ship something simple
+### Scaffold (new) — ship something thin
 
 Build the client (if the API needs one), one plain tool, and deploy. Keep the metadata thin on
 purpose: `queryIntent`, `summaryOnly`, the params you are sure of, a permissive output schema, a
@@ -139,7 +149,8 @@ handler lifecycle: [`references/handlers.md`](references/handlers.md).
 [`references/audit.md`](references/audit.md): measure description offsets and response sizes;
 audit every field name; move what is not delivered; check every alert and threshold for the
 calculated-vs-measured defect; backfill provenance; rebuild as a new variant beside the old one
-and measure the two.
+and measure the two. In this repo that audit predicted where the old reference would lose, and it
+lost there: `rich` 0/20 against `best` 20/20 on `benchmark-trap` [Q19].
 
 ### Examine — the data and the model
 
@@ -161,14 +172,15 @@ HIGH: confirmed across many records and slices. MEDIUM: observed, exceptions pla
 inferred from little data. Without markers, ambiguity is silently resolved with the model's best
 guess — which reads exactly like an observation.
 
-### Validate — true, and used
+### Validate in the loop — the agent against the data, and a measurement
 
-- **Expert** ([`references/validation.md`](references/validation.md)): batch the markers, LOW
-  first, closed questions backed by a data sample. Record the answer, dated, with who answered.
-- **Eval** ([`references/evaluation.md`](references/evaluation.md)): a question that needs what the
-  payload lacks; arms that differ by one variable; a prediction registered before the run; the
-  variance bar; an audit against the server log. Most registered predictions in this repo were
-  wrong [P].
+- **The agent settles what it can**: another probe instead of a question for the expert
+  (`discovery.md`).
+- **Measure whether the model USES it** ([`references/evaluation.md`](references/evaluation.md)):
+  §0 is a minimal version for any server (5–10 questions, the old and the new variant, n=10, one
+  batch); the rest is the full method — questions that need what the payload lacks, one variable
+  per variant, a prediction registered before the run, the variance bar, an audit against the
+  server log. Most registered predictions in this repo were wrong [P].
 
 ### Encode — write it where it is delivered
 
@@ -182,7 +194,8 @@ guess — which reads exactly like an observation.
 4. **Output schema** (§3) — shape-only.
 5. **Response** (§4) — `interpretation { alerts, notes, constants }` first; notes selected from a
    rule registry by `applies(record)`; computed `derived` values with unit/basis/provenance or
-   `null` + reason; the data each rule needs; complete thresholded lists; a size guard.
+   `null` + reason; the data each rule needs — comparable across calls, cached if it is costly
+   upstream; complete thresholded lists; a size guard.
 
 Where each kind of knowledge is written down — for the model and for the next maintainer — is
 mapped in [`references/recording.md`](references/recording.md). The short form: **model-facing
@@ -196,13 +209,27 @@ patterns (tightening filters, deep pagination, many calls to a second tool) name
 field, summary dimension or shipped data. User friction is the rare, high-signal input. Details in
 [`references/validation.md`](references/validation.md).
 
-### Harden — once the loop stabilises
+### Validate after the loop — the expert
 
-- Tests: delivery budgets (description + instructions ≤ 2,048, offsets, worst-case response
-  size), names (units, provenance, no upstream leak), each rule on a triggering fixture, each
-  discovered quirk, and a hash freeze on any variant that has been measured.
-- `docs/<name>-findings.md` — the dated discovery and audit log.
-- A project agent guide (`CLAUDE.md` / `AGENTS.md`) and an MCP client config (`.mcp.json`).
+Only what the agent could not settle from the data, batched into one session, LOW markers first,
+closed questions backed by a sample ([`references/validation.md`](references/validation.md)). Then
+one more pass of the loop with the answers encoded.
+
+### Harden — the measurement becomes a regression suite
+
+What the talk calls "tests, a findings log": concretely, the parts of the eval that keep guarding
+after the loop has stabilised ([`references/evaluation.md`](references/evaluation.md) §7):
+
+- **Budget tests:** description and instructions ≤ 2,048 (ceiling ~1,800), load-bearing sentences
+  before fixed offsets, worst-case response under the size guard.
+- **Name and rule tests:** units in names, a provenance line on every rename and rule, each rule
+  on a fixture record that triggers it.
+- **Ground-truth tests:** every eval question's expected value re-derived from frozen fixtures.
+- **Frozen variants:** a hash of `tools/list` + instructions for every variant that has been measured.
+- **Deploy check:** one live call per variant, and the call log shows it stamped with its own name.
+- **Periodic re-run** of the eval set — registers, upstream APIs, hosts and models all drift.
+- `docs/<name>-findings.md` — the dated discovery, audit and eval log; a project agent guide
+  (`CLAUDE.md` / `AGENTS.md`) and an MCP client config.
 
 ---
 
@@ -220,6 +247,16 @@ field, summary dimension or shipped data. User friction is the rare, high-signal
 - **Computed values carry unit, basis and provenance, or are `null` with a reason** — never a
   fallback that mixes scopes, never 0 for "no data".
 - **Ship the data a rule needs** [Q16]; ship constants in `interpretation.constants` [L2].
+- **Shipped data must be comparable across calls.** A reference that moves with the query (the
+  previous 10 years of *each* window) gives two periods different denominators: 0/10 against
+  10/10 on a two-period comparison [Q19b]. Fix the reference period, or say that two calls'
+  references are not comparable.
+- **Shipped data has an upstream cost.** Know how the source meters requests (Open-Meteo weighs by
+  data volume and caps concurrency); fetch only what the computation needs, and cache data that
+  cannot change. One un-cached 10-year fetch per call exhausted the quota and failed every call
+  [Q19c].
+- **Say what NOT to do with shipped data when the question invites misuse.** With the right
+  quarter figure in hand, 10 of 16 correct haiku answers still extrapolated it to a year [Q19d].
 - **Never prune the note about a null decision field** [AS].
 - **Thresholded results are returned complete** [Q11b].
 - **Responses stay under the host limit**; guidance lives under the fixed key `interpretation` [Q9].
@@ -258,20 +295,21 @@ variants in `evals/`:
 
 | pattern | file |
 |---|---|
-| Field renames with reason + provenance | [best-field-names.ts](../../../src/domain/best-field-names.ts) |
-| Rule registry, record-conditional selection, provenance | [best-rules.ts](../../../src/domain/best-rules.ts), [best-building-rules.ts](../../../src/domain/best-building-rules.ts), [best-weather-rules.ts](../../../src/domain/best-weather-rules.ts) |
-| Description ≤ 2,048 + `interpretation`-first response + computed `derived` values | [get-building-profile-best.ts](../../../src/tools/get-building-profile-best.ts) |
-| Shipping the data a rule needs (reference-period degree days), size guard, complete lists | [get-weather-context-best.ts](../../../src/tools/get-weather-context-best.ts), [reference-period.ts](../../../src/domain/reference-period.ts) |
-| Budget, name and rule tests | [best-arm.test.ts](../../../src/tools/best-arm.test.ts) |
-| Wire-surface freeze of measured variants | [arms-frozen.test.ts](../../../src/arms-frozen.test.ts) |
-| Audit record written the way `recording.md` prescribes | [docs/building-profile-findings.md](../../../docs/building-profile-findings.md), [docs/weather-findings.md](../../../docs/weather-findings.md) |
+| Field renames with reason + provenance | [best-field-names.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-field-names.ts) |
+| Rule registry, record-conditional selection, provenance | [best-rules.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-rules.ts), [best-building-rules.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-building-rules.ts), [best-weather-rules.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-weather-rules.ts) |
+| Description ≤ 2,048 + `interpretation`-first response + computed `derived` values | [get-building-profile-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-best.ts) |
+| Shipping the data a rule needs (reference-period degree days), size guard, complete lists | [get-weather-context-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context-best.ts), [reference-period.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/reference-period.ts) |
+| Known defect, kept visible: the reference period moves with the query year (Q19: two-period normalisation 0/10) | [docs/weather-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/weather-findings.md) §7 |
+| Budget, name and rule tests | [best-arm.test.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/best-arm.test.ts) |
+| Wire-surface freeze of measured variants | [arms-frozen.test.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/arms-frozen.test.ts) |
+| Audit record written the way `recording.md` prescribes | [docs/building-profile-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/building-profile-findings.md), [docs/weather-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/weather-findings.md) |
 
 Contrast cases, kept frozen because results were measured on them:
-[get-building-profile.ts](../../../src/tools/get-building-profile.ts) (`rich`: a 7,360-char
+[get-building-profile.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts) (`rich`: a 7,360-char
 description of which the first 2,048 arrive, and an EP-1 vs Paris Proof alert that the audit
 flags as the calculated-vs-measured defect) and
-[get-building-profile-minimal.ts](../../../src/tools/get-building-profile-minimal.ts) (no metadata
-layer). [render-chart.ts](../../../src/tools/render-chart.ts) is the MCP App (render) example.
+[get-building-profile-minimal.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-minimal.ts) (no metadata
+layer). [render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart.ts) is the MCP App (render) example.
 
 ## Caveats
 

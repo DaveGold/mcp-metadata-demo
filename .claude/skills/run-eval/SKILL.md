@@ -69,6 +69,21 @@ description: Run the eval set in evals/questions.json against the arm servers (t
    each tripped it. Keep multi-call waves small (3 worked), and treat a "Too many requests"
    result as NO_RECORD, not as model behaviour.
 
+   **Four more, found in Q19 (2026-09-24).** The portable harness in
+   `.claude/skills/rich-domain-mcp-server/references/harness/` handles them:
+   - (a) A headless parent can spawn its Agent calls BEFORE an MCP server connects. The host then
+     refuses the tool-less subagent, and the run is missing. Make one ToolSearch `select:` call for
+     every arm's tool first.
+   - (b) Open-Meteo meters by data volume (~1 call per 14 days of data) and caps concurrency. One
+     arm's 10-year fetch per call exhausted the hourly quota. Arms that make the models fetch
+     history themselves (opus on `rich`: 7–8 multi-year calls per run) burn it too. Treat any
+     upstream 429 as NO_RECORD.
+   - (c) Re-run an incomplete wave WHOLE, or as same-batch pairs, never just the missing slot.
+   - (d) `get_tool_call_log` pages at 500 with no offset. Audit a big run by reading the Firestore
+     `toolCalls` collection directly, per wave time window. Use file mtimes for the window
+     (`date +%N` does not exist on macOS). Calls rejected by input validation are not logged;
+     explain them instead.
+
    The only check that counts: can you call
    `mcp__eval-<arm>__get_building_profile` right now — an actual call, not a
    schema lookup? If not, STOP. Do not attempt the run. Re-check later in the

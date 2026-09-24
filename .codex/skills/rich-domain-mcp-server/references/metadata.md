@@ -95,7 +95,7 @@ does not hurt accuracy [Q2] [Q17], but it costs tokens and budget; a wrong sente
 
 **Two other grammars.** Write/action tools: WHEN TO USE / WHEN NOT TO USE / RETURNS (effects) /
 AUTH. App/render tools: WHEN TO USE / RETURNS (what renders) / INPUT (data shape) — see
-[render-chart.ts](../../../../src/tools/render-chart.ts).
+[render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart.ts).
 
 **Deduplication pass — every time the description changes.** Each fact once; no fact that the
 input schema already carries; no pointer to the output schema.
@@ -176,7 +176,16 @@ can be **conditional on the record** [delivery.md]. Standard shape:
 - **Ship the data a rule needs, not only the rule** [Q16]: a server-computed reference-period
   figure took haiku 2/20 → 15/20 and cut sonnet/opus calls by ~87% [Q16b]. Ship the data rather
   than a finished factor (11/20).
-- **Return thresholded results complete** — no "(+6 more)" [Q11b].
+- **Return thresholded results complete** — no "(+6 more)" [Q11b]. In Q19 sonnet filled the
+  truncated list with invented days 10 of 10 times; with the complete list, 9/10 correct.
+- **Shipped data must be comparable across calls.** A reference computed relative to each query
+  (the 10 years before *this* window) gives two periods two denominators: two-period
+  normalisation went 0/10 where the old arm scored 10/10 [Q19b]. Use one fixed reference span,
+  or say explicitly that two calls' references differ and what to use instead.
+- **Shipped data has an upstream cost.** Fetch only the windows the computation needs, respect the
+  provider's metering and concurrency, and cache what cannot change (past years) [Q19c].
+- **Say what not to do with it** when the obvious next step is wrong ("this is the reference for
+  THIS window; do not scale it to a year") [Q19d].
 - **Every quantity that has a calculated and a measured sense states which one it is**, and what
   it may be compared against [BT].
 - **Keep responses under the limit.** Serialize and guard; drop bulk rows with an alert naming

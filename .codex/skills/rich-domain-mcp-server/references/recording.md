@@ -18,19 +18,20 @@ Two readers, two destinations:
 | knowledge | where | form | read by |
 |---|---|---|---|
 | What a value IS (quantity, scope, provenance, unit) | the **field name** | `ep1_energiebehoefte_berekend_kwh_m2` | model |
-| Renames of upstream fields | `FIELD_NAMES` table in source (e.g. [`best-field-names.ts`](../../../../src/domain/best-field-names.ts)) | `{ upstream, name, reason, provenance }` | maintainer |
+| Renames of upstream fields | `FIELD_NAMES` table in source (e.g. [`best-field-names.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-field-names.ts)) | `{ upstream, name, reason, provenance }` | maintainer |
 | What the tool is/is not, input conventions, record-independent rules | description head (≤ 2,048) | prose, fact + instruction per rule | model |
 | Formats, valid values, misbehaving params, valid `select` names | input schema `.describe()`/`.meta()` | one sentence + a working example | model |
-| Rules that interpret returned values | **rule registry** in source (e.g. [`best-building-rules.ts`](../../../../src/domain/best-building-rules.ts)) | `{ id, relates_to_fields, applies, render, provenance }` | maintainer (source), model (the rendered line in `interpretation`) |
+| Rules that interpret returned values | **rule registry** in source (e.g. [`best-building-rules.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-building-rules.ts)) | `{ id, relates_to_fields, applies, render, provenance }` | maintainer (source), model (the rendered line in `interpretation`) |
 | Determinate derived values and verdicts | `transform` / `summarize` code | computed field with `unit`, `basis`, `provenance`, or `null` + `reason` | model |
 | Constants the model needs (conversion factors, thresholds) | `interpretation.constants` in the response, defined once in source | named constant with its source in a comment | both |
 | API behaviour, quirks, null patterns, broken endpoints | `docs/<name>-findings.md` | dated section, reproduction command per claim | maintainer |
 | Open questions | inline `[CONFIDENCE: … TODO: DOMAIN EXPERT — …]` **and** the findings doc | removed from the code when answered | maintainer, expert |
 | Expert answers | findings doc → *Resolved gaps* / *Decisions confirmed* | date + who answered + verbatim answer | maintainer |
 | Each discovered quirk and each rule's behaviour | a unit test | pins vendor behaviour and the rule's output | CI |
-| Wire surface of a variant that has been measured | a hash snapshot test (e.g. [`arms-frozen.test.ts`](../../../../src/arms-frozen.test.ts)) | sha256 of `tools/list` + instructions | CI |
+| Wire surface of a variant that has been measured | a hash snapshot test (e.g. [`arms-frozen.test.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/arms-frozen.test.ts)) | sha256 of `tools/list` + instructions | CI |
 | A hypothesis about a metadata change | `evals/open-questions.md` | prediction + what falsifies it, **before** the run | maintainer |
 | A measurement | `evals/results/<date>-<slug>.json` | new file per run, never edited; caveats list | maintainer |
+| A defect an eval run found (in your tool, not in the model) | findings doc §7 *Known bugs* + the rule's provenance line | what failed, the result that showed it, the repro | maintainer |
 | Project conventions (deploy, variants, quirks) | `CLAUDE.md` / `AGENTS.md` | short, operational | coding agents |
 | Why this skill says what it says | [`evidence.md`](evidence.md) | one row per rule | whoever edits the skill |
 

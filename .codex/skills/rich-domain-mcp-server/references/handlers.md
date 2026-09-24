@@ -5,10 +5,10 @@ factory function for it. A shared factory is what makes permissions, alerts, out
 observability *hard to forget* on any one tool — but direct, hand-rolled logic is perfectly
 acceptable for tools that don't fit the query→transform→summarize shape at all (games, MCP App
 render tools), or for a codebase small enough that a shared factory would be premature. This same
-repo's [get-building-profile.ts](../../../../src/tools/get-building-profile.ts) hand-rolls the
+repo's [get-building-profile.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile.ts) hand-rolls the
 lifecycle directly (`resolveBuildingProfile` + `generateAlerts`, no shared factory) — that's a
 legitimate, working example of the same steps, not a shortcut. The reference implementation,
-[get-building-profile-best.ts](../../../../src/tools/get-building-profile-best.ts), hand-rolls it
+[get-building-profile-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-best.ts), hand-rolls it
 too, with the rule registry and size guard described below.
 
 ---
@@ -87,6 +87,10 @@ check (if applicable) and a log write.
 11. **A failed secondary fetch degrades, it does not fail the call.** If a rule's supporting data
     (a reference period, a label lookup) cannot be fetched, return the primary data with that
     field `null` + `reason`, and say so in an alert.
+12. **Know the upstream cost of every secondary fetch.** Measure it in the provider's own units
+    (Open-Meteo weighs by data volume), cap concurrency, cache immutable results, and add a test
+    that pins the fetch shape. A 10-year span per call exhausted the quota under load and failed
+    EVERY call of the tool [Q19c].
 
 ## What's worth logging
 

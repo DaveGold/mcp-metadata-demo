@@ -35,12 +35,22 @@ describe('rich-domain-mcp-server skill copies', () => {
     expect(target && existsSync(resolve(dirname(AGENTS), target))).toBe(true);
   });
 
-  it('every relative link in the skill resolves', () => {
+  it('links are portable: relative links stay inside the skill, repo links are GitHub URLs to files that exist', () => {
+    // The skill is meant to be copied into OTHER repos (e.g. a production MCP monorepo), so a
+    // relative link into this repo's evals/ or src/ would break there. Evidence and reference
+    // implementations are linked by absolute GitHub URL; this checks each one against the tree.
+    const GITHUB = 'https://github.com/DaveGold/mcp-metadata-demo/blob/main/';
     for (const f of files(CLAUDE).filter((x) => x.endsWith('.md'))) {
       const path = join(CLAUDE, f);
       const links = [...readFileSync(path, 'utf8').matchAll(/\]\(([^)#\s]+)(?:#[^)]*)?\)/g)].map((m) => m[1]);
-      for (const link of links.filter((l) => !/^https?:/.test(l))) {
-        expect(existsSync(resolve(dirname(path), link)), `${f} → ${link}`).toBe(true);
+      for (const link of links) {
+        if (link.startsWith(GITHUB)) {
+          expect(existsSync(join(ROOT, link.slice(GITHUB.length))), `${f} → ${link}`).toBe(true);
+        } else if (!/^https?:/.test(link)) {
+          const target = resolve(dirname(path), link);
+          expect(target.startsWith(CLAUDE), `${f} → ${link} leaves the skill`).toBe(true);
+          expect(existsSync(target), `${f} → ${link}`).toBe(true);
+        }
       }
     }
   });

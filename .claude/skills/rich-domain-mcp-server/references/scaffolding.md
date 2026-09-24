@@ -22,7 +22,7 @@ src/<name>/
 
 (This companion repo keeps it even flatter — one `src/tools/` directory, one `src/server.ts` with a
 `variant` flag instead of one file per environment. See
-[server.ts](../../../../src/server.ts) for a small, complete example of the whole shape.)
+[server.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/server.ts) for a small, complete example of the whole shape.)
 
 ## 1. Client
 
@@ -55,7 +55,7 @@ export class MyClient {
 ```
 
 Not every tool needs a client at all — a public, keyless API (this repo's
-[get-weather-context.ts](../../../../src/tools/get-weather-context.ts) calls Open-Meteo directly
+[get-weather-context.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context.ts) calls Open-Meteo directly
 with plain `fetch()`, no client class, no auth) is the simplest case and shouldn't be forced into a
 client-class shape it doesn't need.
 
@@ -154,7 +154,7 @@ Co-locate as `<file>.test.ts`. Worth testing, in priority order:
 6. **Rules**: unique ids, provenance present, `relates_to_fields` exist in the output, each rule's
    rendered line on a fixture record that triggers it.
 7. **Frozen variants**: once a variant has been measured, hash its `tools/list` + instructions so
-   it cannot drift (this repo: [`arms-frozen.test.ts`](../../../../src/arms-frozen.test.ts)).
+   it cannot drift (this repo: [`arms-frozen.test.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/arms-frozen.test.ts)).
 
 ## 7. Adding a variant to this repo
 
@@ -180,6 +180,6 @@ redeploy — only suitable when the data changes rarely (monthly or less).
 
 Interactive tools (charts, tables, forms, games) register differently from plain data tools and
 ship a small built UI alongside the tool registration. See
-[render-chart.ts](../../../../src/tools/render-chart.ts) in this repo for a complete, working
+[render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart.ts) in this repo for a complete, working
 example — the render tool itself does not fetch data; the agent fetches data elsewhere and passes
 reshaped data in.
