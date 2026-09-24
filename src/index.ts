@@ -14,6 +14,7 @@
 export {
   mcp,
   mcpMinimal,
+  mcpThin,
   mcpSchema,
   mcpInline,
   mcpInlineRecipe,
