@@ -28,6 +28,8 @@ The closing slide promised five things. Here they are:
 4. **A thin and a rich MCP server on the same public API** — plus a third, `best`:
    [try it live](#try-it-live)
 5. **The slides, as a PDF** — [_Most MCP servers are empty_](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
+   · [slide by slide](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.md), with what the evals
+   changed since
 
 **What changed since the talk.** The talk said _bound is not the same as delivered_, and marked
 the tool description as reaching the model before the call. Four days later the evals showed that
@@ -164,10 +166,16 @@ sends and where the cut falls: [`best`](docs/wire/best.md) · [`rich`](docs/wire
 **I lead an AI or platform team.** The paper, [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer),
 then [`docs/design.md`](docs/design.md) for what the evals changed.
 
+## Concepts and language
+
+- [Terminology](docs/terminology.md) — what the terms in this repo mean, canonically
+- [Quotes & principles](docs/quotes.md) — the short formulations, each with its evidence status
+
 ## Talks
 
 - **Most MCP servers are empty** — [AGNTCon + MCPCon Europe 2026](https://agntconmcpconeu26.sched.com/event/2VmKE)
-  · Amsterdam · Sep 17–18 2026 ([slides, PDF](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf))
+  · Amsterdam · Sep 17–18 2026 ([slides, PDF](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
+  · [slide by slide](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.md))
 - **Domain knowledge belongs in the MCP server** — [VibeKode Netherlands 2026](https://vibekode.it/agentic-engineering/domain-knowledge-belongs-in-the-mcp-server/)
   · Utrecht · Oct 7 2026
 - **Adoption is the hard part: six months of MCP in production at an HVAC company** —

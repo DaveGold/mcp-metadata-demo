@@ -1,9 +1,9 @@
 /**
- * The README and the docs point into the source by line range ("here is the WHEN, here the HOW,
- * here the WHAT"). Line ranges rot silently when a file is edited, so this test pins them: every
- * relative link must resolve, a `#Lx-Ly` range must lie inside the file, every backticked name in
- * the link text (`WHEN TO USE`, `computeBuildingDerived`, …) must appear inside that range, and a
- * `#heading` anchor into a Markdown file must match one of its headings.
+ * The README, the docs and the talk pages point into the source by line range ("here is the WHEN,
+ * here the HOW, here the WHAT"). Line ranges rot silently when a file is edited, so this test pins
+ * them: every relative link must resolve, a `#Lx-Ly` range must lie inside the file, every
+ * backticked name in the link text (`WHEN TO USE`, `computeBuildingDerived`, …) must appear inside
+ * that range, and a `#heading` anchor into a Markdown file must match one of its headings.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -16,6 +16,9 @@ const DOCS = [
   ...readdirSync(join(ROOT, 'docs'))
     .filter((f) => f.endsWith('.md'))
     .map((f) => `docs/${f}`),
+  ...readdirSync(join(ROOT, 'talks'))
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => `talks/${f}`),
 ];
 
 const links = DOCS.flatMap((doc) =>

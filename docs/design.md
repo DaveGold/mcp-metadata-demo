@@ -6,7 +6,8 @@ The agent-facing version — ordered steps, checklists, hard budgets — is the
 between each principle and the run behind it lives in one place only, the skill's
 [evidence register](../.claude/skills/rich-domain-mcp-server/references/evidence.md); this page
 cites its row IDs (`Q7`, `BT`, `N2`, …) instead of repeating the numbers. How `best` implements
-it, line by line: [`reference-implementation.md`](reference-implementation.md).
+it, line by line: [`reference-implementation.md`](reference-implementation.md). The terms used
+here are defined in [`terminology.md`](terminology.md).
 
 ## Relation to the paper and the talk
 
