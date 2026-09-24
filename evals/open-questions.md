@@ -4031,3 +4031,19 @@ It runs on haiku AND sonnet, n=10 per path per arm per model: 14 × 2 × 2 × 10
 | P2 | polarArea still reached by `best-lean` (the tree is unchanged) ≥ 3/5 | ≤ 1/5 |
 | P3 | table headers still carry "berekend/calculated" in the final table: `best-lean` ≥ 4/5 (the refusal is unchanged) | ≤ 2/5 |
 | P4 | cost: `best-lean` median tokens ≥ 10% below `best` on every question group | < 5% on any group |
+
+**Amended 2026-09-24, still BEFORE any run: a third arm.** The owner questioned a large input
+schema for a plain bar chart. `best-guided` (temporary) makes render_chart's schema small (4.9k):
+the decision tree, plain labels and tuple datasets. Every other shape comes from a new
+`get_chart_guidance(type)`, which the `type` describe makes a REQUIRED first call for anything but
+a plain bar or line (a hint alone is not followed [Q8b]). The handler still checks the full shape
+(the lean schema) and refuses a mismatch with the shape for that type in the message.
+`tools/list` 41.4k (best 73.6k, lean 48.3k). Arms: `best`, `best-lean`, `best-guided`; 22
+questions × 3 arms × n=5 = 330 runs, haiku.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P5 | no loss: `best-guided` within 1 of `best` on every cell (n=5), including the 12 non-bar/line paths | a cell ≥ 2 below `best` |
+| P6 | the pointer is followed: get_chart_guidance is called before render_chart in ≥ 4/5 runs of every non-bar/line path, and in ≤ 2/5 of the plain bar/line questions | < 3/5 on any non-bar/line path |
+| P7 | every shape refusal in `best-guided` is followed by a rendered chart | any refused run that ends without a chart |
+| P8 | cost: on the Q23 questions (mostly text, bar, line), `best-guided` median tokens ≤ `best-lean`; on the 12 non-bar/line paths `best-guided` ≤ `best-lean` + 5% despite the extra call | guided > lean + 5% on the Q23 group |

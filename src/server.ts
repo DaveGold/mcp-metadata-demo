@@ -26,6 +26,7 @@ import { registerGetBuildingProfileOpaqueTool } from './tools/get-building-profi
 import { registerRenderChartTool } from './tools/render-chart.js';
 import { registerRenderTableTool } from './tools/render-table.js';
 import { registerRenderMapTool } from './tools/render-map.js';
+import { registerGetChartGuidanceTool } from './tools/chart-guidance.js';
 import { registerFetchImageTool } from './tools/fetch-image.js';
 import { registerGetWeatherContextTool } from './tools/get-weather-context.js';
 import { registerGetToolCallLogTool } from './tools/get-tool-call-log.js';
@@ -80,7 +81,8 @@ export type ServerVariant =
   | 'best'
   | 'best-v1'
   | 'best-no-type-rules'
-  | 'best-lean';
+  | 'best-lean'
+  | 'best-guided';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -168,6 +170,24 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerRenderTableTool(server, { minimal: true });
     registerRenderMapTool(server, { minimal: true });
     registerGetToolCallLogTool(server, { minimal: true });
+    return server;
+  }
+
+  if (variant === 'best-guided') {
+    // Temporary measurement arm: best-lean, but render_chart's schema is small and the per-type
+    // shapes come from a REQUIRED get_chart_guidance call.
+    const server = new McpServer(
+      { name: 'metadata-demo-best-guided', version: VERSION },
+      { instructions: bestInstructions },
+    );
+    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
+    registerGetWeatherContextBestTool(server);
+    registerRenderChartTool(server, { best: true, guided: true });
+    registerGetChartGuidanceTool(server);
+    registerRenderTableTool(server, { best: true, leanSchema: true });
+    registerRenderMapTool(server, { best: true });
+    registerFetchImageTool(server, { openWorld: true });
+    registerGetToolCallLogTool(server, { best: true });
     return server;
   }
 

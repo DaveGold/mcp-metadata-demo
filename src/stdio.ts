@@ -30,6 +30,7 @@ async function main(): Promise<void> {
       'best-v1',
       'best-no-type-rules',
       'best-lean',
+      'best-guided',
     ] as const
   ).includes(rawVariant as never)
     ? (rawVariant as ServerVariant)

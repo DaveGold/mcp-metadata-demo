@@ -16,6 +16,7 @@ const EXAMPLE_CODE = [
   'src/tools/app-tools-best.ts',
   'src/tools/render-chart-schema-best.ts',
   'src/tools/render-table-schema-best.ts',
+  'src/tools/chart-guidance.ts',
   'src/domain/best-rules.ts',
   'src/domain/best-building-rules.ts',
   'src/domain/best-weather-rules.ts',
