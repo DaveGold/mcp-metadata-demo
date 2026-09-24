@@ -67,6 +67,30 @@ export const BEST_ANNOTATION_EXAMPLES = {
     'Example — a boundary of the same kind as the data: [{type:"line", scaleID:"y", value:50, borderColor:"#d32f2f", borderDash:[6,6], label:{content:"warmtepomp zeer geschikt < 50", display:true}}]. A calculated label figure is never drawn against a metered target (Paris Proof, WEii).',
 };
 
+/**
+ * A question-first decision path for render_chart's `type`: what the data IS decides the type,
+ * then the per-type rules check it. Prepended to the rules, in the input schema, where it is
+ * delivered (a description would lose it past char 2,048).
+ */
+export const CHART_DECISION_TREE =
+  'Chart type. Decide from what the data IS, in this order, then check the per-type rules below.\n' +
+  '1. Structure first:\n' +
+  '- amounts flowing from one stage to the next (source → system → end use) → sankey\n' +
+  '- stages where each is a subset of the one before (lead → quote → order) → funnel\n' +
+  '- links between items, many-to-many (which system depends on which) → graph\n' +
+  '- a hierarchy with a value per leaf, part-to-whole, 6+ leaves (project → phase → cost item) → treemap\n' +
+  '- two categorical axes with a value per cell (hour × weekday) → matrix\n' +
+  '- many samples per category, and the question is about spread or outliers → boxplot\n' +
+  '- three numeric measures per item (x, y and size) → bubble\n' +
+  '- two numeric measures per item, and the question is whether they move together → scatter\n' +
+  '2. Otherwise one value per category or time step:\n' +
+  '- a trend over continuous time or numbers → line\n' +
+  '- a cycle (weekdays, hours, months) and the question is about the cycle → polarArea\n' +
+  '- shares of one whole, 2–5 parts → pie; the same with one total or KPI to show in the centre → doughnut\n' +
+  '- one or two items scored on 3–6 comparable measures on one scale → radar\n' +
+  '- a ranking or comparison of categories → bar (horizontal above 8 items)\n' +
+  'Per-type rules:\n';
+
 // ── Checks on a finished call ────────────────────────────────────────────────
 
 const METERED_TARGET = /paris\s*proof|weii/i;
@@ -107,8 +131,13 @@ export function chartAlerts(args: {
 }
 
 /** A header or row label that names a label energy figure. */
-const LABEL_FIGURE =
-  /\b(ep-?[12]|energiebehoefte|primair|primary|fossiel|fossil|energieverbruik|energy (use|demand|consumption)|co2|co₂|warmtebehoefte|heat(ing)? (demand|need))\b/i;
+// Lookarounds, not \b: "²" and "₂" are not word characters, so \b never matches after them.
+const LABEL_TERM =
+  /(?<![a-z])(ep-?[12]|ep[₁₂]|energiebehoefte|primair fossiel|warmtebehoefte|berekend energieverbruik)(?![a-z])/i;
+/** A generic energy word only names a LABEL figure when it is per m², as every label figure is. */
+const ENERGY_WORD = /(?<![a-z])(energy|energie|primary|fossil|co2|co₂|emission|emissie|heat|heating|gas)/i;
+const PER_M2 = /\/\s*m[²2](?![a-z0-9])|per m[²2](?![a-z0-9])/i;
+const isLabelFigure = (header: string) => LABEL_TERM.test(header) || (ENERGY_WORD.test(header) && PER_M2.test(header));
 const SAYS_CALCULATED = /berekend|calculated|rekenwaarde|label calc|modelled|modeled/i;
 
 /**
@@ -127,7 +156,7 @@ export function tableAlerts(
     const v = Array.isArray(row) ? row[0] : first ? row[first] : undefined;
     if (typeof v === 'string') names.push(v);
   }
-  const unmarked = [...new Set(names.filter((n) => LABEL_FIGURE.test(n) && !SAYS_CALCULATED.test(n)))];
+  const unmarked = [...new Set(names.filter((n) => isLabelFigure(n) && !SAYS_CALCULATED.test(n)))];
   if (!unmarked.length) return [];
   return [
     `Not rendered. ${unmarked.map((n) => `"${n}"`).join(', ')}: a label figure headed as if it were consumption. It is CALCULATED by the label method; say so in the header (e.g. "EP-2 berekend (kWh/m²)") and call render_table again.`,

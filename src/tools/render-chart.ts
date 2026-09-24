@@ -17,7 +17,7 @@ import { z } from 'zod';
 import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
-import { BEST_ANNOTATION_EXAMPLES, bestChartDescription, chartAlerts } from './app-tools-best.js';
+import { BEST_ANNOTATION_EXAMPLES, CHART_DECISION_TREE, bestChartDescription, chartAlerts } from './app-tools-best.js';
 import { registerAppTool, registerAppResource, RESOURCE_MIME_TYPE } from '@modelcontextprotocol/ext-apps/server';
 import { getAuthExtra } from '../shared/auth.js';
 import { requestContext } from '../shared/log-context.js';
@@ -317,8 +317,9 @@ const inputSchema = {
             ),
           data: z
             .array(z.number().nullable())
+            .optional()
             .describe(
-              'Numeric values, one per label. Use null for missing data points (creates a gap in lines, skips bar). For scatter/bubble use scatterData instead.',
+              'Numeric values, one per label. Use null for missing data points (creates a gap in lines, skips bar). For scatter/bubble use scatterData instead, for boxplot samples or stats.',
             ),
           spanGaps: z
             .boolean()
@@ -783,7 +784,10 @@ interface ChartArgs {
 
 /** Normalize a dataset entry (tuple or object) to the full keyed shape. */
 function normalizeDataset(entry: ChartDataset | DatasetTuple): ChartDataset {
-  return Array.isArray(entry) ? { label: entry[0], data: entry[1] } : entry;
+  if (Array.isArray(entry)) return { label: entry[0], data: entry[1] };
+  // scatter / bubble carry scatterData and boxplot carries samples or stats, so `data` may be absent.
+  // The label-based checks below still refuse a missing `data` there (0 entries vs labels.length).
+  return { ...entry, data: entry.data ?? [] };
 }
 
 /** Normalize a sankey flow entry (tuple or object) to the keyed shape. */
@@ -833,7 +837,7 @@ function normalizeTreemapRow(
 
 export function registerRenderChartTool(
   server: McpServer,
-  opts: { minimal?: boolean; best?: boolean; typeRules?: boolean } = {},
+  opts: { minimal?: boolean; best?: boolean; typeRules?: boolean; decisionTree?: boolean } = {},
 ): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
   registerAppResource(server, 'Chart App', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({
@@ -858,6 +862,13 @@ export function registerRenderChartTool(
             ...inputSchema,
             // A measured variant without the per-type rules, to see whether the rules do the work.
             ...(opts.typeRules === false ? { type: inputSchema.type.describe('Chart type.') } : {}),
+            ...(opts.decisionTree
+              ? {
+                  type: inputSchema.type.describe(
+                    CHART_DECISION_TREE + (inputSchema.type.description ?? '').replace(/^[^\n]*\n/, ''),
+                  ),
+                }
+              : {}),
             options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES),
           }
         : inputSchema,
