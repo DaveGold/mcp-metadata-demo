@@ -3866,3 +3866,42 @@ LAST successful render_table call.
 | P2 | every refused `best` run retries, and ≥ 9/10 end with a rendered table | ≤ 7/10 rendered |
 | P3 | `best-v1` ≤ 2/10 (control) | ≥ 5/10 |
 | P4 | `best` median tokens ≤ +20% of `best-v1` (the retry costs a call) | > +35% |
+
+## Q23 — Does the chart and table guidance make the model choose the right FORM from the data? Registered 2026-09-24, NOT YET RUN
+
+> **REGISTERED, not yet run.** Question set: `evals/questions-chart-choice.json`. Before the run:
+> build arm C below and register the arm list and model tiers.
+
+**Why.** Q22 never tested the choice itself. Its questions named the form ("in a chart", "in a
+table", "on a map"), and its chart question accepted line and bar alike. Three things are
+unmeasured:
+- the per-type REFUSE rules on `render_chart`'s `type` parameter (delivered in the input schema:
+  pie at most 5 slices, no line on a categorical axis, radar at most 3 overlays, …);
+- `rich`'s question-first decision path, which mostly falls past the 2,048 cut;
+- whether the model renders at all when text or a small table would do.
+
+**Questions.** Six questions where the data shape decides the right form and the question names
+none: 12 shares of a year, a trend, 3 measures × 2 buildings, 2 labels, a list of dates, a single
+number. Each has an acceptable and a wrong list, taken from the `type` rules themselves.
+
+**Arms.** Three, to see where the guidance comes from:
+- A — `best-v1`: no chart description, the REFUSE rules in the input schema;
+- B — `best`: a short description, the same schema rules;
+- C — `best` with the REFUSE rules stripped from `type` (to build; wire-frozen as its own
+  variant). C separates "the schema rules work" from "models choose well on their own".
+
+**Scoring.** From the captured arguments: the tool called (or none), `type`, the number of slices
+or series. Each run scores CORRECT (acceptable form), WRONG (a listed wrong form), or OTHER
+(hand-read).
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `choice-share-per-month`, haiku: pie or doughnut in ≤ 2/10 with the rules (A, B), ≥ 5/10 without (C) | C ≤ 2/10 (the rules are not what prevents it) |
+| P2 | `choice-single-number` and `choice-two-labels`: no render_chart in ≥ 9/10, every arm | any arm ≤ 7/10 |
+| P3 | `choice-trend-over-year`: line or bar ≥ 9/10, every arm (ceiling) | any arm ≤ 7/10 |
+| P4 | B ≥ A on every question (the description's WHEN NOT TO USE adds to the schema rules) | A > B by ≥ 3 on any question |
+| P5 | sonnet chooses correctly ≥ 9/10 on every question in every arm | sonnet ≤ 7/10 anywhere |
+
+**Failure mode to expect.** Models may choose well without any rules (C at ceiling). The honest
+result is then that the `type` rules are volume, paid on every turn (~3k characters), and a
+candidate to trim.
