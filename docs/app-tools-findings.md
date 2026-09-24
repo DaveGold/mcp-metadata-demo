@@ -75,3 +75,18 @@ or outside the Netherlands. The chart still renders; the alert names the fix.
   response held in 2/10, with 0/10 re-renders, because the model treats a successful render as
   done. Refusing the call with the fix in the message held in 10/10: 6 runs were refused, retried
   and rendered ([`q22c`](../evals/results/2026-09-24-q22c-table-refusal.json)).
+
+### 2026-09-24 — which chart types are used (Q23)
+
+Six questions that name no form, three arms. The third arm is `best-no-type-rules`: the per-type
+rules removed from `type`, 2,769 → 11 characters. Result: [`q23`](../evals/results/2026-09-24-q23-chart-choice.json).
+- **Forms chosen over 240 runs:** text 137, bar 50, line 26, table 24, pie 3, polarArea 2.
+- **What the rules changed:** only the 12-slice pie on monthly shares, 3/10 → 0/10 on haiku.
+- **What they cost:** 1.9–4.6% tokens.
+- **Candidate:** cut `type`'s rules to the types this data can use (bar, line, polarArea, and pie
+  with its 5-slice cap). `[CONFIDENCE: MEDIUM — one domain; unmeasured whether a shorter rule set
+  keeps the pie effect.]`
+- **Found by the audit:** validation refusals in render_chart, render_table and render_map were
+  not logged. Every refusal is now logged with status `error` and its shape, and the render tools
+  log their shape (chart type and counts, never values) on every call.
+

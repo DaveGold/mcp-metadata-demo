@@ -34,6 +34,8 @@ const FROZEN_ARMS: ServerVariant[] = [
   'best',
   // `best` as measured in Q19–Q19d, kept when its app tools were rebuilt (Q22).
   'best-v1',
+  // Q23 arm C: best without render_chart's per-type rules.
+  'best-no-type-rules',
 ];
 
 const noBag: BagClientLike = {
