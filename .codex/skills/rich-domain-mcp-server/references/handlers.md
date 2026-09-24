@@ -1,5 +1,8 @@
 # Handlers — the tool lifecycle contract
 
+> **Local overlay:** REQUIRED — if `<repo-root>/.skill-local/rich-domain-mcp-server/handlers.md` exists, read it
+> before the rest of this file (SKILL.md → *Local overlays*).
+
 Every tool handler should implement the same lifecycle, whether or not you have a shared
 factory function for it. A shared factory is what makes permissions, alerts, output validation and
 observability *hard to forget* on any one tool — but direct, hand-rolled logic is perfectly

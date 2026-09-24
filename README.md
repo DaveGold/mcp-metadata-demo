@@ -151,7 +151,9 @@ comparison: [`docs/live-demo.md`](docs/live-demo.md).
 
 **I build MCP servers.** Start with the skill ([Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md)
 · [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md)), then the
-[reference implementation](docs/reference-implementation.md). To run or deploy this repo:
+[reference implementation](docs/reference-implementation.md). To use the skill in your own repo,
+unchanged, with your own knowledge plugged in: [`docs/using-the-skill.md`](docs/using-the-skill.md).
+To run or deploy this repo:
 [`docs/running.md`](docs/running.md). The three self-describing MCP Apps (chart, table, map):
 [`docs/mcp-apps.md`](docs/mcp-apps.md).
 

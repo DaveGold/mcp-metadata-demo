@@ -1,5 +1,8 @@
 # Evaluation — measure inside the loop, guard after it
 
+> **Local overlay:** REQUIRED — if `<repo-root>/.skill-local/rich-domain-mcp-server/evaluation.md` exists, read it
+> before the rest of this file (SKILL.md → *Local overlays*).
+
 Expert validation ([`validation.md`](validation.md)) tells you whether the metadata is *true*.
 It cannot tell you whether a model *uses* it. Only a run can, and in this repo runs did more than
 score: they found the defects that no test, review or server log showed. Most registered

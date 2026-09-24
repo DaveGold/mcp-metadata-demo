@@ -36,6 +36,14 @@ describe('rich-domain-mcp-server skill copies', () => {
     expect(target && existsSync(resolve(dirname(AGENTS), target))).toBe(true);
   });
 
+  it('every evidence tag in the skill resolves to a row in references/evidence.md', () => {
+    const evidence = readFileSync(join(CLAUDE, 'references/evidence.md'), 'utf8');
+    const ids = new Set([...evidence.matchAll(/^\| ([A-Z][A-Za-z0-9-]*) \|/gm)].map((m) => m[1]));
+    for (const f of files(CLAUDE).filter((x) => x.endsWith('.md') && !x.startsWith('local-template/')))
+      for (const [, tag] of readFileSync(join(CLAUDE, f), 'utf8').matchAll(/\[([A-Z][A-Z]?\d*[a-z]?)\]/g))
+        expect(ids.has(tag), `${f} → [${tag}]`).toBe(true);
+  });
+
   it('links are portable: relative links stay inside the skill, repo links are GitHub URLs to files that exist', () => {
     // The skill is meant to be copied into OTHER repos (e.g. a production MCP monorepo), so a
     // relative link into this repo's evals/ or src/ would break there. Evidence and reference

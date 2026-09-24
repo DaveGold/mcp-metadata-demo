@@ -193,7 +193,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     const server = new McpServer({ name: 'metadata-demo-best', version: VERSION }, { instructions: bestInstructions });
     registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
     registerGetWeatherContextBestTool(server);
-    registerRenderChartTool(server, { best: true });
+    registerRenderChartTool(server, { best: true, decisionTree: true });
     registerRenderTableTool(server, { best: true });
     registerRenderMapTool(server, { best: true });
     registerFetchImageTool(server, { openWorld: true });

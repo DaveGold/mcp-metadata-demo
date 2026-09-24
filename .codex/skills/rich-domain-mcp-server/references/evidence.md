@@ -1,5 +1,8 @@
 # Evidence — why each rule in this skill exists
 
+> **Local overlay:** REQUIRED — if `<repo-root>/.skill-local/rich-domain-mcp-server/evidence.md` exists, read it
+> before the rest of this file (SKILL.md → *Local overlays*).
+
 The skill applies its own rule here: **every rule carries its provenance** [Q18]. When you are
 about to delete, weaken or reverse a rule, read its row first; when a new eval result lands, add
 or amend a row and date it.
@@ -102,6 +105,7 @@ family (Claude haiku / sonnet / opus).
 | Q22b | An alert after a successful render is read as a note, not a reason to redo the call | [`q22b`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/evals/results/2026-09-24-q22b-table-alert.json) | table headers dropping "calculated": alert on the response fixed 2/10, 0/10 re-rendered; the fact moved into the prose 9/10 | settled (n=10, 0/10 re-renders) |
 | Q22c | …and a refusal with the fix in the message does it | [`q22c`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/evals/results/2026-09-24-q22c-table-refusal.json) | same check, call refused: headers right 10/10 (instruction 1/10, alert 2/10); 6/10 refused → retried → rendered, 10/10 ended rendered; +4.9% tokens | settled (gap 8 over the alert, same batch control 0/10) |
 | Q23 | Size a render tool's type guidance to the tempting mistakes the data invites, not to the menu it supports | [`q23`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/evals/results/2026-09-24-q23-chart-choice.json) | 240 runs, forms chosen: text 137, bar 50, line 26, table 24, pie 3, polarArea 2. Rules for 14 types (2,769 chars): the only effect was no 12-slice pie (3/10 → 0/10, haiku); cost 1.9–4.6% tokens | settled on this domain (series, few categories); untested on hierarchical or flow data |
+| Q24 | Walk every branch of an input schema with data built for it: a branch the model chooses right can still be unreachable, and the server log will not show it | [`pilot`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/evals/results/2026-09-24-q24-chart-paths-pilot.json), [`confirm`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/evals/results/2026-09-24-q24-chart-paths-confirm.json) | scatter/bubble/boxplot chosen right, refused by the schema (`data` required), fallback to line/bar, on every tier; 54 refused calls absent from the server log. After the repair, 13 of 14 paths reach 9–10/10 without help; a decision path fixes the 14th, polarArea: bar 20/20 → polarArea 16/20, +0.7–1.6% tokens | settled (confirmation n=10, haiku + sonnet, 560 runs); the schema defect is determinate |
 | Q19h | The eight canonical block names cost nothing | [`q19d`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/evals/results/2026-09-24-q19d-canonical-blocks.json) | same content under the talk's names and order: 10/10, 10/10, 9/10, no regression | settled (regression check) |
 | Q19f | Renaming fields did not break questions worded in the old vocabulary | same | every building cell ≥ 18/20 or 10/10 with 16 renamed fields | settled |
 
@@ -153,3 +157,17 @@ Kept because they are useful practice, labelled so nobody quotes them as finding
 of the metadata is what the agent flags for the expert", "3–4 passes per tool is normal", the
 row-count thresholds for confidence levels, "one afternoon clears three weeks of async". They come
 from production work on the Warmtebouw servers, not from this eval set.
+
+The practice rules below come from the same source. They carry a `U` tag so the rule that uses
+them can be traced; none is measured, so none can outweigh a result above.
+
+| id | rule | source | status |
+|---|---|---|---|
+| U1 | DATA HORIZON & SCOPE and PRIVACY are blocks worth their budget, in the description head | recurring in production descriptions: 0-row answers explained by a retention window; HR and health data needing handling rules before the call | experience |
+| U2 | One field list, checked against the row type (`satisfies`), is the single source of filterable, selectable and returned names | production connectors built from a shared field list; name drift caught at compile time | experience |
+| U3 | `select` is a saving across many rows and an overhead on single-record lookups; say so on the parameter | production call logs of projections on one-record lookups | experience |
+| U4 | When output annotations are trimmed, freeze the output shapes and forbid descriptions that point at the output schema | a production migration that moved interpretation out of output annotations, with a byte-identical shape baseline as its guard | experience |
+| U5 | Mark server-derived fields as computed in the row type | maintainers looking for a derived field in the upstream API | experience |
+| U6 | A skill that must run before code changes needs a trigger on the state (the path being edited), in the always-loaded project guide — a trigger on request phrasing misses work handed over from a ticket plan | a production scaffold written from a ticket plan without the skill loaded; fixed by a path-based trigger | experience (one incident) |
+| U7 | What each description block prevents (the table in `metadata.md` §1) | production review of failing calls, block by block | experience |
+| U8 | A server-instructions skeleton ordered by what must survive the budget | production instructions truncated at the 2,048 cut [Q7] | experience; the cut itself is measured |

@@ -71,6 +71,8 @@ Read that before quoting any number from this directory.
 | [`2026-09-24-q22b-table-alert.json`](2026-09-24-q22b-table-alert.json) | **Q22b: an alert after a successful render does not trigger a redo.** `best`'s table now names headers that drop "calculated": 2/10 headers fixed, 0/10 re-renders. It does move the fact into the prose (9/10). A fix that must happen needs the call refused, or applied by the server. Audit exact 5/5. |
 | [`2026-09-24-q22c-table-refusal.json`](2026-09-24-q22c-table-refusal.json) | **Q22c: a refusal does what the instruction and the alert could not.** `best`'s render_table refuses a label energy figure headed without "calculated": **10/10** headers right (instruction 1/10, alert 2/10), `best-v1` 0/10. 6/10 were refused, retried and rendered; all 10 ended with a table. +4.9% tokens. Audit 4/5 exact (the extra call was rejected by the host as unparseable JSON). |
 | [`2026-09-24-q23-chart-choice.json`](2026-09-24-q23-chart-choice.json) | **Q23: of 14 chart types, 2 are used.** Six questions that name no form, 240 runs. Text 137, bar 50, line 26, table 24, pie 3, polarArea 2. The 2,769 characters of per-type rules did one measurable thing: no 12-slice pie (haiku 3/10 without, 0/10 with). Everything else identical across the three arms; sonnet 10/10 everywhere. The rules cost 1.9–4.6% tokens. One domain: series, few categories, single values. |
+| [`2026-09-24-q24-chart-paths-pilot.json`](2026-09-24-q24-chart-paths-pilot.json) | **Q24 pilot: every path of the chart decision tree, with data built for it.** 14 prompts, one per type, no type named. **Three paths (scatter, bubble, boxplot) were unreachable on every tier because the input schema refused the right call**, so the model fell back to line or bar. Repaired, they reach 3/3. The one real choice problem was polarArea; a decision path on `type` fixes it (bar 6/6 → polarArea 5/6). Decision tree 14/14 paths, without it 13/14. The schema refusals never reached the server log (54 calls). |
+| [`2026-09-24-q24-chart-paths-confirm.json`](2026-09-24-q24-chart-paths-confirm.json) | **Q24 confirmed (560 runs): with the schema repaired, 13 of 14 chart paths work without help; the decision tree adds the 14th.** 13 paths score 9–10/10 in both arms on haiku and sonnet. polarArea: bar 20/20 without the tree, polarArea 16/20 with it (haiku 6, sonnet 10). The tree changes nothing else and costs +0.7–1.6% tokens. Audit exact 56/56. |
 
 > ### ⚠️ 2026-09-24 — `rich` CHANGED, twice: the EP-1 vs Paris Proof alert is removed (Q20), and the CALCULATED vs MEASURED line is delivered (Q21)
 >
@@ -84,6 +86,21 @@ Read that before quoting any number from this directory.
 > Then, before Q21, `rich`'s description got the CALCULATED vs MEASURED line up front (char 766,
 > inside the cut). From that point `rich` vs `words` is no longer a one-variable rung on ep1/ep2
 > questions, and a `rich` benchmark-trap number from before Q21 does not describe today's `rich`.
+
+> ### ⚠️ 2026-09-24 — `best` CHANGED (after Q24): render_chart's `type` leads with the decision tree
+>
+> The decision path measured as arm `best-decision-tree` in Q24 is now part of `best`. `best`'s wire
+> hash equals the measured one, so that variant is removed. `best` numbers from before this change
+> were measured without the tree. Only polarArea moved in Q24, so no chart-choice result other
+> than that path changes.
+
+> ### ⚠️ 2026-09-24 — `render_chart` CHANGED on every tier (Q24 pilot)
+>
+> Its input schema required `data` on every dataset, so no tier could call scatter, bubble or boxplot
+> in object form. `data` is now optional. The freeze of every arm was re-baselined, with proof that
+> nothing but `render_chart` moved:
+> [`2026-09-24-render-chart-schema-rebaseline.json`](2026-09-24-render-chart-schema-rebaseline.json).
+> No earlier question used those three types, so no earlier result changes.
 
 > ### ⚠️ 2026-09-24 — `best` CHANGED (Q22): the app tools are rebuilt
 >

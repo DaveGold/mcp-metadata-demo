@@ -4,71 +4,71 @@ exports[`frozen arms — wire surface unchanged > tools/list and instructions ha
 {
   "best": {
     "instructions": "3bd554dd32969922c8efbede582e0e2e01774a5cf1c2e40b6b8f09c4c439368d",
-    "tools": "9edad1a2d9f2992911677f5a9f536471adce2b7702ae55baac47e35f403b6a8e",
+    "tools": "dbfa482475c961f91faa077b313d8722a8ad105085253301793449a747f5b37b",
   },
   "best-no-type-rules": {
     "instructions": "3bd554dd32969922c8efbede582e0e2e01774a5cf1c2e40b6b8f09c4c439368d",
-    "tools": "ab27eab5ae0c98e400da48a60d76d807b7351a6cdd43fb4de00dfca907ef36df",
+    "tools": "779681b8344a15ed91d50d158876b3ec4307ba2359c262bea42ffe6fa0a9f9ef",
   },
   "best-v1": {
     "instructions": "3bd554dd32969922c8efbede582e0e2e01774a5cf1c2e40b6b8f09c4c439368d",
-    "tools": "e8baeeec7973d6daa992e01a225b57581321af6709c2dc6cf5f93d92a9a9afa3",
+    "tools": "e7e7f659ee59382089afcda4e2315e01a61b1653af08f23aabdfc54cabed67ac",
   },
   "guidance-recipe": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "c035ae230b197f3695650f0e1d6b062e94d422fb03ffd2d73ce56c47761bbd5d",
+    "tools": "c3dfe855f9033e4b674e24490771ff6163400deabbeb5db019cba275207ee6a9",
   },
   "inline": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "5c86b0e12d35a6ce749437ae86e8b3d15f4839c544bf16718b37508201ccbbab",
+    "tools": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
   },
   "inline-conditional": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "5c86b0e12d35a6ce749437ae86e8b3d15f4839c544bf16718b37508201ccbbab",
+    "tools": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
   },
   "inline-fact": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "5c86b0e12d35a6ce749437ae86e8b3d15f4839c544bf16718b37508201ccbbab",
+    "tools": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
   },
   "inline-instruction": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "5c86b0e12d35a6ce749437ae86e8b3d15f4839c544bf16718b37508201ccbbab",
+    "tools": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
   },
   "inline-oneline": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "7dd5ba5314d5f2c9f43e79fd5c94ddcb19233f706573ffa7f837199beba53df5",
+    "tools": "5092a967e4f079acf40701bd74e3454579fec9bbf313060a2b3f46a237e30b65",
   },
   "inline-recipe": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "5c86b0e12d35a6ce749437ae86e8b3d15f4839c544bf16718b37508201ccbbab",
+    "tools": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
   },
   "minimal": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "e787b0d5be26490bd9cd2ab419f059da44b7597e8d29977447a83f067c908171",
+    "tools": "fb420eff53ff25d37e07e0ad311b770e8db18892f2da6e0c788b96c26b822360",
   },
   "opaque": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "e1f0d25d19d8681cabd12552838d3e468b47e532b3ef418709c9a2ef26f34a2e",
+    "tools": "be6118b058276f55ab64f15833af01a1aba5595c3d549001f62f21b7afb52220",
   },
   "opaque-words": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "306cc36e0b22faa74698a0ffa3afc2efe5f72ab9e574b4cb74c7b82962b9ebdf",
+    "tools": "f648aac6e191c4671a2f3873ce33e4fc20c40508cffaf7ea76f2089f3a1d20da",
   },
   "rich": {
     "instructions": "c389e91b120684aa2a61b811c0ebebe20edbb8aacd8b3a1a7540aed5db535eab",
-    "tools": "62d3aa7b89b4861484df7b93dcb08125606d760ffd7b7ccef12a4585bc5441ae",
+    "tools": "f3416d82732de7fb9df0ab62cf9312872aa78b9fdd056ee0e161e51f2dcd8aca",
   },
   "schema": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "6561478e9287eba8c1bdaf88d9edba635d1450b296f514f499a6b52b5184693d",
+    "tools": "27dfe77eefae9edd3f96fd92751e5f66cc76cf92d55574418360f2cf274fb273",
   },
   "words": {
     "instructions": "3b2847026b13c4a2e876decd62b27d00837d85355c1a04c2af87e11839519f73",
-    "tools": "9ffcd746244012d822719af5d48351eb544b466b024256cc9051da0449943da8",
+    "tools": "e22c790bfe45db239f3e4ee686928932b641d4946f275ef877948fda663e1616",
   },
   "words-recipe": {
     "instructions": "3b2847026b13c4a2e876decd62b27d00837d85355c1a04c2af87e11839519f73",
-    "tools": "37ae1fabfa2371e496e48b9b6b29c9557aa293e716aacc41c2ef38da75727ba8",
+    "tools": "eda953ff9857c7e29cd7c72c7a771d1f5e4de769b15c06f44dcca9eb7cd19f42",
   },
 }
 `;

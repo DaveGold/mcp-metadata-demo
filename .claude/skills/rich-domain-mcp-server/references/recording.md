@@ -1,5 +1,8 @@
 # Recording — where each kind of knowledge is written down
 
+> **Local overlay:** REQUIRED — if `<repo-root>/.skill-local/rich-domain-mcp-server/recording.md` exists, read it
+> before the rest of this file (SKILL.md → *Local overlays*).
+
 Discovery that is not written down is re-discovered next quarter. Discovery written down in the
 wrong place is worse: it looks recorded and never reaches the model or the next maintainer.
 

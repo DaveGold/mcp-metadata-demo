@@ -1,0 +1,50 @@
+{
+  "contract": "1.0",
+  "root": ".skill-local/rich-domain-mcp-server",
+  "overlays": [
+    {
+      "document": "SKILL.md",
+      "overlay": "README.md"
+    },
+    {
+      "document": "references/audit.md",
+      "overlay": "audit.md"
+    },
+    {
+      "document": "references/delivery.md",
+      "overlay": "delivery.md"
+    },
+    {
+      "document": "references/scaffolding.md",
+      "overlay": "scaffolding.md"
+    },
+    {
+      "document": "references/handlers.md",
+      "overlay": "handlers.md"
+    },
+    {
+      "document": "references/discovery.md",
+      "overlay": "discovery.md"
+    },
+    {
+      "document": "references/metadata.md",
+      "overlay": "metadata.md"
+    },
+    {
+      "document": "references/recording.md",
+      "overlay": "recording.md"
+    },
+    {
+      "document": "references/validation.md",
+      "overlay": "validation.md"
+    },
+    {
+      "document": "references/evaluation.md",
+      "overlay": "evaluation.md"
+    },
+    {
+      "document": "references/evidence.md",
+      "overlay": "evidence.md"
+    }
+  ]
+}
