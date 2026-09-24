@@ -26,6 +26,7 @@ import { registerGetBuildingProfileOpaqueTool } from './tools/get-building-profi
 import { registerRenderChartTool } from './tools/render-chart.js';
 import { registerRenderTableTool } from './tools/render-table.js';
 import { registerRenderMapTool } from './tools/render-map.js';
+import { registerGetChartGuidanceTool } from './tools/chart-guidance.js';
 import { registerFetchImageTool } from './tools/fetch-image.js';
 import { registerGetWeatherContextTool } from './tools/get-weather-context.js';
 import { registerGetToolCallLogTool } from './tools/get-tool-call-log.js';
@@ -190,11 +191,14 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     // The reference implementation, built with the rich-domain-mcp-server skill's audit flow
     // (references/audit.md): the two data tools, the render tools and the log tool. fetch_image
     // is app-only (the table UI resolves image cells through it), so the model never sees it.
+    // The input schemas are re-sent every turn, so render_chart's carries the decision tree and the
+    // bar/line shape; every other shape comes from get_chart_guidance (evals/results/2026-09-25-q25b-lean-vs-guided-confirm.json).
     const server = new McpServer({ name: 'metadata-demo-best', version: VERSION }, { instructions: bestInstructions });
     registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
     registerGetWeatherContextBestTool(server);
-    registerRenderChartTool(server, { best: true, decisionTree: true });
-    registerRenderTableTool(server, { best: true });
+    registerRenderChartTool(server, { best: true, guided: true });
+    registerGetChartGuidanceTool(server);
+    registerRenderTableTool(server, { best: true, leanSchema: true });
     registerRenderMapTool(server, { best: true });
     registerFetchImageTool(server, { openWorld: true });
     registerGetToolCallLogTool(server, { best: true });

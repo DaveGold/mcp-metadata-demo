@@ -4011,3 +4011,89 @@ It runs on haiku AND sonnet, n=10 per path per arm per model: 14 × 2 × 2 × 10
 | P7 | the 13 other paths: A and C within 2 of each other on every path and model (the tree changes only the path it was written for) | a gap ≥ 4 on any other path |
 | P8 | 0 schema refusals (-32602) on scatter, bubble and boxplot, in both arms | any |
 | P9 | C costs ≤ +3% median tokens over A (the tree adds ~1,060 characters to `type`) | > +6% |
+
+## Q25 — Do the lean app-tool input schemas lose anything, and what do they save? Registered 2026-09-24, BEFORE the run
+
+> **REGISTERED before any run.** Input schemas are delivered in full and re-sent every turn
+> (`results/2026-09-24-input-schema-delivery.json`). So their size is paid on every call, used or
+> not. `best-lean` (temporary) has the same schema structure as `best`, and a test pins it; only
+> the words differ. Chart input 21.7k → 10.6k characters, table input 20.2k → 5.9k, `tools/list`
+> 73.6k → 48.3k (−34%). The decision tree stays; the per-type rules shrink to the caps.
+
+**Run.** `best` vs `best-lean`, haiku, n=5 per cell, same batches, interleaved. 220 runs:
+- the 14 chart paths of Q24;
+- the six form-choice questions of Q23;
+- `table-label-figures` and `chart-paris-proof-line` of Q22.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | no loss: `best-lean` within 1 of `best` on every cell (n=5) | a cell with `best-lean` ≥ 2 below `best` |
+| P2 | polarArea still reached by `best-lean` (the tree is unchanged) ≥ 3/5 | ≤ 1/5 |
+| P3 | table headers still carry "berekend/calculated" in the final table: `best-lean` ≥ 4/5 (the refusal is unchanged) | ≤ 2/5 |
+| P4 | cost: `best-lean` median tokens ≥ 10% below `best` on every question group | < 5% on any group |
+
+**Amended 2026-09-24, still BEFORE any run: a third arm.** The owner questioned a large input
+schema for a plain bar chart. `best-guided` (temporary) makes render_chart's schema small (4.9k):
+the decision tree, plain labels and tuple datasets. Every other shape comes from a new
+`get_chart_guidance(type)`, which the `type` describe makes a REQUIRED first call for anything but
+a plain bar or line (a hint alone is not followed [Q8b]). The handler still checks the full shape
+(the lean schema) and refuses a mismatch with the shape for that type in the message.
+`tools/list` 41.4k (best 73.6k, lean 48.3k). Arms: `best`, `best-lean`, `best-guided`; 22
+questions × 3 arms × n=5 = 330 runs, haiku.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P5 | no loss: `best-guided` within 1 of `best` on every cell (n=5), including the 12 non-bar/line paths | a cell ≥ 2 below `best` |
+| P6 | the pointer is followed: get_chart_guidance is called before render_chart in ≥ 4/5 runs of every non-bar/line path, and in ≤ 2/5 of the plain bar/line questions | < 3/5 on any non-bar/line path |
+| P7 | every shape refusal in `best-guided` is followed by a rendered chart | any refused run that ends without a chart |
+| P8 | cost: on the Q23 questions (mostly text, bar, line), `best-guided` median tokens ≤ `best-lean`; on the 12 non-bar/line paths `best-guided` ≤ `best-lean` + 5% despite the extra call | guided > lean + 5% on the Q23 group |
+
+> **ANSWERED 2026-09-24 — a smaller schema loses nothing measurable and saves a fifth to a third
+> of every run.** See [`results/2026-09-24-q25-lean-vs-guided-schemas.json`](results/2026-09-24-q25-lean-vs-guided-schemas.json).
+> 330 runs, haiku, n=5; audit 41/44 waves exact, 554 of 557 calls in the log (the 3 missing never
+> reached a handler, or could not be traced).
+>
+> | | best | best-lean | best-guided |
+> |---|---|---|---|
+> | 14 chart paths correct | 66/70 | 70/70 | 67/70 |
+> | 6 form-choice questions | 29/30 | 30/30 | 29/30 |
+> | 2 traps (Paris Proof line, label headers) | 7/10 | 9/10 | 9/10 |
+> | median tokens, 12 non-bar/line paths | 34.2k | 26.3k (−23%) | 24.4k (−29%) |
+> | median tokens, form choice | 36.5k | 28.6k (−22%) | 26.3k (−28%) |
+>
+> P1–P5, P7, P8 hold. P6 mostly: the REQUIRED pointer was followed in 58/62 runs on the 12
+> non-bar/line paths (pie 3/5, the rest 4–5/5) and 0/10 on plain bar/line. Guided's extra call is
+> cheaper than the schema it replaces (−7% against lean). Guided missed three runs that lean did
+> not (funnel drawn as sankey, boxplot as line without fetching guidance, polarArea as bar); at
+> n=5 that is direction, not size. The lesson for the skill: the input schema is paid on every
+> turn by every question, so it carries what forming a call needs and no more; a type-specific
+> shape can move behind a REQUIRED guidance call without loss.
+
+## Q25b — Is the guided schema as reliable as the lean one where it differs? Registered 2026-09-24, BEFORE the run
+
+> **REGISTERED before any run.** Q25 left one question open: guided missed 3 of 70 chart-path runs
+> where lean missed none (funnel as sankey, boxplot as line without fetching guidance, polarArea
+> as bar). At n=5 that is noise or direction. This run decides which of the two goes into `best`.
+
+**Run.** `best-lean` vs `best-guided`, haiku, n=10 per cell, the 12 chart paths other than bar and
+line (the only paths where the two differ in what the model must do), interleaved 5+5 per wave, 24
+waves, 240 runs.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | both arms reach ≥ 9/10 on at least 11 of the 12 paths | either arm below 9/10 on 2 or more paths |
+| P2 | no reliability gap: guided never ≥ 3 below lean on a path | a path with lean − guided ≥ 3 |
+| P3 | the pointer is followed: get_chart_guidance before the first render_chart ≥ 8/10 on every path | < 6/10 on any path |
+| P4 | cost: guided median tokens ≤ lean over the 12 paths, despite the extra call | guided > lean + 5% |
+
+**Decision rule, fixed before the run:** guided goes into `best` if P1 and P2 hold for guided;
+otherwise lean does. P3 and P4 inform the skill, not the choice.
+
+> **ANSWERED 2026-09-25 — guided is as reliable as lean, and cheaper; guided goes into `best`.**
+> See [`results/2026-09-25-q25b-lean-vs-guided-confirm.json`](results/2026-09-25-q25b-lean-vs-guided-confirm.json).
+> 240 runs, audit 20/24 waves exact; the 4 missing calls never reached a handler (3 unparsable,
+> 1 SDK schema refusal on lean). Correct: lean 118/120, guided 117/120; lean ≥ 9/10 on 12 of 12
+> paths, guided on 11 of 12 (treemap 8/10: two runs answered in text, no chart). Largest gap 2.
+> Pointer followed 114/120 (pie 6/10, where the small schema already shows the payload). Median
+> tokens guided −7.6% against lean, at 2 calls instead of 1. P1, P2, P4 hold; P3 partly (pie).
+> By the rule fixed before the run, guided goes into `best`.

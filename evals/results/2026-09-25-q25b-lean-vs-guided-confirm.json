@@ -1,0 +1,221 @@
+{
+ "_comment": "Q25b: best-lean vs best-guided on the 12 chart paths other than bar and line, haiku, n=10 per cell. Registered before the run with a decision rule: guided goes into best if P1 and P2 hold for guided, otherwise lean.",
+ "date": "2026-09-25",
+ "model": "haiku",
+ "n_per_cell": 10,
+ "total_runs": 240,
+ "protocol": "Portable harness, 24 waves of 5+5 interleaved (two waves per path), 0 retries.",
+ "headline": [
+  "Both arms reach the chart the data calls for: lean 118/120, guided 117/120. Lean is at 9–10/10 on all 12 paths, guided on 11 of 12; guided's treemap is 8/10 because two runs answered in text and drew nothing (the same failure best showed on treemap in Q25, and lean showed on funnel here).",
+  "No reliability gap: the largest lean − guided difference on a path is 2 (treemap, both no-chart runs). Decision rule met: guided goes into best.",
+  "The pointer is followed: get_chart_guidance before the first render_chart 114/120; 10/10 on 10 paths, treemap 8/10 (the two runs without a chart), pie 6/10. Pie is still 9/10 correct: its payload is the tuple the small schema already shows.",
+  "Guided is cheaper despite the extra call: median 24405 vs 26424 tokens (−7.6%), at a median of 2 calls instead of 1.",
+  "Refusal recovery: guided 4/4, lean 3/3 refused runs ended with a rendered chart."
+ ],
+ "predictions": {
+  "P1": "HOLDS — lean 12/12 paths ≥ 9/10, guided 11/12 (treemap 8/10).",
+  "P2": "HOLDS — largest gap 2 (treemap).",
+  "P3": "PARTLY — ≥ 8/10 on 11 of 12 paths; pie 6/10 (below the predicted 8/10, not below the falsification line 6/10).",
+  "P4": "HOLDS — guided 24405 ≤ lean 26424."
+ },
+ "decision": "guided (P1 and P2 hold for guided).",
+ "guidance_before_first_render": {
+  "path-pie": "6/10",
+  "path-doughnut": "10/10",
+  "path-radar": "10/10",
+  "path-polarArea": "10/10",
+  "path-bubble": "10/10",
+  "path-scatter": "10/10",
+  "path-sankey": "10/10",
+  "path-matrix": "10/10",
+  "path-treemap": "8/10",
+  "path-boxplot": "10/10",
+  "path-funnel": "10/10",
+  "path-graph": "10/10"
+ },
+ "median_tokens": {
+  "best-lean": 26424,
+  "best-guided": 24405
+ },
+ "log_audit": {
+  "waves": 24,
+  "exact": 20,
+  "harness_calls": 380,
+  "log_rows": 376,
+  "unlogged": "4 calls, none reached a handler: 3 with unparsable JSON rejected by the host (2 lean render_chart, 1 guided render_table), and 1 lean render_chart with a flat dataset (\"datasets\": [\"label\", [..]]) refused by the SDK schema (-32602) — the same malformed call as in Q25, again invisible to the log under a strict schema."
+ },
+ "cells": {
+  "haiku · path-boxplot · best-guided": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "boxplot": 10
+   }
+  },
+  "haiku · path-boxplot · best-lean": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "boxplot": 10
+   }
+  },
+  "haiku · path-bubble · best-guided": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "bubble": 10
+   }
+  },
+  "haiku · path-bubble · best-lean": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "bubble": 10
+   }
+  },
+  "haiku · path-doughnut · best-guided": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "doughnut": 10
+   }
+  },
+  "haiku · path-doughnut · best-lean": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "doughnut": 10
+   }
+  },
+  "haiku · path-funnel · best-guided": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "funnel": 10
+   }
+  },
+  "haiku · path-funnel · best-lean": {
+   "correct": 9,
+   "n": 10,
+   "finals": {
+    "funnel": 9,
+    "none": 1
+   }
+  },
+  "haiku · path-graph · best-guided": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "graph": 10
+   }
+  },
+  "haiku · path-graph · best-lean": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "graph": 10
+   }
+  },
+  "haiku · path-matrix · best-guided": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "matrix": 10
+   }
+  },
+  "haiku · path-matrix · best-lean": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "matrix": 10
+   }
+  },
+  "haiku · path-pie · best-guided": {
+   "correct": 9,
+   "n": 10,
+   "finals": {
+    "pie": 9,
+    "doughnut": 1
+   }
+  },
+  "haiku · path-pie · best-lean": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "pie": 10
+   }
+  },
+  "haiku · path-polarArea · best-guided": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "polarArea": 10
+   }
+  },
+  "haiku · path-polarArea · best-lean": {
+   "correct": 9,
+   "n": 10,
+   "finals": {
+    "polarArea": 9,
+    "bar": 1
+   }
+  },
+  "haiku · path-radar · best-guided": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "radar": 10
+   }
+  },
+  "haiku · path-radar · best-lean": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "radar": 10
+   }
+  },
+  "haiku · path-sankey · best-guided": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "sankey": 10
+   }
+  },
+  "haiku · path-sankey · best-lean": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "sankey": 10
+   }
+  },
+  "haiku · path-scatter · best-guided": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "scatter": 10
+   }
+  },
+  "haiku · path-scatter · best-lean": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "scatter": 10
+   }
+  },
+  "haiku · path-treemap · best-guided": {
+   "correct": 8,
+   "n": 10,
+   "finals": {
+    "treemap": 8,
+    "none": 2
+   }
+  },
+  "haiku · path-treemap · best-lean": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "treemap": 10
+   }
+  }
+ }
+}

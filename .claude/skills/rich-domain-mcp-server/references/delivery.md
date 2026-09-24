@@ -21,11 +21,23 @@ bottom. Bracketed tags (`[Q7]`) resolve in [`evidence.md`](evidence.md).
 | **field names** in the returned data | **always** — in every response, on every host | none | what the value IS: quantity, scope, provenance, unit | [N1]–[N6] |
 | **tool description** | **first 2,048 characters only**, re-sent on every request | 2,048 chars (keep a working ceiling ~1,800) | what the tool is and is not, when to pick it, input conventions, the few rules that must hold *before* a call | [Q7] [Q15] [Q15b] |
 | **server instructions** | same 2,048 cut | 2,048 chars | cross-tool routing, "read `interpretation` first", what the server does NOT have | [Q7] |
-| **input schema** (`.describe()`/`.meta()` per param) | yes | — | formats, working examples, the list of valid `select` names, misbehaving params | [L3] [Q11] |
+| **input schema** (`.describe()`/`.meta()` per param) | **yes, in full**: no cut seen up to ~21.7k chars per tool — but re-sent every turn, for every tool, used or not | what forming the call needs; cost per turn | formats, working examples, the list of valid `select` names, misbehaving params, how to choose an enum value | [L3] [Q11] [IS] |
 | **output schema** annotations | **no** — a 7,659-char schema difference cost +181–336 tokens | — | validation + UI only; keep shape-only | [Q11] |
 | **tool response** | yes, **up to ~25k tokens**; above that the host replaces the result with a "saved to file" notice | keep < ~25k tokens (this repo guards at 50k chars) | the instance, record-conditional interpretation, computed verdicts, the data a rule needs | [Q9] [Q13] [Q14] [Q16] |
 | **guidance call / meta-tool** | only if the model makes the call — and it makes it only when the pointer is an instruction | — | procedures and recipes, when they cannot go in the response | [Q8] [Q8b] |
 | MCP Resources | client-dependent, not measured here | — | never the sole home of essential guidance | — |
+
+**The input schema is delivered, and paid for every turn.** It is not a place to park what does
+not fit in the description. Interpretation of results belongs in the response, which is paid
+only when the tool is called. On `best`, render_chart and render_table alone are 42k of the 73.6k
+characters every request carries [IS].
+
+Trimming it is safe and pays on every run: the same structure in fewer words (tools/list 73.6k →
+48.3k) lost nothing and cost 21–23% fewer tokens on every question group, including questions
+that never draw a chart; moving the shapes of the rarer chart types behind a REQUIRED
+`get_chart_guidance(type)` (41.4k) saved 26–29%, and the pointer was followed 58/62 times where it
+applied [Q25]. Confirmed at n=10 on the rarer shapes: as reliable as the trimmed schema (117
+against 118 of 120) and 7.6% cheaper, so `best` uses the guided form.
 
 ## What follows from it
 

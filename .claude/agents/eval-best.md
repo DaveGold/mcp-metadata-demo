@@ -1,7 +1,7 @@
 ---
 name: eval-best
-description: Eval arm best (the reference implementation built with the rich-domain-mcp-server skill; Q19, app tools rebuilt in Q22). Answers one building-data question using ONLY the eval-best MCP server. Not for general use — spawned by the run-eval skill.
-tools: mcp__eval-best__get_building_profile, mcp__eval-best__get_weather_context, mcp__eval-best__render_chart, mcp__eval-best__render_table, mcp__eval-best__render_map, mcp__eval-best__get_tool_call_log
+description: Eval arm best (the reference implementation built with the rich-domain-mcp-server skill; Q19, app tools rebuilt in Q22, chart schema guided in Q25). Answers one building-data question using ONLY the eval-best MCP server. Not for general use — spawned by the run-eval skill.
+tools: mcp__eval-best__get_building_profile, mcp__eval-best__get_weather_context, mcp__eval-best__render_chart, mcp__eval-best__get_chart_guidance, mcp__eval-best__render_table, mcp__eval-best__render_map, mcp__eval-best__get_tool_call_log
 ---
 
 You are answering a single question from a user about Dutch buildings, using the

@@ -108,3 +108,24 @@ One prompt per chart type, with the data in the prompt; results in
   polarArea 16/20 with it; nothing else moves. Promoted into `best` on 2026-09-24. The measured
   variant `best-decision-tree` is removed: `best`'s wire hash now equals the one Q24 measured.
 
+
+### 2026-09-24 — the size of the app-tool input schemas (Q25)
+
+The input schema reaches the model in full, and is re-sent on every turn
+([`input-schema-delivery`](../evals/results/2026-09-24-input-schema-delivery.json)). On `best`,
+render_chart and render_table were 42k of the 73.6k characters in `tools/list`, paid on questions
+that never draw a chart. Two smaller versions were measured against `best`
+([`q25`](../evals/results/2026-09-24-q25-lean-vs-guided-schemas.json), 330 runs, haiku n=5):
+- **Lean** (`render-chart-schema-best.ts`, `render-table-schema-best.ts`): the same structure in
+  fewer words (a test pins the structure). Chart paths 70/70, −21 to −23% tokens on every
+  question group.
+- **Guided** (`chart-guidance.ts`): render_chart keeps the decision tree and the bar/line shape;
+  every other shape comes from `get_chart_guidance(type)`, a REQUIRED first call. The handler
+  validates the full shape and refuses with the expected shape and an example. Chart paths
+  67/70, −26 to −29%. The pointer was followed 58/62 times where it applied, never on bar/line.
+- Neither lost a cell by 2 or more against `best`. A strict schema refuses before the handler, so
+  those refusals never reach the log; the guided variant's handler refuses, and logs it.
+- Confirmed at n=10 on the 12 non-bar/line paths
+  ([`q25b`](../evals/results/2026-09-25-q25b-lean-vs-guided-confirm.json)): lean 118/120, guided
+  117/120, largest gap on a path 2; guided −7.6% against lean. Promoted into `best` on 2026-09-25;
+  the temporary variants `best-lean` and `best-guided` are removed.

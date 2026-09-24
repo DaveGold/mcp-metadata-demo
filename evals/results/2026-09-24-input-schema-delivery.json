@@ -1,0 +1,44 @@
+{
+ "_comment": "Is the INPUT SCHEMA delivered in full on Claude Code, or cut like descriptions (2,048)? The Q7 technique: fresh subagents on `best` quote verbatim the last sentence of three parameter descriptions at increasing depth, without calling a tool.",
+ "date": "2026-09-24",
+ "total_runs": 6,
+ "targets": {
+  "render_chart.type (3,829 chars)": "REFUSE on strict parent-child hierarchy (→ treemap) or on plain list views (→ table).",
+  "render_table.columns[].type (5,075 chars)": "Pick text when the URL is display-only.",
+  "render_table.columns[].footer (the last describe in a 16,131-char `columns` schema)": "Footer value is formatted using the same column type (e.g. currency footer shows € total)."
+ },
+ "headline": [
+  "Delivered in full: 6/6 runs (3 haiku, 3 sonnet) quote all three last sentences verbatim, including the one at the end of a 16,131-char parameter schema; none sees a truncation marker. Unlike descriptions, input schemas are not cut on Claude Code, at least up to ~21.7k characters per tool.",
+  "It is not free: the whole input schema of every tool is re-sent every turn. On `best`, tools/list is 73.6k characters, of which render_chart + render_table are 42k."
+ ],
+ "caveats": [
+  "Claude Code only; other hosts unmeasured.",
+  "Largest single tool schema tested: ~21.7k characters."
+ ],
+ "runs": [
+  {
+   "model": "claude-haiku-4-5-20251001",
+   "answer": "Looking at the tool definitions provided:\n\n1. **Last sentence of `type` parameter in render_chart:**\n   \"REFUSE on strict parent-child hierarchy (→ treemap) or on plain list views (→ table).\"\n\n2. **Last sentence of `columns[].type` in render_table:**\n   \"Pick text when the URL is display-only.\"\n\n3. **Last sentence of `columns[].footer` in render_table:**\n   \"Footer value is formatted using the same column type (e.g. currency footer shows € total).\"\n\nNone of these descriptions show truncation markers, and none are cut off mid-sentence. All three have complete final sentences."
+  },
+  {
+   "model": "claude-haiku-4-5-20251001",
+   "answer": "Looking at the tool definitions provided:\n\n**1. Last sentence of `type` parameter description in render_chart:**\n\"REFUSE on strict parent-child hierarchy (→ treemap) or on plain list views (→ table).\"\n\n**2. Last sentence of `columns[].type` parameter description in render_table:**\n\"Pick text when the URL is display-only.\"\n\n**3. Last sentence of `columns[].footer` parameter description in render_table:**\n\"Footer value is formatted using the same column type (e.g. currency footer shows € total).\"\n\n**Truncation markers:** No truncation markers (such as \"… [truncated]\") appear in any of these descriptions. All three descriptions appear complete and end with properly formed sentences."
+  },
+  {
+   "model": "claude-haiku-4-5-20251001",
+   "answer": "Looking at the tool definitions provided:\n\n1. **Last sentence of `render_chart` → `type` parameter description:**\n   \"REFUSE on strict parent-child hierarchy (→ treemap) or on plain list views (→ table).\"\n\n2. **Last sentence of `render_table` → `columns[].type` description:**\n   \"Pick text when the URL is display-only.\"\n\n3. **Last sentence of `render_table` → `columns[].footer` description:**\n   \"Footer value is formatted using the same column type (e.g. currency footer shows € total).\"\n\nAll three sentences appear complete with no mid-sentence cuts or truncation markers such as '… [truncated]'."
+  },
+  {
+   "model": "claude-sonnet-5",
+   "answer": "ANSWER: (1) render_chart `type` parameter, last sentence: \"REFUSE on strict parent-child hierarchy (→ treemap) or on plain list views (→ table).\" (2) render_table `columns[].type`, last sentence: \"Pick text when the URL is display-only.\" (3) render_table `columns[].footer`, last sentence: \"Footer value is formatted using the same column type (e.g. currency footer shows € total).\" None of these three descriptions show a truncation marker such as \"… [truncated]\" or any other sign of being cut off — each reads as a complete sentence ending in a period.\nCALLS: 0\nTOOLS: none\nPARAMS: none"
+  },
+  {
+   "model": "claude-sonnet-5",
+   "answer": "ANSWER: (1) render_chart `type` param, last sentence: \"REFUSE on strict parent-child hierarchy (→ treemap) or on plain list views (→ table).\" (2) render_table `columns[].type`, last sentence: \"Pick text when the URL is display-only.\" (3) render_table `columns[].footer`, last sentence: \"Footer value is formatted using the same column type (e.g. currency footer shows € total).\" None of these three descriptions show a truncation marker such as \"… [truncated]\" — all three appear complete, ending with a full stop and no cut-off text.\nCALLS: 0\nTOOLS: none\nPARAMS: none"
+  },
+  {
+   "model": "claude-sonnet-5",
+   "answer": "ANSWER: (1) render_chart `type` param, last sentence: \"REFUSE on strict parent-child hierarchy (→ treemap) or on plain list views (→ table).\" (2) render_table `columns[].type`, last sentence: \"Pick text when the URL is display-only.\" (3) render_table `columns[].footer`, last sentence: \"Footer value is formatted using the same column type (e.g. currency footer shows € total).\" None of these three descriptions show a truncation marker such as \"… [truncated]\" — all appear complete, ending with proper punctuation.\nCALLS: 0\nTOOLS: none\nPARAMS: none"
+  }
+ ]
+}

@@ -18,6 +18,7 @@ import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
 import { BEST_ANNOTATION_EXAMPLES, CHART_DECISION_TREE, bestChartDescription, chartAlerts } from './app-tools-best.js';
+import { guidedChartInputSchema, guidedShapeProblem } from './chart-guidance.js';
 import { registerAppTool, registerAppResource, RESOURCE_MIME_TYPE } from '@modelcontextprotocol/ext-apps/server';
 import { getAuthExtra } from '../shared/auth.js';
 import { requestContext } from '../shared/log-context.js';
@@ -837,7 +838,13 @@ function normalizeTreemapRow(
 
 export function registerRenderChartTool(
   server: McpServer,
-  opts: { minimal?: boolean; best?: boolean; typeRules?: boolean; decisionTree?: boolean } = {},
+  opts: {
+    minimal?: boolean;
+    best?: boolean;
+    typeRules?: boolean;
+    decisionTree?: boolean;
+    guided?: boolean;
+  } = {},
 ): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
   registerAppResource(server, 'Chart App', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({
@@ -857,21 +864,23 @@ export function registerRenderChartTool(
     {
       title: 'Render Chart',
       description: opts.best ? bestChartDescription : opts.minimal ? 'Render data as a chart.' : description,
-      inputSchema: opts.best
-        ? {
-            ...inputSchema,
-            // A measured variant without the per-type rules, to see whether the rules do the work.
-            ...(opts.typeRules === false ? { type: inputSchema.type.describe('Chart type.') } : {}),
-            ...(opts.decisionTree
-              ? {
-                  type: inputSchema.type.describe(
-                    CHART_DECISION_TREE + (inputSchema.type.description ?? '').replace(/^[^\n]*\n/, ''),
-                  ),
-                }
-              : {}),
-            options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES),
-          }
-        : inputSchema,
+      inputSchema: opts.guided
+        ? guidedChartInputSchema
+        : opts.best
+          ? {
+              ...inputSchema,
+              // A measured variant without the per-type rules, to see whether the rules do the work.
+              ...(opts.typeRules === false ? { type: inputSchema.type.describe('Chart type.') } : {}),
+              ...(opts.decisionTree
+                ? {
+                    type: inputSchema.type.describe(
+                      CHART_DECISION_TREE + (inputSchema.type.description ?? '').replace(/^[^\n]*\n/, ''),
+                    ),
+                  }
+                : {}),
+              options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES),
+            }
+          : inputSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -880,7 +889,7 @@ export function registerRenderChartTool(
       },
       _meta: { ui: { resourceUri: RESOURCE_URI } },
     },
-    async (rawArgs, extra: { authInfo?: AuthInfo }) => {
+    async (rawArgs: Record<string, unknown>, extra: { authInfo?: AuthInfo }) => {
       const start = Date.now();
       let auth: { email: string; userId: string; roles: string[] } | null = null;
 
@@ -898,6 +907,12 @@ export function registerRenderChartTool(
           await logToolCall({ auth, args, start, status: 'error' });
           return { content: [{ type: 'text' as const, text }], isError: true as const };
         };
+
+        // The small guided schema does not check the per-type shape; the full check runs here.
+        if (opts.guided) {
+          const problem = guidedShapeProblem(rawArgs as Record<string, unknown>);
+          if (problem) return fail(problem);
+        }
 
         // Treemap tuple rows require `columns` for positional interpretation.
         // Check before normalization — otherwise normalizeTreemapRow silently

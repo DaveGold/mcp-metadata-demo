@@ -105,12 +105,13 @@ describe('best — delivery budgets (the host cuts at 2,048)', () => {
         expect(d, h).toContain(h);
   });
 
-  it('exposes seven tools (fetch_image app-only), each with all four annotations explicit', async () => {
+  it('exposes eight tools (fetch_image app-only), each with all four annotations explicit', async () => {
     const { tools } = await (await connectBest()).listTools();
     expect(tools.map((t) => t.name).sort()).toEqual(
       [
         'fetch_image',
         'get_building_profile',
+        'get_chart_guidance',
         'get_tool_call_log',
         'get_weather_context',
         'render_chart',
@@ -128,7 +129,7 @@ describe('best — delivery budgets (the host cuts at 2,048)', () => {
         openWorldHint: true,
       });
     }
-    for (const name of ['render_chart', 'render_table', 'render_map', 'get_tool_call_log']) {
+    for (const name of ['render_chart', 'get_chart_guidance', 'render_table', 'render_map', 'get_tool_call_log']) {
       const a = tools.find((t) => t.name === name)!.annotations!;
       expect(a, name).toEqual({
         readOnlyHint: true,

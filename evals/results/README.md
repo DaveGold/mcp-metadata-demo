@@ -73,6 +73,21 @@ Read that before quoting any number from this directory.
 | [`2026-09-24-q23-chart-choice.json`](2026-09-24-q23-chart-choice.json) | **Q23: of 14 chart types, 2 are used.** Six questions that name no form, 240 runs. Text 137, bar 50, line 26, table 24, pie 3, polarArea 2. The 2,769 characters of per-type rules did one measurable thing: no 12-slice pie (haiku 3/10 without, 0/10 with). Everything else identical across the three arms; sonnet 10/10 everywhere. The rules cost 1.9–4.6% tokens. One domain: series, few categories, single values. |
 | [`2026-09-24-q24-chart-paths-pilot.json`](2026-09-24-q24-chart-paths-pilot.json) | **Q24 pilot: every path of the chart decision tree, with data built for it.** 14 prompts, one per type, no type named. **Three paths (scatter, bubble, boxplot) were unreachable on every tier because the input schema refused the right call**, so the model fell back to line or bar. Repaired, they reach 3/3. The one real choice problem was polarArea; a decision path on `type` fixes it (bar 6/6 → polarArea 5/6). Decision tree 14/14 paths, without it 13/14. The schema refusals never reached the server log (54 calls). |
 | [`2026-09-24-q24-chart-paths-confirm.json`](2026-09-24-q24-chart-paths-confirm.json) | **Q24 confirmed (560 runs): with the schema repaired, 13 of 14 chart paths work without help; the decision tree adds the 14th.** 13 paths score 9–10/10 in both arms on haiku and sonnet. polarArea: bar 20/20 without the tree, polarArea 16/20 with it (haiku 6, sonnet 10). The tree changes nothing else and costs +0.7–1.6% tokens. Audit exact 56/56. |
+| [`2026-09-24-q25-lean-vs-guided-schemas.json`](2026-09-24-q25-lean-vs-guided-schemas.json) | **Q25: a smaller app-tool input schema loses nothing measurable and saves a fifth to a third of every run.** best vs best-lean (same structure, fewer words) vs best-guided (small render_chart schema + a REQUIRED `get_chart_guidance(type)`), 330 runs, haiku n=5. Chart paths 66/70, 70/70, 67/70; tokens −21–23% (lean) and −26–29% (guided), also on questions that draw no chart. The guidance pointer is followed 58/62 on non-bar/line paths, 0/10 on bar/line. Audit 554/557. |
+| [`2026-09-25-q25b-lean-vs-guided-confirm.json`](2026-09-25-q25b-lean-vs-guided-confirm.json) | **Q25b: the guided schema is as reliable as the lean one, and cheaper.** 12 non-bar/line chart paths, haiku n=10, 240 runs. Correct lean 118/120, guided 117/120, largest gap on a path 2. `get_chart_guidance` fetched first 114/120. Guided −7.6% tokens against lean. By the rule registered before the run, guided goes into `best`. |
+
+> ### ⚠️ 2026-09-25 — `best` CHANGED (after Q25b): small render_chart schema + `get_chart_guidance`, lean render_table schema
+>
+> `best` now carries the arm Q25b chose: render_chart's input schema holds the decision tree and
+> the bar/line shape, every other shape comes from a REQUIRED `get_chart_guidance(type)`, and the
+> handler validates the full shape; render_table uses the lean schema (same structure, fewer
+> words). `tools/list` 73.6k → about 41k characters. Two wording fixes after the measurement: the
+> `type` describe no longer says "then check the per-type rules below" (they moved into the
+> guidance), and `get_chart_guidance` got its WHEN NOT TO USE line. Results on `best` before this
+> date were measured with the full schemas; only the app tools moved, and Q25/Q25b measured the
+> change directly ([`q25`](2026-09-24-q25-lean-vs-guided-schemas.json),
+> [`q25b`](2026-09-25-q25b-lean-vs-guided-confirm.json)). The temporary arms `best-lean` and
+> `best-guided` are removed.
 
 > ### ⚠️ 2026-09-24 — `rich` CHANGED, twice: the EP-1 vs Paris Proof alert is removed (Q20), and the CALCULATED vs MEASURED line is delivered (Q21)
 >
