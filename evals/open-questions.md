@@ -3467,6 +3467,21 @@ failure mode uncovered.
 
 ## Q19 — Does the skill's reference arm (`best`) hold every answer the old reference won, and fix the ones it lost?
 
+> **ANSWERED 2026-09-24 — a safe reference, with one new defect of its own.** See
+> [`results/2026-09-24-q19-best-arm.json`](results/2026-09-24-q19-best-arm.json). 790 runs, audit exact.
+>
+> - **Confirmed:** P1, P2, P3, P5, P7, P8, P9, P10. **Partial:** P4 (16/20). **Falsified:** P6 (both
+>   margins stated 10/20).
+> - **P2 in numbers:** `best` 20/20 · 10/10 · 10/10 on `benchmark-trap`, `rich` 0/20 · 0/10 · 6/10.
+>   The old reference loses the question it was built to win, exactly where the audit said.
+> - **Held-out:** `best` 19/20 · 10/10 · 10/10, `rich` 0/20 · 5/10 · 10/10.
+> - **Unpredicted:** `weather-partial-normalization` `best` 0/10 against `rich` 10/10. The shipped
+>   reference moves with the query year, so two periods are normalised to different denominators
+>   (6.6% where 3.6% is right). *Shipped data must be comparable across calls*: a new rule, recorded
+>   in the skill.
+> - **Infrastructure:** `best`'s first reference fetch cost ~260 Open-Meteo weighted calls and
+>   exhausted the quota mid-run. Fixed (window-sized, sequential, cached) and re-run.
+
 > **REGISTERED 2026-09-23, BEFORE ANY RUN.** The arm was built and deployed first
 > (`mcpBest`, verified live: variant stamped, reference period 1,231.3 for Q1 2024 and
 > 2,188.4 for Oct 2023–Mar 2024, both matching independent computations). The held-out
