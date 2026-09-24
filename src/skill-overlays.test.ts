@@ -6,7 +6,8 @@
  * overlays and on broken ones.
  */
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, readdirSync, mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 // @ts-expect-error — plain ESM script shipped inside the skill, no type declarations
@@ -139,6 +140,22 @@ describe('overlay checker', () => {
 
     it('a missing README fails', () => {
       expect(run({ 'discovery.md': '# d\n' }).errors.join('\n')).toMatch(/README\.md is missing/);
+    });
+
+    it('the CLI fails a broken set even when run through a symlinked path', () => {
+      // node resolves symlinks in import.meta.url but not in argv[1]; a plain comparison made the
+      // CLI skip the check and exit 0 whenever the skill folder was reached through a link.
+      const root = make({ 'README.md': readme(MAJOR + 1, ['README.md']) });
+      const link = join(mkdtempSync(join(tmpdir(), 'overlays-link-')), 'skill');
+      symlinkSync(SKILL, link);
+      try {
+        expect(() =>
+          execFileSync('node', [join(link, 'check-overlays.mjs'), '--root', root], { stdio: 'pipe' }),
+        ).toThrow(/does not match the skill's major/);
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+        rmSync(join(link, '..'), { recursive: true, force: true });
+      }
     });
 
     it('a broken relative link fails', () => {
