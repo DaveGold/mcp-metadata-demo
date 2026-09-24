@@ -4088,3 +4088,12 @@ waves, 240 runs.
 
 **Decision rule, fixed before the run:** guided goes into `best` if P1 and P2 hold for guided;
 otherwise lean does. P3 and P4 inform the skill, not the choice.
+
+> **ANSWERED 2026-09-25 — guided is as reliable as lean, and cheaper; guided goes into `best`.**
+> See [`results/2026-09-25-q25b-lean-vs-guided-confirm.json`](results/2026-09-25-q25b-lean-vs-guided-confirm.json).
+> 240 runs, audit 20/24 waves exact; the 4 missing calls never reached a handler (3 unparsable,
+> 1 SDK schema refusal on lean). Correct: lean 118/120, guided 117/120; lean ≥ 9/10 on 12 of 12
+> paths, guided on 11 of 12 (treemap 8/10: two runs answered in text, no chart). Largest gap 2.
+> Pointer followed 114/120 (pie 6/10, where the small schema already shows the payload). Median
+> tokens guided −7.6% against lean, at 2 calls instead of 1. P1, P2, P4 hold; P3 partly (pie).
+> By the rule fixed before the run, guided goes into `best`.

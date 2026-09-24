@@ -125,3 +125,6 @@ that never draw a chart. Two smaller versions were measured against `best`
   67/70, −26 to −29%. The pointer was followed 58/62 times where it applied, never on bar/line.
 - Neither lost a cell by 2 or more against `best`. A strict schema refuses before the handler, so
   those refusals never reach the log; the guided variant's handler refuses, and logs it.
+- Confirmed at n=10 on the 12 non-bar/line paths
+  ([`q25b`](../evals/results/2026-09-25-q25b-lean-vs-guided-confirm.json)): lean 118/120, guided
+  117/120, largest gap on a path 2; guided −7.6% against lean. Guided goes into `best`.
