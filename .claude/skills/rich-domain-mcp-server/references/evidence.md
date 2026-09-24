@@ -95,7 +95,17 @@ family (Claude haiku / sonnet / opus).
 | Q19c | Shipped data has an upstream cost: fetch only what the computation needs, respect the source's metering and concurrency, cache what cannot change | same, `infrastructure_incidents` | one un-cached 10-year fetch per call (~260 Open-Meteo weighted calls) exhausted the hourly quota; every call of the arm then failed with 429 | settled (incident) |
 | Q19d | Say what NOT to do with shipped data when the question invites misuse — and expect it to reduce, not remove, the misuse | same; [`q19b`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/evals/results/2026-09-24-q19b-weather-fixes.json) | with the correct quarter figure in hand, 10 of 16 correct haiku answers extrapolated it to a year (= the forbidden 4,200 × 2.53); with a "do not scale it to a full year" clause, 5 of 18 — several quoting the caveat and annualising anyway | direction (cross-sitting) |
 | Q19e | A prohibition in the description head can suppress the call that would show the problem | same | forecast window: `best` haiku made no call in 8/10 and asked for data; `best` 2/10 vs `rich` 4/10 | not measured (gap < 4); behaviour observed |
+| Q19g | Pre-call misses are fixed in the description head, not the response: "call it directly" | [`q19c`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/evals/results/2026-09-24-q19c-call-it-directly.json) | weather calls 30/30, 0 address requests (was 3/30); forecast question called 10/10 (was 2/10) — its remaining miss moved to reading (5/10) | settled for the call; reading open |
+| Q19h | The eight canonical block names cost nothing | [`q19d`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/evals/results/2026-09-24-q19d-canonical-blocks.json) | same content under the talk's names and order: 10/10, 10/10, 9/10, no regression | settled (regression check) |
 | Q19f | Renaming fields did not break questions worded in the old vocabulary | same | every building cell ≥ 18/20 or 10/10 with 16 renamed fields | settled |
+
+## Field reading (probe)
+
+| id | rule | evidence | result | status |
+|---|---|---|---|---|
+| FP1 | Test which fields need explanation with a field-reading probe, not an eval per field; read the flagged meanings, do not trust the auto-score | [`field-probe-best`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/evals/results/2026-09-24-field-probe-best.json) | 44 building + 20 weather fields, haiku, 3 records × 3: calculated energy fields never read as measured (0/99); after rescoring, 7 weather fields stayed flagged on unit spelling / kind choice with correct meanings, while the auto-score PASSED a real scope misread (below) | direction (one author, one probe) |
+| FP2 | A native-language term in a name may not carry its meaning to the model; keep the response rule | same | `oppervlakte_bag_verblijfsobject_m2` read as the building's area 2/9; the rename alone did not fix the scope, the `bp.area.one_unit` rule does | direction |
+| FP3 | Fields outside the six risk classes need no explanation | same | all 14 `UNCOVERED_BY_DESIGN` fields read right 9/9 or 8/9 | direction |
 
 ## Method
 

@@ -440,8 +440,9 @@ export const BUILDING_RULES: readonly Rule<BuildingCtx>[] = [
 
 /**
  * Response fields no rule explains — on purpose. Each is a self-describing register fact
- * (identity, address, dates, the adviser's name) for which no misreading was ever observed in the
- * eval set. The coverage test fails when a NEW field appears that is neither explained by a rule
+ * (identity, address, dates, the adviser's name). Provenance: 2026-09-24 field-reading probe
+ * (evals/results/2026-09-24-field-probe-best.json) — haiku, 3 records × 3, every one read right
+ * 9/9 or 8/9 on kind and unit. The coverage test fails when a NEW field appears that is neither explained by a rule
  * nor listed here, so every field gets a decision. Moving a field out of this list needs a rule
  * and a reason (provenance).
  */

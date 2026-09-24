@@ -3666,6 +3666,10 @@ same scoring as Q19/Q19b.
 
 ### Q19d — Does renaming the description heads to the eight canonical blocks break anything? Registered 2026-09-24, BEFORE the run
 
+> **ANSWERED 2026-09-24 — no.** See [`results/2026-09-24-q19d-canonical-blocks.json`](results/2026-09-24-q19d-canonical-blocks.json).
+> - **P1 confirmed:** 10/10, 10/10, 9/10.
+> - **P2 partial:** the refusal was answered with no call in 6/10.
+
 > **REGISTERED before any run.** Deployed and verified live: building 1,800 chars, weather 1,781,
 > both opening with `WHEN TO USE:`.
 

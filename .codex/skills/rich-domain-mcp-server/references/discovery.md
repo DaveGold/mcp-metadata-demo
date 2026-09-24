@@ -59,6 +59,17 @@ the sentence that explains it, or received it and read a field name instead. Pro
   description and of the server instructions. A quote ending at char 2,048 with `… [truncated]` is
   the host cut [Q7]. See [`delivery.md`](delivery.md) for the other checks (token accounting,
   offsets, response size).
+- **Which fields does it misread? — the field-reading probe.** Do not test every field with an
+  eval. Hand a fresh, tool-less model (the weakest you might be called by) one real response with
+  the guidance stripped, and ask per field what it is, its unit, its kind (register / calculated /
+  measured / computed by the tool / identifier / metadata) and what null means. Score it against a
+  ground-truth file. A field read right 3/3 needs no explanation — that is the evidence for leaving
+  it unexplained. A misread field gets a rename or a rule. A few calls per tool, minutes not hours:
+  [`harness/field_probe.py`](harness/field_probe.py). Calibrate the ground truth on ONE smoke run
+  before the scored runs, and record that you did. **Read the meanings of every flagged field AND
+  of every critical field** — on `best` the auto-score passed a real scope misread (the BAG area
+  read as the building's, 2/9) and flagged seven harmless unit spellings [FP1] [FP2]. Most fields need no probe at all; start from the
+  six risk classes in `metadata.md` §0.
 - **Which field did it use?** Ask a question the payload can answer and read which field the
   answer cites. A model that reaches for the wrong field (a "magnet" name) or invents a unit for
   a unitless one has found a naming defect, not a prose gap [N3] [N4] [N5].

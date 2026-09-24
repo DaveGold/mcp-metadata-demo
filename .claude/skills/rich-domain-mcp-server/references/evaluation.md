@@ -106,6 +106,7 @@ A portable harness is in [`harness/`](harness/):
 | `extract.py` | reads the parent's transcript: verbatim answer, tokens, duration, and every MCP call with result size, error, rate-limit and file-notice flags — idempotent per wave |
 | `check_wave.py` | a wave with any missing run, empty answer or rate-limited call is incomplete |
 | `run_all.sh` | runs waves sequentially and re-runs an incomplete wave WHOLE, up to 3 times |
+| `field_probe.py` | the field-reading probe (`discovery.md`): a tool-less model reads one bare response; per field kind + unit scored against a ground-truth file. For deciding WHICH fields need explanation, before any eval |
 
 Why a fresh headless parent per wave: an MCP connection is fixed when a session starts, so a
 running session may not reach a variant added after it began; a new `claude -p` loads the current

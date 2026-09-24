@@ -54,7 +54,8 @@
   },
   "oppervlakte_bag_verblijfsobject_m2": {
    "kinds": [
-    "register"
+    "register",
+    "measured"
    ],
    "unit": "m2",
    "meaning": "BAG floor area of one unit (verblijfsobject), not the building",
@@ -70,7 +71,9 @@
   },
   "coordinaten": {
    "kinds": [
-    "register"
+    "register",
+    "computed_by_tool",
+    "measured"
    ],
    "unit": "degrees",
    "meaning": "latitude/longitude of the unit",
@@ -86,7 +89,8 @@
   },
   "vbo_status": {
    "kinds": [
-    "register"
+    "register",
+    "metadata"
    ],
    "unit": "none",
    "meaning": "registration status of the unit",
@@ -102,7 +106,8 @@
   },
   "pand_status": {
    "kinds": [
-    "register"
+    "register",
+    "metadata"
    ],
    "unit": "none",
    "meaning": "registration status of the building",
@@ -110,7 +115,9 @@
   },
   "aantal_verblijfsobjecten_in_pand": {
    "kinds": [
-    "register"
+    "register",
+    "computed_by_tool",
+    "metadata"
    ],
    "unit": "count",
    "meaning": "number of units in the building (pand)",
@@ -200,7 +207,8 @@
   "gebruiksoppervlakte_thermische_zone_m2": {
    "kinds": [
     "register",
-    "calculated"
+    "calculated",
+    "measured"
    ],
    "unit": "m2",
    "meaning": "usable floor area of the thermal zone the label covers",
@@ -366,5 +374,6 @@
    "meaning": "construction year as registered in EP-Online",
    "critical": false
   }
- }
+ },
+ "_calibration": "2026-09-24, after one smoke run on mahlerlaan, BEFORE the scored runs: floor areas may be called measured (they are surveyed; the risk is scope, not kind); status fields may be metadata; the VBO count and coordinates may be tool-derived. The measured-misread flag applies only to fields whose accepted kinds include calculated and exclude measured."
 }

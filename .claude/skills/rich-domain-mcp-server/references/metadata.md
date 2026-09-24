@@ -46,6 +46,13 @@ Rules:
 - **If the API is not yours, rename in `transform`** and keep a mapping table in source with a
   reason and provenance per rename (`{ upstream, name, reason, provenance }`). The mapping is
   where the next maintainer learns why the name differs from the vendor docs.
+- **Which names need help? Six risk classes, then a probe.** Across the eval set every misread
+  field fell in one of: (1) the name implies another quantity, (2) no or ambiguous unit, (3) scope
+  ambiguity (per unit vs building vs zone), (4) calculated vs measured, (5) null on a decision
+  field, (6) a derived value needing a constant the payload lacks. Fields outside all six (address,
+  ids, dates) rarely need anything. Confirm with the field-reading probe
+  (`discovery.md`) instead of an eval per field, and record the fields you deliberately leave
+  unexplained with a reason (in this repo: `UNCOVERED_BY_DESIGN`).
 - Keep names identical across the tools of one server (`latitude`/`longitude` in the input of
   one tool should match what another tool returns, or the RELATED TOOLS chain breaks).
 
