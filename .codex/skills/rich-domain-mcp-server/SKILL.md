@@ -187,7 +187,8 @@ guess — which reads exactly like an observation.
 [`references/metadata.md`](references/metadata.md). In order:
 
 1. **Names** (§0) — rename what the audit flagged; mapping table with reason + provenance.
-2. **Description head** (§1) — what it is and is NOT (refusals must be possible before a call),
+2. **Description head** (§1, the eight blocks: the before-the-call and calling-it groups here, the
+   after-the-answer group in the response) — what it is and is NOT (refusals must be possible before a call),
    "read `interpretation` first", the few rules that hold for every record as fact + instruction,
    input conventions. ≤ 2,048, enforced by a test.
 3. **Input schema** (§2) — types, regex, working examples, valid-name lists, misbehaving params.

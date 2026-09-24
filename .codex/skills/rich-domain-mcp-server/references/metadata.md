@@ -76,18 +76,30 @@ A structure that fits the budget:
 5. NOT FOR — adjacent questions and the right tool.
 ```
 
-The classic blocks (RETURNS · WHEN TO USE · WHEN NOT TO USE · QUERY STRATEGY · INTERPRETATION ·
-RELATED TOOLS) are still the right *vocabulary*, but they no longer all fit, and they do not all
-belong here:
+### The eight blocks — three moments, three channels
 
-| block | where it goes now |
-|---|---|
-| RETURNS | description, terse — and name the **literal field identifiers** (`tempMean/tempMin/tempMax`), never a paraphrased group label ("temperature stats") |
-| WHEN TO USE / WHEN NOT TO USE | description, one line each; the NOT-TO-USE line is often the most valuable sentence in the budget |
-| QUERY STRATEGY | description (short) + input-schema param descriptions |
-| INTERPRETATION | **response**, as record-conditional rules under `interpretation` (§4). Only the rules that hold for every record stay in the description |
-| RELATED TOOLS | description, one line: `get_x(join key) — what it adds` |
-| ALERTS | not in the description — the alerts are in the response |
+Every tool uses the same eight blocks (the talk's fixed template), grouped by the moment the model
+needs them. The evals made that grouping literal: each moment has its own channel.
+
+| moment | block | channel | note |
+|---|---|---|---|
+| before the call | WHEN TO USE | description head | one line, in the user's words |
+| | WHEN NOT TO USE | description head | often the most valuable line in the budget; includes what the server does NOT have, so a refusal needs no call [Q19] |
+| | RELATED TOOLS | description head | one line: `get_x(join key) — what it adds` |
+| calling it | QUERY STRATEGY | description head + input-schema `.describe()` | formats, valid names, "call it directly" when models hesitate [Q19c] |
+| | RETURNS | description head, terse | **literal field identifiers**, never a paraphrased group label |
+| after the answer | INTERPRETATION | **response** `interpretation.notes` | record-conditional rules; only rules that hold for EVERY record also go in the head |
+| | ALERTS | **response** `interpretation.alerts` | computed verdicts and branches for this record |
+| and one more | FEEDBACK | one line in the head or instructions | only if a feedback mechanism exists |
+
+Why the third group moved: an INTERPRETATION block in the description arrived only up to char
+2,048 [Q7], and a description is written before the data exists, so it cannot be conditional on the
+record. In the response it is always delivered and can be.
+
+**Naming the blocks costs little.** Eight headers are ~30–40 tokens per tool (~0.1% of a typical
+run, not separately measured), and ~110 chars of the 2,048 budget. Use the canonical names when
+there is room: a model and a maintainer both find the blocks by name. Merge or rename a header only
+when the budget forces it, and say which block it stands for.
 
 **Blocks are earned, not templated.** A sentence exists because a model fails without it. Volume
 does not hurt accuracy [Q2] [Q17], but it costs tokens and budget; a wrong sentence can break
