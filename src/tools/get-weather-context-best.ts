@@ -45,21 +45,22 @@ export const RECORD_FIELDS = [
 ] as const;
 
 export const bestWeatherDescription = `\
-Daily weather for a Dutch location (Open-Meteo): archive days (isForecast=false) and forecast days up to today+14 (isForecast=true), with degree days, solar irradiance (GHI) and a period summary. All aggregates cover archive days only.
+Daily Dutch weather (Open-Meteo): archive days (isForecast=false) and forecast days to today+14 (isForecast=true), with degree days, solar irradiance (GHI) and a summary over archive days only.
 
-READ \`interpretation\` FIRST: it states the weather correction that is valid for THIS window, the complete list of fighting-system days, and the forecast/archive split. Quote its computed values rather than recomputing them.
+CALL IT DIRECTLY: no address is needed — for a city use its coordinates, or omit them for the Utrecht default. Call it even when the window ends in the future: the response separates archive from forecast days and says what can be corrected.
+
+READ \`interpretation\` FIRST: the correction valid for THIS window, all fighting-system days, the forecast/archive split. Quote its computed values.
 
 WEATHER CORRECTION (gas / heating energy):
-- The Dutch convention uses weighted degree days: weightedHdd / totalWeightedHDD, never raw hdd.
+- Use weighted degree days (weightedHdd, totalWeightedHDD), never raw hdd.
 - Full 12-month window: corrected = actual × fullYearGasNormalizationFactor (2800 ÷ totalWeightedHDD).
-- Any shorter window: fullYearGasNormalizationFactor is null — never apply the annual 2800 to part of a year. Use summary.degreeDays.referencePeriodWeightedHDD (the same calendar window averaged over the fixed span 2014–2023, identical for every query year): corrected = actual × referencePeriodWeightedHDD ÷ totalWeightedHDD. The result is for that window only; never scale a partial window up to a year.
+- Shorter window: fullYearGasNormalizationFactor is null — never apply the annual 2800 to part of a year. Use summary.degreeDays.referencePeriodWeightedHDD (same calendar window, fixed span 2014–2023, identical for every query year): corrected = actual × referencePeriodWeightedHDD ÷ totalWeightedHDD. That is the figure for the window; never scale a partial window up to a year.
 - Two periods: compare by the ratio of their totalWeightedHDD.
-- Never weather-correct against forecast days.
 - Pass energyUse to get the corrected figure computed.
 
-SOLAR: expected yield = totalGHI_kWhM2 × kWp × 0.75–0.85; investigate only below 70% of expected. Pass solarKwp + solarYieldKwh to get the verdict computed.
+SOLAR: expected yield = totalGHI_kWhM2 × kWp × 0.75–0.85; investigate only below 70% of expected. Pass solarKwp + solarYieldKwh for a computed verdict.
 
-INPUT: dates yyyy-MM-dd, max 730 days, from 1940 to today+14. latitude/longitude from get_building_profile coordinaten (default Utrecht). summaryOnly=true when you need no per-day rows; select=[exact field names] to keep only some fields per day. Very large responses drop their records and say so.
+INPUT: dates yyyy-MM-dd, max 730 days, 1940 to today+14. latitude/longitude from get_building_profile coordinaten. summaryOnly=true for no per-day rows; select=[exact field names] for some fields per day. Oversized responses drop their records and say so.
 
 NOT FOR: hourly weather, locations outside the Netherlands.`;
 

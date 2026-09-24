@@ -98,7 +98,12 @@ AUTH. App/render tools: WHEN TO USE / RETURNS (what renders) / INPUT (data shape
 [render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart.ts).
 
 **Deduplication pass — every time the description changes.** Each fact once; no fact that the
-input schema already carries; no pointer to the output schema.
+input schema already carries; no pointer to the output schema. **One deliberate exception:** a rule
+may appear in the description head AND as a response rule when the head version is needed
+*before* the call (to decide whether to call, or to refuse) and the response version is
+record-specific. In Q19 `best` answered `metered-vs-model` 10/10 with a median of **0 calls**,
+from the head's "this server has NO metered consumption" alone. A rule only in the response does
+not exist for a question the model answers without calling [Q19].
 
 ## 2. Input schema
 
