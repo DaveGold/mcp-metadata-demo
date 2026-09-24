@@ -28,6 +28,8 @@ The closing slide promised five things. Here they are:
 4. **A thin and a rich MCP server on the same public API** — plus a third, `best`:
    [try it live](#try-it-live)
 5. **The slides, as a PDF** — [_Most MCP servers are empty_](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
+   · [slide by slide](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.md), with what the evals
+   changed since
 
 **What changed since the talk.** The talk said _bound is not the same as delivered_, and marked
 the tool description as reaching the model before the call. Four days later the evals showed that
@@ -125,17 +127,18 @@ differs:
 
 Then ask each the **same question**:
 
-> _"What's the energy label of Museumstraat 1, 1071XX Amsterdam, and what should I keep in mind about this building?"_
-
-The talk's opening example. Every tier gets `energielabel: null`. Rich says no label is
-_registered_ and flags the pre-1992 insulation caveat; best says no label is known and not to infer
-one from the building's age; on thin, an unprimed agent typically says the building _has_ no label
-— wrong.
-
 > _"Gustav Mahlerlaan 10, 1082PP Amsterdam — how does it stack up against the Paris Proof 2040 office target of 70 kWh/m²?"_
 
 The eval set's headline trap. The right answer: it **cannot be ranked from this data** — the
 label figures are calculated, Paris Proof is defined on measured energy. `best` gets it right.
+
+> _"What's the energy label of Museumstraat 1, 1071XX Amsterdam, and what should I keep in mind about this building?"_
+
+The talk's opening example — and, on this data, not one that separates the tiers. Every tier gets
+`energielabel: null`, but also `labelCount: 0`, so even thin usually reads it as _none
+registered_; in the eval set the same case (`invented-label`) is a control every arm passes. What
+differs is the rest of the answer: rich flags the pre-1992 insulation caveat, best says not to
+infer a label from the building's age.
 
 Three more prompts (visualisation, Select, reading `queryIntent` back) and the full tier
 comparison: [`docs/live-demo.md`](docs/live-demo.md).
@@ -166,10 +169,16 @@ sends and where the cut falls: [`best`](docs/wire/best.md) · [`rich`](docs/wire
 **I lead an AI or platform team.** The paper, [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer),
 then [`docs/design.md`](docs/design.md) for what the evals changed.
 
+## Concepts and language
+
+- [Terminology](docs/terminology.md) — what the terms in this repo mean, canonically
+- [Quotes & principles](docs/quotes.md) — the short formulations, each with its evidence status
+
 ## Talks
 
 - **Most MCP servers are empty** — [AGNTCon + MCPCon Europe 2026](https://agntconmcpconeu26.sched.com/event/2VmKE)
-  · Amsterdam · Sep 17–18 2026 ([slides, PDF](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf))
+  · Amsterdam · Sep 17–18 2026 ([slides, PDF](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
+  · [slide by slide](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.md))
 - **Domain knowledge belongs in the MCP server** — [VibeKode Netherlands 2026](https://vibekode.it/agentic-engineering/domain-knowledge-belongs-in-the-mcp-server/)
   · Utrecht · Oct 7 2026
 - **Adoption is the hard part: six months of MCP in production at an HVAC company** —

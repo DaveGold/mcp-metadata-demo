@@ -153,8 +153,8 @@ family (Claude haiku / sonnet / opus).
 
 ## Unmeasured claims still in this skill
 
-Kept because they are useful practice, labelled so nobody quotes them as findings: "roughly 90%
-of AI-discovered metadata holds up under expert review", "3–4 passes per tool is normal", the
+Kept because they are useful practice, labelled so nobody quotes them as findings: "roughly 10%
+of the metadata is what the agent flags for the expert", "3–4 passes per tool is normal", the
 row-count thresholds for confidence levels, "one afternoon clears three weeks of async". They come
 from production work on the Warmtebouw servers, not from this eval set.
 

@@ -57,6 +57,18 @@ three entrypoints — tool registration lives in exactly one place:
   HTTP app with `hosted: true`, which mounts request-logging, daily-cap, and rate-limit middleware.
   EP-Online key injected from Secret Manager.
 
+### Protocol version
+
+The servers speak MCP **2025-11-25**, through `@modelcontextprotocol/sdk` 1.29. Every eval in
+this repo ran on that version. The [2026-07-28 revision](https://modelcontextprotocol.io/specification/2026-07-28/changelog)
+is not supported yet because no TypeScript SDK release supports it (1.30.1, 23 Sep 2026, still
+tops out at 2025-11-25). The migration is small: the HTTP transport is already stateless, one
+fresh server per request with no session id ([src/http.ts](../src/http.ts)). What remains is
+`server/discover` (which now carries the server `instructions`), protocol version and client
+capabilities read from each request's `_meta`, `resultType` on every result, and `ttlMs` /
+`cacheScope` on list results. None of it changes a surface the design rules are about: the
+description, the input and output schema, the response and the instructions all still exist.
+
 ### Layers
 
 - **Tools** (`src/tools/`) — each tool's `description` and Zod `inputSchema` (`.describe()` on
