@@ -41,4 +41,30 @@ describe('render call shape in the log', () => {
     expect(JSON.stringify(shape)).not.toMatch(/SECRET/);
     info.mockRestore();
   });
+
+  it('a refused render call is logged too, with status error and its shape', async () => {
+    const info = vi.spyOn(logger, 'info');
+    const server = createServer({ variant: 'rich', bagClient: noBag, epOnlineClient: noEp });
+    const [c, s] = InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: 'shape-test', version: '0.0.0' });
+    await Promise.all([client.connect(c), server.connect(s)]);
+    const r = await requestContext.run({ sessionId: 't', environment: 'local', variant: 'rich' }, () =>
+      client.callTool({
+        name: 'render_table',
+        arguments: {
+          columns: [
+            { key: 'a', header: 'A' },
+            { key: 'b', header: 'B' },
+          ],
+          data: [[1, 2, 3]],
+        },
+      }),
+    );
+    expect(r.isError).toBe(true);
+    const call = info.mock.calls.find(
+      ([event, data]) => event === 'tool.invoked' && (data as { tool?: string }).tool === 'render_table',
+    );
+    expect(call![1]).toMatchObject({ status: 'error', shape: { columns: 2, rows: 1 } });
+    info.mockRestore();
+  });
 });

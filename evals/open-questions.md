@@ -3869,6 +3869,26 @@ LAST successful render_table call.
 
 ## Q23 — Does the chart and table guidance make the model choose the right FORM from the data? Registered 2026-09-24, NOT YET RUN
 
+> **ANSWERED 2026-09-24 — of 14 chart types, 2 are used, and the rules do one thing.** See
+> [`results/2026-09-24-q23-chart-choice.json`](results/2026-09-24-q23-chart-choice.json). 240 runs.
+>
+> **Which forms were chosen.** Text 137, bar 50, line 26, table 24, pie 3, polarArea 2. Every chart
+> was a bar or a line, apart from 3 pies and 2 polarArea (sonnet, on months, which the rules allow).
+>
+> **What the rules changed.** On 12 monthly shares, haiku without the per-type rules drew a
+> 12-slice pie in 3/10 runs; with the rules, 0/10 in both arms. Every other cell was identical in
+> all three arms: 10/10 no chart for a single number or two labels, 10/10 line or bar for the
+> trend, sonnet 10/10 everywhere.
+>
+> **Cost.** Without the rules, 1.9–4.6% fewer tokens in all 8 cells.
+>
+> P2–P5 confirmed; P1 partial (3/10 without the rules, where ≥ 5 was predicted). The pies came
+> back with the pie alert and were not re-rendered, the Q22b pattern again. Audit 38/40 exact: the
+> two extra calls were validation refusals the handlers did not log, now fixed.
+>
+> **Caveat.** One domain. Its data is series, a few categories or single values; hierarchies, flows
+> or distributions would give treemap, sankey and boxplot a chance this set does not.
+
 > **REGISTERED before any run.** Question set: `evals/questions-chart-choice.json`. Arm C is built
 > as the frozen variant `best-no-type-rules`: the `type` describe drops from 2,769 characters to 11
 > ("Chart type."), and `tools/list` from 72.5k to 69.8k. The render tools now also log the shape

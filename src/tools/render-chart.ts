@@ -882,10 +882,11 @@ export function registerRenderChartTool(
       try {
         auth = getAuthExtra(extra.authInfo);
 
-        const fail = (text: string) => ({
-          content: [{ type: 'text' as const, text }],
-          isError: true as const,
-        });
+        // Every refusal is logged, so the call log shows what was refused and in what shape.
+        const fail = async (text: string) => {
+          await logToolCall({ auth, args, start, status: 'error' });
+          return { content: [{ type: 'text' as const, text }], isError: true as const };
+        };
 
         // Treemap tuple rows require `columns` for positional interpretation.
         // Check before normalization — otherwise normalizeTreemapRow silently

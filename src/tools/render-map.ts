@@ -321,55 +321,35 @@ export function registerRenderMapTool(server: McpServer, opts: { minimal?: boole
         // Normalize positional rows to keyed objects before any validation.
         const markers = normalizeMarkers(args.markers);
 
+        // Every refusal is logged, so the call log shows what was refused and in what shape.
+        const refuse = async (text: string) => {
+          await logToolCall({ auth, args: { ...args, markers }, start, status: 'error' });
+          return { content: [{ type: 'text' as const, text }], isError: true as const };
+        };
+
         // ── Validate marker count ────────────────────────────────────
         if (markers.length > 500) {
-          return {
-            content: [
-              {
-                type: 'text' as const,
-                text: `Too many markers (${markers.length}). Maximum 500. Pre-filter or aggregate before calling render_map.`,
-              },
-            ],
-            isError: true,
-          };
+          return refuse(
+            `Too many markers (${markers.length}). Maximum 500. Pre-filter or aggregate before calling render_map.`,
+          );
         }
 
         // ── Validate empty markers ───────────────────────────────────
         if (markers.length === 0) {
-          return {
-            content: [
-              {
-                type: 'text' as const,
-                text: 'No markers provided. Add at least one marker with lat, lng, and label.',
-              },
-            ],
-            isError: true,
-          };
+          return refuse('No markers provided. Add at least one marker with lat, lng, and label.');
         }
 
         // ── Validate coordinates ─────────────────────────────────────
         for (const marker of markers) {
           if (typeof marker.lat !== 'number' || marker.lat < -90 || marker.lat > 90) {
-            return {
-              content: [
-                {
-                  type: 'text' as const,
-                  text: `Invalid latitude ${marker.lat} for marker "${marker.label}". Must be a number between -90 and 90.`,
-                },
-              ],
-              isError: true,
-            };
+            return refuse(
+              `Invalid latitude ${marker.lat} for marker "${marker.label}". Must be a number between -90 and 90.`,
+            );
           }
           if (typeof marker.lng !== 'number' || marker.lng < -180 || marker.lng > 180) {
-            return {
-              content: [
-                {
-                  type: 'text' as const,
-                  text: `Invalid longitude ${marker.lng} for marker "${marker.label}". Must be a number between -180 and 180.`,
-                },
-              ],
-              isError: true,
-            };
+            return refuse(
+              `Invalid longitude ${marker.lng} for marker "${marker.label}". Must be a number between -180 and 180.`,
+            );
           }
         }
 
