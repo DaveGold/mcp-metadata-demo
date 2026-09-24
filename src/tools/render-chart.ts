@@ -173,13 +173,13 @@ const inputSchema = {
         '- treemap: hierarchical part-to-whole, 6+ items, area = value. Use the treemap field. Max 3 levels. REFUSE on flat data (→ bar), on one item >80% (it swallows the rest), or on precise-ranking questions.\n' +
         '- boxplot: distribution (median, IQR, outliers) per category, n≥5 per box. Use samples or stats on each dataset. REFUSE on n<5 (→ dot plot) or when the question is only about the mean.\n' +
         '- funnel: 3-6 strictly decreasing stages where each stage is a subset of the previous one. REFUSE on non-linear processes, branching, or stages that can grow (→ bar).\n' +
-        '- graph: relational networks where edges carry meaning (dependencies, many-to-many, cross-tier). Use the graph field; layouts: force / tree / dendrogram. REFUSE on strict parent-child hierarchy (→ treemap) or on plain list views (→ table).'
+        '- graph: relational networks where edges carry meaning (dependencies, many-to-many, cross-tier). Use the graph field; layouts: force / tree / dendrogram. REFUSE on strict parent-child hierarchy (→ treemap) or on plain list views (→ table).',
     ),
   title: z
     .string()
     .optional()
     .describe(
-      'Chart title displayed above the visualization. Use Dutch, concise (e.g. "Energieverbruik per maand", "Uren per medewerker Q1 2025").'
+      'Chart title displayed above the visualization. Use Dutch, concise (e.g. "Energieverbruik per maand", "Uren per medewerker Q1 2025").',
     ),
   labels: z
     .array(z.string())
@@ -188,7 +188,7 @@ const inputSchema = {
       'Category labels for the x-axis (bar, line) or segments (pie, doughnut, radar, polarArea). ' +
         'REQUIRED for all chart types except scatter, bubble, and sankey — omitting labels causes an invisible chart. ' +
         'Must have the same length as the data array. ' +
-        'Examples: month names ["Jan", "Feb", ...], employee names, project numbers, energy types.'
+        'Examples: month names ["Jan", "Feb", ...], employee names, project numbers, energy types.',
     ),
   datasets: z
     .array(
@@ -208,12 +208,12 @@ const inputSchema = {
           label: z
             .string()
             .describe(
-              'Legend label for this dataset. Use Dutch domain terms (e.g. "Elektriciteit (kWh)", "Gewerkte uren", "Materiaalkosten").'
+              'Legend label for this dataset. Use Dutch domain terms (e.g. "Elektriciteit (kWh)", "Gewerkte uren", "Materiaalkosten").',
             ),
           data: z
             .array(z.number().nullable())
             .describe(
-              'Numeric values, one per label. Use null for missing data points (creates a gap in lines, skips bar). For scatter/bubble use scatterData instead.'
+              'Numeric values, one per label. Use null for missing data points (creates a gap in lines, skips bar). For scatter/bubble use scatterData instead.',
             ),
           spanGaps: z
             .boolean()
@@ -225,7 +225,7 @@ const inputSchema = {
                 'BEST PRACTICE for interpolated gaps: use TWO datasets instead of spanGaps. ' +
                 'Dataset 1: actual data (solid line). Dataset 2: only the interpolated segments ' +
                 '(null everywhere except the gap range), with a dashed borderDash=[5,5] and a muted/lighter color. ' +
-                'This makes interpolated values visually distinct from real measurements.'
+                'This makes interpolated values visually distinct from real measurements.',
             ),
           scatterData: z
             .array(
@@ -233,17 +233,17 @@ const inputSchema = {
                 x: z.number(),
                 y: z.number(),
                 r: z.number().optional(),
-              })
+              }),
             )
             .optional()
             .describe(
-              'For scatter: [{x, y}]. For bubble: [{x, y, r}]. r = bubble radius in pixels — normalize to 5-40 range.'
+              'For scatter: [{x, y}]. For bubble: [{x, y, r}]. r = bubble radius in pixels — normalize to 5-40 range.',
             ),
           backgroundColor: z
             .union([z.string(), z.array(z.string())])
             .optional()
             .describe(
-              'Fill color(s). Omit to use default palette auto-cycling. Single string for uniform, array for per-segment (pie/doughnut).'
+              'Fill color(s). Omit to use default palette auto-cycling. Single string for uniform, array for per-segment (pie/doughnut).',
             ),
           borderColor: z
             .union([z.string(), z.array(z.string())])
@@ -254,13 +254,13 @@ const inputSchema = {
             .optional()
             .describe(
               'Dash pattern [dashLength, gapLength] in pixels. E.g. [5,5] for dashed, [10,5] for long dash. ' +
-                'Only for type=line. Use to visually distinguish interpolated/estimated data from real measurements.'
+                'Only for type=line. Use to visually distinguish interpolated/estimated data from real measurements.',
             ),
           fill: z
             .boolean()
             .optional()
             .describe(
-              'true = area chart (fill under line). Only for type=line. Creates stacked area effect with multiple datasets.'
+              'true = area chart (fill under line). Only for type=line. Creates stacked area effect with multiple datasets.',
             ),
           tension: z
             .number()
@@ -270,13 +270,13 @@ const inputSchema = {
             .string()
             .optional()
             .describe(
-              'Per-dataset type override for mixed charts. E.g. main type=bar, one dataset type="line" to overlay a trend line on bars.'
+              'Per-dataset type override for mixed charts. E.g. main type=bar, one dataset type="line" to overlay a trend line on bars.',
             ),
           order: z
             .number()
             .optional()
             .describe(
-              'Drawing order for mixed charts. Higher number = drawn first (behind). E.g. bars order=2, line order=1 (line on top).'
+              'Drawing order for mixed charts. Higher number = drawn first (behind). E.g. bars order=2, line order=1 (line on top).',
             ),
           samples: z
             .array(z.array(z.number()))
@@ -285,7 +285,7 @@ const inputSchema = {
               'For type=boxplot: raw value arrays, one inner array per category label. ' +
                 'Outer length MUST equal labels.length. Each inner array ≤ 500 values. ' +
                 'The plugin computes min/q1/median/q3/max/outliers automatically. ' +
-                'Example (2 projects, 5 marges each): [[12,15,18,22,27], [8,10,11,13,35]].'
+                'Example (2 projects, 5 marges each): [[12,15,18,22,27], [8,10,11,13,35]].',
             ),
           stats: z
             .array(
@@ -298,15 +298,15 @@ const inputSchema = {
                 mean: z.number().optional(),
                 outliers: z.array(z.number()).optional(),
                 items: z.array(z.number()).optional(),
-              })
+              }),
             )
             .optional()
             .describe(
               'For type=boxplot: pre-computed stats per category (use when you have aggregated results). ' +
-                'Array length MUST equal labels.length. Prefer samples when raw values are available — the plugin renders richer whiskers/outliers from samples.'
+                'Array length MUST equal labels.length. Prefer samples when raw values are available — the plugin renders richer whiskers/outliers from samples.',
             ),
         }),
-      ])
+      ]),
     )
     .optional()
     .describe(
@@ -315,7 +315,7 @@ const inputSchema = {
         '- Tuple shorthand: [label, data]  — preferred for simple bar/line series. Use default palette default.\n' +
         '  Example: ["Elektriciteit (kWh)", [1800, 1620, 1240, null, null, 120]]\n' +
         '- Full object: {label, data, backgroundColor?, borderColor?, borderDash?, fill?, tension?, scatterData?, type?, order?, spanGaps?}\n' +
-        '  Required when you need styling overrides, scatter/bubble data, dashed lines, mixed charts, or area fills.'
+        '  Required when you need styling overrides, scatter/bubble data, dashed lines, mixed charts, or area fills.',
     ),
   sankey: z
     .object({
@@ -331,20 +331,20 @@ const inputSchema = {
               to: z.string().describe('Target node name (e.g. "Warmtepomp", "Afdeling W")'),
               flow: z.number().describe('Flow value (e.g. kWh, euros, uren). Determines link thickness.'),
             }),
-          ])
+          ]),
         )
         .describe(
           'Array of flows. Each flow links a source node to a target node with a magnitude. Max 200 flows.\n' +
             'Two accepted shapes per flow:\n' +
             '- Tuple shorthand: [from, to, flow]  — preferred, ~40% smaller per flow.\n' +
             '  Example: [["Elektriciteit", "Warmtepomp", 1800], ["Gas", "CV-ketel", 450]]\n' +
-            '- Object: {from, to, flow}  — fine for small diagrams.'
+            '- Object: {from, to, flow}  — fine for small diagrams.',
         ),
       labels: z
         .record(z.string(), z.string())
         .optional()
         .describe(
-          'Display labels per node. Keys = node names from flows, values = display text. E.g. {"Electricity": "Elektriciteit (netaansluiting)"}'
+          'Display labels per node. Keys = node names from flows, values = display text. E.g. {"Electricity": "Elektriciteit (netaansluiting)"}',
         ),
       colors: z
         .record(z.string(), z.string())
@@ -354,20 +354,20 @@ const inputSchema = {
         .record(z.string(), z.number())
         .optional()
         .describe(
-          'Vertical ordering per node. Lower number = higher position. Use to group related nodes (e.g. sources at top, sinks at bottom).'
+          'Vertical ordering per node. Lower number = higher position. Use to group related nodes (e.g. sources at top, sinks at bottom).',
         ),
       colorMode: z
         .enum(['gradient', 'from', 'to'])
         .optional()
         .describe(
-          'Link coloring: gradient (default, smooth blend source→target), from (link color = source node), to (link color = target node).'
+          'Link coloring: gradient (default, smooth blend source→target), from (link color = source node), to (link color = target node).',
         ),
     })
     .optional()
     .describe(
       'Sankey-specific config. Use ONLY with type=sankey. ' +
         'Perfect for energy flow analysis (bron→systeem→toepassing), cost allocation (budget→afdeling→post), ' +
-        'or any source→destination flow. Nodes are auto-discovered from flow from/to values.'
+        'or any source→destination flow. Nodes are auto-discovered from flow from/to values.',
     ),
   matrix: z
     .object({
@@ -383,35 +383,32 @@ const inputSchema = {
               y: z.union([z.string(), z.number()]).describe('Y-axis category or numeric position'),
               v: z.number().describe('Cell value — drives color intensity'),
             }),
-          ])
+          ]),
         )
         .describe(
           'Heatmap cells. Max 2000.\n' +
             'Two accepted shapes per cell:\n' +
             '- Tuple shorthand: [x, y, v]  — preferred (saves ~50% per cell).\n' +
             '  Example: [["Ma","09",4.2], ["Ma","10",4.5], ...]\n' +
-            '- Object: {x, y, v}'
+            '- Object: {x, y, v}',
         ),
       xLabels: z
         .array(z.string())
         .optional()
         .describe(
           'X-axis category labels (order matters). REQUIRED when cells use string x values. ' +
-            'Example for calendar heatmap: ["Ma","Di","Wo","Do","Vr","Za","Zo"].'
+            'Example for calendar heatmap: ["Ma","Di","Wo","Do","Vr","Za","Zo"].',
         ),
       yLabels: z
         .array(z.string())
         .optional()
         .describe(
           'Y-axis category labels (order matters). REQUIRED when cells use string y values. ' +
-            'Example for calendar heatmap: ["00","01",...,"23"].'
+            'Example for calendar heatmap: ["00","01",...,"23"].',
         ),
       colorScale: z
         .object({
-          min: z
-            .string()
-            .optional()
-            .describe('Low-value color (hex or CSS color). Default: palette primary-lighter.'),
+          min: z.string().optional().describe('Low-value color (hex or CSS color). Default: palette primary-lighter.'),
           max: z.string().optional().describe('High-value color (hex or CSS color). Default: palette primary.'),
           reverse: z.boolean().optional().describe('Reverse scale (high values get the low color).'),
         })
@@ -422,7 +419,7 @@ const inputSchema = {
     .describe(
       'Matrix (heatmap) config. Use ONLY with type=matrix. ' +
         'Each cell combines an x, y, and value — color intensity encodes the value. ' +
-        'Perfect for 2D density patterns: uur × dag kWh (calendar heatmap), week × installatietype storingen, voertuig × dag bezetting.'
+        'Perfect for 2D density patterns: uur × dag kWh (calendar heatmap), week × installatietype storingen, voertuig × dag bezetting.',
     ),
   treemap: z
     .object({
@@ -432,7 +429,7 @@ const inputSchema = {
             // Tuple shorthand: positional array aligned with `columns`. Saves ~50% per row for dense trees.
             z.array(z.union([z.string(), z.number()])),
             z.record(z.string(), z.union([z.string(), z.number()])),
-          ])
+          ]),
         )
         .describe(
           'Flat rows of data. Max 500 rows.\n' +
@@ -440,14 +437,14 @@ const inputSchema = {
             '- Tuple shorthand: positional array aligned with `columns` — preferred for large trees.\n' +
             '  Example (with columns=["project","fase","uren"]): [["G25011600","Uitvoering",145], ...]\n' +
             '- Object: {<groupCol>: string, ..., <keyCol>: number}.\n' +
-            '  Example: [{project:"G25011600", fase:"Uitvoering", uren:145}, ...]'
+            '  Example: [{project:"G25011600", fase:"Uitvoering", uren:145}, ...]',
         ),
       columns: z
         .array(z.string())
         .optional()
         .describe(
           'Column names in positional order — REQUIRED when tree rows use the tuple shorthand. ' +
-            'Must include every entry in `groups` plus the `key` column. Example: ["project","fase","uren"].'
+            'Must include every entry in `groups` plus the `key` column. Example: ["project","fase","uren"].',
         ),
       key: z.string().describe('Column name holding the numeric value (cell area). E.g. "uren", "kosten", "m2".'),
       groups: z
@@ -455,7 +452,7 @@ const inputSchema = {
         .optional()
         .describe(
           'Hierarchy column names, top → bottom (max 3). Omit for a flat treemap keyed on index. ' +
-            'Example: ["project","fase"] groups first by project then by fase within each project.'
+            'Example: ["project","fase"] groups first by project then by fase within each project.',
         ),
       labels: z
         .object({
@@ -472,7 +469,7 @@ const inputSchema = {
     .describe(
       'Treemap config. Use ONLY with type=treemap. ' +
         'Hierarchical nested rectangles where area is proportional to the value. ' +
-        'Perfect for: kosten project→fase→post, BIM discipline→category→family, portfolio gebruikstype→energielabel.'
+        'Perfect for: kosten project→fase→post, BIM discipline→category→family, portfolio gebruikstype→energielabel.',
     ),
   graph: z
     .object({
@@ -480,7 +477,7 @@ const inputSchema = {
         .enum(['force', 'tree', 'dendrogram'])
         .describe(
           'Layout algorithm: "force" = force-directed (undirected clusters, best general default), ' +
-            '"tree" = top-down hierarchy, "dendrogram" = branching tree (requires parent-child edges).'
+            '"tree" = top-down hierarchy, "dendrogram" = branching tree (requires parent-child edges).',
         ),
       nodes: z
         .array(
@@ -496,14 +493,14 @@ const inputSchema = {
               y: z.number().optional().describe('Optional pre-computed y position (skips layout).'),
               group: z.string().optional().describe('Group key for color cycling.'),
             }),
-          ])
+          ]),
         )
         .describe(
           'Graph nodes. Max 200.\n' +
             'Three accepted shapes per node:\n' +
             '- Tuple shorthand: [id] or [id, label] or [id, label, group] — preferred.\n' +
             '  Example: [["AH","Albert Heijn","klant"], ["R250312","AH 1460","project"]]\n' +
-            '- Object: {id, label?, group?, x?, y?} — use for pre-computed coordinates.'
+            '- Object: {id, label?, group?, x?, y?} — use for pre-computed coordinates.',
         ),
       edges: z
         .array(
@@ -520,21 +517,21 @@ const inputSchema = {
               target: z.string().describe('Target node id (must match a node.id).'),
               weight: z.number().optional().describe('Edge weight (affects line thickness).'),
             }),
-          ])
+          ]),
         )
         .describe(
           'Graph edges. Max 500. Every source/target must match a node id.\n' +
             'Three accepted shapes per edge:\n' +
             '- Tuple shorthand: [source, target] or [source, target, weight] — preferred.\n' +
             '  Example: [["AH","R250312"], ["JUMBO","JW",3]]\n' +
-            '- Object: {source, target, weight?}'
+            '- Object: {source, target, weight?}',
         ),
       directed: z.boolean().optional().describe('Draw edge arrows. Default: false.'),
     })
     .optional()
     .describe(
       'Graph config. Use ONLY with type=graph. ' +
-        'Perfect for relational data: element dependencies, network graphs, hierarchical trees.'
+        'Perfect for relational data: element dependencies, network graphs, hierarchical trees.',
     ),
   options: z
     .object({
@@ -542,13 +539,13 @@ const inputSchema = {
         .enum(['x', 'y'])
         .optional()
         .describe(
-          '"y" = horizontal bar chart (bars grow left to right). Useful for long category labels like project names or addresses.'
+          '"y" = horizontal bar chart (bars grow left to right). Useful for long category labels like project names or addresses.',
         ),
       stacked: z
         .boolean()
         .optional()
         .describe(
-          'true = stacked bar/line. Shows composition within each category. E.g. stacked bar: uren Wst + Kst + Art per project.'
+          'true = stacked bar/line. Shows composition within each category. E.g. stacked bar: uren Wst + Kst + Art per project.',
         ),
       showLegend: z
         .boolean()
@@ -562,7 +559,7 @@ const inputSchema = {
         .number()
         .optional()
         .describe(
-          'Width/height ratio. Default: 2 (wide). Use 1 for square charts (pie, radar). Use 3+ for sparkline-style.'
+          'Width/height ratio. Default: 2 (wide). Use 1 for square charts (pie, radar). Use 3+ for sparkline-style.',
         ),
       yAxisLabel: z.string().optional().describe('Y-axis title. Use units (e.g. "kWh", "Uren", "€", "m³").'),
       xAxisLabel: z
@@ -575,19 +572,19 @@ const inputSchema = {
             type: z
               .enum(['line', 'box', 'label'])
               .describe(
-                '"line" = horizontal/vertical threshold; "box" = rectangular band (comfort zone, SLA band); "label" = free-floating text marker.'
+                '"line" = horizontal/vertical threshold; "box" = rectangular band (comfort zone, SLA band); "label" = free-floating text marker.',
               ),
             scaleID: z
               .enum(['x', 'y', 'y1'])
               .optional()
               .describe(
-                'REQUIRED for type="line" — without it nothing renders. y = horizontal line on left y-axis, y1 = horizontal line on right y-axis (mixed charts), x = vertical line on x-axis.'
+                'REQUIRED for type="line" — without it nothing renders. y = horizontal line on left y-axis, y1 = horizontal line on right y-axis (mixed charts), x = vertical line on x-axis.',
               ),
             value: z
               .union([z.number(), z.string()])
               .optional()
               .describe(
-                'For type="line": the position on scaleID. Number for numeric/time axes (e.g. value:70 for Paris Proof). For a categorical x-axis (labels[] is strings, e.g. dates), pass the label string verbatim (e.g. value:"30 apr") — Chart.js resolves it against the category scale.'
+                'For type="line": the position on scaleID. Number for numeric/time axes (e.g. value:70 for Paris Proof). For a categorical x-axis (labels[] is strings, e.g. dates), pass the label string verbatim (e.g. value:"30 apr") — Chart.js resolves it against the category scale.',
               ),
             xMin: z.union([z.number(), z.string()]).optional().describe('For box/label: x-axis lower bound.'),
             xMax: z.union([z.number(), z.string()]).optional().describe('For box/label: x-axis upper bound.'),
@@ -614,7 +611,7 @@ const inputSchema = {
               })
               .optional()
               .describe('Optional label rendered on the annotation.'),
-          })
+          }),
         )
         .optional()
         .describe(
@@ -622,7 +619,7 @@ const inputSchema = {
             'For type="line" annotations, scaleID is REQUIRED or the annotation silently renders nothing. ' +
             'Example — Paris Proof target: [{type:"line", scaleID:"y", value:70, borderColor:"#d32f2f", borderDash:[6,6], label:{content:"Paris Proof", display:true}}]. ' +
             'Example — comfort band: [{type:"box", yMin:18, yMax:22, backgroundColor:"rgba(0,128,0,0.08)"}]. ' +
-            'Example — event marker on a categorical x-axis (e.g. labels=["1 apr","2 apr",...,"30 apr"]): [{type:"line", scaleID:"x", value:"30 apr", borderColor:"#d32f2f", label:{content:"Wapenstilstand", display:true}}]. The string MUST match a value in labels[] exactly.'
+            'Example — event marker on a categorical x-axis (e.g. labels=["1 apr","2 apr",...,"30 apr"]): [{type:"line", scaleID:"x", value:"30 apr", borderColor:"#d32f2f", label:{content:"Wapenstilstand", display:true}}]. The string MUST match a value in labels[] exactly.',
         ),
     })
     .optional()
@@ -806,7 +803,7 @@ function normalizeGraphEdge(entry: GraphEdge | GraphEdgeTuple): GraphEdge {
  */
 function normalizeTreemapRow(
   entry: Record<string, string | number> | Array<string | number>,
-  columns?: string[]
+  columns?: string[],
 ): Record<string, string | number> {
   if (!Array.isArray(entry)) return entry;
   if (!columns || columns.length === 0) return {};
@@ -872,7 +869,7 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
         if (args.treemap?.tree?.some((row) => Array.isArray(row))) {
           if (!args.treemap.columns || args.treemap.columns.length === 0) {
             return fail(
-              'Treemap tuple rows require "columns" to be provided alongside "tree". Example: { columns:["project","fase","uren"], tree:[["G25011600","Uitvoering",145]], key:"uren" }.'
+              'Treemap tuple rows require "columns" to be provided alongside "tree". Example: { columns:["project","fase","uren"], tree:[["G25011600","Uitvoering",145]], key:"uren" }.',
             );
           }
         }
@@ -901,18 +898,18 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
         if (args.type === 'sankey') {
           if (sankey && sankey.flows.length > 200) {
             return fail(
-              `Too many sankey flows (${sankey.flows.length}). Maximum 200. Pre-aggregate before calling render_chart.`
+              `Too many sankey flows (${sankey.flows.length}). Maximum 200. Pre-aggregate before calling render_chart.`,
             );
           }
         } else if (args.type === 'matrix') {
           if (!matrix || matrix.cells.length === 0) {
             return fail(
-              `type=matrix requires a "matrix" field with "cells" array. Example: { cells: [["Ma","09",42], ...], xLabels:[...], yLabels:[...] }.`
+              `type=matrix requires a "matrix" field with "cells" array. Example: { cells: [["Ma","09",42], ...], xLabels:[...], yLabels:[...] }.`,
             );
           }
           if (matrix.cells.length > 2000) {
             return fail(
-              `Too many matrix cells (${matrix.cells.length}). Maximum 2000. Pre-aggregate before calling render_chart.`
+              `Too many matrix cells (${matrix.cells.length}). Maximum 2000. Pre-aggregate before calling render_chart.`,
             );
           }
           if (matrix.xLabels) {
@@ -920,7 +917,7 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
             for (const cell of matrix.cells as MatrixCell[]) {
               if (typeof cell.x === 'string' && !xSet.has(cell.x)) {
                 return fail(
-                  `Matrix cell x="${cell.x}" is not in xLabels. Every string x value must appear in xLabels.`
+                  `Matrix cell x="${cell.x}" is not in xLabels. Every string x value must appear in xLabels.`,
                 );
               }
             }
@@ -930,7 +927,7 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
             for (const cell of matrix.cells as MatrixCell[]) {
               if (typeof cell.y === 'string' && !ySet.has(cell.y)) {
                 return fail(
-                  `Matrix cell y="${cell.y}" is not in yLabels. Every string y value must appear in yLabels.`
+                  `Matrix cell y="${cell.y}" is not in yLabels. Every string y value must appear in yLabels.`,
                 );
               }
             }
@@ -938,40 +935,40 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
         } else if (args.type === 'treemap') {
           if (!treemap || treemap.tree.length === 0) {
             return fail(
-              `type=treemap requires a "treemap" field with "tree" and "key". Example: { columns:["project","fase","uren"], tree:[["G25011600","Uitvoering",145]], key:"uren", groups:["project","fase"] }.`
+              `type=treemap requires a "treemap" field with "tree" and "key". Example: { columns:["project","fase","uren"], tree:[["G25011600","Uitvoering",145]], key:"uren", groups:["project","fase"] }.`,
             );
           }
           if (treemap.tree.length > 500) {
             return fail(
-              `Too many treemap rows (${treemap.tree.length}). Maximum 500. Aggregate to a coarser grouping before calling render_chart.`
+              `Too many treemap rows (${treemap.tree.length}). Maximum 500. Aggregate to a coarser grouping before calling render_chart.`,
             );
           }
           if (treemap.groups && treemap.groups.length > 3) {
             return fail(
-              `Treemap supports at most 3 group levels (got ${treemap.groups.length}). Flatten or drop a level.`
+              `Treemap supports at most 3 group levels (got ${treemap.groups.length}). Flatten or drop a level.`,
             );
           }
           for (const row of treemap.tree as Record<string, string | number>[]) {
             if (typeof row[treemap.key] !== 'number') {
               return fail(
-                `Treemap row is missing numeric value for key "${treemap.key}". Every row must have a number at that column.`
+                `Treemap row is missing numeric value for key "${treemap.key}". Every row must have a number at that column.`,
               );
             }
           }
         } else if (args.type === 'graph') {
           if (!graph || graph.nodes.length === 0) {
             return fail(
-              `type=graph requires a "graph" field with "layout", "nodes", and "edges". Example: { layout:"force", nodes:[["a"],["b"]], edges:[["a","b"]] }.`
+              `type=graph requires a "graph" field with "layout", "nodes", and "edges". Example: { layout:"force", nodes:[["a"],["b"]], edges:[["a","b"]] }.`,
             );
           }
           if (graph.nodes.length > 200) {
             return fail(
-              `Too many graph nodes (${graph.nodes.length}). Maximum 200. Reduce the graph before calling render_chart.`
+              `Too many graph nodes (${graph.nodes.length}). Maximum 200. Reduce the graph before calling render_chart.`,
             );
           }
           if (graph.edges.length > 500) {
             return fail(
-              `Too many graph edges (${graph.edges.length}). Maximum 500. Reduce the graph before calling render_chart.`
+              `Too many graph edges (${graph.edges.length}). Maximum 500. Reduce the graph before calling render_chart.`,
             );
           }
           const ids = new Set((graph.nodes as GraphNode[]).map((n) => n.id));
@@ -988,14 +985,14 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
             const hasStats = Array.isArray(ds.stats) && ds.stats.length > 0;
             if (!hasSamples && !hasStats) {
               return fail(
-                `Dataset "${ds.label}" has no "samples" or "stats". boxplot charts require one of those — the tuple shorthand [label, data] is not supported for boxplot.`
+                `Dataset "${ds.label}" has no "samples" or "stats". boxplot charts require one of those — the tuple shorthand [label, data] is not supported for boxplot.`,
               );
             }
             if (hasSamples) {
               for (const inner of ds.samples!) {
                 if (inner.length > 500) {
                   return fail(
-                    `Dataset "${ds.label}" has ${inner.length} samples in one category. Maximum 500 per category for boxplot. Pre-aggregate or bin the data.`
+                    `Dataset "${ds.label}" has ${inner.length} samples in one category. Maximum 500 per category for boxplot. Pre-aggregate or bin the data.`,
                   );
                 }
               }
@@ -1013,7 +1010,7 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
             const pointCount = ds.scatterData ? ds.scatterData.length : ds.data.length;
             if (pointCount > maxPoints) {
               return fail(
-                `Too many data points in dataset "${ds.label}" (${pointCount}). Maximum ${maxPoints} per dataset for ${args.type} charts. Pre-aggregate or filter before calling render_chart.`
+                `Too many data points in dataset "${ds.label}" (${pointCount}). Maximum ${maxPoints} per dataset for ${args.type} charts. Pre-aggregate or filter before calling render_chart.`,
               );
             }
           }
@@ -1026,7 +1023,7 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
         const needsLabels = !NO_LABEL_TYPES.includes(args.type);
         if (needsLabels && datasets?.length && (!args.labels || args.labels.length === 0)) {
           return fail(
-            `Missing "labels" array. ${args.type} charts require labels (one per data point). Provide labels matching the length of your data arrays.`
+            `Missing "labels" array. ${args.type} charts require labels (one per data point). Provide labels matching the length of your data arrays.`,
           );
         }
 
@@ -1037,7 +1034,7 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
             if (axisLength !== args.labels.length) {
               const fieldName = args.type === 'boxplot' ? 'samples/stats' : 'data';
               return fail(
-                `Dataset "${ds.label}" has ${axisLength} ${fieldName} entries but labels has ${args.labels.length}. For ${args.type} charts each dataset must match labels.length so values align with the axis.`
+                `Dataset "${ds.label}" has ${axisLength} ${fieldName} entries but labels has ${args.labels.length}. For ${args.type} charts each dataset must match labels.length so values align with the axis.`,
               );
             }
           }
@@ -1051,7 +1048,7 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
           for (const ds of datasets) {
             if (!ds.scatterData || ds.scatterData.length === 0) {
               return fail(
-                `Dataset "${ds.label}" has no "scatterData". ${args.type} charts require the full object form {label, scatterData: [{x,y${args.type === 'bubble' ? ',r' : ''}}]} — the tuple shorthand [label, data] is not supported for ${args.type}.`
+                `Dataset "${ds.label}" has no "scatterData". ${args.type} charts require the full object form {label, scatterData: [{x,y${args.type === 'bubble' ? ',r' : ''}}]} — the tuple shorthand [label, data] is not supported for ${args.type}.`,
               );
             }
           }
@@ -1061,7 +1058,7 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
         const ANNOTATION_TYPES = ['bar', 'line', 'scatter', 'bubble', 'matrix'];
         if (args.options?.annotations?.length && !ANNOTATION_TYPES.includes(args.type)) {
           return fail(
-            `options.annotations is not supported on type=${args.type}. Use annotations on bar, line, scatter, bubble, matrix, or mixed charts only.`
+            `options.annotations is not supported on type=${args.type}. Use annotations on bar, line, scatter, bubble, matrix, or mixed charts only.`,
           );
         }
 
@@ -1083,12 +1080,12 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
                   : `the ${annotation.scaleID}-axis`;
             if (!domain) {
               return fail(
-                `Annotation value "${annotation.value}" is a string but ${domainName} is not defined. String annotation values only work on categorical axes — pass a number for numeric/time axes.`
+                `Annotation value "${annotation.value}" is a string but ${domainName} is not defined. String annotation values only work on categorical axes — pass a number for numeric/time axes.`,
               );
             }
             if (!domain.includes(annotation.value)) {
               return fail(
-                `Annotation value "${annotation.value}" is not present in ${domainName}. The string must match a category label exactly.`
+                `Annotation value "${annotation.value}" is not present in ${domainName}. The string must match a category label exactly.`,
               );
             }
           }
@@ -1131,7 +1128,7 @@ export function registerRenderChartTool(server: McpServer, opts: { minimal?: boo
           isError: true,
         };
       }
-    }
+    },
   );
 }
 

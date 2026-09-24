@@ -80,9 +80,7 @@ describe('conditionalInterpretation', () => {
 
   it('actually prunes — a pruned arm that ships everything measures nothing', () => {
     for (const profile of [nen7120, nta8800]) {
-      expect(lines(conditionalInterpretation(profile)).length).toBeLessThan(
-        lines(interpretationBlock).length
-      );
+      expect(lines(conditionalInterpretation(profile)).length).toBeLessThan(lines(interpretationBlock).length);
     }
   });
 
@@ -96,9 +94,7 @@ describe('conditionalInterpretation', () => {
     const branchCount = (s: string) =>
       lines(s).filter(
         (l) =>
-          l.startsWith('- NTA 8800 (') ||
-          l.startsWith('- NEN 7120 / ISSO 75.3') ||
-          l.startsWith('- Nader Voorschrift')
+          l.startsWith('- NTA 8800 (') || l.startsWith('- NEN 7120 / ISSO 75.3') || l.startsWith('- Nader Voorschrift'),
       ).length;
 
     const nen = conditionalInterpretation(nen7120);

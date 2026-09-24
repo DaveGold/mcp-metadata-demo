@@ -36,10 +36,7 @@ async function main(): Promise<void> {
   }
 
   const best = addresses[0];
-  const [vbo, labels] = await Promise.all([
-    bag.getVerblijfsobject(best.vboId),
-    ep.getByBagVboId(best.vboId),
-  ]);
+  const [vbo, labels] = await Promise.all([bag.getVerblijfsobject(best.vboId), ep.getByBagVboId(best.vboId)]);
   const pand = vbo && vbo.pandLinks.length > 0 ? await bag.getPand(vbo.pandLinks[0]) : null;
 
   const profile = buildProfile({

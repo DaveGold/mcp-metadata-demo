@@ -54,12 +54,13 @@ QUERY STRATEGY:
 
 /** CALCULATED vs MEASURED, as FACT + INSTRUCTION; the Q4 arms ship one half each. The label belongs to the fact half. */
 export const calcVsMeasuredLabel = '- CALCULATED vs MEASURED — ';
-export const calcVsMeasuredFact = 'ep1_energiebehoefte, ep2_fossiel and berekend_energieverbruik are all CALCULATED NTA 8800 figures, not meter readings: ep1 is net energy DEMAND, ep2 is PRIMARY FOSSIL energy, berekend is modelled total use. Paris Proof and other metered benchmarks are defined on MEASURED FINAL energy at the meter, and this server holds NO metered data, so none of these three can be ranked against such a target as though it were measured consumption — the unit (kWh/m²) matches and the quantity does not.';
-export const calcVsMeasuredInstruction = 'Where a question asks how a building compares to a metered benchmark, say that the comparison cannot be made from this data and why, rather than producing a ratio.';
+export const calcVsMeasuredFact =
+  'ep1_energiebehoefte, ep2_fossiel and berekend_energieverbruik are all CALCULATED NTA 8800 figures, not meter readings: ep1 is net energy DEMAND, ep2 is PRIMARY FOSSIL energy, berekend is modelled total use. Paris Proof and other metered benchmarks are defined on MEASURED FINAL energy at the meter, and this server holds NO metered data, so none of these three can be ranked against such a target as though it were measured consumption — the unit (kWh/m²) matches and the quantity does not.';
+export const calcVsMeasuredInstruction =
+  'Where a question asks how a building compares to a metered benchmark, say that the comparison cannot be made from this data and why, rather than producing a ratio.';
 
 /** The whole line, as deployed 2026-09-21. */
-export const calcVsMeasuredLine =
-  calcVsMeasuredLabel + calcVsMeasuredFact + ' ' + calcVsMeasuredInstruction;
+export const calcVsMeasuredLine = calcVsMeasuredLabel + calcVsMeasuredFact + ' ' + calcVsMeasuredInstruction;
 
 /** Q4 `inline-fact`. */
 export const calcVsMeasuredFactOnly = calcVsMeasuredLabel + calcVsMeasuredFact;
@@ -111,7 +112,10 @@ DERIVED FIGURES YOU MUST COMPUTE YOURSELF (nothing below is returned):
 const alertsParagraph = `ALERTS: Always check interpretation.alerts — they contain bouwjaar era warnings (suppressed for good labels A/A+/A++/A+++/A++++), multiple-VBO disambiguation, large pand oppervlakte warning (>10 VBOs), label expiry notices, BENG compliance violations, VBO status warnings, bouwjaar discrepancies, and district heating impact notes. For residential buildings alerts also include an estimated annual gas consumption (m³), total CO₂ emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.`;
 
 /** rich only (Q21): the CALCULATED vs MEASURED line also sits before QUERY STRATEGY, inside the 2,048-char cut. */
-const richPreamble = descriptionPreamble.replace('\n\nQUERY STRATEGY:', '\n\n' + calcVsMeasuredLine + '\n\nQUERY STRATEGY:');
+const richPreamble = descriptionPreamble.replace(
+  '\n\nQUERY STRATEGY:',
+  '\n\n' + calcVsMeasuredLine + '\n\nQUERY STRATEGY:',
+);
 if (richPreamble === descriptionPreamble) throw new Error('rich description: QUERY STRATEGY anchor not found');
 
 /** Full rich description: domain prose (with the calc-vs-measured line up front) plus the alerts promise. */
@@ -128,12 +132,11 @@ export const overheatingLine = (() => {
   if (!line) {
     throw new Error(
       'overheatingLine: no line in interpretationBlock starts with overheatingLabel. ' +
-        'The block was edited without updating the slice — fix the label, do not retype the line.'
+        'The block was edited without updating the slice — fix the label, do not retype the line.',
     );
   }
   return line;
 })();
-
 
 // ── Input schema ─────────────────────────────────────────────────────────────
 
@@ -198,7 +201,7 @@ export const outputSchema = z.object({
     .number()
     .nullable()
     .describe(
-      'Theoretical total energy consumption (NOT measured). Unit depends on berekeningstype — see INTERPRETATION block.'
+      'Theoretical total energy consumption (NOT measured). Unit depends on berekeningstype — see INTERPRETATION block.',
     ),
   warmtebehoefte_kwh_m2: z.number().nullable().describe('Net heat demand (kWh/m²/year)'),
   temperatuuroverschrijding: z.number().nullable().describe('Overheating-risk indicator (TOjuli/GTO)'),
@@ -207,12 +210,12 @@ export const outputSchema = z.object({
     .number()
     .nullable()
     .describe('Usable floor area of the thermal zone in m² (EP-Online).'),
-  gebouwklasse: z
+  gebouwklasse: z.string().nullable().describe("'Woningbouw' = residential, 'Utiliteitsbouw' = non-residential."),
+  soort_opname: z.string().nullable().describe('Assessment type. Null = pre-NTA 8800 or no label.'),
+  berekeningstype: z
     .string()
     .nullable()
-    .describe("'Woningbouw' = residential, 'Utiliteitsbouw' = non-residential."),
-  soort_opname: z.string().nullable().describe('Assessment type. Null = pre-NTA 8800 or no label.'),
-  berekeningstype: z.string().nullable().describe('Calculation standard (NTA 8800:2024, NEN 7120, Nader Voorschrift, ...)'),
+    .describe('Calculation standard (NTA 8800:2024, NEN 7120, Nader Voorschrift, ...)'),
   label_status: z.string().nullable().describe("'Bestaand' (existing) or 'Nieuw' (new construction)"),
   op_basis_van_referentiegebouw: z
     .boolean()
@@ -221,23 +224,19 @@ export const outputSchema = z.object({
   label_geldig_tot: z.string().nullable().describe('Label expiry date (ISO 8601)'),
   label_opnamedatum: z.string().nullable().describe('Label assessment date (ISO 8601)'),
   label_registratiedatum: z.string().nullable().describe('Label registration date (ISO 8601)'),
-  gebouwtype: z
-    .string()
-    .nullable()
-    .describe('Residential building type (Woningbouw only). Null for utiliteitsbouw.'),
+  gebouwtype: z.string().nullable().describe('Residential building type (Woningbouw only). Null for utiliteitsbouw.'),
   gebouwsubtype: z.string().nullable().describe('Refinement of gebouwtype (residential only).'),
   sbi_code: z
     .string()
     .nullable()
     .describe('Sector description (NEN 7120 / ISSO 75.3 only). Full text, not a numeric SBI code.'),
-  energie_index: z
-    .number()
-    .nullable()
-    .describe('Energy Index (EI) from pre-NTA 8800 labels (NEN 7120 / ISSO 82).'),
+  energie_index: z.number().nullable().describe('Energy Index (EI) from pre-NTA 8800 labels (NEN 7120 / ISSO 82).'),
   ep2_fossiel_emg_forfaitair_kwh_m2: z
     .number()
     .nullable()
-    .describe('EP-2 with standardized area-bound measures (stadsverwarming, collectief WKO/PV). NTA 8800 utiliteitsbouw only.'),
+    .describe(
+      'EP-2 with standardized area-bound measures (stadsverwarming, collectief WKO/PV). NTA 8800 utiliteitsbouw only.',
+    ),
   aandeel_hernieuwbaar_emg_forfaitair_pct: z
     .number()
     .nullable()
@@ -279,14 +278,9 @@ export type EpOnlineClientLike = Pick<EpOnlineClient, 'getByBagVboId'>;
 export async function resolveBuildingProfile(
   bagClient: BagClientLike,
   epOnlineClient: EpOnlineClientLike,
-  args: { postcode: string; huisnummer: number; huisletter?: string; toevoeging?: string }
+  args: { postcode: string; huisnummer: number; huisletter?: string; toevoeging?: string },
 ): Promise<{ profile: Omit<BuildingProfile, 'alerts'>; notFound: boolean }> {
-  const addresses = await bagClient.findAddress(
-    args.postcode,
-    args.huisnummer,
-    args.huisletter,
-    args.toevoeging
-  );
+  const addresses = await bagClient.findAddress(args.postcode, args.huisnummer, args.huisletter, args.toevoeging);
 
   if (addresses.length === 0) {
     const adres = `${args.postcode} ${args.huisnummer}${args.huisletter ?? ''}${args.toevoeging ? ' ' + args.toevoeging : ''}`;
@@ -299,7 +293,7 @@ export async function resolveBuildingProfile(
   const vboPromise = bagClient.getVerblijfsobject(bestAddress.vboId);
   const epPromise = epOnlineClient.getByBagVboId(bestAddress.vboId);
   const pandPromise = vboPromise.then((vbo) =>
-    vbo && vbo.pandLinks.length > 0 ? bagClient.getPand(vbo.pandLinks[0]) : null
+    vbo && vbo.pandLinks.length > 0 ? bagClient.getPand(vbo.pandLinks[0]) : null,
   );
 
   const [vbo, labels, pand] = await Promise.all([vboPromise, epPromise, pandPromise]);
@@ -321,7 +315,7 @@ export async function resolveBuildingProfile(
 export function registerGetBuildingProfileTool(
   server: McpServer,
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
+  epOnlineClient: EpOnlineClientLike,
 ): void {
   server.registerTool(
     'get_building_profile',
@@ -363,9 +357,7 @@ export function registerGetBuildingProfileTool(
           await logToolCall({ args, start, status: 'success', rowCount: 0 });
           return ok({
             ...profile,
-            alerts: [
-              'Geen adres gevonden in BAG. Controleer postcode (4 cijfers + 2 hoofdletters) en huisnummer.',
-            ],
+            alerts: ['Geen adres gevonden in BAG. Controleer postcode (4 cijfers + 2 hoofdletters) en huisnummer.'],
           });
         }
 
@@ -380,7 +372,7 @@ export function registerGetBuildingProfileTool(
           isError: true,
         };
       }
-    }
+    },
   );
 }
 

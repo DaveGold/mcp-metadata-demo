@@ -124,7 +124,7 @@ describe('render_table row models', () => {
 
   it('renders every row when pagination is off even with a pageSize passed', () => {
     const rows = kentekens(
-      buildTable({ input: { pagination: false, pageSize: 5 }, current: { pageIndex: 0, pageSize: 5 } })
+      buildTable({ input: { pagination: false, pageSize: 5 }, current: { pageIndex: 0, pageSize: 5 } }),
     );
 
     expect(rows).toHaveLength(VEHICLES.length);
@@ -147,7 +147,7 @@ describe('render_table row models', () => {
     // Without the resolver pinning pageIndex to 0 while paginating is off, a table left on page 4
     // comes back to an out-of-range page and renders nothing at all.
     const rows = kentekens(
-      buildTable({ input: { pagination: true }, current: { pageIndex: 4, pageSize: DEFAULT_PAGE_SIZE } })
+      buildTable({ input: { pagination: true }, current: { pageIndex: 4, pageSize: DEFAULT_PAGE_SIZE } }),
     );
 
     expect(rows).toHaveLength(0);
@@ -156,7 +156,7 @@ describe('render_table row models', () => {
       buildTable({
         input: { pagination: true },
         current: resolvePagination({ pagination: false }, { pageIndex: 4, pageSize: DEFAULT_PAGE_SIZE }).state,
-      })
+      }),
     );
 
     expect(afterReset).toHaveLength(DEFAULT_PAGE_SIZE);

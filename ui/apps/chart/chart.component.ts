@@ -82,7 +82,7 @@ Chart.register(
   TreeController,
   DendrogramController,
   EdgeLine,
-  annotationPlugin
+  annotationPlugin,
 );
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -258,7 +258,7 @@ function normalizeGraphEdge(entry: GraphEdgeInput | GraphEdgeTupleInput): GraphE
 
 function normalizeTreemapRow(
   entry: Record<string, string | number> | Array<string | number>,
-  columns?: string[]
+  columns?: string[],
 ): Record<string, string | number> {
   if (!Array.isArray(entry)) return entry;
   if (!columns) return {};
@@ -504,7 +504,7 @@ export class ChartComponent implements OnInit, OnDestroy {
     } else if (inp.type === 'matrix' && inp.matrix) {
       const header = ['x', 'y', 'v'].map((h) => csvField(h, sep)).join(sep);
       const rows = inp.matrix.cells.map((c) =>
-        [csvField(String(c.x), sep), csvField(String(c.y), sep), String(c.v)].join(sep)
+        [csvField(String(c.x), sep), csvField(String(c.y), sep), String(c.v)].join(sep),
       );
       csv = [header, ...rows].join('\r\n');
     } else if (inp.type === 'treemap' && inp.treemap) {
@@ -516,11 +516,11 @@ export class ChartComponent implements OnInit, OnDestroy {
       const nodesHeader = ['# Nodes', '', ''].map((h) => csvField(h, sep)).join(sep);
       const nodeCols = ['id', 'label', 'group'].map((h) => csvField(h, sep)).join(sep);
       const nodeRows = inp.graph.nodes.map((n) =>
-        [csvField(n.id, sep), csvField(n.label ?? '', sep), csvField(n.group ?? '', sep)].join(sep)
+        [csvField(n.id, sep), csvField(n.label ?? '', sep), csvField(n.group ?? '', sep)].join(sep),
       );
       const edgeCols = ['source', 'target', 'weight'].map((h) => csvField(h, sep)).join(sep);
       const edgeRows = inp.graph.edges.map((e) =>
-        [csvField(e.source, sep), csvField(e.target, sep), String(e.weight ?? '')].join(sep)
+        [csvField(e.source, sep), csvField(e.target, sep), String(e.weight ?? '')].join(sep),
       );
       csv = [nodesHeader, nodeCols, ...nodeRows, '', '# Edges', edgeCols, ...edgeRows].join('\r\n');
     } else if (inp.type === 'boxplot' && inp.datasets?.some((ds) => ds.samples || ds.stats)) {
@@ -682,14 +682,18 @@ export class ChartComponent implements OnInit, OnDestroy {
         grid: { display: showGrid, color: gridColor },
         ticks: { color: textColor },
         stacked: opts.stacked ?? false,
-        ...(opts.xAxisLabel ? { title: { display: true, text: decodeUnicodeEscapes(opts.xAxisLabel), color: textColor } } : {}),
+        ...(opts.xAxisLabel
+          ? { title: { display: true, text: decodeUnicodeEscapes(opts.xAxisLabel), color: textColor } }
+          : {}),
       };
       scales[yKey] = {
         display: true,
         grid: { display: showGrid, color: gridColor },
         ticks: { color: textColor },
         stacked: opts.stacked ?? false,
-        ...(opts.yAxisLabel ? { title: { display: true, text: decodeUnicodeEscapes(opts.yAxisLabel), color: textColor } } : {}),
+        ...(opts.yAxisLabel
+          ? { title: { display: true, text: decodeUnicodeEscapes(opts.yAxisLabel), color: textColor } }
+          : {}),
       };
 
       // Mixed chart: add secondary y-axis on right side
@@ -743,7 +747,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 
   private buildAnnotationPlugin(
     annotations: AnnotationInput[] | undefined,
-    palette: { backgrounds: string[]; borders: string[] }
+    palette: { backgrounds: string[]; borders: string[] },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Record<string, any> {
     if (!annotations?.length) return {};
@@ -788,7 +792,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 
   private buildSankeyConfig(
     inp: NormalizedChartInput,
-    palette: { backgrounds: string[]; borders: string[] }
+    palette: { backgrounds: string[]; borders: string[] },
   ): ChartConfiguration {
     const sankey = inp.sankey!;
 
@@ -848,7 +852,7 @@ export class ChartComponent implements OnInit, OnDestroy {
     inp: NormalizedChartInput,
     isDark: boolean,
     textColor: string,
-    gridColor: string
+    gridColor: string,
   ): ChartConfiguration {
     const matrix = inp.matrix!;
     const cells = matrix.cells;
@@ -959,7 +963,7 @@ export class ChartComponent implements OnInit, OnDestroy {
 
   private buildTreemapConfig(
     inp: NormalizedChartInput,
-    palette: { backgrounds: string[]; borders: string[] }
+    palette: { backgrounds: string[]; borders: string[] },
   ): ChartConfiguration {
     const treemap = inp.treemap!;
     const labelOpts = treemap.labels ?? { display: true, formatter: 'name-value' };
@@ -1047,7 +1051,7 @@ export class ChartComponent implements OnInit, OnDestroy {
   private buildGraphConfig(
     inp: NormalizedChartInput,
     palette: { backgrounds: string[]; borders: string[] },
-    isDark: boolean
+    isDark: boolean,
   ): ChartConfiguration {
     const graph = inp.graph!;
     const typeMap: Record<'force' | 'tree' | 'dendrogram', string> = {
@@ -1091,7 +1095,7 @@ export class ChartComponent implements OnInit, OnDestroy {
     if (droppedEdges.length > 0 && isDev) {
       console.warn(
         `[ChartComponent] graph: dropped ${droppedEdges.length} edge(s) with unknown source/target node id(s):`,
-        droppedEdges
+        droppedEdges,
       );
     }
 

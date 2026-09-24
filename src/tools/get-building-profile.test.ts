@@ -11,11 +11,7 @@ describe('rich description — delivery (Q21)', () => {
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer } from '../server.js';
-import {
-  outputSchema,
-  type BagClientLike,
-  type EpOnlineClientLike,
-} from './get-building-profile.js';
+import { outputSchema, type BagClientLike, type EpOnlineClientLike } from './get-building-profile.js';
 import type { BagAddress, BagVerblijfsobject, BagPand } from '../clients/bag-client.js';
 import type { PandEnergielabelV5 } from '../clients/ep-online-client.js';
 
@@ -36,10 +32,7 @@ function stubEpOnline(labels: PandEnergielabelV5[]): EpOnlineClientLike {
   return { getByBagVboId: async () => labels };
 }
 
-async function connectClientToServer(
-  bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
-): Promise<Client> {
+async function connectClientToServer(bagClient: BagClientLike, epOnlineClient: EpOnlineClientLike): Promise<Client> {
   const server = createServer({ bagClient, epOnlineClient });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: 'test-client', version: '0.0.0' });
@@ -136,9 +129,7 @@ describe('get_building_profile (end-to-end over InMemoryTransport)', () => {
     expect(parsed.alerts.some((alert) => alert.includes('Geen adres gevonden'))).toBe(true);
     // Regression: not_found short-circuits before EP-Online, so claiming "no
     // label found in EP-Online" would be a lie. Stay silent about EP here.
-    expect(parsed.alerts.some((alert) => alert.includes('Geen geregistreerd energielabel'))).toBe(
-      false
-    );
+    expect(parsed.alerts.some((alert) => alert.includes('Geen geregistreerd energielabel'))).toBe(false);
 
     await client.close();
   });

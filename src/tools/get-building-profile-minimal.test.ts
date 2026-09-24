@@ -71,10 +71,7 @@ const HAPPY_EP = stubEpOnline([
   },
 ]);
 
-async function connectMinimal(
-  bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
-): Promise<Client> {
+async function connectMinimal(bagClient: BagClientLike, epOnlineClient: EpOnlineClientLike): Promise<Client> {
   const server = createServer({ variant: 'minimal', bagClient, epOnlineClient });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: 'test-client', version: '0.0.0' });
@@ -111,10 +108,10 @@ describe('get_building_profile — minimal variant (the ablation)', () => {
     // get_weather_context: same schema (including `select`) as rich, only the top-level
     // description is stripped — mirroring the render-tool ablation pattern.
     expect(tools.find((t) => t.name === 'get_weather_context')!.description).toBe(
-      'Look up daily weather and degree-day/solar metrics for a Dutch location and date range.'
+      'Look up daily weather and degree-day/solar metrics for a Dutch location and date range.',
     );
     expect(tools.find((t) => t.name === 'get_tool_call_log')!.description).toBe(
-      'Look up recent tool calls and their queryIntent values.'
+      'Look up recent tool calls and their queryIntent values.',
     );
 
     await client.close();

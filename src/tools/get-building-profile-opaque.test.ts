@@ -75,7 +75,7 @@ const HAPPY_EP = stubEpOnline([
 async function connectOpaque(
   variant: 'opaque' | 'opaque-words',
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
+  epOnlineClient: EpOnlineClientLike,
 ): Promise<Client> {
   const server = createServer({ variant, bagClient, epOnlineClient });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -122,7 +122,8 @@ describe("get_building_profile — opaque arms (A' and B')", () => {
 
     const args = { postcode: '3543AR', huisnummer: 1 };
     const o = JSON.parse(
-      ((await opaque.callTool({ name: 'get_building_profile', arguments: args })).content as Array<{ text: string }>)[0].text
+      ((await opaque.callTool({ name: 'get_building_profile', arguments: args })).content as Array<{ text: string }>)[0]
+        .text,
     ) as Record<string, unknown>;
     const r = (await richClient.callTool({ name: 'get_building_profile', arguments: args }))
       .structuredContent as Record<string, unknown>;
@@ -137,7 +138,7 @@ describe("get_building_profile — opaque arms (A' and B')", () => {
     await richClient.close();
   });
 
-  it("differs from opaque-words in the DESCRIPTION and nothing else", async () => {
+  it('differs from opaque-words in the DESCRIPTION and nothing else', async () => {
     const bare = await connectOpaque('opaque', HAPPY_BAG, HAPPY_EP);
     const prose = await connectOpaque('opaque-words', HAPPY_BAG, HAPPY_EP);
 

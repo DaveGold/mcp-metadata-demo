@@ -75,7 +75,7 @@ const HAPPY_EP = stubEpOnline([
 async function connectArm(
   variant: 'words' | 'rich',
   bagClient: BagClientLike,
-  epOnlineClient: EpOnlineClientLike
+  epOnlineClient: EpOnlineClientLike,
 ): Promise<Client> {
   const server = createServer({ variant, bagClient, epOnlineClient });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -91,13 +91,16 @@ describe('get_building_profile — words variant (arm B)', () => {
     const words = createServer({ variant: 'words', bagClient: HAPPY_BAG, epOnlineClient: HAPPY_EP });
     const rich = createServer({ variant: 'rich', bagClient: HAPPY_BAG, epOnlineClient: HAPPY_EP });
 
-    const w = words.server.getClientCapabilities, r = rich.server.getClientCapabilities; // touch, keep tsc happy
+    const w = words.server.getClientCapabilities,
+      r = rich.server.getClientCapabilities; // touch, keep tsc happy
     expect(typeof w === typeof r).toBe(true);
 
-    const wi = (words as unknown as { _instructions?: string })._instructions
-      ?? (words.server as unknown as { _instructions?: string })._instructions;
-    const ri = (rich as unknown as { _instructions?: string })._instructions
-      ?? (rich.server as unknown as { _instructions?: string })._instructions;
+    const wi =
+      (words as unknown as { _instructions?: string })._instructions ??
+      (words.server as unknown as { _instructions?: string })._instructions;
+    const ri =
+      (rich as unknown as { _instructions?: string })._instructions ??
+      (rich.server as unknown as { _instructions?: string })._instructions;
 
     expect(typeof wi).toBe('string');
     expect(typeof ri).toBe('string');
@@ -106,7 +109,10 @@ describe('get_building_profile — words variant (arm B)', () => {
     expect(alertsBullet).toBeDefined();
 
     // Removing exactly that one line from rich must yield words, byte for byte.
-    const richMinusAlerts = ri!.split('\n').filter((l) => l !== alertsBullet).join('\n');
+    const richMinusAlerts = ri!
+      .split('\n')
+      .filter((l) => l !== alertsBullet)
+      .join('\n');
     expect(wi).toBe(richMinusAlerts);
   });
 
@@ -164,13 +170,7 @@ describe('get_building_profile — words variant (arm B)', () => {
 
     // huisletter/toevoeging are absent from the minimal schema — arm A cannot
     // even express the disambiguating call. Arm B can.
-    expect(Object.keys(props).sort()).toEqual([
-      'huisletter',
-      'huisnummer',
-      'postcode',
-      'queryIntent',
-      'toevoeging',
-    ]);
+    expect(Object.keys(props).sort()).toEqual(['huisletter', 'huisnummer', 'postcode', 'queryIntent', 'toevoeging']);
     await client.close();
   });
 

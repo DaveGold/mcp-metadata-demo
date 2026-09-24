@@ -45,9 +45,7 @@ export interface Rule<Ctx> {
 const ORDER: RuleKind[] = ['branch', 'verdict', 'null-note', 'fact'];
 
 export function selectRules<Ctx>(rules: readonly Rule<Ctx>[], ctx: Ctx): { alerts: string[]; notes: string[] } {
-  const fired = rules
-    .filter((rule) => rule.applies(ctx))
-    .sort((a, b) => ORDER.indexOf(a.kind) - ORDER.indexOf(b.kind));
+  const fired = rules.filter((rule) => rule.applies(ctx)).sort((a, b) => ORDER.indexOf(a.kind) - ORDER.indexOf(b.kind));
   const alerts: string[] = [];
   const notes: string[] = [];
   for (const rule of fired) {
@@ -60,8 +58,7 @@ export function selectRules<Ctx>(rules: readonly Rule<Ctx>[], ctx: Ctx): { alert
 
 /** A computed value that explains itself, or says why it could not be computed. */
 export type Derived<T = number> =
-  | { value: T; unit: string; basis: string; provenance: 'calculated' | 'register' }
-  | { value: null; reason: string };
+  { value: T; unit: string; basis: string; provenance: 'calculated' | 'register' } | { value: null; reason: string };
 
 /** The fixed response key every tool leads with, so the model always knows where the guidance is. */
 export interface Interpretation {

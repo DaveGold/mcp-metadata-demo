@@ -562,15 +562,15 @@ export class McpBridgeService {
    */
   createSamplingMessage(
     params: CreateMessageRequest['params'] & { tools?: undefined },
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<CreateMessageResult>;
   createSamplingMessage(
     params: CreateMessageRequest['params'],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<CreateMessageResultWithTools>;
   createSamplingMessage(
     params: CreateMessageRequest['params'],
-    options?: RequestOptions
+    options?: RequestOptions,
   ): Promise<CreateMessageResult | CreateMessageResultWithTools> {
     return this.app.createSamplingMessage(params, options);
   }

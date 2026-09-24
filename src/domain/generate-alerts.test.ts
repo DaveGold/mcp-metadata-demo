@@ -72,7 +72,7 @@ describe('generateAlerts', () => {
         berekeningstype: 'Nader Voorschrift',
         co2_emissie_kg_m2: 4200,
         oppervlakte_m2: 79,
-      })
+      }),
     );
     // Per-m² interpretation would multiply by 79 → ~331k. Total interpretation keeps ~4200.
     const co2Alert = alerts.find((a) => a.includes('CO₂ emissions'));
@@ -98,7 +98,7 @@ describe('generateAlerts', () => {
         ep1_energiebehoefte_kwh_m2: 70, // overschrijding
         eis_aandeel_hernieuwbare_energie_pct: 40,
         aandeel_hernieuwbaar_pct: 50, // passes
-      })
+      }),
     );
     const beng = alerts.find((a) => a.startsWith('BENG compliance:'));
     expect(beng).toBeDefined();
@@ -114,7 +114,7 @@ describe('generateAlerts', () => {
         candidateCount: 4,
         energielabel: 'C',
         label_geldig_tot: yesterday,
-      })
+      }),
     );
     expect(alerts.some((a) => a.includes('Multiple verblijfsobjecten (4)'))).toBe(true);
     expect(alerts.some((a) => a.includes('Energy label has expired'))).toBe(true);
@@ -126,7 +126,7 @@ describe('generateAlerts', () => {
         matchStatus: 'not_found',
         candidateCount: 0,
         energielabel: null,
-      })
+      }),
     );
     expect(alerts.some((a) => a.includes('No registered energy label'))).toBe(false);
   });
@@ -139,7 +139,7 @@ describe('generateAlerts', () => {
         labelCount: 0,
         energielabel: null,
         bouwjaar: 2010,
-      })
+      }),
     );
     expect(alerts.some((a) => a.includes('No registered energy label'))).toBe(true);
   });
@@ -153,7 +153,7 @@ describe('generateAlerts', () => {
         gebruiksdoel: 'woonfunctie',
         warmtebehoefte_kwh_m2: 52.73,
         oppervlakte_m2: 41,
-      })
+      }),
     );
     const gasAlert = alerts.find((a) => a.includes('space-heating gas equivalent'));
     expect(gasAlert).toContain('~259 m³/year');
@@ -172,7 +172,7 @@ describe('generateAlerts', () => {
         oppervlakte_m2: 41,
         gebruiksoppervlakte_thermische_zone_m2: 40.02,
         co2_emissie_kg_m2: 13.79,
-      })
+      }),
     );
     const gasAlert = alerts.find((a) => a.includes('space-heating gas equivalent'));
     expect(gasAlert).toContain('~253 m³/year');
@@ -190,7 +190,7 @@ describe('generateAlerts', () => {
         warmtebehoefte_kwh_m2: 52.73,
         oppervlakte_m2: 41,
         gebruiksoppervlakte_thermische_zone_m2: null,
-      })
+      }),
     );
     const gasAlert = alerts.find((a) => a.includes('space-heating gas equivalent'));
     expect(gasAlert).toContain('41 m² BAG');
@@ -204,7 +204,7 @@ describe('generateAlerts', () => {
         gebruiksdoel: 'woonfunctie',
         warmtebehoefte_kwh_m2: 100,
         gebruiksoppervlakte_thermische_zone_m2: 120,
-      })
+      }),
     );
     const gasAlert = alerts.find((a) => a.includes('space-heating gas equivalent'));
     expect(gasAlert).toMatch(/SPACE HEATING ONLY/);
@@ -219,7 +219,7 @@ describe('generateAlerts', () => {
         gebruiksdoel: 'woonfunctie',
         warmtebehoefte_kwh_m2: 100,
         gebruiksoppervlakte_thermische_zone_m2: 120,
-      })
+      }),
     );
     const gasAlert = alerts.find((a) => a.includes('space-heating gas equivalent'));
     const m3 = Number(gasAlert?.match(/~(\d+) m³\/year/)?.[1]);
@@ -233,9 +233,7 @@ describe('generateAlerts', () => {
     // comparison treats it as midnight UTC of that day, so a far-future
     // date-only value is unambiguously valid.
     const farFutureDateOnly = '2099-12-31';
-    const alerts = generateAlerts(
-      baseProfile({ energielabel: 'C', label_geldig_tot: farFutureDateOnly })
-    );
+    const alerts = generateAlerts(baseProfile({ energielabel: 'C', label_geldig_tot: farFutureDateOnly }));
     expect(alerts.some((a) => a.includes('Energy label has expired'))).toBe(false);
   });
 });
@@ -254,7 +252,7 @@ describe('overheating alert (computed: the bare value is misread)', () => {
 
   it('names the two misreadings the eval actually observed', () => {
     const a = generateAlerts({ ...base, temperatuuroverschrijding: 3.59 }).find((x) =>
-      x.startsWith('Overheating risk:')
+      x.startsWith('Overheating risk:'),
     );
     expect(a).toContain('unitless');
     expect(a).toContain('not °C');
@@ -263,14 +261,10 @@ describe('overheating alert (computed: the bare value is misread)', () => {
 
   it('says minor between 0 and 1.5, and none at 0', () => {
     expect(
-      generateAlerts({ ...base, temperatuuroverschrijding: 1.2 }).find((x) =>
-        x.startsWith('Overheating risk:')
-      )
+      generateAlerts({ ...base, temperatuuroverschrijding: 1.2 }).find((x) => x.startsWith('Overheating risk:')),
     ).toContain('minor');
     expect(
-      generateAlerts({ ...base, temperatuuroverschrijding: 0 }).find((x) =>
-        x.startsWith('Overheating risk:')
-      )
+      generateAlerts({ ...base, temperatuuroverschrijding: 0 }).find((x) => x.startsWith('Overheating risk:')),
     ).toContain('none');
   });
 

@@ -76,7 +76,7 @@ const inputSchema = {
     .string()
     .optional()
     .describe(
-      'Filter to calls served by one arm ("rich" | "words" | "words-recipe" | "inline" | "inline-recipe" | "inline-conditional" | "inline-fact" | "inline-instruction" | "schema" | "minimal" | "opaque" | "opaque-words"). Applied AFTER the page is fetched, so pass a large `limit` alongside it. Read `summary.countByVariant` from an UNFILTERED call first: a filter returning zero cannot tell "never called" from "not stamping".'
+      'Filter to calls served by one arm ("rich" | "words" | "words-recipe" | "inline" | "inline-recipe" | "inline-conditional" | "inline-fact" | "inline-instruction" | "schema" | "minimal" | "opaque" | "opaque-words"). Applied AFTER the page is fetched, so pass a large `limit` alongside it. Read `summary.countByVariant` from an UNFILTERED call first: a filter returning zero cannot tell "never called" from "not stamping".',
     ),
   limit: z
     .number()
@@ -86,7 +86,7 @@ const inputSchema = {
     .optional()
     .default(20)
     .describe(
-      'Maximum number of calls to return, most recent first. Default 20, max 500. One eval batch does not fit in 100 rows — size this to the whole window you are auditing.'
+      'Maximum number of calls to return, most recent first. Default 20, max 500. One eval batch does not fit in 100 rows — size this to the whole window you are auditing.',
     ),
 };
 
@@ -99,20 +99,18 @@ const outputSchema = {
         status: z.enum(['success', 'error']).describe('Call outcome'),
         durationMs: z.number().describe('Call duration in milliseconds'),
         timestamp: z.string().describe('ISO 8601 timestamp'),
-        variant: z
-          .string()
-          .describe('Which arm served the call. "unknown" for stdio, which opens no request context.'),
+        variant: z.string().describe('Which arm served the call. "unknown" for stdio, which opens no request context.'),
         paramsPresent: z
           .array(z.string())
           .describe(
-            'Names of the OPTIONAL parameters the caller supplied — never their values. For get_building_profile: huisletter, toevoeging, queryIntent.'
+            'Names of the OPTIONAL parameters the caller supplied — never their values. For get_building_profile: huisletter, toevoeging, queryIntent.',
           ),
         rowCount: z.number().describe('Rows the call resolved to. 0 on a miss or an error.'),
         errorType: z.string().nullable().describe('Null on success.'),
         sessionId: z
           .string()
           .describe('Per-REQUEST id. This server is stateless, so this does NOT group a multi-call run.'),
-      })
+      }),
     )
     .describe('Recent calls, most recent first'),
   summary: z.object({
@@ -121,7 +119,7 @@ const outputSchema = {
     countByVariant: z
       .record(z.string(), z.number())
       .describe(
-        'Number of returned records per ARM. Read this before filtering: an arm missing here, or a large "unknown" bucket, is an attribution problem rather than an absence of calls.'
+        'Number of returned records per ARM. Read this before filtering: an arm missing here, or a large "unknown" bucket, is an attribution problem rather than an absence of calls.',
       ),
     oldestTimestamp: z.string().nullable().describe('Timestamp of the oldest returned record'),
     newestTimestamp: z.string().nullable().describe('Timestamp of the newest returned record'),
@@ -165,7 +163,7 @@ export function registerGetToolCallLogTool(server: McpServer, opts: { minimal?: 
         const alerts: string[] = [];
         if (environment === 'local') {
           alerts.push(
-            'environment: local — this is an in-memory buffer for this process only (last 50 calls, reset on restart), not the deployed persisted log.'
+            'environment: local — this is an in-memory buffer for this process only (last 50 calls, reset on restart), not the deployed persisted log.',
           );
         }
         if (args.tool && records.length === 0) {
@@ -173,17 +171,17 @@ export function registerGetToolCallLogTool(server: McpServer, opts: { minimal?: 
         }
         if (args.variant && records.length === 0) {
           alerts.push(
-            `No calls found for variant "${args.variant}" in the last ${limit} rows. The variant filter narrows the fetched page rather than searching deeper — retry with a larger limit before concluding the arm was not called.`
+            `No calls found for variant "${args.variant}" in the last ${limit} rows. The variant filter narrows the fetched page rather than searching deeper — retry with a larger limit before concluding the arm was not called.`,
           );
         }
         const unknownRows = records.filter((r) => r.variant === 'unknown');
         if (unknownRows.length > 0) {
           alerts.push(
-            `${unknownRows.length} of ${records.length} rows have variant "unknown". THREE causes, not equally harmless: (1) stdio, which opens no request context; (2) rows written before variant stamping existed; (3) A DEPLOYED ARM RUNNING A STALE REVISION, which predates the stamping and will keep writing "unknown" forever while the repo source looks correct. Cause 3 silently deletes a whole arm from every count — it is what happened to the inline arm on 2026-09-21. DO NOT discard these rows: match their queryIntent values against the arm you expected, and if they line up, redeploy that arm and re-run the audit.`
+            `${unknownRows.length} of ${records.length} rows have variant "unknown". THREE causes, not equally harmless: (1) stdio, which opens no request context; (2) rows written before variant stamping existed; (3) A DEPLOYED ARM RUNNING A STALE REVISION, which predates the stamping and will keep writing "unknown" forever while the repo source looks correct. Cause 3 silently deletes a whole arm from every count — it is what happened to the inline arm on 2026-09-21. DO NOT discard these rows: match their queryIntent values against the arm you expected, and if they line up, redeploy that arm and re-run the audit.`,
           );
           if (environment === 'cloud' && unknownRows.every((r) => r.rowCount === 0 && r.paramsPresent.length === 0)) {
             alerts.push(
-              'Every "unknown" row also has rowCount 0 and an empty paramsPresent — the signature of pre-stamping code, not of genuine empty results. In environment "cloud" stdio is impossible, so read this as a STALE DEPLOY of whichever arm those queryIntent values belong to.'
+              'Every "unknown" row also has rowCount 0 and an empty paramsPresent — the signature of pre-stamping code, not of genuine empty results. In environment "cloud" stdio is impossible, so read this as a STALE DEPLOY of whichever arm those queryIntent values belong to.',
             );
           }
         }
@@ -215,7 +213,7 @@ export function registerGetToolCallLogTool(server: McpServer, opts: { minimal?: 
           isError: true,
         };
       }
-    }
+    },
   );
 }
 

@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { __resetRingBufferForTests, readRecentToolCalls, writeToolCallLog, type ToolCallLogEntry } from './log-store.js';
+import {
+  __resetRingBufferForTests,
+  readRecentToolCalls,
+  writeToolCallLog,
+  type ToolCallLogEntry,
+} from './log-store.js';
 
 function entry(overrides: Partial<ToolCallLogEntry> = {}): ToolCallLogEntry {
   return {
@@ -82,7 +87,7 @@ describe('log-store — the fields the eval audit depends on', () => {
     // paramsPresent is the highest-value field on the row: `wrong-unit` turns
     // entirely on whether huisletter was passed, and no answer text reveals it.
     await writeToolCallLog(
-      entry({ queryIntent: 'with letter', paramsPresent: ['huisletter', 'queryIntent'], rowCount: 2 })
+      entry({ queryIntent: 'with letter', paramsPresent: ['huisletter', 'queryIntent'], rowCount: 2 }),
     );
     const [row] = await readRecentToolCalls('local', { limit: 10 });
 

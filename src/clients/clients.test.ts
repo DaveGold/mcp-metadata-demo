@@ -34,7 +34,7 @@ describe('BagClient.findAddress', () => {
             },
           ],
         },
-      })
+      }),
     ) as typeof fetch;
 
     const client = new BagClient();
@@ -69,7 +69,7 @@ describe('BagClient.getVerblijfsobject', () => {
             geometry: { type: 'Point', coordinates: [5.12, 52.08] },
           },
         ],
-      })
+      }),
     ) as typeof fetch;
 
     const vbo = await new BagClient().getVerblijfsobject('0344010000000001');
@@ -91,7 +91,7 @@ describe('BagClient.getVerblijfsobject', () => {
             geometry: { type: 'Point', coordinates: [5.12, 52.08] },
           },
         ],
-      })
+      }),
     ) as typeof fetch;
 
     const vbo = await new BagClient().getVerblijfsobject('0344010000000001');
@@ -125,7 +125,7 @@ describe('EpOnlineClient.getByBagVboId', () => {
         PrimaireFossieleEnergie: 30,
         Aandeel_hernieuwbare_energie: 60,
         Geldig_tot: '2030-01-01T00:00:00Z',
-      })
+      }),
     ) as typeof fetch;
 
     const client = new EpOnlineClient();

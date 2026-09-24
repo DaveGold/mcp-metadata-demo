@@ -41,7 +41,7 @@ export function applySelect<T extends object>(records: T[], requested: string[] 
 
   if (validList.length === 0) {
     alerts.push(
-      `select: none of the requested field(s) [${requested.join(', ')}] exist on this tool — no records returned. Valid fields: ${[...allowed].join(', ')}.`
+      `select: none of the requested field(s) [${requested.join(', ')}] exist on this tool — no records returned. Valid fields: ${[...allowed].join(', ')}.`,
     );
     return { records: [], alerts };
   }
@@ -57,7 +57,7 @@ export function applySelect<T extends object>(records: T[], requested: string[] 
     alerts.push(`select: ignored unknown field(s) [${unknown.join(', ')}]. Returned only: ${validList.join(', ')}.`);
   }
   alerts.push(
-    `Records projected to ${validList.length} field(s) via select — omitted fields are NOT null, just excluded. Re-query without select to see them.`
+    `Records projected to ${validList.length} field(s) via select — omitted fields are NOT null, just excluded. Re-query without select to see them.`,
   );
 
   return { records: projected, alerts };

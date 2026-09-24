@@ -152,12 +152,17 @@ export async function writeToolCallLog(entry: ToolCallLogEntry): Promise<void> {
 
 export async function readRecentToolCalls(
   environment: string,
-  opts: { tool?: string; limit: number; variant?: string }
+  opts: { tool?: string; limit: number; variant?: string },
 ): Promise<ToolCallRecord[]> {
   if (environment === 'cloud') {
     const db = await getFirestoreDb();
     let query = db.collection(FIRESTORE_COLLECTION).orderBy('createdAt', 'desc').limit(opts.limit);
-    if (opts.tool) query = db.collection(FIRESTORE_COLLECTION).where('tool', '==', opts.tool).orderBy('createdAt', 'desc').limit(opts.limit);
+    if (opts.tool)
+      query = db
+        .collection(FIRESTORE_COLLECTION)
+        .where('tool', '==', opts.tool)
+        .orderBy('createdAt', 'desc')
+        .limit(opts.limit);
     const snapshot = await query.get();
     const rows = snapshot.docs.map((doc) => {
       const data = doc.data();
@@ -166,7 +171,8 @@ export async function readRecentToolCalls(
         queryIntent: data.queryIntent as string,
         status: data.status as 'success' | 'error',
         durationMs: data.durationMs as number,
-        timestamp: (data.createdAt as import('firebase-admin/firestore').Timestamp | undefined)?.toDate().toISOString() ?? '',
+        timestamp:
+          (data.createdAt as import('firebase-admin/firestore').Timestamp | undefined)?.toDate().toISOString() ?? '',
         // Rows written before these fields existed carry none of them.
         variant: (data.variant as string | undefined) ?? 'unknown',
         paramsPresent: (data.paramsPresent as string[] | undefined) ?? [],

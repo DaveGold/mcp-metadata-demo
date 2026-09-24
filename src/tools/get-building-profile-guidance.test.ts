@@ -6,11 +6,7 @@ import { derivedFiguresBlock } from './get-building-profile.js';
 import type { BagClientLike, EpOnlineClientLike } from './get-building-profile.js';
 import type { BagAddress, BagVerblijfsobject, BagPand } from '../clients/bag-client.js';
 import type { PandEnergielabelV5 } from '../clients/ep-online-client.js';
-import {
-  guidanceDescription,
-  guidancePointer,
-  schemaTierDescription,
-} from './get-building-profile-guidance.js';
+import { guidanceDescription, guidancePointer, schemaTierDescription } from './get-building-profile-guidance.js';
 
 /**
  * Q8's arm must ship the recipe by ONE channel only, the no-argument call, and be
@@ -107,7 +103,9 @@ describe('guidance-recipe arm (Q8)', () => {
   });
 
   it('returns the same fields as the schema arm on a lookup — no prose, no alerts, no guidance', async () => {
-    const guided = await (await connectArm('guidance-recipe')).callTool({ name: 'get_building_profile', arguments: lookup });
+    const guided = await (
+      await connectArm('guidance-recipe')
+    ).callTool({ name: 'get_building_profile', arguments: lookup });
     const schema = await (await connectArm('schema')).callTool({ name: 'get_building_profile', arguments: lookup });
     expect(guided.structuredContent).toEqual(schema.structuredContent);
     expect(guided.structuredContent).not.toHaveProperty('interpretation');
@@ -123,8 +121,7 @@ describe('guidance-recipe arm (Q8)', () => {
   it("is inline-recipe's neighbour: every other tool and the instructions are identical", async () => {
     const g = await connectArm('guidance-recipe');
     const r = await connectArm('inline-recipe');
-    const others = async (c: Client) =>
-      (await c.listTools()).tools.filter((t) => t.name !== 'get_building_profile');
+    const others = async (c: Client) => (await c.listTools()).tools.filter((t) => t.name !== 'get_building_profile');
     expect(await others(g)).toEqual(await others(r));
     expect(g.getInstructions()).toBe(r.getInstructions());
   });

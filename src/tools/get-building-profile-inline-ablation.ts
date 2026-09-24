@@ -65,8 +65,7 @@ export type AblationMode = 'fact' | 'instruction';
  * arms and `inline` differ in exactly one line of prose.
  */
 export function ablatedInterpretation(mode: AblationMode): string {
-  const replacement =
-    mode === 'fact' ? calcVsMeasuredFactOnly : calcVsMeasuredInstructionOnly;
+  const replacement = mode === 'fact' ? calcVsMeasuredFactOnly : calcVsMeasuredInstructionOnly;
   return interpretationBlock
     .split('\n')
     .map((line) => (line.startsWith(calcVsMeasuredLabel.trimEnd()) ? replacement : line))
@@ -77,7 +76,7 @@ export function registerGetBuildingProfileInlineAblationTool(
   server: McpServer,
   bagClient: BagClientLike,
   epOnlineClient: EpOnlineClientLike,
-  opts: { mode: AblationMode }
+  opts: { mode: AblationMode },
 ): void {
   const interpretationPayload = ablatedInterpretation(opts.mode);
   const variant = opts.mode === 'fact' ? 'inline-fact' : 'inline-instruction';
@@ -129,6 +128,6 @@ export function registerGetBuildingProfileInlineAblationTool(
           isError: true,
         };
       }
-    }
+    },
   );
 }

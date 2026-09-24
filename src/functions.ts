@@ -57,14 +57,8 @@ export const mcpInline = onRequest(functionOptions, createHttpApp({ hosted: true
  * given that in a description it was applied 0 of 13 times.
  * See evals/open-questions.md Q1b.
  */
-export const mcpWordsRecipe = onRequest(
-  functionOptions,
-  createHttpApp({ hosted: true, variant: 'words-recipe' })
-);
-export const mcpInlineRecipe = onRequest(
-  functionOptions,
-  createHttpApp({ hosted: true, variant: 'inline-recipe' })
-);
+export const mcpWordsRecipe = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'words-recipe' }));
+export const mcpInlineRecipe = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'inline-recipe' }));
 
 /**
  * Q2 arm — CONDITIONAL interpretation. As `mcpInline`, but the response carries
@@ -78,14 +72,11 @@ export const mcpInlineRecipe = onRequest(
  * differs by exactly that line, which is the cheapest fix a production server
  * could ship. See open-questions.md Q14.
  */
-export const mcpInlineOneline = onRequest(
-  functionOptions,
-  createHttpApp({ hosted: true, variant: 'inline-oneline' })
-);
+export const mcpInlineOneline = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'inline-oneline' }));
 
 export const mcpInlineConditional = onRequest(
   functionOptions,
-  createHttpApp({ hosted: true, variant: 'inline-conditional' })
+  createHttpApp({ hosted: true, variant: 'inline-conditional' }),
 );
 
 /**
@@ -93,13 +84,10 @@ export const mcpInlineConditional = onRequest(
  * `mcpInline` is the third arm (both halves) and needs no new function. See
  * evals/open-questions.md Q4.
  */
-export const mcpInlineFact = onRequest(
-  functionOptions,
-  createHttpApp({ hosted: true, variant: 'inline-fact' })
-);
+export const mcpInlineFact = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'inline-fact' }));
 export const mcpInlineInstruction = onRequest(
   functionOptions,
-  createHttpApp({ hosted: true, variant: 'inline-instruction' })
+  createHttpApp({ hosted: true, variant: 'inline-instruction' }),
 );
 
 /**
@@ -127,7 +115,7 @@ export const mcpOpaqueWords = onRequest(functionOptions, createHttpApp({ hosted:
  */
 export const mcpGuidanceRecipe = onRequest(
   functionOptions,
-  createHttpApp({ hosted: true, variant: 'guidance-recipe' })
+  createHttpApp({ hosted: true, variant: 'guidance-recipe' }),
 );
 
 /**

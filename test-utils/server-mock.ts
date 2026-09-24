@@ -4,10 +4,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
  * Capture the handler that `register*Tool(server, ...)` passes as the 3rd arg
  * of `server.registerTool(name, config, handler)`. Avoids spinning up a real MCP server.
  */
-export type CapturedToolHandler = (
-  args: Record<string, unknown>,
-  extra: { authInfo?: unknown }
-) => Promise<unknown>;
+export type CapturedToolHandler = (args: Record<string, unknown>, extra: { authInfo?: unknown }) => Promise<unknown>;
 
 export interface CapturedToolRegistration {
   name: string;

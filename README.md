@@ -165,31 +165,31 @@ marked, read its wire view: [`best`](docs/wire/best.md) · [`rich`](docs/wire/ri
 **1 · WHEN — before the call.** Does this tool fit the question, what is it not for, what does it
 join with? These must be in the first 2,048 characters of the description, because the model
 decides before it has any response:
-- building: [`WHEN TO USE` · `WHEN NOT TO USE` · `RELATED TOOLS`](src/tools/get-building-profile-best.ts#L32-L36), including the
+- building: [`WHEN TO USE` · `WHEN NOT TO USE` · `RELATED TOOLS`](src/tools/get-building-profile-best.ts#L33-L37), including the
   refusal that must be possible without a call ("this server has NO metered energy consumption")
-- weather: [the same three blocks](src/tools/get-weather-context-best.ts#L48-L52)
+- weather: [the same three blocks](src/tools/get-weather-context-best.ts#L58-L62)
 
 **2 · HOW — calling it.** How to form the arguments, and what comes back:
-- building: [`QUERY STRATEGY` · `RETURNS`](src/tools/get-building-profile-best.ts#L38-L40) and [the input schema](src/tools/get-building-profile-best.ts#L52-L58), a `.describe`
+- building: [`QUERY STRATEGY` · `RETURNS`](src/tools/get-building-profile-best.ts#L39-L41) and [the input schema](src/tools/get-building-profile-best.ts#L53-L66), a `.describe`
   on every parameter (the input schema is delivered)
-- weather: [`QUERY STRATEGY` · `RETURNS`](src/tools/get-weather-context-best.ts#L54-L56) and [the input schema](src/tools/get-weather-context-best.ts#L67-L85), including
+- weather: [`QUERY STRATEGY` · `RETURNS`](src/tools/get-weather-context-best.ts#L64-L66) and [the input schema](src/tools/get-weather-context-best.ts#L77-L129), including
   `select` with its exact field names, and `energyUse` / `solarKwp` so the server computes the verdict
 
 **3 · WHAT — meaning and interpretation, after the answer.** What a value is, and how to read it
 for this record. Most of it travels in the response, where there is no 2,048 cut:
-- **names first** — [the rename table](src/domain/best-field-names.ts#L31-L130): upstream name → name
+- **names first** — [the rename table](src/domain/best-field-names.ts#L31-L147): upstream name → name
   that says quantity, scope, provenance and unit, with a reason and provenance per row
-  ([weather](src/domain/best-field-names.ts#L162-L169)); the [output schema](src/tools/get-building-profile-best.ts#L67-L123) lists the
+  ([weather](src/domain/best-field-names.ts#L179-L188)); the [output schema](src/tools/get-building-profile-best.ts#L75-L138) lists the
   resulting names (shape only: the model never receives it)
-- **rules that hold for every record** — [`INTERPRETATION` in the description head](src/tools/get-building-profile-best.ts#L42-L48),
+- **rules that hold for every record** — [`INTERPRETATION` in the description head](src/tools/get-building-profile-best.ts#L43-L49),
   each a fact plus an instruction (CALCULATED vs MEASURED, which area totals use, what null means)
 - **rules for this record** — [the rule shape](src/domain/best-rules.ts#L29-L42) (`applies`, `render`,
   `relates_to_fields`, `provenance`; only `render()` reaches the model) and the registries:
-  [building](src/domain/best-building-rules.ts#L206-L437), [weather](src/domain/best-weather-rules.ts#L105-L226)
-- **computed values** — [`computeBuildingDerived`](src/domain/best-building-rules.ts#L98-L181): each with unit,
+  [building](src/domain/best-building-rules.ts#L235-L526), [weather](src/domain/best-weather-rules.ts#L109-L244)
+- **computed values** — [`computeBuildingDerived`](src/domain/best-building-rules.ts#L104-L210): each with unit,
   basis and provenance, or `null` plus the reason; the server-computed
   [reference period](src/domain/reference-period.ts) for a partial year
-- **the response, `interpretation` first** — [building](src/tools/get-building-profile-best.ts#L159-L173), [weather](src/tools/get-weather-context-best.ts#L135-L271)
+- **the response, `interpretation` first** — [building](src/tools/get-building-profile-best.ts#L181-L195), [weather](src/tools/get-weather-context-best.ts#L223-L373)
   (including the size guard that drops records rather than lose the interpretation to a file notice)
 - **proof it holds** — [`best-arm.test.ts`](src/tools/best-arm.test.ts) pins every computed value to
   the ground truth, and checks the description budget and rule coverage

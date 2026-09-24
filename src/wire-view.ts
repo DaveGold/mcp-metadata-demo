@@ -13,13 +13,25 @@ import type { BagClientLike, EpOnlineClientLike } from './tools/get-building-pro
 
 export const CUT = 2048;
 export const WIRE_VIEW_ARMS: { arm: ServerVariant; blurb: string }[] = [
-  { arm: 'best', blurb: 'The reference implementation: everything before the call fits inside the cut; meaning travels in field names and the response.' },
-  { arm: 'rich', blurb: 'The older, description-heavy tier: most of its INTERPRETATION sits past the cut and never reaches the model on Claude Code.' },
+  {
+    arm: 'best',
+    blurb:
+      'The reference implementation: everything before the call fits inside the cut; meaning travels in field names and the response.',
+  },
+  {
+    arm: 'rich',
+    blurb:
+      'The older, description-heavy tier: most of its INTERPRETATION sits past the cut and never reaches the model on Claude Code.',
+  },
   { arm: 'minimal', blurb: 'The thin wrapper: same data, one-line descriptions, no guidance.' },
 ];
 const DATA_TOOLS = ['get_building_profile', 'get_weather_context'];
 
-const noBag: BagClientLike = { findAddress: async () => [], getVerblijfsobject: async () => null, getPand: async () => null };
+const noBag: BagClientLike = {
+  findAddress: async () => [],
+  getVerblijfsobject: async () => null,
+  getPand: async () => null,
+};
 const noEp: EpOnlineClientLike = { getByBagVboId: async () => [] };
 
 const fence = (text: string) => '````text\n' + text + '\n````';
@@ -64,7 +76,10 @@ export async function renderWireView(arm: ServerVariant, blurb: string): Promise
     const tool = tools.find((t) => t.name === name);
     if (!tool) continue;
     const description = tool.description ?? '';
-    const props = ((tool.inputSchema as { properties?: Record<string, Prop> }).properties ?? {}) as Record<string, Prop>;
+    const props = ((tool.inputSchema as { properties?: Record<string, Prop> }).properties ?? {}) as Record<
+      string,
+      Prop
+    >;
     const required = new Set((tool.inputSchema as { required?: string[] }).required ?? []);
     out.push(
       '',
@@ -80,14 +95,14 @@ export async function renderWireView(arm: ServerVariant, blurb: string): Promise
       '|---|---|---|',
       ...Object.entries(props).map(
         ([k, p]) =>
-          `| \`${k}\`${required.has(k) ? ' *' : ''} | ${p.enum ? p.enum.map((v) => `\`${String(v)}\``).join(' · ') : (p.type ?? '')} | ${(p.description ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ')} |`
+          `| \`${k}\`${required.has(k) ? ' *' : ''} | ${p.enum ? p.enum.map((v) => `\`${String(v)}\``).join(' · ') : (p.type ?? '')} | ${(p.description ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ')} |`,
       ),
       '',
       '### Output schema (not delivered)',
       '',
       tool.outputSchema
         ? `${JSON.stringify(tool.outputSchema).length.toLocaleString('en')} chars, ${Object.keys((tool.outputSchema as { properties?: object }).properties ?? {}).length} top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.`
-        : '_none_'
+        : '_none_',
     );
   }
   return out.join('\n') + '\n';

@@ -148,7 +148,7 @@ export class BagClient {
     postcode: string,
     huisnummer: number,
     huisletter?: string,
-    toevoeging?: string
+    toevoeging?: string,
   ): Promise<BagAddress[]> {
     let q = `postcode:${postcode} AND huisnummer:${huisnummer}`;
     if (huisletter) q += ` AND huisletter:${escapeLucene(huisletter)}`;

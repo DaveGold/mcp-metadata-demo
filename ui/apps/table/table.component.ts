@@ -239,7 +239,7 @@ function buildSparklineSvg(values: unknown): string | null {
  */
 function progressColorClass(
   value: number,
-  config: { thresholds?: { warn: number; danger: number }; invertColors?: boolean } | undefined
+  config: { thresholds?: { warn: number; danger: number }; invertColors?: boolean } | undefined,
 ): string {
   const warn = config?.thresholds?.warn ?? 0.7;
   const danger = config?.thresholds?.danger ?? 0.9;
@@ -851,7 +851,7 @@ export class TableComponent implements OnInit {
           rowA: any,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           rowB: any,
-          columnId: string
+          columnId: string,
         ): number =>
           aggregateSparkline(rowA.getValue(columnId), agg) - aggregateSparkline(rowB.getValue(columnId), agg);
       } else if (type === 'trend') {
@@ -860,7 +860,7 @@ export class TableComponent implements OnInit {
           rowA: any,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           rowB: any,
-          columnId: string
+          columnId: string,
         ): number =>
           (extractTrendValue(rowA.getValue(columnId)) ?? 0) - (extractTrendValue(rowB.getValue(columnId)) ?? 0);
         const valueType = col.trendConfig?.valueType ?? 'number';
@@ -868,7 +868,7 @@ export class TableComponent implements OnInit {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           row: any,
           columnId: string,
-          filterValue: unknown
+          filterValue: unknown,
         ): boolean => {
           const raw = row.getValue(columnId);
           if (!raw || typeof raw !== 'object' || !('value' in raw) || !('delta' in raw)) return false;
@@ -883,7 +883,7 @@ export class TableComponent implements OnInit {
           rowA: any,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           rowB: any,
-          columnId: string
+          columnId: string,
         ): number => {
           const a = rowA.getValue(columnId);
           const b = rowB.getValue(columnId);
@@ -894,7 +894,7 @@ export class TableComponent implements OnInit {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           row: any,
           columnId: string,
-          filterValue: unknown
+          filterValue: unknown,
         ): boolean => {
           const raw = row.getValue(columnId);
           if (!Array.isArray(raw)) return false;
@@ -913,13 +913,13 @@ export class TableComponent implements OnInit {
           rowA: any,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           rowB: any,
-          columnId: string
+          columnId: string,
         ): number => extractLinkLabel(rowA.getValue(columnId)).localeCompare(extractLinkLabel(rowB.getValue(columnId)));
         columnDef.filterFn = (
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           row: any,
           columnId: string,
-          filterValue: unknown
+          filterValue: unknown,
         ): boolean =>
           extractLinkLabel(row.getValue(columnId))
             .toLowerCase()
@@ -930,7 +930,7 @@ export class TableComponent implements OnInit {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           row: any,
           columnId: string,
-          filterValue: unknown
+          filterValue: unknown,
         ): boolean => {
           const raw = row.getValue(columnId);
           const url = typeof raw === 'string' ? raw : '';
@@ -1245,7 +1245,7 @@ export class TableComponent implements OnInit {
   getProgressRender(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     colDef: any,
-    value: unknown
+    value: unknown,
   ): { percent: number; label: string; barClass: string; trackClass: string } | null {
     if (typeof value !== 'number' || isNaN(value)) return null;
     const clamped = Math.min(1, Math.max(0, value));
@@ -1261,7 +1261,7 @@ export class TableComponent implements OnInit {
   getTrendRender(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     colDef: any,
-    value: unknown
+    value: unknown,
   ): { valueLabel: string; deltaLabel: string; arrowSvg: SafeHtml; colorClass: string; title: string } | null {
     if (!value || typeof value !== 'object' || !('value' in value) || !('delta' in value)) return null;
     const tv = value as TrendValue;
@@ -1344,7 +1344,7 @@ export class TableComponent implements OnInit {
   getRatingRender(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     colDef: any,
-    value: unknown
+    value: unknown,
   ): {
     glyphs: { state: 'full' | 'half' | 'empty'; shape: 'stars' | 'dots' }[];
     colorClass: string;
@@ -1381,7 +1381,7 @@ export class TableComponent implements OnInit {
   getImageRender(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     colDef: any,
-    value: unknown
+    value: unknown,
   ): { src: string | null; alt: string; width: number; height: number; rounded: boolean; loading: boolean } | null {
     if (!isSafeImageUrl(value)) return null;
     const cfg = colDef.meta?.imageConfig;
@@ -1493,7 +1493,7 @@ export class TableComponent implements OnInit {
           }
           return csvField(formatCell(value, type), sep);
         })
-        .join(sep)
+        .join(sep),
     );
 
     const bom = '\uFEFF';

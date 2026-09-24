@@ -35,12 +35,9 @@ const filter = process.env.UI_APP?.trim() || null;
 const force = process.env.UI_FORCE === '1' || process.env.UI_FORCE === 'true';
 
 // Files whose changes invalidate every app's cache.
-const globalConfigFiles = [
-  'vite.config.ts',
-  'ui/tsconfig.json',
-  'ui/styles.css',
-  'package-lock.json',
-].map((p) => resolve(projectRoot, p));
+const globalConfigFiles = ['vite.config.ts', 'ui/tsconfig.json', 'ui/styles.css', 'package-lock.json'].map((p) =>
+  resolve(projectRoot, p),
+);
 
 // Discover all app entries
 const apps = [];

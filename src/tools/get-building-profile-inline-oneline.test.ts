@@ -6,24 +6,21 @@
 import { describe, it, expect } from 'vitest';
 import { createServer } from '../server.js';
 import type { BagClientLike, EpOnlineClientLike } from './get-building-profile.js';
-import {
-  descriptionCore,
-  interpretationBlock,
-  overheatingLine,
-  overheatingLabel,
-} from './get-building-profile.js';
+import { descriptionCore, interpretationBlock, overheatingLine, overheatingLabel } from './get-building-profile.js';
 
 const stubBag = (): BagClientLike =>
-  ({ searchAddresses: async () => [], getVerblijfsobject: async () => null, getPand: async () => null }) as unknown as BagClientLike;
-const stubEp = (): EpOnlineClientLike =>
-  ({ getLabelsForPand: async () => [] }) as unknown as EpOnlineClientLike;
+  ({
+    searchAddresses: async () => [],
+    getVerblijfsobject: async () => null,
+    getPand: async () => null,
+  }) as unknown as BagClientLike;
+const stubEp = (): EpOnlineClientLike => ({ getLabelsForPand: async () => [] }) as unknown as EpOnlineClientLike;
 
 const serverFor = (variant: 'inline-oneline' | 'words') =>
   createServer({ variant, bagClient: stubBag(), epOnlineClient: stubEp() });
 
 function toolOf(server: unknown): { description?: string } {
-  const registered = (server as { _registeredTools: Record<string, { description?: string }> })
-    ._registeredTools;
+  const registered = (server as { _registeredTools: Record<string, { description?: string }> })._registeredTools;
   return registered['get_building_profile'];
 }
 

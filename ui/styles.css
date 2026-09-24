@@ -109,15 +109,15 @@
   --color-dark-border: #303036;
 
   /* Neutral grays (standard Tailwind scale, used across UI components) */
-  --color-wb-gray-50: #F9FAFB;
-  --color-wb-gray-100: #F3F4F6;
-  --color-wb-gray-200: #E5E7EB;
-  --color-wb-gray-300: #D1D5DB;
-  --color-wb-gray-400: #9CA3AF;
-  --color-wb-gray-500: #6B7280;
-  --color-wb-gray-600: #4B5563;
+  --color-wb-gray-50: #f9fafb;
+  --color-wb-gray-100: #f3f4f6;
+  --color-wb-gray-200: #e5e7eb;
+  --color-wb-gray-300: #d1d5db;
+  --color-wb-gray-400: #9ca3af;
+  --color-wb-gray-500: #6b7280;
+  --color-wb-gray-600: #4b5563;
   --color-wb-gray-700: #374151;
-  --color-wb-gray-800: #1F2937;
+  --color-wb-gray-800: #1f2937;
   --color-wb-gray-900: #111827;
 }
 
@@ -125,7 +125,7 @@
 :root {
   color-scheme: light;
 }
-[data-theme="dark"] {
+[data-theme='dark'] {
   color-scheme: dark;
 }
 
@@ -142,17 +142,16 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  [data-theme="dark"] body {
+  [data-theme='dark'] body {
     background-color: var(--color-dark-surface);
     color: var(--color-grey-beige-lighter);
   }
-
 }
 
 /* Table striped rows — outside @layer so it can't be overridden by Tailwind utilities */
 .stripe-even {
   background-color: var(--color-wb-gray-50);
 }
-[data-theme="dark"] .stripe-even {
+[data-theme='dark'] .stripe-even {
   background-color: var(--color-dark-surface-raised);
 }
