@@ -80,6 +80,12 @@ For every alert, threshold, benchmark and derived value:
 A computed value is the most readily believed thing a tool can emit (78/78 when right [L1]),
 which is exactly why a wrong one is the worst failure in the set.
 
+**Removing the wrong line is only half the fix.** When the question itself invites the wrong
+comparison, the model makes it unaided: in Q20 `rich` lost its false alert and still scored
+0/10, because the fact that forbids the comparison sat past the description cut. After removing
+a defect, make sure the correcting FACT is delivered (description head or response) and measure
+it [Q20].
+
 ## Step 5 — Provenance backfill
 
 Every rule, alert and rename gets a provenance line in source: the date, and the eval result,

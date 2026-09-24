@@ -3472,7 +3472,9 @@ failure mode uncovered.
 >
 > - **Confirmed:** P1, P2, P3, P5, P7, P8, P9, P10. **Partial:** P4 (16/20). **Falsified:** P6 (both
 >   margins stated 10/20).
-> - **P2 in numbers:** `best` 20/20 · 10/10 · 10/10 on `benchmark-trap`, `rich` 0/20 · 0/10 · 6/10.
+> - **P2 in numbers:** `best` 20/20 · 9/10 · 10/10 on `benchmark-trap`, `rich` 0/20 · 0/10 · 0/10. The
+>   opus and sonnet cells follow the hand-read erratum in the results file: `rich`-opus's six
+>   "correct" answers were hedged verdicts.
 >   The old reference loses the question it was built to win, exactly where the audit said.
 > - **Held-out:** `best` 19/20 · 10/10 · 10/10, `rich` 0/20 · 5/10 · 10/10.
 > - **Unpredicted:** `weather-partial-normalization` `best` 0/10 against `rich` 10/10. The shipped
@@ -3689,6 +3691,20 @@ the description head:
 | P2 | `metered-vs-model` is still answered without a building call in ≥ 7/10 `best` runs | ≤ 4/10 |
 
 ## Q20 — Does removing `rich`'s EP-1 vs Paris Proof alert fix `rich` on benchmark-trap? Registered 2026-09-24, BEFORE the run
+
+> **ANSWERED 2026-09-24 — no.** See [`results/2026-09-24-q20-rich-alert-removed.json`](results/2026-09-24-q20-rich-alert-removed.json).
+>
+> **Falsified:**
+> - P1 — `rich` haiku 0/10;
+> - P2 — `rich` sonnet 1/10, +3 hedged. This is the failure mode the registration named.
+>
+> **Confirmed:**
+> - P3 — no "Paris Proof" misnaming on heat-pump-triage, 9/10;
+> - P4 — `best` 10/10, 10/10, 9/10.
+>
+> The removal takes the false claim out of `rich`'s output. It does not deliver the missing fact
+> that stops a model making the comparison itself. That fact is in `best` (head and response). In
+> `rich` it sits past the cut.
 
 > **REGISTERED before any run.** Deployed and verified live: `rich` on Gustav Mahlerlaan 10
 > returns only the overheating alert.

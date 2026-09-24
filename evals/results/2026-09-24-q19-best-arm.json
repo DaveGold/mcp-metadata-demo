@@ -86039,5 +86039,16 @@
    "agent_id": "a60857542cf69d268",
    "parent_session": "cd2f4eb9-8407-42b9-9ead-872146b3d822"
   }
- ]
+ ],
+ "hand_reading_erratum_2026-09-24": {
+  "why": "Q19 scored benchmark-trap answers that state the 17% gap and then reject the comparison as CORRECT by rubric, without reading them ('declines, mentions the number': best 9, rich-opus 6, inline 7). Q20 introduced a hand rule and it is applied back here for consistency: CORRECT = explicitly declines a verdict; PARTIAL = a hedged verdict ('indicative', 'likely misses'); WRONG = the verdict with at most an aside.",
+  "reread": 22,
+  "changed": {
+   "rich / opus / benchmark-trap": "6/10 -> 0/10 correct (5 partial: 103-2, 103-6, 1052-2, 1053-2, 1054-2 — 'looks like it misses', 'a first indication rather than a verdict'; 1 wrong: 101-2 'on that measure it misses')",
+   "best / sonnet / benchmark-trap": "10/10 -> 9/10 correct (1 partial: 1033-1 'likely would not meet Paris Proof today')"
+  },
+  "unchanged": "the other 8 best answers and all 7 inline answers explicitly reject the comparison and stay CORRECT",
+  "effect_on_predictions": "P2 unchanged (best >= 9/10 on every model still holds; rich <= 3/10 was registered for haiku and sonnet only)",
+  "note": "The runs and their verdict fields above are left as recorded; this erratum supersedes them for the two cells named."
+ }
 }

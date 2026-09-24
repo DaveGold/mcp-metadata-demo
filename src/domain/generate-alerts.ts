@@ -103,7 +103,10 @@ export function generateAlerts(profile: ProfileCore): string[] {
   // EP-1 is the CALCULATED NTA 8800 net energy demand; Paris Proof is defined on MEASURED final
   // energy use at the meter — same unit, different quantity — and the 150 had no source. As a
   // computed verdict it was repeated by the models: benchmark-trap rich 0/20 (haiku), 0/10
-  // (sonnet), 6/10 (opus) in evals/results/2026-09-24-q19-best-arm.json. Fix measured as Q20.
+  // (sonnet), 0/10 (opus, hand-read) in evals/results/2026-09-24-q19-best-arm.json. Q20
+  // (evals/results/2026-09-24-q20-rich-alert-removed.json): removing it did NOT fix rich on that
+  // question (haiku 0/10, sonnet 1/10) — the missing CALCULATED vs MEASURED fact sits past rich's
+  // 2,048 cut. Removing a wrong line is not the same as delivering the right one.
   // Do not reintroduce a numeric benchmark comparison for calculated label figures.
 
   if (profile.label_geldig_tot) {

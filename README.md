@@ -67,8 +67,8 @@ fields need explanation (a field-reading probe), and a portable eval harness.
 **And measured with it.** Running that skill's audit on this repo's own tools produced the
 **`best`** arm ([`get-building-profile-best.ts`](src/tools/get-building-profile-best.ts),
 [`get-weather-context-best.ts`](src/tools/get-weather-context-best.ts)). Against the previous
-reference, in the same batches: the calculated-vs-measured trap **20/20 · 10/10 · 10/10 against
-0/20 · 0/10 · 6/10** (haiku · sonnet · opus), a held-out question **19/20 against 0/20**, cheaper in
+reference, in the same batches: the calculated-vs-measured trap **20/20 · 9/10 · 10/10 against
+0/20 · 0/10 · 0/10** (haiku · sonnet · opus; hand-read), a held-out question **19/20 against 0/20**, cheaper in
 30 of 32 cells — and two defects the runs found in `best` itself, fixed and re-measured
 ([Q19–Q20](evals/results/README.md)).
 
@@ -113,7 +113,7 @@ Same registers, same building (it's the Rijksmuseum, bouwjaar 1885) — the only
 
 > *"Gustav Mahlerlaan 10, 1082PP Amsterdam — how does it stack up against the Paris Proof 2040 office target of 70 kWh/m²?"*
 
-The right answer is that it **cannot be ranked from this data**: every EP-Online figure is CALCULATED by the label method, and Paris Proof is defined on MEASURED energy at the meter — same unit, different quantity. `best` states that fact where the model reads it and scores 20/20 on haiku. Until 2026-09-24 `rich` itself carried a computed alert that made exactly this comparison, and the models repeated it (0/20). It is removed now. This is the eval set's headline trap ([`benchmark-trap`](evals/questions.json)).
+The right answer is that it **cannot be ranked from this data**: every EP-Online figure is CALCULATED by the label method, and Paris Proof is defined on MEASURED energy at the meter — same unit, different quantity. `best` states that fact where the model reads it and scores 20/20 on haiku. Until 2026-09-24 `rich` itself carried a computed alert that made exactly this comparison, and the models repeated it (0/20). The alert is removed now, but `rich` still scores 0/10 on haiku: the question invites the comparison, and `rich`'s CALCULATED vs MEASURED sentence sits past the 2,048 cut. Removing a wrong line is not the same as delivering the right one ([Q20](evals/results/2026-09-24-q20-rich-alert-removed.json)). This is the eval set's headline trap ([`benchmark-trap`](evals/questions.json)).
 
 **3 — Self-describing visualization (rich):**
 
