@@ -3687,3 +3687,28 @@ the description head:
 |---|---|---|
 | P1 | No regression: `best` ≥ 9/10 on each question (Q19/Q19c: 10/10, 20/20, 9/10) | any `best` cell ≤ 7/10 |
 | P2 | `metered-vs-model` is still answered without a building call in ≥ 7/10 `best` runs | ≤ 4/10 |
+
+## Q20 — Does removing `rich`'s EP-1 vs Paris Proof alert fix `rich` on benchmark-trap? Registered 2026-09-24, BEFORE the run
+
+> **REGISTERED before any run.** Deployed and verified live: `rich` on Gustav Mahlerlaan 10
+> returns only the overheating alert.
+
+**Change.** `rich` loses its computed "EP-1 above Paris Proof 2040 target" and "> 150 above
+benchmark" alerts. The Paris Proof promise also goes from its alerts paragraph, its instructions
+and its ep1 schema describe. The shared `interpretationBlock` line stays, but it sits past `rich`'s
+2,048 cut and is not delivered. No other arm changed; the hash freeze proves it.
+
+**Run.** `rich` vs `best` in the same batches, the portable harness, 60 runs:
+- `benchmark-trap` on haiku and on sonnet, n=10 per arm each;
+- `heat-pump-triage` on haiku, n=10 per arm.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `benchmark-trap`, haiku: `rich` ≥ 7/10 (Q19: 0/20) | ≤ 3/10 |
+| P2 | `benchmark-trap`, sonnet: `rich` ≥ 7/10 (Q19: 0/10) | ≤ 3/10 |
+| P3 | `heat-pump-triage`, haiku: `rich` stays ≥ 9/10 and calls the 100 kWh/m² band boundary a "Paris Proof" target in ≤ 2/10 (Q19: 8 of 20) | correct ≤ 7/10, or Paris Proof named in ≥ 5/10 |
+| P4 | `best` unchanged: ≥ 9/10 in every cell | any `best` cell ≤ 7/10 |
+
+**Why P1 could fail.** Without the alert and without a delivered CALCULATED vs MEASURED line
+(`rich`'s sits past the cut), haiku may compare 81.68 with 70 unaided. In that case the fix
+removes a false claim, but it does not add the missing fact.
