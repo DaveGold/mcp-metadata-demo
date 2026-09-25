@@ -1,16 +1,16 @@
-# MCP Apps — self-describing UI
+# MCP Apps: self-describing UI
 
-The repo ships three MCP Apps — `render_chart` (14 chart types via Chart.js, with annotations),
+The repo ships three MCP Apps: `render_chart` (14 chart types via Chart.js, with annotations),
 `render_table` (TanStack Table with badge/icon/cell formatters) and `render_map` (Leaflet with
-car/building/project/pin markers) — plus `fetch_image`, a server-side image proxy with SSRF
+car/building/project/pin markers). It also ships `fetch_image`, a server-side image proxy with SSRF
 protection that `render_table` uses when the iframe CSP blocks `img-src`. They apply the same
 metadata strategy to UI configuration that the data tools apply to domain data. What their audit
 found: [`app-tools-findings.md`](app-tools-findings.md).
 
 ## Two levels, one strategy
 
-**Level 1 — domain tool.** An agent calls `get_building_profile`, reads the `alerts[]` array, and
-formulates a follow-up from the curated advisory text — no separate priming on Dutch energy
+**Level 1: domain tool.** An agent calls `get_building_profile`, reads the `alerts[]` array, and
+formulates a follow-up from the curated advisory text, no separate priming on Dutch energy
 regulation:
 
 ```
@@ -21,9 +21,9 @@ regulation:
 > "Given the pre-1992 era and the lack of a registered label, what's the next step?"
 ```
 
-**Level 2 — self-describing app config.** The same agent then picks an appropriate visualisation.
+**Level 2: self-describing app config.** The same agent then picks an appropriate visualisation.
 The chart-type metadata tells it sankey is for flows, treemap for hierarchical area shares, bar for
-category comparison — no wrapper logic
+category comparison, no wrapper logic
 ([see the `type` REFUSE rules](../src/tools/render-chart.ts#L162-L200)):
 
 ```
@@ -32,14 +32,14 @@ category comparison — no wrapper logic
 ```
 
 The two levels use the metadata layer differently, and the difference matters. `render_chart`'s
-**input** schema is model-visible — the agent reads its REFUSE rules before generating a call,
+**input** schema is model-visible: the agent reads its REFUSE rules before generating a call,
 which is why they work. `get_building_profile`'s **output** schema is _not_ model-visible: the
 interpretation the agent uses at Level 1 comes from the tool description and the returned data,
 never from the output schema itself.
 
 Two things the evals added for app tools
 ([Q22](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)):
-an example in an app's input schema is delivered, and is copied — including a Paris Proof line
+an example in an app's input schema is delivered, and is copied, including a Paris Proof line
 drawn on calculated bars. And a fix the model _must_ make needs the call refused with the fix in
 the message; an alert after a successful render is read as a note, not as a reason to redo it.
 
@@ -87,13 +87,13 @@ reaches `tile.openstreetmap.org` even though the host CSP blocks external resour
 **The stack**:
 
 - **Vite** bundler with **`vite-plugin-singlefile`** inlines every asset into one `index.html`.
-  Output: one file per app — `build/ui/chart.html`, `build/ui/table.html`, `build/ui/map.html`. The
+  Output is one file per app: `build/ui/chart.html`, `build/ui/table.html`, `build/ui/map.html`. The
   server reads that file at startup and registers it with `registerAppResource(...)`.
 - **Angular** (via `@analogjs/vite-plugin-angular`) so the framework slots into the same Vite
-  pipeline. The choice of Angular is incidental, not required — React, Svelte, or vanilla TS would
+  pipeline. The choice of Angular is incidental, not required: React, Svelte, or vanilla TS would
   work the same way; Angular fits because the table renderer (cell formatters with badges, icons,
   sparklines) benefits from a strongly-typed component model.
-- **Per-app entries** — `ui/apps/{chart,table,map}/index.html` are discovered by
+- **Per-app entries**: `ui/apps/{chart,table,map}/index.html` are discovered by
   `scripts/build-ui.js` and built independently. One broken app doesn't block the others; each gets
   only the libraries it needs (Chart.js for chart, Leaflet for map, TanStack Table for table)
   instead of every library in every bundle.
@@ -101,9 +101,9 @@ reaches `tile.openstreetmap.org` even though the host CSP blocks external resour
 **The data bridge**: the tool handler returns `structuredContent` (the chart config, table rows,
 map markers) alongside `_meta.ui.resourceUri` pointing at the HTML. The MCP Apps SDK exposes that
 `structuredContent` to the iframe as `window.mcpAppData`. The Angular component reads it at
-bootstrap and renders. No follow-up fetch from iframe to server, no runtime API — one tool response
+bootstrap and renders. No follow-up fetch from iframe to server, no runtime API: one tool response
 is everything.
 
-The result: `render_chart`'s **input** schema is what the agent reads to generate this payload —
+The result: `render_chart`'s **input** schema is what the agent reads to generate this payload:
 schema-guided generation, model-visible. The Angular-plus-Vite-single-file part is just how the
 generated UI configuration becomes pixels.

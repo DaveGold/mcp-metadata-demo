@@ -4,14 +4,14 @@ Companion repo to the talk _[Most MCP servers are empty](talks/most-mcp-servers-
 (MCPCon Europe 2026) and the paper _[The Missing Layer](https://davidgolverdingen.nl/en/the-missing-layer)_.
 
 Most MCP servers expose data. This repo shows what happens when the server also carries the domain
-knowledge an agent needs to use that data correctly — and measures whether that knowledge actually
+knowledge an agent needs to use that data correctly, and measures whether that knowledge actually
 reaches the model.
 
 > Domain knowledge belongs with the capability that owns the data.
 > Then measure whether it arrives.
 
-Built from seven months of MCP in production at a 350-person Dutch building-services contractor —
-[who and why](#who-built-this-and-why).
+Built from seven months of MCP in production at a 350-person Dutch building-services contractor
+([who and why](#who-built-this-and-why)).
 
 **[Try it live](#try-it-live)** · **[How it's built](docs/reference-implementation.md)** · **[The research](evals/README.md)** · **[From a talk?](#if-you-came-from-a-talk)**
 
@@ -33,21 +33,21 @@ company. → [Capability architecture](docs/capability-architecture.md)
 
 The closing slide promised five things. Here they are:
 
-1. **A skill that runs the loop on your server** — builds a new one or audits an existing one,
+1. **A skill that runs the loop on your server**: builds a new one or audits an existing one,
    every rule linked to the run behind it: [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md)
    · [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md)
-2. **The practitioner paper** — [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)
-3. **Example code** — the reference implementation, walked through by WHY / HOW / WHAT:
+2. **The practitioner paper**: [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)
+3. **Example code**: the reference implementation, walked through by WHY / HOW / WHAT:
    [`docs/reference-implementation.md`](docs/reference-implementation.md)
-4. **A thin and a rich MCP server on the same public API** — plus a third, `best`:
+4. **A thin and a rich MCP server on the same public API**, plus a third, `best`:
    [try it live](#try-it-live)
-5. **The slides, as a PDF** — [_Most MCP servers are empty_](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
+5. **The slides, as a PDF**: [_Most MCP servers are empty_](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
    · [slide by slide](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.md), with what the evals
    changed since
 
 **What changed since the talk.** The talk said _bound is not the same as delivered_, and marked
 the tool description as reaching the model before the call. Four days later the evals showed that
-on Claude Code only the first **2,048 characters** of a description arrive — and 74% of the rich
+on Claude Code only the first **2,048 characters** of a description arrive, and 74% of the rich
 tier's description never did. The thesis held; what changed is where the knowledge has to go.
 
 - **`rich` is the server from the talk.** Afterwards only its measured defects were fixed, among
@@ -57,14 +57,14 @@ tier's description never did. The thesis held; what changed is where the knowled
 
 ## thin → rich → best
 
-**Thin** — the raw API as a tool: a one-line description, a bare schema. The model reconstructs
+**Thin** is the raw API as a tool, with a one-line description and a bare schema. The model reconstructs
 the domain itself, and guesses. Level 1 of the talk's ladder, the API wrapper.
 
-**Rich** — long descriptions, typed schemas, curated alerts: the tier from the talk (levels 2–3).
-Much better — but most of the description never arrived, and one computed alert was confidently
+**Rich** is the tier from the talk (levels 2–3): long descriptions, typed schemas, curated alerts.
+Much better, but most of the description never arrived, and one computed alert was confidently
 wrong.
 
-**Best** — what the evals left standing:
+**Best** is what the evals left standing:
 
 - a description head that fits the delivered budget
 - an input schema that can express every valid call
@@ -88,10 +88,10 @@ before its run, every run audited against the server's own call log. Six results
   failing question from 0/10 to 10/10. ([Q7](.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery),
   [Q21](.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19))
 - **Ship the data, not just the rule.** A rule that sent the model off to fetch history: Haiku
-  2/20. The same rule with the server-computed reference figure: 15/20 — and Sonnet and Opus
+  2/20. The same rule with the server-computed reference figure: 15/20, and Sonnet and Opus
   needed 86% fewer calls. ([Q16, Q16b](.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship))
 - **The schema decides what can be asked.** Where the call needs a parameter the thin schema
-  lacks, thin scored 0/18 and a typed schema 18/18 — the weakest model with the layer beats the
+  lacks, thin scored 0/18 and a typed schema 18/18. The weakest model with the layer beats the
   strongest without it. ([L3](.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship))
 - **Compute what is determinate.** A server-computed value scored 20/20 on value and derivation;
   every arm that left the arithmetic to the model, 2/60 combined.
@@ -109,15 +109,15 @@ predictions: [`evals/open-questions.md`](evals/open-questions.md) · every run:
 
 ## The resulting design
 
-**Before the call** — when to use the tool and when not, in the head of the description, inside
+**Before the call**: when to use the tool and when not, in the head of the description, inside
 the delivered budget; an input schema that can express every valid call and lists the exact
 vocabulary the model must produce.
 
-**In the result** — `interpretation` first; field names that carry quantity, scope and unit; the
+**In the result**: `interpretation` first; field names that carry quantity, scope and unit; the
 data a rule needs; determinate values computed server-side, or `null` with the reason; a refusal
 when the call must be corrected.
 
-**Behind the interface** — rules kept canonical, with provenance per rule; deterministic tests for
+**Behind the interface**: rules kept canonical, with provenance per rule; deterministic tests for
 their truth; evals for their effect on the model; `queryIntent` and production telemetry to find
 the next gap.
 
@@ -129,9 +129,9 @@ Why, and at what cost: [`docs/design.md`](docs/design.md) · line by line in the
 No install, no API key. Three hosted endpoints over the same data; only the capability layer
 differs:
 
-- **thin** — `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpThin` (also at `/mcpMinimal`, the URL on the slide)
-- **rich** — `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp`
-- **best** — `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest`
+- **thin**: `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpThin` (also at `/mcpMinimal`, the URL on the slide)
+- **rich**: `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp`
+- **best**: `https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest`
 
 ```json
 {
@@ -147,12 +147,12 @@ Then ask each the **same question**:
 
 > _"Gustav Mahlerlaan 10, 1082PP Amsterdam — how does it stack up against the Paris Proof 2040 office target of 70 kWh/m²?"_
 
-The eval set's headline trap. The right answer: it **cannot be ranked from this data** — the
-label figures are calculated, Paris Proof is defined on measured energy. `best` gets it right.
+The eval set's headline trap. The right answer: it **cannot be ranked from this data**, because
+the label figures are calculated and Paris Proof is defined on measured energy. `best` gets it right.
 
 > _"What's the energy label of Museumstraat 1, 1071XX Amsterdam, and what should I keep in mind about this building?"_
 
-The talk's opening example — and, on this data, not one that separates the tiers. Every tier gets
+The talk's opening example, and on this data not one that separates the tiers. Every tier gets
 `energielabel: null`, but also `labelCount: 0`, so even thin usually reads it as _none
 registered_; in the eval set the same case (`invented-label`) is a control every arm passes. What
 differs is the rest of the answer: rich flags the pre-1992 insulation caveat, best says not to
@@ -162,7 +162,7 @@ Three more prompts (visualisation, Select, reading `queryIntent` back) and the f
 comparison: [`docs/live-demo.md`](docs/live-demo.md).
 
 > Shared endpoints, rate-limited. Every call's `queryIntent` is stored and readable back by
-> anyone via `get_tool_call_log` — don't put anything in it you would not want another user to
+> anyone via `get_tool_call_log`, so don't put anything in it you would not want another user to
 > see. [Logging details](docs/running.md#logging).
 
 ## Where to go next
@@ -194,19 +194,19 @@ the measurements stop.
 
 ## Concepts and language
 
-- [Terminology](docs/terminology.md) — what the terms in this repo mean, canonically
-- [Quotes & principles](docs/quotes.md) — the short formulations, each with its evidence status
+- [Terminology](docs/terminology.md): what the terms in this repo mean, canonically
+- [Quotes & principles](docs/quotes.md): the short formulations, each with its evidence status
 - [Capability architecture](docs/capability-architecture.md): the thesis above the interface, with
   stacking, adoption, skills, the engineering multiplier
 
 ## Talks
 
-- **Most MCP servers are empty** — [AGNTCon + MCPCon Europe 2026](https://agntconmcpconeu26.sched.com/event/2VmKE)
+- **Most MCP servers are empty**: [AGNTCon + MCPCon Europe 2026](https://agntconmcpconeu26.sched.com/event/2VmKE)
   · Amsterdam · Sep 17–18 2026 ([slides, PDF](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
   · [slide by slide](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.md))
-- **Domain knowledge belongs in the MCP server** — [VibeKode Netherlands 2026](https://vibekode.it/agentic-engineering/domain-knowledge-belongs-in-the-mcp-server/)
+- **Domain knowledge belongs in the MCP server**: [VibeKode Netherlands 2026](https://vibekode.it/agentic-engineering/domain-knowledge-belongs-in-the-mcp-server/)
   · Utrecht · Oct 7 2026
-- **Adoption is the hard part: six months of MCP in production at an HVAC company** —
+- **Adoption is the hard part: six months of MCP in production at an HVAC company**:
   [Update Conference Prague 2026](https://prague.updateconference.net/en/2026/schedule/adoption-is-the-hard-part-six-months-of-mcp-in-production-at-an-hvac-company)
   · Prague · Nov 12–13 2026
 
@@ -214,11 +214,11 @@ Full, up-to-date list: [davidgolverdingen.nl/en/talks](https://davidgolverdingen
 
 ## Who built this, and why
 
-**David Golverdingen** — Senior Engineer & MCP Architect at Warmtebouw, a 350-person Dutch
+**David Golverdingen**, Senior Engineer & MCP Architect at Warmtebouw, a 350-person Dutch
 mechanical building-services contractor with five developers.
 
-There, twelve custom MCP servers run in production — ERP, energy, BIM, estimating, building
-automation, external registers — with 97 tools and 8 MCP Apps, used mostly by people who are not
+There, twelve custom MCP servers run in production (ERP, energy, BIM, estimating, building
+automation, external registers), with 97 tools and 8 MCP Apps, used mostly by people who are not
 developers. One general-purpose model on top, no agent per domain: _we scaled capabilities, not
 agents_.
 
@@ -230,7 +230,7 @@ where the render tools' refusals come from ([refuse what would mislead](docs/mcp
 Why this repo: someone who has never opened our ERP is going to ask it about some data. Something
 has to tell the agent what that data means, and the only thing I own is the interface. Production
 data cannot be shared, so this repo shows the same approach on public Dutch registers (BAG,
-EP-Online, Open-Meteo) — and measures it, because "it works" may simply mean the model guessed
+EP-Online, Open-Meteo), and measures it, because "it works" may simply mean the model guessed
 correctly.
 
 [Website](https://davidgolverdingen.nl/en) · [LinkedIn](https://www.linkedin.com/in/davidgolverdingen/)

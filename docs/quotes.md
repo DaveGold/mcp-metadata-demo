@@ -2,7 +2,7 @@
 
 _By [David Golverdingen](https://davidgolverdingen.nl/en), companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
 
-Short formulations from the talks, the writing and the research around this project — a
+Short formulations from the talks, the writing and the research around this project. A
 selection, not an archive. A memorable sentence is not automatically a measured finding, so every
 line carries its status, and measured lines link to the run behind them.
 
@@ -75,7 +75,7 @@ description reach the model on Claude Code, and the output schema never does.
 > **Check what the model received, not what the server sent.**
 
 `MEASURED` · [Q7, Q11, Q15](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery).
-Every protocol-side check in this repo — raw `tools/list`, unit tests, the log audit — saw the
+Every protocol-side check in this repo (raw `tools/list`, unit tests, the log audit) saw the
 full description.
 
 > **Delivery decides; the channel did not.**
@@ -100,7 +100,7 @@ Fact and instruction 30/30, fact only 25/30, instruction only 10/30.
 > **Noticing is not acting.**
 
 `MEASURED` · [M3](../.claude/skills/rich-domain-mcp-server/references/evidence.md#model-differences).
-Opus named the calculated-vs-measured trap in 7 of 10 answers — and gave the forbidden verdict in
+Opus named the calculated-vs-measured trap in 7 of 10 answers, and gave the forbidden verdict in
 10 of 10.
 
 > **If a rule needs data the payload lacks, ship the data.**
@@ -190,8 +190,8 @@ having to report it.
 
 > **I set out to write better descriptions. Four times out of five, the answer was not a description.**
 
-`PRODUCTION` · the five fixes on MCPCon slide 16 — selective retrieval, summaries, alerts, derived
-values, a write that reports back — mostly changed what the tool does, not what it says.
+`PRODUCTION` · the five fixes on MCPCon slide 16 (selective retrieval, summaries, alerts, derived
+values, a write that reports back) mostly changed what the tool does, not what it says.
 
 ---
 
@@ -256,7 +256,7 @@ of the thinking stays inspectable, and so they are not reused by accident.
 |---|---|---|---|
 | ~~Most MCP servers are empty.~~ | early posts | **Most MCP servers are empty of meaning.** | Literally false: they have tools. |
 | ~~The agent can call every endpoint and understand nothing.~~ | MCPCon announcement | **The models are good. It's the metadata that isn't.** | Models reason well; the premise was missing from the payload. |
-| ~~The tool description reaches the model before the call.~~ | MCPCon, slide 17 | **Only the description head does** — the first 2,048 chars on Claude Code. | [Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery), four days after the talk. |
+| ~~The tool description reaches the model before the call.~~ | MCPCon, slide 17 | **Only the description head does**: the first 2,048 chars on Claude Code. | [Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery), four days after the talk. |
 | ~~The response beats the description.~~ | first eval round | **Delivery decides; the channel did not.** | The description copy sat past the cut ([Q1, reversed](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). |
 | ~~Agents won't call a meta-tool to learn something.~~ | MCPCon talk notes | **They won't on a hint. They will when the pointer says REQUIRED, or the guidance is its own tool.** | Soft pointer 0/10, REQUIRED 10/10 ([Q8b](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). |
 | ~~Specify behaviour, not semantics.~~ | earlier design rule | **Ship the fact with the instruction.** | [Q4](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship) |
