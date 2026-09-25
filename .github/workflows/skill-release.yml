@@ -1,0 +1,36 @@
+name: Skill release
+
+# Tags skill-v<version> and publishes a GitHub release when a merge to main carries a skill version
+# that has no tag yet. Repos that vendor the skill pin these tags (docs/using-the-skill.md).
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.claude/skills/rich-domain-mcp-server/**'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag and release the skill version if new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          dir=.claude/skills/rich-domain-mcp-server
+          version=$(awk '/^metadata:/{m=1;next} m&&/version:/{print $2;exit}' "$dir/SKILL.md")
+          [ -n "$version" ] || { echo "no metadata.version in SKILL.md"; exit 1; }
+          tag="skill-v$version"
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "$tag exists; nothing to release"; exit 0
+          fi
+          awk -v v="$version" '$0 ~ "^## "v" " {p=1;next} /^## /{if(p)exit} p' "$dir/CHANGELOG.md" > notes.md
+          git tag -a "$tag" -m "rich-domain-mcp-server skill v$version"
+          git push origin "$tag"
+          gh release create "$tag" --title "rich-domain-mcp-server skill v$version" --notes-file notes.md

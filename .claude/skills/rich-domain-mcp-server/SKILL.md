@@ -13,6 +13,8 @@ description: >-
   prepare a domain-expert validation session; or measure a metadata change with an eval. Also
   triggers on "the agent picks the wrong tool", "the agent misreads this field", "the agent
   ignores the description", user-feedback triage, and tool-call-log pattern analysis.
+metadata:
+  version: 1.1.0
 ---
 
 # rich-domain-mcp-server — build, audit and measure MCP tools

@@ -63,4 +63,13 @@ describe('rich-domain-mcp-server skill copies', () => {
       }
     }
   });
+
+  it('carries a semantic version with a CHANGELOG entry for it', () => {
+    const version = readFileSync(join(CLAUDE, 'SKILL.md'), 'utf8').match(
+      /^metadata:\n\s+version:\s*(\d+\.\d+\.\d+)\s*$/m,
+    )?.[1];
+    expect(version).toBeDefined();
+    const changelog = readFileSync(join(CLAUDE, 'CHANGELOG.md'), 'utf8');
+    expect(changelog.match(/^## (\d+\.\d+\.\d+) /m)?.[1], 'the newest CHANGELOG entry').toBe(version);
+  });
 });
