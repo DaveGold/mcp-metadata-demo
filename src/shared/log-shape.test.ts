@@ -64,7 +64,10 @@ describe('render call shape in the log', () => {
     const call = info.mock.calls.find(
       ([event, data]) => event === 'tool.invoked' && (data as { tool?: string }).tool === 'render_table',
     );
-    expect(call![1]).toMatchObject({ status: 'error', shape: { columns: 2, rows: 1 } });
+    expect(call![1]).toMatchObject({
+      status: 'error',
+      shape: { columns: 2, rows: 1, columnTypes: 'text,text', footers: 0 },
+    });
     info.mockRestore();
   });
 });

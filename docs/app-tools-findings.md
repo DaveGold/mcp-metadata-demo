@@ -133,3 +133,12 @@ that never draw a chart. Two smaller versions were measured against `best`
   the same guidance from a render_chart call with only `type` was fetched first 78/120 against
   110/120, and paths fell to 113/120 against 119/120 (treemap and boxplot: refused, then bar or
   line). One tool fewer saved no tokens. `best` keeps `get_chart_guidance`.
+
+### 2026-09-25 — the table's rarer column types, with data built for them (Q26 pilot)
+
+Nine column types never appeared in the 227 tables of the earlier runs. With one prompt per type
+([`q26`](../evals/results/2026-09-25-q26-table-paths-pilot.json)), most are reached: sparkline,
+trend, image, boolean and search 5/5, progress 4/5. A condition score is shown as a coloured badge
+rather than a rating, a list of installations as text rather than multi_badge, and a status as a
+badge rather than an icon; each reads as well. No split behind guidance: the gain would be a few
+percent. render_table now logs its column types, footers and features in `shape`.

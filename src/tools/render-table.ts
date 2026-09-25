@@ -735,7 +735,17 @@ async function logToolCall({
       take: 0,
       status,
       rowCount: args.data.length,
-      shape: { columns: args.columns.length, rows: args.data.length },
+      // Which column types and features were chosen, never headers or values.
+      shape: {
+        columns: args.columns.length,
+        rows: args.data.length,
+        columnTypes: args.columns.map((c) => c.type ?? 'text').join(','),
+        footers: args.columns.filter((c) => c.footer).length,
+        features: Object.entries(args.features ?? {})
+          .filter(([, on]) => on === true)
+          .map(([name]) => name)
+          .join(','),
+      },
       hasMore: false,
       durationMs: Date.now() - start,
       errorType: status === 'error' ? 'ToolError' : null,
