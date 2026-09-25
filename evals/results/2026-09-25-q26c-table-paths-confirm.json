@@ -1,0 +1,134 @@
+{
+ "_comment": "Q26c: do the table paths the Q26 pilot passed hold at n=10? best (with Q26b's when-to-pick lines), haiku. Registered before the run.",
+ "date": "2026-09-25",
+ "model": "haiku",
+ "n_per_cell": 10,
+ "total_runs": 90,
+ "protocol": "Portable harness, one run of 35 waves (Q26c 18 waves of 5, Q27 17 waves of 5+5 interleaved), 0 retries.",
+ "log_audit": {
+  "waves": 35,
+  "exact": 35,
+  "harness_calls": {
+   "best": 223,
+   "best-lean-chart": 69,
+   "best-no-when": 26
+  },
+  "log_rows": {
+   "best": 223,
+   "best-lean-chart": 69,
+   "best-no-when": 26
+  }
+ },
+ "headline": [
+  "Seven of nine hold: sparkline, progress, image, badge and search 10/10, trend 8/10.",
+  "boolean 7/10: 3 runs showed the yes/no columns as icons, not booleans. trend lost 2 runs to an icon column too. The pilot, before the when-to-pick lines, had no icon on either path. Q26d tests whether the icon line causes it.",
+  "Link and footer: no table in 10/10 runs each (pilot 3/5 and 2/5). Both prompts ask to list things, not for a table, and every run answered in text or markdown. When a table was drawn in the pilot, it used the target 5/5."
+ ],
+ "predictions": {
+  "P1": "FALSIFIED on boolean (7/10); sparkline, image, badge, search 10/10, trend 8/10.",
+  "P2": "HOLDS — progress 10/10.",
+  "P3": "FALSIFIED — no table in 10/10 on link and on footer."
+ },
+ "median_tokens": {
+  "best": 24123
+ },
+ "cells": {
+  "claude-haiku-4-5-20251001 · table-badge · best": {
+   "correct": 10,
+   "n": 10,
+   "verdicts": {
+    "correct": 10
+   },
+   "finals": {
+    "badge,text": 10
+   }
+  },
+  "claude-haiku-4-5-20251001 · table-boolean · best": {
+   "correct": 7,
+   "n": 10,
+   "verdicts": {
+    "correct": 7,
+    "acceptable": 3
+   },
+   "finals": {
+    "boolean,text": 7,
+    "icon,text": 3
+   }
+  },
+  "claude-haiku-4-5-20251001 · table-footer · best": {
+   "correct": 0,
+   "n": 10,
+   "verdicts": {
+    "no table": 10
+   },
+   "finals": {
+    "none": 10
+   }
+  },
+  "claude-haiku-4-5-20251001 · table-image · best": {
+   "correct": 10,
+   "n": 10,
+   "verdicts": {
+    "correct": 10
+   },
+   "finals": {
+    "image,text": 10
+   }
+  },
+  "claude-haiku-4-5-20251001 · table-link · best": {
+   "correct": 0,
+   "n": 10,
+   "verdicts": {
+    "no table": 10
+   },
+   "finals": {
+    "none": 10
+   }
+  },
+  "claude-haiku-4-5-20251001 · table-progress · best": {
+   "correct": 10,
+   "n": 10,
+   "verdicts": {
+    "correct": 10
+   },
+   "finals": {
+    "currency,progress,text": 10
+   }
+  },
+  "claude-haiku-4-5-20251001 · table-search · best": {
+   "correct": 10,
+   "n": 10,
+   "verdicts": {
+    "correct": 10
+   },
+   "finals": {
+    "number,text": 6,
+    "badge,number,text": 4
+   }
+  },
+  "claude-haiku-4-5-20251001 · table-sparkline · best": {
+   "correct": 10,
+   "n": 10,
+   "verdicts": {
+    "correct": 10
+   },
+   "finals": {
+    "number,sparkline,text": 10
+   }
+  },
+  "claude-haiku-4-5-20251001 · table-trend · best": {
+   "correct": 8,
+   "n": 10,
+   "verdicts": {
+    "correct": 8,
+    "wrong": 2
+   },
+   "finals": {
+    "badge,number,text,trend": 1,
+    "icon,number,text": 2,
+    "number,text,trend": 6,
+    "text,trend": 1
+   }
+  }
+ }
+}

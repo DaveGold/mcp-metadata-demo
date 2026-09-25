@@ -15,7 +15,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { bestTableDescription, tableAlerts } from './app-tools-best.js';
-import { bestTableInputSchema, bestTableInputSchemaNoWhen } from './render-table-schema-best.js';
+import { bestTableInputSchema } from './render-table-schema-best.js';
 import { z } from 'zod';
 import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -603,7 +603,7 @@ export function findRowShapeError(columns: TableArgs['columns'], data: TableArgs
 
 export function registerRenderTableTool(
   server: McpServer,
-  opts: { minimal?: boolean; best?: boolean; leanSchema?: boolean; noWhenLines?: boolean } = {},
+  opts: { minimal?: boolean; best?: boolean; leanSchema?: boolean } = {},
 ): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
   registerAppResource(server, 'Table App', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({
@@ -623,7 +623,7 @@ export function registerRenderTableTool(
     {
       title: 'Render Table',
       description: opts.best ? bestTableDescription : opts.minimal ? 'Render data as a table.' : description,
-      inputSchema: opts.noWhenLines ? bestTableInputSchemaNoWhen : opts.leanSchema ? bestTableInputSchema : inputSchema,
+      inputSchema: opts.leanSchema ? bestTableInputSchema : inputSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,

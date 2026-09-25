@@ -14,7 +14,7 @@ description: >-
   triggers on "the agent picks the wrong tool", "the agent misreads this field", "the agent
   ignores the description", user-feedback triage, and tool-call-log pattern analysis.
 metadata:
-  version: 1.1.0
+  version: 1.1.1
 ---
 
 # rich-domain-mcp-server — build, audit and measure MCP tools

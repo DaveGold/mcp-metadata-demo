@@ -6,6 +6,15 @@ Semantic versions; each release is the git tag `skill-v<version>` in
 sharpens rules; a **patch** fixes wording, links or tooling. Every change to the skill bumps
 `metadata.version` in `SKILL.md` and adds an entry here (CI checks both).
 
+## 1.1.1 — 2026-09-25
+
+Evidence only; no rule changed.
+
+- [Q25] and [Q26b] hold on sonnet (Q27). The when-to-pick lines matter there too, most on a score
+  that haiku read right without them.
+- [Q26] confirmed at n=10 for the types that were reached (Q26c). The when-to-pick lines showed
+  no side effect on other columns or on whether a table is drawn (Q26d).
+
 ## 1.1.0 — 2026-09-25
 
 Rules for app (render) tools and their input schemas, each with its evidence row.

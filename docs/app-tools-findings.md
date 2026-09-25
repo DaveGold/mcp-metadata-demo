@@ -153,3 +153,14 @@ icon 10/10 (was 2/10). A 1–5 score was a rating 10/10 without help. The lines 
 - **Defect: badgeMap took six colours.** A sixth tag got a seventh colour in 11 calls. The schema
   refused them before the handler, so the log did not show them. `best` now accepts `primary`, which
   the renderer draws; the frozen tiers keep the six.
+
+### 2026-09-25 — confirmation at n=10, side effects, and sonnet (Q26c, Q26d, Q27)
+
+- [`q26c`](../evals/results/2026-09-25-q26c-table-paths-confirm.json): seven of nine table paths hold
+  at n=10 (boolean 7/10, the rest shown as icons). Link and footer drew no table: a prompt that asks
+  to list things gets text.
+- [`q26d`](../evals/results/2026-09-25-q26d-when-lines-side-effects.json): the when-to-pick lines do
+  not pull other columns to icon (4/20 vs 2/20) and do not change table use (1/20 vs 1/20).
+- [`q27`](../evals/results/2026-09-25-q27-sonnet-app-schemas.json): on sonnet, the guided chart
+  schema reaches every path (59/60) at 8.5% fewer tokens, and the when-to-pick lines decide rating
+  (5/5 vs 0/5 on a 1–5 score).

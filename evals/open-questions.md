@@ -4311,3 +4311,32 @@ A result at n=5 is direction, not size. It says whether sonnet contradicts haiku
 
 **What follows:** if P1 holds, the icon line is narrowed so it does not claim true/false or
 up/down values, and the change is measured again.
+
+> **Q26c ANSWERED 2026-09-25 — seven of nine hold; the other two are form, not type.** See
+> [`results/2026-09-25-q26c-table-paths-confirm.json`](results/2026-09-25-q26c-table-paths-confirm.json).
+> - **Hold:** sparkline, progress, image, badge and search 10/10; trend 8/10.
+> - **boolean 7/10**, the rest as icons.
+> - **Link and footer:** no table in 10/10 each. Those prompts ask to list things, not for a
+>   table.
+>
+> P2 holds; P1 is falsified on boolean and P3 on the table count. Audit exact 35/35.
+>
+> **Q26d ANSWERED 2026-09-25 — the lines have no side effect.** See
+> [`results/2026-09-25-q26d-when-lines-side-effects.json`](results/2026-09-25-q26d-when-lines-side-effects.json).
+> - **Icons:** on boolean + trend, 4/20 with the lines and 2/20 without; the targets are equal.
+> - **Tables:** link + footer drew a table 1/20 in each arm.
+>
+> P1 is neither confirmed nor falsified (a difference of 2); P2 holds. The icon line stays.
+> Audit exact 8/8.
+>
+> **Q27 ANSWERED 2026-09-25 — both results hold on sonnet.** See
+> [`results/2026-09-25-q27-sonnet-app-schemas.json`](results/2026-09-25-q27-sonnet-app-schemas.json). 170 runs.
+> - **A (chart):** every chart path is reached in both arms (59/60 vs 58/60). The guidance is
+>   fetched first 59/60, and the guided schema is 8.5% cheaper.
+> - **B (table):** the when-to-pick lines matter on sonnet too, most where haiku needed nothing.
+>   A 1–5 satisfaction score became a plain number 5/5 without the lines and a rating 5/5 with
+>   them. The condition score went to rating 4/5 with them and 0/5 without.
+> - **Where the data shape says it, sonnet needs no line:** multi_badge from arrays and the status
+>   icon are 5/5 either way.
+>
+> P1–P6 hold. Audit exact (shared with Q26c).
