@@ -218,32 +218,71 @@ const OPTIONS_GUIDANCE =
   'annotations (bar, line, scatter, bubble, matrix): [{type:"line", scaleID:"y", value:50, label:{content:"…", display:true}}]; scaleID is required for a line. ' +
   'Draw a target only against data of the same kind: a calculated label figure never against a metered target (Paris Proof, WEii).';
 
-/** The small render_chart schema of this variant. */
-export const guidedChartInputSchema = {
-  type: z
-    .enum(CHART_TYPES)
-    .describe(
-      CHART_DECISION_TREE.replace(', then check the per-type rules below', '').replace(/Per-type rules:\n$/, '') +
-        'REQUIRED: for any chart other than a plain bar or line chart (and for any option, such as a target line), call get_chart_guidance with the type first. It returns the exact payload.',
-    ),
-  title: z.string().optional().describe('Short title, in the language of the conversation.'),
-  labels: z.array(z.string()).optional().describe('One label per value.'),
-  datasets: z
-    .array(z.union([z.array(z.unknown()), z.looseObject({ label: z.string() })]))
-    .optional()
-    .describe('bar and line: [["Gas (m³)", [412, 352, 301]]]. Other shapes: get_chart_guidance.'),
-  sankey: z.record(z.string(), z.unknown()).optional().describe('type=sankey only; see get_chart_guidance.'),
-  matrix: z.record(z.string(), z.unknown()).optional().describe('type=matrix only; see get_chart_guidance.'),
-  treemap: z.record(z.string(), z.unknown()).optional().describe('type=treemap only; see get_chart_guidance.'),
-  graph: z.record(z.string(), z.unknown()).optional().describe('type=graph only; see get_chart_guidance.'),
-  options: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe('Axes, stacking, target lines; see get_chart_guidance.'),
-  width: z.number().optional(),
-  height: z.number().optional(),
-  queryIntent: z.string().optional().describe('The business question this call answers. Used for observability.'),
+/** Where the small schema sends the model for every shape but bar and line. */
+interface GuidancePointer {
+  /** Appended to the decision tree in the `type` describe. */
+  required: string;
+  /** How the field describes name the place the shapes come from. */
+  ref: string;
+}
+
+const TOOL_POINTER: GuidancePointer = {
+  required:
+    'REQUIRED: for any chart other than a plain bar or line chart (and for any option, such as a target line), call get_chart_guidance with the type first. It returns the exact payload.',
+  ref: 'get_chart_guidance',
 };
+
+/** Temporary, for one measurement: the same guidance from render_chart itself, called with only `type`. */
+const INLINE_POINTER: GuidancePointer = {
+  required:
+    'REQUIRED: for any chart other than a plain bar or line chart (and for any option, such as a target line), first call render_chart with only `type`. It renders nothing and returns the exact payload.',
+  ref: 'a type-only call',
+};
+
+function smallChartInputSchema(p: GuidancePointer) {
+  return {
+    type: z
+      .enum(CHART_TYPES)
+      .describe(
+        CHART_DECISION_TREE.replace(', then check the per-type rules below', '').replace(/Per-type rules:\n$/, '') +
+          p.required,
+      ),
+    title: z.string().optional().describe('Short title, in the language of the conversation.'),
+    labels: z.array(z.string()).optional().describe('One label per value.'),
+    datasets: z
+      .array(z.union([z.array(z.unknown()), z.looseObject({ label: z.string() })]))
+      .optional()
+      .describe(`bar and line: [["Gas (m³)", [412, 352, 301]]]. Other shapes: ${p.ref}.`),
+    sankey: z.record(z.string(), z.unknown()).optional().describe(`type=sankey only; see ${p.ref}.`),
+    matrix: z.record(z.string(), z.unknown()).optional().describe(`type=matrix only; see ${p.ref}.`),
+    treemap: z.record(z.string(), z.unknown()).optional().describe(`type=treemap only; see ${p.ref}.`),
+    graph: z.record(z.string(), z.unknown()).optional().describe(`type=graph only; see ${p.ref}.`),
+    options: z.record(z.string(), z.unknown()).optional().describe(`Axes, stacking, target lines; see ${p.ref}.`),
+    width: z.number().optional(),
+    height: z.number().optional(),
+    queryIntent: z.string().optional().describe('The business question this call answers. Used for observability.'),
+  };
+}
+
+/** best's render_chart schema: the shapes come from get_chart_guidance. */
+export const guidedChartInputSchema = smallChartInputSchema(TOOL_POINTER);
+/** Temporary, for one measurement: the shapes come from a type-only render_chart call. */
+export const inlineGuidedChartInputSchema = smallChartInputSchema(INLINE_POINTER);
+
+const PAYLOAD_FIELDS = ['labels', 'datasets', 'sankey', 'matrix', 'treemap', 'graph'] as const;
+
+/** The guidance for one chart type, as get_chart_guidance returns it. */
+export function chartGuidanceText(type: ChartType): string {
+  const g = CHART_GUIDANCE[type];
+  return JSON.stringify({ type, payload: g.payload, example: g.example, rules: g.rules, options: OPTIONS_GUIDANCE });
+}
+
+/** Temporary, for one measurement: a render_chart call with only `type` gets the guidance instead of a chart. */
+export function typeOnlyGuidance(args: Record<string, unknown>): string | null {
+  if (PAYLOAD_FIELDS.some((f) => args[f] !== undefined)) return null;
+  const type = CHART_TYPES.includes(args.type as ChartType) ? (args.type as ChartType) : 'bar';
+  return `Nothing rendered (type-only call). The payload for type=${type}: ${chartGuidanceText(type)}`;
+}
 
 const fullShape = z.object(bestChartInputSchema);
 
@@ -298,15 +337,7 @@ export function registerGetChartGuidanceTool(server: McpServer): void {
           errorType: null,
         });
       }
-      const g = CHART_GUIDANCE[type];
-      const text = JSON.stringify({
-        type,
-        payload: g.payload,
-        example: g.example,
-        rules: g.rules,
-        options: OPTIONS_GUIDANCE,
-      });
-      return { content: [{ type: 'text' as const, text }] };
+      return { content: [{ type: 'text' as const, text: chartGuidanceText(type) }] };
     },
   );
 }

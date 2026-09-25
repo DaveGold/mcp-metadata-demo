@@ -80,7 +80,8 @@ export type ServerVariant =
   | 'guidance-recipe'
   | 'best'
   | 'best-v1'
-  | 'best-no-type-rules';
+  | 'best-no-type-rules'
+  | 'best-inline-guidance';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -181,6 +182,23 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerGetWeatherContextBestTool(server);
     registerRenderChartTool(server, { best: true, typeRules: false });
     registerRenderTableTool(server, { best: true });
+    registerRenderMapTool(server, { best: true });
+    registerFetchImageTool(server, { openWorld: true });
+    registerGetToolCallLogTool(server, { best: true });
+    return server;
+  }
+
+  if (variant === 'best-inline-guidance') {
+    // Temporary measurement arm (Q25c): best without get_chart_guidance; a render_chart call with
+    // only `type` returns the same guidance.
+    const server = new McpServer(
+      { name: 'metadata-demo-best-inline-guidance', version: VERSION },
+      { instructions: bestInstructions },
+    );
+    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
+    registerGetWeatherContextBestTool(server);
+    registerRenderChartTool(server, { best: true, inlineGuidance: true });
+    registerRenderTableTool(server, { best: true, leanSchema: true });
     registerRenderMapTool(server, { best: true });
     registerFetchImageTool(server, { openWorld: true });
     registerGetToolCallLogTool(server, { best: true });

@@ -139,3 +139,9 @@ export const mcpBestNoTypeRules = onRequest(
   functionOptions,
   createHttpApp({ hosted: true, variant: 'best-no-type-rules' }),
 );
+
+/** Temporary: best with the chart guidance from a type-only render_chart call, for the Q25c measurement. */
+export const mcpBestInlineGuidance = onRequest(
+  functionOptions,
+  createHttpApp({ hosted: true, variant: 'best-inline-guidance' }),
+);

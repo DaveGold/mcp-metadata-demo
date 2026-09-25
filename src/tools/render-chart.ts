@@ -18,7 +18,12 @@ import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
 import { BEST_ANNOTATION_EXAMPLES, CHART_DECISION_TREE, bestChartDescription, chartAlerts } from './app-tools-best.js';
-import { guidedChartInputSchema, guidedShapeProblem } from './chart-guidance.js';
+import {
+  guidedChartInputSchema,
+  guidedShapeProblem,
+  inlineGuidedChartInputSchema,
+  typeOnlyGuidance,
+} from './chart-guidance.js';
 import { registerAppTool, registerAppResource, RESOURCE_MIME_TYPE } from '@modelcontextprotocol/ext-apps/server';
 import { getAuthExtra } from '../shared/auth.js';
 import { requestContext } from '../shared/log-context.js';
@@ -844,6 +849,8 @@ export function registerRenderChartTool(
     typeRules?: boolean;
     decisionTree?: boolean;
     guided?: boolean;
+    /** Temporary, for one measurement: the guided schema, with the guidance from a type-only call. */
+    inlineGuidance?: boolean;
   } = {},
 ): void {
   // Register the ui:// resource (serves the Vite-built Angular app)
@@ -864,23 +871,25 @@ export function registerRenderChartTool(
     {
       title: 'Render Chart',
       description: opts.best ? bestChartDescription : opts.minimal ? 'Render data as a chart.' : description,
-      inputSchema: opts.guided
-        ? guidedChartInputSchema
-        : opts.best
-          ? {
-              ...inputSchema,
-              // A measured variant without the per-type rules, to see whether the rules do the work.
-              ...(opts.typeRules === false ? { type: inputSchema.type.describe('Chart type.') } : {}),
-              ...(opts.decisionTree
-                ? {
-                    type: inputSchema.type.describe(
-                      CHART_DECISION_TREE + (inputSchema.type.description ?? '').replace(/^[^\n]*\n/, ''),
-                    ),
-                  }
-                : {}),
-              options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES),
-            }
-          : inputSchema,
+      inputSchema: opts.inlineGuidance
+        ? inlineGuidedChartInputSchema
+        : opts.guided
+          ? guidedChartInputSchema
+          : opts.best
+            ? {
+                ...inputSchema,
+                // A measured variant without the per-type rules, to see whether the rules do the work.
+                ...(opts.typeRules === false ? { type: inputSchema.type.describe('Chart type.') } : {}),
+                ...(opts.decisionTree
+                  ? {
+                      type: inputSchema.type.describe(
+                        CHART_DECISION_TREE + (inputSchema.type.description ?? '').replace(/^[^\n]*\n/, ''),
+                      ),
+                    }
+                  : {}),
+                options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES),
+              }
+            : inputSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -909,7 +918,11 @@ export function registerRenderChartTool(
         };
 
         // The small guided schema does not check the per-type shape; the full check runs here.
-        if (opts.guided) {
+        if (opts.inlineGuidance) {
+          const guidance = typeOnlyGuidance(rawArgs as Record<string, unknown>);
+          if (guidance) return fail(guidance);
+        }
+        if (opts.guided || opts.inlineGuidance) {
           const problem = guidedShapeProblem(rawArgs as Record<string, unknown>);
           if (problem) return fail(problem);
         }
