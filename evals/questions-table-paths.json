@@ -1,0 +1,100 @@
+{
+ "_what_this_is": "One question per rarely used render_table column type or option, with the data in the prompt and no type named, so each walks one path of the table menu. Scored on the last successful render_table call: the target column type (or footer / search feature) is CORRECT, a listed alternative is ACCEPTABLE, anything else is WRONG, and no successful table is FAILED. Registered for Q26 (evals/open-questions.md).",
+ "questions": [
+  {
+   "id": "table-sparkline",
+   "target": "sparkline",
+   "alt": [],
+   "check": "type",
+   "question": "Monthly gas use in 2024 (m³, January to December) for six buildings: Ceres 410,380,330,220,120,60,40,45,110,240,330,400; Delta 300,290,250,170,90,50,30,35,80,180,250,290; Eiland 820,760,650,440,240,120,80,90,220,480,660,800; Fokker 150,140,120,80,45,25,15,18,40,90,120,145; Gouda 520,500,430,290,160,80,55,60,150,320,440,510; Haven 260,240,210,140,75,40,28,30,70,150,210,250. Give me one row per building with its yearly total and how its use ran through the year."
+  },
+  {
+   "id": "table-progress",
+   "target": "progress",
+   "alt": [
+    "percentage"
+   ],
+   "check": "type",
+   "question": "Project budgets (€): P-101 budget 120,000 spent 96,000; P-102 budget 80,000 spent 81,500; P-103 budget 45,000 spent 12,000; P-104 budget 200,000 spent 150,000; P-105 budget 60,000 spent 58,000; P-106 budget 30,000 spent 9,500. Show per project how far through its budget it is, so the ones close to or over budget stand out."
+  },
+  {
+   "id": "table-trend",
+   "target": "trend",
+   "alt": [
+    "percentage"
+   ],
+   "check": "type",
+   "question": "Electricity use per building (MWh): Ceres 2023 612, 2024 575; Delta 2023 305, 2024 331; Eiland 2023 1190, 2024 1102; Fokker 2023 498, 2024 540; Gouda 2023 704, 2024 690; Haven 2023 281, 2024 244. Show each building's 2024 use and whether it went up or down against 2023."
+  },
+  {
+   "id": "table-rating",
+   "target": "rating",
+   "alt": [
+    "badge"
+   ],
+   "check": "type",
+   "question": "Condition scores of installations on the NEN 2767 scale, 1 (excellent) to 6 (very bad): heat pump Ceres 2, boiler Delta 5, air handling unit Eiland 3, pumps Fokker 4, chiller Gouda 1, ventilation Haven 6, heat pump IJdok 2. Put them in a table so the condition reads at a glance."
+  },
+  {
+   "id": "table-link",
+   "target": "link",
+   "alt": [],
+   "check": "type",
+   "question": "Datasheets for the products on order: Daikin Altherma 3 H HT, https://www.daikin.eu/en_us/products/product.html/EPRA-DV.html; Vaillant ecoTEC plus, https://www.vaillant.com/business/products/ecotec-plus; Zehnder ComfoAir Q, https://www.zehnder-systems.com/products-and-systems/comfosystems/zehnder-comfoair-q; Wilo Stratos MAXO, https://wilo.com/en/Products/Stratos-MAXO. List the products with a way to open each datasheet."
+  },
+  {
+   "id": "table-image",
+   "target": "image",
+   "alt": [],
+   "check": "type",
+   "question": "Product photos for the site team: Heat pump, https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Heat_pump_outdoor_unit.jpg/320px-Heat_pump_outdoor_unit.jpg; Radiator, https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Radiator_Heizkoerper.jpg/320px-Radiator_Heizkoerper.jpg; Thermostat, https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Nest_Thermostat.jpg/320px-Nest_Thermostat.jpg. Make a table of these products that shows what each one looks like."
+  },
+  {
+   "id": "table-boolean",
+   "target": "boolean",
+   "alt": [
+    "icon",
+    "badge"
+   ],
+   "check": "type",
+   "question": "Which buildings have which systems — Ceres: solar panels yes, heat pump yes, smart meter no; Delta: no, no, yes; Eiland: yes, yes, yes; Fokker: no, yes, yes; Gouda: yes, no, no; Haven: no, no, no. Show it as a table I can scan."
+  },
+  {
+   "id": "table-icon",
+   "target": "icon",
+   "alt": [
+    "badge"
+   ],
+   "check": "type",
+   "question": "Status of the installations right now: heat pump Ceres running; boiler Delta fault; AHU Eiland warning; chiller Gouda running; pumps Fokker running; ventilation Haven fault. Show each installation with a status symbol so the faults jump out."
+  },
+  {
+   "id": "table-multi-badge",
+   "target": "multi_badge",
+   "alt": [],
+   "check": "type",
+   "question": "Installations present per building: Ceres heat pump, PV, ventilation; Delta boiler; Eiland heat pump, PV, battery, ventilation; Fokker boiler, PV; Gouda heat pump, ventilation; Haven district heating. Put the buildings in a table with their installations."
+  },
+  {
+   "id": "table-badge",
+   "target": "badge",
+   "alt": [],
+   "check": "type",
+   "question": "Registered energy labels: Ceres A, Delta C, Eiland A+++, Fokker E, Gouda B, Haven G, IJdok A, Jupiter D. Show them in a table so the good and bad labels stand out."
+  },
+  {
+   "id": "table-footer",
+   "target": "footer",
+   "alt": [],
+   "check": "footer",
+   "question": "Invoice lines for project P-104 (€, excl. VAT): heat pump 18,400; buffer tank 2,150; pipework 6,320; electrical work 3,480; commissioning 1,200; engineering 4,750. List the lines and give the total at the bottom."
+  },
+  {
+   "id": "table-search",
+   "target": "search",
+   "alt": [],
+   "check": "features",
+   "question": "All 60 meter readings this month (meter, carrier, kWh): Ceres-M1 heat 14187; Delta-M1 heat 14345; Eiland-M1 gas 40271; Fokker-M1 heat 4619; Gouda-M1 electricity 32177; Haven-M1 electricity 45686; IJdok-M1 heat 33847; Jupiter-M1 electricity 42544; Kade-M1 gas 16789; Linde-M1 heat 27713; Maas-M1 heat 14134; Noord-M1 heat 2786; Ceres-M2 heat 15467; Delta-M2 electricity 9381; Eiland-M2 electricity 40054; Fokker-M2 gas 26372; Gouda-M2 gas 16867; Haven-M2 heat 2917; IJdok-M2 electricity 20132; Jupiter-M2 heat 36072; Kade-M2 electricity 34290; Linde-M2 electricity 43130; Maas-M2 electricity 31330; Noord-M2 heat 43983; Ceres-M3 heat 21453; Delta-M3 gas 44552; Eiland-M3 gas 29212; Fokker-M3 heat 14055; Gouda-M3 electricity 17319; Haven-M3 electricity 41809; IJdok-M3 gas 28953; Jupiter-M3 heat 34868; Kade-M3 electricity 4761; Linde-M3 electricity 5808; Maas-M3 electricity 36613; Noord-M3 heat 47698; Ceres-M4 electricity 3980; Delta-M4 gas 15189; Eiland-M4 gas 39970; Fokker-M4 electricity 36531; Gouda-M4 gas 7727; Haven-M4 gas 3850; IJdok-M4 gas 47199; Jupiter-M4 gas 39011; Kade-M4 electricity 3555; Linde-M4 gas 7208; Maas-M4 heat 16607; Noord-M4 electricity 9667; Ceres-M5 heat 19018; Delta-M5 gas 40551; Eiland-M5 heat 46638; Fokker-M5 gas 23683; Gouda-M5 heat 31680; Haven-M5 heat 26463; IJdok-M5 heat 3016; Jupiter-M5 electricity 10857; Kade-M5 heat 1434; Linde-M5 heat 8209; Maas-M5 heat 45985; Noord-M5 gas 3080. Put them in one table I can search to find a single meter."
+  }
+ ]
+}

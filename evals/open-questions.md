@@ -4137,3 +4137,36 @@ otherwise lean does. P3 and P4 inform the skill, not the choice.
 > first" as a separate step: it tries the payload straight away, and when that is refused it
 > sometimes falls back to bar or line. Saving one tool entry (932 characters) did not lower the
 > cost. By the rule fixed before the run, `best` keeps `get_chart_guidance`.
+
+## Q26 — Does the model use render_table's richer column types when the data calls for them? Registered 2026-09-25, BEFORE the run
+
+> **REGISTERED before any run.** 227 tables were rendered in the Q22–Q25c runs. Their columns used
+> only these types: number, text, date, badge, percentage and currency. Nine types never appeared:
+> sparkline, progress, trend, rating, link, icon, image, multi_badge and boolean. Those questions
+> seldom called for them, so absence is not proof. The Q24 lesson is to walk every branch with data
+> built for it. Those types and their configs are about 2.6k of render_table's 7.9k characters in
+> `tools/list`, paid on every turn. Before splitting them behind guidance (Q25), or cutting them from
+> the menu (Q23), find out whether the model reaches them.
+
+**Pilot.** `best`, haiku, n=5, 60 runs. 12 prompts in `evals/questions-table-paths.json`:
+- the nine unused types;
+- a badge control (energy labels);
+- a footer total;
+- search on 60 rows.
+
+Each prompt carries its data and names no type. Scored on the last successful render_table call.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | the menu works: at least 9 of the 12 paths reach the target or a listed alternative in ≥ 3/5 | fewer than 9 |
+| P2 | the per-row shapes are reached: sparkline, progress and trend each ≥ 3/5 on the target itself | any of the three ≤ 1/5 |
+| P3 | the controls hold: badge and footer ≥ 4/5 | either ≤ 2/5 |
+| P4 | no path fails on a refusal: every refused render_table call is followed by a rendered table | a run that ends without a table after a refusal |
+
+**What follows:**
+- A path below 3/5 is traced to its cause: a refusal by the schema or the handler, the model's
+  choice, or a chart drawn instead. The cause is fixed or recorded, then confirmed at n=10.
+- Only if the menu works does a guidance split become a cost question for its own measurement.
+- A type no prompt reaches is a candidate to cut.
+
+Column types, footers and features are now logged in render_table's `shape`, never headers or values.
