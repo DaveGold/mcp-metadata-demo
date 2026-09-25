@@ -47,13 +47,13 @@ the message; an alert after a successful render is read as a note, not as a reas
 
 In industrial control, a system that reports success while the operator cannot see the result is
 badly designed; an interlock stops the action instead. The render tools apply that rule. A call
-that would render nothing, or render something wrong, is refused with the fix in the message — not
+that would render nothing, or render something wrong, is refused with the fix in the message, not
 drawn and reported as done:
 
 - `render_chart` refuses a `type="line"` annotation without `scaleID` (Chart.js draws nothing and
   reports success), an annotation value that is not one of the category labels, and annotations on
   a chart type that cannot show them.
-- `render_table` refuses rows whose shape does not match the columns, and — in `best` — a header
+- `render_table` refuses rows whose shape does not match the columns, and (in `best`) a header
   that presents a calculated label figure as if it were measured consumption.
 - `render_map` refuses an empty marker list and coordinates outside the valid range.
 
@@ -64,7 +64,7 @@ example in the input schema, and fixed it
 ([Q22](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
 
 **Refuse or alert.** Not every problem is a refusal. Where the render is usable but could be better
-— a pie above five slices, too many line series, an overfull radar — `best` renders and returns an
+(a pie above five slices, too many line series, an overfull radar), `best` renders and returns an
 alert with the fix. Where the fix is mandatory, it refuses: an alert after a successful render was
 acted on 2/10, a refusal 10/10
 ([Q22b, Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).

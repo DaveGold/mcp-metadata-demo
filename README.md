@@ -23,7 +23,7 @@ a model can use it correctly?
 The larger architecture that emerged is capability-first: make company systems available as
 trustworthy, composable capabilities, improve them from real usage, let people capture recurring
 work as skills, and let general agents compose both around a goal. The long-term aim is an
-agent-readable company — and an [engineering multiplier](docs/terminology.md#engineering-multiplier)
+agent-readable company, and an [engineering multiplier](docs/terminology.md#engineering-multiplier)
 that gives more people the ability to improve and automate their own work.
 
 That part comes from production and is a thesis; the evals below measure the capability, not the
@@ -48,8 +48,12 @@ The closing slide promised five things. Here they are:
 **What changed since the talk.** The talk said _bound is not the same as delivered_, and marked
 the tool description as reaching the model before the call. Four days later the evals showed that
 on Claude Code only the first **2,048 characters** of a description arrive — and 74% of the rich
-tier's description never did. The thesis held; where the knowledge has to go changed. **`best` is
-the architecture that survived the experiments. `rich` is the talk's version, fixed after them.**
+tier's description never did. The thesis held; what changed is where the knowledge has to go.
+
+- **`rich` is the server from the talk.** Afterwards only its measured defects were fixed, among
+  them a wrong alert removed and one correcting sentence moved inside the cut. The rest is as
+  presented.
+- **`best` is rebuilt from what the evals found.** Use it as the reference.
 
 ## thin → rich → best
 
@@ -192,7 +196,7 @@ the measurements stop.
 
 - [Terminology](docs/terminology.md) — what the terms in this repo mean, canonically
 - [Quotes & principles](docs/quotes.md) — the short formulations, each with its evidence status
-- [Capability architecture](docs/capability-architecture.md) — the thesis above the interface:
+- [Capability architecture](docs/capability-architecture.md): the thesis above the interface, with
   stacking, adoption, skills, the engineering multiplier
 
 ## Talks
@@ -218,8 +222,8 @@ automation, external registers — with 97 tools and 8 MCP Apps, used mostly by 
 developers. One general-purpose model on top, no agent per domain: _we scaled capabilities, not
 agents_.
 
-Before this: industrial automation from 2007 (PLC, HMI, SCADA), then industrial IT — real-time
-dashboards on OSIsoft PI for energy and manufacturing — then eight years of enterprise frontend.
+Before this: industrial automation from 2007 (PLC, HMI, SCADA), then industrial IT (real-time
+dashboards on OSIsoft PI for energy and manufacturing), then eight years of enterprise frontend.
 The same problem throughout: help a person read a system's state and act on it safely. That is
 where the render tools' refusals come from ([refuse what would mislead](docs/mcp-apps.md#refuse-what-would-mislead)).
 

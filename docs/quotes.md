@@ -1,6 +1,6 @@
 # Quotes & principles
 
-_By [David Golverdingen](https://davidgolverdingen.nl/en) — companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
+_By [David Golverdingen](https://davidgolverdingen.nl/en), companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
 
 Short formulations from the talks, the writing and the research around this project — a
 selection, not an archive. A memorable sentence is not automatically a measured finding, so every
@@ -242,7 +242,7 @@ thesis.
 
 > **The multiplier is not the model. It is the system that lets people compose reliable capabilities into their own work.**
 
-`THESIS` · extends Gregor Ojstersek's _engineering multiplier_ — attribute the phrase to him
+`THESIS` · extends Gregor Ojstersek's _engineering multiplier_; attribute the phrase to him
 ([terminology](terminology.md#engineering-multiplier)).
 
 ---
