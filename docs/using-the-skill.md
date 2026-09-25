@@ -6,8 +6,9 @@ telemetry, your own reference implementations, your own evidence) goes in overla
 skill reads at fixed points.
 
 1. **Copy the skill folder** (`.claude/skills/rich-domain-mcp-server/`, and the `.codex/` copy
-   if you use Codex) and record the commit or tag you took. Pin a tag (`skill-v1.0.0`, …) rather
-   than `main`.
+   if you use Codex) and record the commit or tag you took. Pin a tag (`skill-v1.1.0`, …) rather
+   than `main`. `metadata.version` in `SKILL.md` says which version a copy is, and the skill's
+   `CHANGELOG.md` says what changed; every change to the skill bumps it and is released as a tag.
 2. **Create `.skill-local/rich-domain-mcp-server/` at your repo root**, starting from the skill's
    [`local-template/`](../.claude/skills/rich-domain-mcp-server/local-template/README.md). One
    overlay per document, same file name; `README.md` overlays `SKILL.md` and is read first. Keep
