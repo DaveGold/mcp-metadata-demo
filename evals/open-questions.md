@@ -4290,3 +4290,24 @@ running/warning/fault). The two new prompts are the less-coached test.
 | P6 | B, the lines still help where the data is ambiguous: `best` ≥ `best-no-when` + 2 on the condition-score rating or on icon | neither |
 
 A result at n=5 is direction, not size. It says whether sonnet contradicts haiku, not by how much.
+
+## Q26d — Do the when-to-pick lines pull other columns to `icon`, or push tables into text? Registered 2026-09-25, BEFORE the run
+
+> **REGISTERED before any run, after Q26c.** On the current `best`, which carries Q26b's lines,
+> Q26c saw two things the pilot (before the lines) did not:
+> - boolean columns rendered as `icon` 3/10, and a trend column as `icon` 2/10 (pilot 0/5 and 0/5);
+> - no table at all for the link and footer prompts, 0/10 each (pilot 3/5 and 2/5).
+>
+> The icon line ("for a status shown as a symbol") could pull these columns to `icon`. Or it is run
+> variance. The arm without the lines, `best-no-when`, is still deployed.
+
+**Run.** `best` vs `best-no-when`, haiku, n=10 per cell, 5+5 interleaved, 80 runs, four prompts:
+`table-boolean`, `table-trend`, `table-link` and `table-footer`.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | the icon line pulls: `icon` columns on boolean + trend together, `best` ≥ `best-no-when` + 3 (of 20) | a difference ≤ 1 |
+| P2 | the lines do not change whether a table is drawn: link + footer tables within 2 of each other (of 20) | a difference ≥ 4 |
+
+**What follows:** if P1 holds, the icon line is narrowed so it does not claim true/false or
+up/down values, and the change is measured again.
