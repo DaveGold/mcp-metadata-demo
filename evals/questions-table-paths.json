@@ -36,6 +36,15 @@
    "question": "Condition scores of installations on the NEN 2767 scale, 1 (excellent) to 6 (very bad): heat pump Ceres 2, boiler Delta 5, air handling unit Eiland 3, pumps Fokker 4, chiller Gouda 1, ventilation Haven 6, heat pump IJdok 2. Put them in a table so the condition reads at a glance."
   },
   {
+   "id": "table-rating-stars",
+   "target": "rating",
+   "alt": [
+    "badge"
+   ],
+   "check": "type",
+   "question": "Customer satisfaction after the service visit, on a scale of 1 to 5: Ceres 4.5, Delta 3, Eiland 5, Fokker 2.5, Gouda 4, Haven 3.5. Put the buildings in a table with their score."
+  },
+  {
    "id": "table-link",
    "target": "link",
    "alt": [],
@@ -74,6 +83,13 @@
    "alt": [],
    "check": "type",
    "question": "Installations present per building: Ceres heat pump, PV, ventilation; Delta boiler; Eiland heat pump, PV, battery, ventilation; Fokker boiler, PV; Gouda heat pump, ventilation; Haven district heating. Put the buildings in a table with their installations."
+  },
+  {
+   "id": "table-multi-badge-array",
+   "target": "multi_badge",
+   "alt": [],
+   "check": "type",
+   "question": "Put this in a table, one row per building: [{\"building\": \"Ceres\", \"installations\": [\"heat pump\", \"PV\", \"ventilation\"]}, {\"building\": \"Delta\", \"installations\": [\"boiler\"]}, {\"building\": \"Eiland\", \"installations\": [\"heat pump\", \"PV\", \"battery\", \"ventilation\"]}, {\"building\": \"Fokker\", \"installations\": [\"boiler\", \"PV\"]}, {\"building\": \"Gouda\", \"installations\": [\"heat pump\", \"ventilation\"]}, {\"building\": \"Haven\", \"installations\": [\"district heating\"]}]"
   },
   {
    "id": "table-badge",

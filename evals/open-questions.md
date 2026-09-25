@@ -4187,3 +4187,61 @@ Column types, footers and features are now logged in render_table's `shape`, nev
 > earlier because no question called for them. A split would be a cost question only: about 2.6k
 > characters, a few percent per run after a guidance tool's own entry. `render_map` has four
 > marker types of one line each and nothing to split.
+
+## Q26b — When are rating, multi_badge and icon chosen? Registered 2026-09-25, BEFORE the run
+
+> **REGISTERED before any run.** In the Q26 pilot, rating was chosen 0/5, multi_badge 0/5 and
+> icon 1/5. `best`'s lean table schema says what data each of these types takes, not when to pick
+> it. The full schema (`rich`) still says when: "Pick over concatenated text" for multi_badge, and
+> "Pick over number when the value is a bounded, fixed-scale score" for rating. The same gap on
+> the chart side was closed by a line keyed on what the data is (polarArea, Q24). A second possible
+> cause is effort: multi_badge needs an array and a badgeMap entry per tag, where a text cell does not.
+
+**Run.** Haiku, n=10 per cell, 150 runs, interleaved 2+2+2 per wave (25 waves). Three arms:
+- `best` as it is;
+- `rich`, the full table schema with its when-to-pick lines;
+- `best-table-when` (temporary): `best` plus three lines on what the data is.
+  - multi_badge: "for several tags per row … instead of a comma list in text";
+  - rating: "for a score on a fixed scale (condition 1–6 … satisfaction 1–5) …";
+  - icon: "for a status shown as a symbol".
+
+Five paths:
+- `table-rating` (condition 1–6);
+- `table-rating-stars` (satisfaction 1–5, new);
+- `table-multi-badge` (a list in the prose);
+- `table-multi-badge-array` (the data already as JSON arrays, new);
+- `table-icon`.
+
+Caveat: the three lines use examples close to the pilot's prompts (installations, condition 1–6,
+running/warning/fault). The two new prompts are the less-coached test.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | the when-lines work: `best-table-when` ≥ 3 above `best` on at least 3 of the 5 paths | fewer than 2 such paths |
+| P2 | effort, not only words, holds multi_badge back: on `best`, `table-multi-badge-array` ≥ `table-multi-badge` + 3 | a gap < 1 |
+| P3 | `rich` reaches rating and multi_badge more than `best`: ≥ 3 above on at least 2 of the 4 rating/multi_badge paths | none |
+| P4 | no loss: no path where `best-table-when` is ≥ 3 below `best` | any |
+
+**Decision rule, fixed before the run:**
+- If P1 and P4 hold, the three lines go into `best`.
+- A type still below 3/10 on both of its paths in every arm is a candidate to cut from the menu.
+
+> **ANSWERED 2026-09-25 — a line on when to pick a type is what gets it chosen; the lines go into `best`.**
+> See [`results/2026-09-25-q26b-table-when-to-pick.json`](results/2026-09-25-q26b-table-when-to-pick.json). 150 runs.
+>
+> | path | best | rich | best-table-when |
+> |---|---|---|---|
+> | condition 1–6 → rating | 0/10 (badge) | 4/10 | 6/10 |
+> | satisfaction 1–5 → rating | 10/10 | 10/10 | 10/10 |
+> | tag list in prose → multi_badge | 1/10 | 9/10 | 6/10 |
+> | tag list as JSON arrays → multi_badge | 3/10 | 8/10 | 10/10 |
+> | status symbol → icon | 2/10 | 0/10 | 10/10 |
+>
+> P1, P3 and P4 hold; P2 holds only partly (arrays help by 2, not 3). The lean schema lost exactly
+> the when-to-pick lines that `rich` still has, and with them multi_badge and rating. A score that
+> looks like one (1–5) needs no line.
+>
+> The run also found a defect. `badgeMap` accepted six colours, and a sixth tag got another colour
+> in 11 calls. The input schema refused those calls before the handler, so the log missed them
+> (audit 18/25 waves exact; the missing calls are exactly these 11). All 11 runs recovered.
+> `best` now accepts `primary` too, which the renderer draws. Cost of the lines: +1.8% median tokens.

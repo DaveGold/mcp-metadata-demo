@@ -284,7 +284,9 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
   the menu to what your data can use.
 - **Size the input schema to what forming the call needs.** It is re-sent every turn for every
   tool, so every question pays for it, also the ones that never call the tool. Trim the words first:
-  the same structure in fewer words saved 21–23% of each run and lost nothing. Then, when one tool
+  the same structure in fewer words saved 21–23% of each run and lost nothing [Q25], but keep the
+  line that says when to pick each enum value: cut to the data shape alone, three table column
+  types were passed over, and one line each brought them back (0–3/10 → 6–10/10, +1.8%) [Q26b]. Then, when one tool
   has a common shape and several rare ones (a chart tool: bar and line against sankey, matrix,
   graph), keep the choice and the common shape in the schema, and move the rare shapes behind a
   REQUIRED guidance tool; the handler validates the full shape and refuses with the expected shape

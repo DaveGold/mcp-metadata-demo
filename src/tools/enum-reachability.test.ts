@@ -189,3 +189,17 @@ describe.each(['best', 'rich'] as ServerVariant[])('every enum value is reachabl
     expect(r.ok, r.text.slice(0, 300)).toBe(true);
   });
 });
+
+describe("best's badge colours", () => {
+  it.each(['green', 'red', 'yellow', 'blue', 'gray', 'orange', 'primary'])(
+    'badgeMap colour %s is accepted',
+    async (color) => {
+      const r = await call(await connect('best'), 'render_table', {
+        title: 't',
+        columns: [{ key: 'v', header: 'Value', type: 'multi_badge', badgeMap: { a: { color } } }],
+        data: [{ v: ['a'] }],
+      });
+      expect(r.ok, r.text.slice(0, 300)).toBe(true);
+    },
+  );
+});

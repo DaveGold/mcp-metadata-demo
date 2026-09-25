@@ -3,12 +3,13 @@
  *
  * Delivered in full and re-sent on every turn (evals/results/2026-09-24-input-schema-delivery.json),
  * so it carries what forming the call needs: which column type fits which value, the data shape
- * of each, one example. Structure identical to the other tiers' schema (a test pins it).
+ * of each, one example, and for the types a model passes over, when to pick them
+ * (evals/results/2026-09-25-q26b-table-when-to-pick.json). Structure identical to the other tiers'
+ * schema apart from one more badge colour (a test pins it).
  */
 import { z } from 'zod';
 
-const COLORS = ['green', 'red', 'yellow', 'blue', 'gray', 'orange'] as const;
-const COLORS_PRIMARY = ['green', 'red', 'yellow', 'blue', 'gray', 'orange', 'primary'] as const;
+const COLORS = ['green', 'red', 'yellow', 'blue', 'gray', 'orange', 'primary'] as const;
 
 const COLUMN_TYPES =
   'How the value is shown and sorted; pick the most specific type for the value:\n' +
@@ -19,13 +20,13 @@ const COLUMN_TYPES =
   '- percentage: a number in [0, 1] (0.15 → 15,0%).\n' +
   '- boolean: true/false → ✓/✗.\n' +
   '- badge: a string key, coloured through badgeMap; for a status or label letter.\n' +
-  '- multi_badge: an array of badgeMap keys.\n' +
-  '- icon: a Heroicon name, or a key looked up in iconMap.\n' +
+  '- multi_badge: an array of badgeMap keys; for several tags per row (installations, certifications), instead of a comma list in text.\n' +
+  '- icon: a Heroicon name, or a key looked up in iconMap; for a status shown as a symbol (running, warning, fault).\n' +
   '- sparkline: a number[] per row (2–60 points), for a trend per row.\n' +
   '- progress: a number in [0, 1] shown as a bar with thresholds.\n' +
   '- trend: {value, delta}, delta a fraction (0.12 = +12%).\n' +
   '- link: a URL string, or {label, href}; http(s) and mailto only.\n' +
-  '- rating: a number on a fixed scale (ratingConfig.max).\n' +
+  '- rating: a number on a fixed scale (ratingConfig.max); for a score on a fixed scale (condition 1–6: max 6, dots; satisfaction 1–5: stars), instead of a badge or a number.\n' +
   '- image: an http(s) or data:image URL.';
 
 export const bestTableInputSchema = {
@@ -72,13 +73,13 @@ export const bestTableInputSchema = {
         iconMap: z
           .record(
             z.string(),
-            z.object({ icon: z.string(), color: z.enum(COLORS_PRIMARY).optional(), label: z.string().optional() }),
+            z.object({ icon: z.string(), color: z.enum(COLORS).optional(), label: z.string().optional() }),
           )
           .optional()
           .describe('icon: value → {icon, color?}, e.g. {"true": {"icon": "check-circle", "color": "green"}}.'),
         sparklineConfig: z
           .object({
-            color: z.enum(COLORS_PRIMARY).optional(),
+            color: z.enum(COLORS).optional(),
             sortBy: z.enum(['last', 'avg', 'min', 'max']).optional(),
           })
           .optional()

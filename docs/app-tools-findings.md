@@ -142,3 +142,14 @@ trend, image, boolean and search 5/5, progress 4/5. A condition score is shown a
 rather than a rating, a list of installations as text rather than multi_badge, and a status as a
 badge rather than an icon; each reads as well. No split behind guidance: the gain would be a few
 percent. render_table now logs its column types, footers and features in `shape`.
+
+### 2026-09-25 — when rating, multi_badge and icon are chosen (Q26b)
+
+The lean table schema kept what data each column type takes but lost the lines on when to pick
+three of them. With one line each, keyed on what the data is
+([`q26b`](../evals/results/2026-09-25-q26b-table-when-to-pick.json)), a condition score becomes a
+rating 6/10 (was 0/10), a tag list a multi_badge 6/10 and 10/10 (was 1/10 and 3/10), and a status an
+icon 10/10 (was 2/10). A 1–5 score was a rating 10/10 without help. The lines are in `best`.
+- **Defect: badgeMap took six colours.** A sixth tag got a seventh colour in 11 calls. The schema
+  refused them before the handler, so the log did not show them. `best` now accepts `primary`, which
+  the renderer draws; the frozen tiers keep the six.
