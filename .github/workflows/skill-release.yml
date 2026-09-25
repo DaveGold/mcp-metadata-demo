@@ -7,6 +7,8 @@ on:
     branches: [main]
     paths:
       - '.claude/skills/rich-domain-mcp-server/**'
+      - '.github/workflows/skill-release.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -31,6 +33,5 @@ jobs:
             echo "$tag exists; nothing to release"; exit 0
           fi
           awk -v v="$version" '$0 ~ "^## "v" " {p=1;next} /^## /{if(p)exit} p' "$dir/CHANGELOG.md" > notes.md
-          git tag -a "$tag" -m "rich-domain-mcp-server skill v$version"
-          git push origin "$tag"
-          gh release create "$tag" --title "rich-domain-mcp-server skill v$version" --notes-file notes.md
+          # The release creates the tag on this commit; no git identity is needed on the runner.
+          gh release create "$tag" --target "$GITHUB_SHA" --title "rich-domain-mcp-server skill v$version" --notes-file notes.md
