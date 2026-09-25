@@ -1,6 +1,6 @@
 # Terminology
 
-_By [David Golverdingen](https://davidgolverdingen.nl/en) — companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
+_By [David Golverdingen](https://davidgolverdingen.nl/en), companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
 
 This repository uses the terms below with specific meanings. When this repo says **X**, this page
 says what X means. It does not argue for the ideas; for that:
@@ -196,7 +196,7 @@ The three tiers served over the same data in this repo.
 
 - **thin** — the raw API as a tool: a one-line description, a bare schema.
 - **rich** — the talk's tier: long descriptions, typed schemas, curated alerts. It predates most
-  of the eval findings and was fixed after them.
+  of the eval findings; afterwards only its measured defects were fixed, not its design.
 - **best** — the reference implementation derived from the measured findings. A repository name,
   not a claim that the design is optimal everywhere.
 
@@ -234,7 +234,7 @@ cases_.
 Composing independently useful capabilities into questions and workflows none of them was built
 for. Its effect is **compounding optionality**: with _n_ composable capabilities there are 2ⁿ − 1
 possible sets, and each new one extends every set already present. A claim about the option space,
-not about value — most combinations are useless, and value does not grow exponentially.
+not about value: most combinations are useless, and value does not grow exponentially.
 
 ### Ambassador
 
@@ -245,7 +245,7 @@ the capability is missing.
 
 ### Skill (procedure layer)
 
-A captured work procedure — steps, decisions, rules, approval points — that a general agent runs
+A captured work procedure (steps, decisions, rules, approval points) that a general agent runs
 over the capabilities. Capabilities say _what the company can do_; skills say _how the work is
 done_; a prompt, a schedule or an event says _when_. Not to be confused with _the skill_ in this
 repo, [`rich-domain-mcp-server`](../.claude/skills/rich-domain-mcp-server/SKILL.md), which is an
@@ -254,7 +254,7 @@ engineering procedure for building interfaces.
 ### Engineering multiplier
 
 The phrase is Gregor Ojstersek's (TechLead Conference): an engineer who multiplies their impact by
-combining human skills, pragmatic problem solving and AI tools — attribute that framing to him. In
+combining human skills, pragmatic problem solving and AI tools. Attribute that framing to him. In
 this repo's extension: a system that turns engineering work into reusable capability, so that
 other people can compose, run and improve their own workflows without a new software project for
 each.
@@ -269,6 +269,6 @@ agent when the task demands it; enrich the interface when the domain demands it.
 
 A company that exposes its systems as composable agent-facing capabilities carrying enough domain
 meaning for a capable general agent to discover, interpret and safely operate them. Short form:
-_make the company agent-readable._ In the fuller form it also exposes how its people work —
-procedures as skills, operational rhythm as schedules and events — not only what its systems can
+_make the company agent-readable._ In the fuller form it also exposes how its people work
+(procedures as skills, operational rhythm as schedules and events), not only what its systems can
 do.

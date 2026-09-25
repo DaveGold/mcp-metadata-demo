@@ -1,6 +1,6 @@
-# Capability architecture — the layer above the interface
+# Capability architecture: the layer above the interface
 
-_By [David Golverdingen](https://davidgolverdingen.nl/en) — companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
+_By [David Golverdingen](https://davidgolverdingen.nl/en), companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
 
 The rest of this repo is about one capability at a time: what a good agent-facing interface
 carries, and whether it reaches the model. This page is about what happens when there are many of
@@ -56,20 +56,20 @@ Richness is measured in what the interface can do correctly, not in what was wri
 
 `PRODUCTION` for what Warmtebouw did, `THESIS` for the general claim
 
-An agent-first architecture starts from use cases — use case A gets agent A — and each agent
+An agent-first architecture starts from use cases (use case A gets agent A), and each agent
 accumulates its own prompts, domain instructions, integrations and business rules. The domain
 knowledge ends up duplicated at the orchestration layer, once per agent.
 
 Capability-first reverses the dependency. The capability owns access, meaning, constraints,
 determinate behaviour and bounded authority; one general agent composes capabilities around the
 question. At Warmtebouw that is the production setup: one general-purpose model over a growing set
-of domain MCP servers, no agent per domain — _we scaled capabilities, not agents_
+of domain MCP servers, no agent per domain: _we scaled capabilities, not agents_
 ([who built this](../README.md#who-built-this-and-why)).
 
 This does not make specialised agents unnecessary. It says one should not exist only because a
 general agent was given an insufficient interface: _specialize the agent when the task demands it;
 enrich the interface when the domain demands it._ Warmtebouw runs one of those too: a specialised
-agent inside an application, with its own golden eval set — built because the task demanded it,
+agent inside an application, with its own golden eval set. It was built because the task demanded it,
 not because the interface was too thin.
 
 The engineering consequence: you build the ERP capability, the BIM capability and the energy
@@ -101,7 +101,7 @@ What the combinations add is paths between systems that stay separate:
 | + tickets | do building characteristics, energy, maintenance and cost relate? |
 
 Nothing is merged into one data platform. What goes away is the boundary around what can be
-_asked_ across the systems — not because the model invents what is missing, but because two correct
+_asked_ across the systems. That works not because the model invents what is missing, but because two correct
 capabilities together expose a path neither had alone. This only holds if each capability is
 correct on its own: composition multiplies wrongness as readily as it multiplies options, which is
 why the rest of this repo is about getting one capability right.
@@ -123,9 +123,9 @@ agent-readable company up front; you can grow it one useful capability at a time
 `PRODUCTION`
 
 A capability can be technically right and still change nothing if nobody works differently. The
-rollout at Warmtebouw did not start company-wide. It started with **ambassadors** — a few people
+rollout at Warmtebouw did not start company-wide. It started with **ambassadors**: a few people
 with a real recurring problem, enough domain knowledge to spot a wrong answer, and enough
-credibility for colleagues to follow — and grew with training as more people joined.
+credibility for colleagues to follow. It grew with training as more people joined.
 
 The pattern that worked early on was short: someone asked for something, the next day it was
 there, with a prompt to try. The enthusiasm was immediate. An ambassador is not just an early
@@ -134,7 +134,7 @@ missing, and each improvement gives them a better example to show the next colle
 
 That makes adoption telemetry, not only distribution. `queryIntent` is one implementation: _a log
 of calls becomes a log of questions_ ([terminology](terminology.md#queryintent)). The
-questions nobody anticipated, the follow-up calls, the answers people re-check by hand — those pick
+questions nobody anticipated, the follow-up calls, the answers people re-check by hand: those pick
 the next gap, the same way the method does ([ICE](terminology.md#introspective-context-engineering-for-mcp-ice)).
 
 Access is not adoption, and neither is attending a training. Adoption is people repeatedly choosing
@@ -148,8 +148,8 @@ question of what AI can do. These are observations, not an eval framework in thi
 `PRODUCTION` for skills and schedules, `THESIS` for what that makes of specialised agents
 
 Capabilities answer _what can the company do?_ Skills answer _how does the company do this work?_
-A recurring procedure — find the active projects, pull the energy figures, check open maintenance
-issues, apply these rules, produce a review list, never write without approval — captured once
+Take a recurring procedure: find the active projects, pull the energy figures, check open maintenance
+issues, apply these rules, produce a review list, never write without approval. Captured once, it
 becomes reusable, without a new application for every repeated workflow.
 
 At Warmtebouw this is what happened next. The first skills were built for people who asked for
@@ -164,7 +164,7 @@ themselves, live artifacts are following, and some skills run on a schedule.
 | activation | when should it run? | a prompt now, a schedule, an event |
 
 A skill run by hand is a reusable procedure; attach a schedule and the same procedure runs as
-operations — at Warmtebouw that is already the case. The thesis is what that adds up to: an
+operations. At Warmtebouw that is already the case. The thesis is what that adds up to: an
 adaptive procedure plus capabilities plus a trigger plus a bounded objective is close to what is
 usually built as a specialised agent. Here it _emerges_ from a general one, without a new agent
 platform.
@@ -182,14 +182,14 @@ A skill is more than a prompt or an SOP. It is the path from a person's intent t
 outcome, with capabilities underneath. A weak skill is a tool sequence: call A, call B, answer. A
 stronger one is a sequence of state transitions: establish where we are and where we want to be,
 resolve what is uncertain, gather evidence, decide, act, verify, and leave the person somewhere
-useful. The tools are implementation details under the journey — the same move Rich Domain MCP
+useful. The tools are implementation details under the journey. It is the same move Rich Domain MCP
 makes when it refuses to expose the raw API shape as the product.
 
 At each step the designer decides what the person needs to see or decide, and which surface fits:
 plain text, a question, a chart, table or map, an approval, or a refusal with the fix. Human
 involvement is a design choice, not a default: not maximum autonomy and not maximum control, but
 the right involvement at the right transition. Whether a surface is right is not only whether it
-renders: [MCP Apps — refuse what would mislead](mcp-apps.md#refuse-what-would-mislead) covers the
+renders: [MCP Apps: refuse what would mislead](mcp-apps.md#refuse-what-would-mislead) covers the
 part of this the evals measured.
 
 ## 8 · The engineering multiplier
@@ -212,7 +212,7 @@ multiplier  engineer builds capabilities → experts compose them → experts ca
 
 The development team at Warmtebouw works the same way on itself: ticket context lives in Git next
 to the code, plans are reviewed before implementation, review runs from a clean context, and
-anything irreversible needs human approval — so that an improvement to the process carries over to
+anything irreversible needs human approval, so that an improvement to the process carries over to
 every ticket after it, rather than making one engineer faster. The thesis is that the same shape
 works for the company: _the multiplier is not the model; it is the system that lets people compose
 reliable capabilities into their own work._
@@ -222,13 +222,13 @@ reliable capabilities into their own work._
 `THESIS`
 
 The destination: a company whose systems are exposed as trustworthy capabilities, whose procedures
-are exposed as reusable skills, and whose operational rhythm is exposed as triggers — so that a
+are exposed as reusable skills, and whose operational rhythm is exposed as triggers, so that a
 capable general agent can discover, interpret, compose and safely operate across a growing part of
 it ([terminology](terminology.md#agent-readable-company)).
 
 The path there is not _buy AI → launch a chatbot → train everyone_. It is one problem, one
 ambassador, one trustworthy capability, real use, a better capability, the next colleague, the next
-capability, more composition, skills that capture what works — repeated.
+capability, more composition, skills that capture what works. Then the loop starts again.
 
 ---
 
@@ -236,15 +236,15 @@ capability, more composition, skills that capture what works — repeated.
 
 | claim | status | where the evidence is |
 |---|---|---|
-| delivery, expressibility, naming, shipped data, computation, refusals, guidance activation — on one host | `MEASURED` | [evals](../evals/README.md), [evidence register](../.claude/skills/rich-domain-mcp-server/references/evidence.md) |
+| delivery, expressibility, naming, shipped data, computation, refusals, guidance activation, on one host | `MEASURED` | [evals](../evals/README.md), [evidence register](../.claude/skills/rich-domain-mcp-server/references/evidence.md) |
 | one general model over many domain servers, used mostly by non-developers | `PRODUCTION` | [who built this](../README.md#who-built-this-and-why) |
 | ambassadors first; usage picks the next gap | `PRODUCTION` | this page, §5 |
 | domain experts build their own skills; some run on a schedule | `PRODUCTION` | this page, §6 |
-| capability-first beats agent-first in general | `THESIS` | — |
-| capability stacking compounds optionality | `THESIS` | — |
-| skills + triggers are a better way to get specialised agents | `THESIS` | — |
-| the multiplier effect generalises across organisations | `THESIS` | — |
-| the agent-readable company is the right endpoint | `THESIS` | — |
+| capability-first beats agent-first in general | `THESIS` | not measured |
+| capability stacking compounds optionality | `THESIS` | not measured |
+| skills + triggers are a better way to get specialised agents | `THESIS` | not measured |
+| the multiplier effect generalises across organisations | `THESIS` | not measured |
+| the agent-readable company is the right endpoint | `THESIS` | not measured |
 
 Nothing on this page claims an ROI or an adoption rate. One company, one team, one author: the same
 caveat as [Design §9](design.md#9--what-is-measured-and-what-is-not), with less measurement under it.

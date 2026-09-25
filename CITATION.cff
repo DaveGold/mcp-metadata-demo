@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: 'If you use or refer to Rich Domain MCP, Introspective Context Engineering for MCP, or this repository, please cite it as below.'
-title: 'Rich Domain MCP — companion repository to The Missing Layer'
+title: 'Rich Domain MCP: companion repository to The Missing Layer'
 type: software
 authors:
   - family-names: Golverdingen

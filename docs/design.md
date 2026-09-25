@@ -1,6 +1,6 @@
 # Design — what survived the experiments
 
-_By [David Golverdingen](https://davidgolverdingen.nl/en) — companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
+_By [David Golverdingen](https://davidgolverdingen.nl/en), companion to [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)._
 
 This is the human-facing version of the design: the principles, why they hold, and what they cost.
 The agent-facing version — ordered steps, checklists, hard budgets — is the
