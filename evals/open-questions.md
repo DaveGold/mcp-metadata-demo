@@ -4245,3 +4245,98 @@ running/warning/fault). The two new prompts are the less-coached test.
 > in 11 calls. The input schema refused those calls before the handler, so the log missed them
 > (audit 18/25 waves exact; the missing calls are exactly these 11). All 11 runs recovered.
 > `best` now accepts `primary` too, which the renderer draws. Cost of the lines: +1.8% median tokens.
+
+## Q26c — Do the table paths the Q26 pilot passed hold at n=10? Registered 2026-09-25, BEFORE the run
+
+> **REGISTERED before any run.** The Q26 pilot (n=5) passed nine paths:
+> - sparkline, trend, image, boolean and search at 5/5;
+> - progress at 4/5, badge at 5/5;
+> - link and footer used in every table drawn, but only 3/5 and 2/5 runs drew a table.
+>
+> Q26b re-ran only the three weak types. This confirms the other nine on the current `best`,
+> which since Q26b carries the three when-to-pick lines and the `primary` badge colour.
+
+**Run.** `best`, haiku, n=10 per path, 90 runs, the nine prompts of `evals/questions-table-paths.json`.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | sparkline, trend, image, boolean, search and badge ≥ 9/10 on the target | any ≤ 7/10 |
+| P2 | progress ≥ 8/10 on the target or percentage | ≤ 6/10 |
+| P3 | link and footer: every drawn table uses the target, and a table is drawn in ≥ 6/10 | a drawn table without the target, or a table in ≤ 3/10 |
+
+## Q27 — Do the app-tool schema results hold on sonnet? Registered 2026-09-25, BEFORE the run
+
+> **REGISTERED before any run.** Q25b (guided vs lean chart schema) and Q26b (when-to-pick lines
+> for three table column types) ran on haiku only. Two temporary arms rebuild what each was
+> compared against:
+> - `best-lean-chart` — the full-shape chart schema sent as is, no `get_chart_guidance`; the table
+>   as in `best`;
+> - `best-no-when` — `best` with the table's three when-to-pick lines removed (915 characters, as
+>   before Q26b).
+>
+> Everything else in both arms is byte-identical to `best`.
+
+**Run.** Sonnet, n=5 per cell, 5+5 interleaved per wave, 170 runs.
+- **A:** `best` vs `best-lean-chart` on the 12 non-bar/line chart paths of Q24 (120 runs).
+- **B:** `best` vs `best-no-when` on the five paths of Q26b (50 runs).
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | A, no loss: `best` within 1 of `best-lean-chart` on every chart path | a path with a gap ≥ 3 |
+| P2 | A, the pointer holds: `get_chart_guidance` before the first chart ≥ 4/5 on at least 10 of the 12 paths | fewer than 8 paths |
+| P3 | A, cost: `best` median tokens ≤ `best-lean-chart` | `best` > lean + 5% |
+| P4 | B, no loss: `best` ≥ `best-no-when` on every table path | a path with `best` ≥ 2 below |
+| P5 | B, a stronger model needs the lines less: without them, sonnet reaches multi_badge from arrays ≥ 3/5 (haiku 3/10) | ≤ 1/5 |
+| P6 | B, the lines still help where the data is ambiguous: `best` ≥ `best-no-when` + 2 on the condition-score rating or on icon | neither |
+
+A result at n=5 is direction, not size. It says whether sonnet contradicts haiku, not by how much.
+
+## Q26d — Do the when-to-pick lines pull other columns to `icon`, or push tables into text? Registered 2026-09-25, BEFORE the run
+
+> **REGISTERED before any run, after Q26c.** On the current `best`, which carries Q26b's lines,
+> Q26c saw two things the pilot (before the lines) did not:
+> - boolean columns rendered as `icon` 3/10, and a trend column as `icon` 2/10 (pilot 0/5 and 0/5);
+> - no table at all for the link and footer prompts, 0/10 each (pilot 3/5 and 2/5).
+>
+> The icon line ("for a status shown as a symbol") could pull these columns to `icon`. Or it is run
+> variance. The arm without the lines, `best-no-when`, is still deployed.
+
+**Run.** `best` vs `best-no-when`, haiku, n=10 per cell, 5+5 interleaved, 80 runs, four prompts:
+`table-boolean`, `table-trend`, `table-link` and `table-footer`.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | the icon line pulls: `icon` columns on boolean + trend together, `best` ≥ `best-no-when` + 3 (of 20) | a difference ≤ 1 |
+| P2 | the lines do not change whether a table is drawn: link + footer tables within 2 of each other (of 20) | a difference ≥ 4 |
+
+**What follows:** if P1 holds, the icon line is narrowed so it does not claim true/false or
+up/down values, and the change is measured again.
+
+> **Q26c ANSWERED 2026-09-25 — seven of nine hold; the other two are form, not type.** See
+> [`results/2026-09-25-q26c-table-paths-confirm.json`](results/2026-09-25-q26c-table-paths-confirm.json).
+> - **Hold:** sparkline, progress, image, badge and search 10/10; trend 8/10.
+> - **boolean 7/10**, the rest as icons.
+> - **Link and footer:** no table in 10/10 each. Those prompts ask to list things, not for a
+>   table.
+>
+> P2 holds; P1 is falsified on boolean and P3 on the table count. Audit exact 35/35.
+>
+> **Q26d ANSWERED 2026-09-25 — the lines have no side effect.** See
+> [`results/2026-09-25-q26d-when-lines-side-effects.json`](results/2026-09-25-q26d-when-lines-side-effects.json).
+> - **Icons:** on boolean + trend, 4/20 with the lines and 2/20 without; the targets are equal.
+> - **Tables:** link + footer drew a table 1/20 in each arm.
+>
+> P1 is neither confirmed nor falsified (a difference of 2); P2 holds. The icon line stays.
+> Audit exact 8/8.
+>
+> **Q27 ANSWERED 2026-09-25 — both results hold on sonnet.** See
+> [`results/2026-09-25-q27-sonnet-app-schemas.json`](results/2026-09-25-q27-sonnet-app-schemas.json). 170 runs.
+> - **A (chart):** every chart path is reached in both arms (59/60 vs 58/60). The guidance is
+>   fetched first 59/60, and the guided schema is 8.5% cheaper.
+> - **B (table):** the when-to-pick lines matter on sonnet too, most where haiku needed nothing.
+>   A 1–5 satisfaction score became a plain number 5/5 without the lines and a rating 5/5 with
+>   them. The condition score went to rating 4/5 with them and 0/5 without.
+> - **Where the data shape says it, sonnet needs no line:** multi_badge from arrays and the status
+>   icon are 5/5 either way.
+>
+> P1–P6 hold. Audit exact (shared with Q26c).

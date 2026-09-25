@@ -1,0 +1,397 @@
+{
+ "_comment": "Q27: do the app-tool schema results hold on sonnet? A: best (small chart schema + get_chart_guidance) vs best-lean-chart (temporary: the full-shape chart schema, no guidance tool). B: best vs best-no-when (temporary: without the table's three when-to-pick lines). Sonnet, n=5 per cell. Registered before the run.",
+ "date": "2026-09-25",
+ "model": "sonnet",
+ "n_per_cell": 5,
+ "total_runs": 170,
+ "protocol": "Portable harness, one run of 35 waves (Q26c 18 waves of 5, Q27 17 waves of 5+5 interleaved), 0 retries.",
+ "log_audit": {
+  "waves": 35,
+  "exact": 35,
+  "harness_calls": {
+   "best": 223,
+   "best-lean-chart": 69,
+   "best-no-when": 26
+  },
+  "log_rows": {
+   "best": 223,
+   "best-lean-chart": 69,
+   "best-no-when": 26
+  }
+ },
+ "headline": [
+  "A: sonnet reaches every chart path in both arms (best 59/60, lean 58/60; polarArea 4/5 and 3/5, the rest 5/5). It fetches the guidance first in 59/60 runs, and the guided schema is 8.5% cheaper (31482 vs 34414 median tokens). Q25b's result holds on sonnet.",
+  "B: the when-to-pick lines matter on sonnet too, and on one path more than on haiku. Without them, a 1–5 satisfaction score became a plain number 5/5 (haiku chose rating 10/10 without help); with them, rating 5/5. The condition score went to rating 4/5 with the lines, 0/5 without.",
+  "B: where the data shape says it, sonnet needs no line: multi_badge from arrays 5/5 and the status icon 5/5 in both arms; multi_badge from prose 5/5 against 4/5.",
+  "B: the lines cost nothing measurable (31141 vs 31181 median tokens)."
+ ],
+ "predictions": {
+  "P1": "HOLDS — no chart path gap above 1.",
+  "P2": "HOLDS — guidance first ≥ 4/5 on all 12 paths (59/60).",
+  "P3": "HOLDS — best 31482 vs lean 34414.",
+  "P4": "HOLDS — best ≥ best-no-when on every table path.",
+  "P5": "HOLDS — multi_badge from arrays 5/5 without the lines.",
+  "P6": "HOLDS — condition score +4 (4/5 vs 0/5); also satisfaction stars +5."
+ },
+ "median_tokens": {
+  "Q27A": {
+   "best": 31482,
+   "best-lean-chart": 34414
+  },
+  "Q27B": {
+   "best": 31141,
+   "best-no-when": 31181
+  }
+ },
+ "cells": {
+  "claude-sonnet-5 · path-boxplot · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "boxplot": 5
+   }
+  },
+  "claude-sonnet-5 · path-boxplot · best-lean-chart": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "boxplot": 5
+   }
+  },
+  "claude-sonnet-5 · path-bubble · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "bubble": 5
+   }
+  },
+  "claude-sonnet-5 · path-bubble · best-lean-chart": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "bubble": 5
+   }
+  },
+  "claude-sonnet-5 · path-doughnut · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "doughnut": 5
+   }
+  },
+  "claude-sonnet-5 · path-doughnut · best-lean-chart": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "doughnut": 5
+   }
+  },
+  "claude-sonnet-5 · path-funnel · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "funnel": 5
+   }
+  },
+  "claude-sonnet-5 · path-funnel · best-lean-chart": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "funnel": 5
+   }
+  },
+  "claude-sonnet-5 · path-graph · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "graph": 5
+   }
+  },
+  "claude-sonnet-5 · path-graph · best-lean-chart": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "graph": 5
+   }
+  },
+  "claude-sonnet-5 · path-matrix · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "matrix": 5
+   }
+  },
+  "claude-sonnet-5 · path-matrix · best-lean-chart": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "matrix": 5
+   }
+  },
+  "claude-sonnet-5 · path-pie · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "pie": 5
+   }
+  },
+  "claude-sonnet-5 · path-pie · best-lean-chart": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "pie": 5
+   }
+  },
+  "claude-sonnet-5 · path-polarArea · best": {
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "correct": 4,
+    "acceptable": 1
+   },
+   "finals": {
+    "polarArea": 4,
+    "bar": 1
+   }
+  },
+  "claude-sonnet-5 · path-polarArea · best-lean-chart": {
+   "correct": 3,
+   "n": 5,
+   "verdicts": {
+    "correct": 3,
+    "acceptable": 2
+   },
+   "finals": {
+    "polarArea": 3,
+    "bar": 2
+   }
+  },
+  "claude-sonnet-5 · path-radar · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "radar": 5
+   }
+  },
+  "claude-sonnet-5 · path-radar · best-lean-chart": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "radar": 5
+   }
+  },
+  "claude-sonnet-5 · path-sankey · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "sankey": 5
+   }
+  },
+  "claude-sonnet-5 · path-sankey · best-lean-chart": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "sankey": 5
+   }
+  },
+  "claude-sonnet-5 · path-scatter · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "scatter": 5
+   }
+  },
+  "claude-sonnet-5 · path-scatter · best-lean-chart": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "scatter": 5
+   }
+  },
+  "claude-sonnet-5 · path-treemap · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "treemap": 5
+   }
+  },
+  "claude-sonnet-5 · path-treemap · best-lean-chart": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "treemap": 5
+   }
+  },
+  "claude-sonnet-5 · table-icon · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "icon,text": 5
+   }
+  },
+  "claude-sonnet-5 · table-icon · best-no-when": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "badge,icon,text": 2,
+    "icon,text": 3
+   }
+  },
+  "claude-sonnet-5 · table-multi-badge · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "multi_badge,text": 5
+   }
+  },
+  "claude-sonnet-5 · table-multi-badge · best-no-when": {
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "correct": 4,
+    "wrong": 1
+   },
+   "finals": {
+    "multi_badge,text": 4,
+    "boolean,text": 1
+   }
+  },
+  "claude-sonnet-5 · table-multi-badge-array · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "multi_badge,text": 5
+   }
+  },
+  "claude-sonnet-5 · table-multi-badge-array · best-no-when": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "multi_badge,text": 5
+   }
+  },
+  "claude-sonnet-5 · table-rating · best": {
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "correct": 4,
+    "acceptable": 1
+   },
+   "finals": {
+    "rating,text": 4,
+    "badge,text": 1
+   }
+  },
+  "claude-sonnet-5 · table-rating · best-no-when": {
+   "correct": 0,
+   "n": 5,
+   "verdicts": {
+    "acceptable": 5
+   },
+   "finals": {
+    "badge,text": 5
+   }
+  },
+  "claude-sonnet-5 · table-rating-stars · best": {
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "finals": {
+    "rating,text": 5
+   }
+  },
+  "claude-sonnet-5 · table-rating-stars · best-no-when": {
+   "correct": 0,
+   "n": 5,
+   "verdicts": {
+    "wrong": 5
+   },
+   "finals": {
+    "number,text": 5
+   }
+  }
+ }
+}
