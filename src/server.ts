@@ -80,7 +80,8 @@ export type ServerVariant =
   | 'guidance-recipe'
   | 'best'
   | 'best-v1'
-  | 'best-no-type-rules';
+  | 'best-no-type-rules'
+  | 'best-table-when';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -181,6 +182,23 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     registerGetWeatherContextBestTool(server);
     registerRenderChartTool(server, { best: true, typeRules: false });
     registerRenderTableTool(server, { best: true });
+    registerRenderMapTool(server, { best: true });
+    registerFetchImageTool(server, { openWorld: true });
+    registerGetToolCallLogTool(server, { best: true });
+    return server;
+  }
+
+  if (variant === 'best-table-when') {
+    // Temporary measurement arm (Q26b): best with when-to-pick lines for three table column types.
+    const server = new McpServer(
+      { name: 'metadata-demo-best-table-when', version: VERSION },
+      { instructions: bestInstructions },
+    );
+    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
+    registerGetWeatherContextBestTool(server);
+    registerRenderChartTool(server, { best: true, guided: true });
+    registerGetChartGuidanceTool(server);
+    registerRenderTableTool(server, { best: true, whenLines: true });
     registerRenderMapTool(server, { best: true });
     registerFetchImageTool(server, { openWorld: true });
     registerGetToolCallLogTool(server, { best: true });

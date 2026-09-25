@@ -139,3 +139,6 @@ export const mcpBestNoTypeRules = onRequest(
   functionOptions,
   createHttpApp({ hosted: true, variant: 'best-no-type-rules' }),
 );
+
+/** Temporary: best with when-to-pick lines for three table column types, for the Q26b measurement. */
+export const mcpBestTableWhen = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'best-table-when' }));
