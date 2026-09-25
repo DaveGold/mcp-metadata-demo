@@ -150,6 +150,7 @@ const BADGE_COLORS: Record<string, string> = {
   blue: 'bg-petrol/15 text-petrol',
   gray: 'bg-grey-blue/15 text-grey-blue-darker',
   orange: 'bg-warning/15 text-warning-darker',
+  primary: 'bg-primary/15 text-primary',
 };
 
 const ICON_COLORS: Record<string, string> = {

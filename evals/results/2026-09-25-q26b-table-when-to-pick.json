@@ -1,0 +1,229 @@
+{
+ "_comment": "Q26b: when are rating, multi_badge and icon chosen? best (the lean table schema: what data each type takes) vs rich (the full schema, with when-to-pick lines) vs best-table-when (temporary: best + three lines keyed on what the data is). haiku, n=10 per cell. Registered before the run with a decision rule.",
+ "date": "2026-09-25",
+ "model": "haiku",
+ "n_per_cell": 10,
+ "total_runs": 150,
+ "protocol": "Portable harness, 25 waves of 2+2+2 interleaved, 0 retries.",
+ "headline": [
+  "A line on when to pick a type is what makes it chosen. best-table-when against best: condition score as rating 6/10 vs 0/10, a tag list as multi_badge 6/10 vs 1/10 (from prose) and 10/10 vs 3/10 (from JSON arrays), a status as icon 10/10 vs 2/10. rich, which still carries its own when-to-pick lines, reaches rating 4/10 and multi_badge 9/10 and 8/10; icon 0/10.",
+  "Without any line, rating is chosen when the score looks like one: a 1–5 satisfaction score 10/10 in every arm. A 1–6 condition score is read as a category and goes to a coloured badge.",
+  "Data already in array form helps but does not decide: on best, multi_badge 3/10 from arrays against 1/10 from prose.",
+  "Cost: best-table-when +1.8% median tokens against best (23606 vs 23196); rich 34803 (its whole server is larger).",
+  "Defect found: badgeMap accepts six colours, and a sixth tag was given a colour outside it (such as 'primary' or 'purple') in 11 calls across all arms. The input schema refused those calls before the handler, so none reached the server log (audit 18/25 waves exact, the 11 missing calls are exactly these). All 11 runs recovered."
+ ],
+ "predictions": {
+  "P1": "HOLDS — best-table-when ≥ 3 above best on 4 of 5 paths (rating +6, multi_badge prose +5, arrays +7, icon +8); stars 10/10 in both.",
+  "P2": "PARTLY — arrays 3/10 vs prose 1/10 on best: a gap of 2, below the predicted 3, above the falsification line 1.",
+  "P3": "HOLDS — rich ≥ 3 above best on rating (+4), multi_badge prose (+8), arrays (+5).",
+  "P4": "HOLDS — no path below best."
+ },
+ "decision": "The three lines go into best (P1 and P4 hold). No type is a candidate to cut: each is reached on at least one path.",
+ "caveat": "The lines use examples close to the pilot's prompts (installations, condition 1–6, running/warning/fault). The array and stars paths are the less-coached ones.",
+ "median_tokens": {
+  "best": 23196,
+  "rich": 34803,
+  "best-table-when": 23606
+ },
+ "log_audit": {
+  "waves": 25,
+  "exact": 18,
+  "harness_calls": {
+   "best": 49,
+   "rich": 54,
+   "best-table-when": 55
+  },
+  "log_rows": {
+   "best": 47,
+   "best-table-when": 50,
+   "rich": 50
+  },
+  "unlogged": "11 render_table calls refused by the input schema for a badgeMap colour outside the enum ('primary', 'purple'); SDK refusals never reach the handler or the log."
+ },
+ "cells": {
+  "haiku · table-icon · best": {
+   "target": "icon",
+   "correct": 2,
+   "n": 10,
+   "verdicts": {
+    "no table": 3,
+    "acceptable": 5,
+    "correct": 2
+   },
+   "column_type_sets": {
+    "badge,text": 5,
+    "icon,text": 2
+   }
+  },
+  "haiku · table-icon · best-table-when": {
+   "target": "icon",
+   "correct": 10,
+   "n": 10,
+   "verdicts": {
+    "correct": 10
+   },
+   "column_type_sets": {
+    "icon,text": 10
+   }
+  },
+  "haiku · table-icon · rich": {
+   "target": "icon",
+   "correct": 0,
+   "n": 10,
+   "verdicts": {
+    "acceptable": 10
+   },
+   "column_type_sets": {
+    "badge,text": 10
+   }
+  },
+  "haiku · table-multi-badge · best": {
+   "target": "multi_badge",
+   "correct": 1,
+   "n": 10,
+   "verdicts": {
+    "wrong": 9,
+    "correct": 1
+   },
+   "column_type_sets": {
+    "text": 9,
+    "multi_badge,text": 1
+   }
+  },
+  "haiku · table-multi-badge · best-table-when": {
+   "target": "multi_badge",
+   "correct": 6,
+   "n": 10,
+   "verdicts": {
+    "correct": 6,
+    "wrong": 4
+   },
+   "column_type_sets": {
+    "multi_badge,text": 6,
+    "text": 4
+   }
+  },
+  "haiku · table-multi-badge · rich": {
+   "target": "multi_badge",
+   "correct": 9,
+   "n": 10,
+   "verdicts": {
+    "correct": 9,
+    "wrong": 1
+   },
+   "column_type_sets": {
+    "multi_badge,text": 9,
+    "text": 1
+   }
+  },
+  "haiku · table-multi-badge-array · best": {
+   "target": "multi_badge",
+   "correct": 3,
+   "n": 10,
+   "verdicts": {
+    "correct": 3,
+    "wrong": 7
+   },
+   "column_type_sets": {
+    "multi_badge,text": 3,
+    "text": 7
+   }
+  },
+  "haiku · table-multi-badge-array · best-table-when": {
+   "target": "multi_badge",
+   "correct": 10,
+   "n": 10,
+   "verdicts": {
+    "correct": 10
+   },
+   "column_type_sets": {
+    "multi_badge,text": 10
+   }
+  },
+  "haiku · table-multi-badge-array · rich": {
+   "target": "multi_badge",
+   "correct": 8,
+   "n": 10,
+   "verdicts": {
+    "correct": 8,
+    "wrong": 2
+   },
+   "column_type_sets": {
+    "multi_badge,text": 8,
+    "text": 2
+   }
+  },
+  "haiku · table-rating · best": {
+   "target": "rating",
+   "correct": 0,
+   "n": 10,
+   "verdicts": {
+    "acceptable": 10
+   },
+   "column_type_sets": {
+    "badge,text": 10
+   }
+  },
+  "haiku · table-rating · best-table-when": {
+   "target": "rating",
+   "correct": 6,
+   "n": 10,
+   "verdicts": {
+    "correct": 6,
+    "acceptable": 4
+   },
+   "column_type_sets": {
+    "rating,text": 6,
+    "badge,text": 4
+   }
+  },
+  "haiku · table-rating · rich": {
+   "target": "rating",
+   "correct": 4,
+   "n": 10,
+   "verdicts": {
+    "acceptable": 6,
+    "correct": 4
+   },
+   "column_type_sets": {
+    "badge,text": 5,
+    "badge,number,text": 1,
+    "rating,text": 3,
+    "badge,rating,text": 1
+   }
+  },
+  "haiku · table-rating-stars · best": {
+   "target": "rating",
+   "correct": 10,
+   "n": 10,
+   "verdicts": {
+    "correct": 10
+   },
+   "column_type_sets": {
+    "rating,text": 10
+   }
+  },
+  "haiku · table-rating-stars · best-table-when": {
+   "target": "rating",
+   "correct": 10,
+   "n": 10,
+   "verdicts": {
+    "correct": 10
+   },
+   "column_type_sets": {
+    "rating,text": 10
+   }
+  },
+  "haiku · table-rating-stars · rich": {
+   "target": "rating",
+   "correct": 10,
+   "n": 10,
+   "verdicts": {
+    "correct": 10
+   },
+   "column_type_sets": {
+    "rating,text": 10
+   }
+  }
+ }
+}

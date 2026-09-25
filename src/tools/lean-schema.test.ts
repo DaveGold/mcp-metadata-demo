@@ -47,9 +47,16 @@ function validatorServer() {
 }
 
 describe('lean input schemas', () => {
-  it('render_table on best has the structure of the full schema, with fewer words', async () => {
+  it('render_table on best has the structure of the full schema, with fewer words and one more badge colour', async () => {
     const [best, rich] = await Promise.all([schemas('best'), schemas('rich')]);
-    expect(strip(best.render_table)).toEqual(strip(rich.render_table));
+    // best's badgeMap also takes 'primary', a colour models reach for and the renderer draws.
+    type Json = { properties: Record<string, Json>; items: Json; additionalProperties: Json; enum: string[] };
+    const badgeColour = (t: unknown) =>
+      (t as Json).properties.columns.items.properties.badgeMap.additionalProperties.properties.color;
+    const b = strip(best.render_table);
+    expect(badgeColour(b).enum).toEqual([...badgeColour(strip(rich.render_table)).enum, 'primary']);
+    badgeColour(b).enum = badgeColour(b).enum.filter((c) => c !== 'primary');
+    expect(b).toEqual(strip(rich.render_table));
     expect(JSON.stringify(best.render_table).length).toBeLessThan(JSON.stringify(rich.render_table).length * 0.7);
   });
 

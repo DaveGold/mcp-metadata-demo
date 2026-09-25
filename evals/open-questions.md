@@ -4225,3 +4225,23 @@ running/warning/fault). The two new prompts are the less-coached test.
 **Decision rule, fixed before the run:**
 - If P1 and P4 hold, the three lines go into `best`.
 - A type still below 3/10 on both of its paths in every arm is a candidate to cut from the menu.
+
+> **ANSWERED 2026-09-25 — a line on when to pick a type is what gets it chosen; the lines go into `best`.**
+> See [`results/2026-09-25-q26b-table-when-to-pick.json`](results/2026-09-25-q26b-table-when-to-pick.json). 150 runs.
+>
+> | path | best | rich | best-table-when |
+> |---|---|---|---|
+> | condition 1–6 → rating | 0/10 (badge) | 4/10 | 6/10 |
+> | satisfaction 1–5 → rating | 10/10 | 10/10 | 10/10 |
+> | tag list in prose → multi_badge | 1/10 | 9/10 | 6/10 |
+> | tag list as JSON arrays → multi_badge | 3/10 | 8/10 | 10/10 |
+> | status symbol → icon | 2/10 | 0/10 | 10/10 |
+>
+> P1, P3 and P4 hold; P2 holds only partly (arrays help by 2, not 3). The lean schema lost exactly
+> the when-to-pick lines that `rich` still has, and with them multi_badge and rating. A score that
+> looks like one (1–5) needs no line.
+>
+> The run also found a defect. `badgeMap` accepted six colours, and a sixth tag got another colour
+> in 11 calls. The input schema refused those calls before the handler, so the log missed them
+> (audit 18/25 waves exact; the missing calls are exactly these 11). All 11 runs recovered.
+> `best` now accepts `primary` too, which the renderer draws. Cost of the lines: +1.8% median tokens.

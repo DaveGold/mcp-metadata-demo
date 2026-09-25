@@ -77,6 +77,14 @@ Read that before quoting any number from this directory.
 | [`2026-09-25-q25b-lean-vs-guided-confirm.json`](2026-09-25-q25b-lean-vs-guided-confirm.json) | **Q25b: the guided schema is as reliable as the lean one, and cheaper.** 12 non-bar/line chart paths, haiku n=10, 240 runs. Correct lean 118/120, guided 117/120, largest gap on a path 2. `get_chart_guidance` fetched first 114/120. Guided −7.6% tokens against lean. By the rule registered before the run, guided goes into `best`. |
 | [`2026-09-25-q25c-guidance-tool-vs-type-only-call.json`](2026-09-25-q25c-guidance-tool-vs-type-only-call.json) | **Q25c: guidance keeps its own tool.** `best` (`get_chart_guidance`) vs the same guidance from a type-only `render_chart` call, haiku, 260 runs. Non-bar/line paths 119/120 vs 113/120; guidance fetched first 110/120 vs 78/120; tokens equal (+0.2%) despite one tool fewer. The pointer to a mode of the same tool is followed less, and a refused payload sometimes falls back to bar or line. Audit exact 26/26. |
 | [`2026-09-25-q26-table-paths-pilot.json`](2026-09-25-q26-table-paths-pilot.json) | **Q26 pilot: render_table's rarer column types are reached when the data calls for them.** One prompt per type, no type named, `best`, haiku n=5. sparkline, trend, image, boolean, search 5/5; progress 4/5. A condition score went to a coloured badge (rating 0/5), a list to text (multi_badge 0/5), a status to badge (icon 1/5). Link and footer lose runs only to text answers without a table. No guidance split for the table. Audit exact 12/12. |
+| [`2026-09-25-q26b-table-when-to-pick.json`](2026-09-25-q26b-table-when-to-pick.json) | **Q26b: a line on when to pick a column type is what gets it chosen.** best vs rich vs best + three lines keyed on what the data is, haiku n=10, 150 runs. rating 0 → 6/10, multi_badge 1 → 6/10 (prose) and 3 → 10/10 (arrays), icon 2 → 10/10; a 1–5 score is rating 10/10 without help. +1.8% tokens. Also found: badgeMap refused a seventh colour in 11 calls, invisible to the log. The lines and a `primary` badge colour go into `best`. |
+
+> ### ⚠️ 2026-09-25 — `best` CHANGED (after Q26b): when-to-pick lines for three table column types, and a seventh badge colour
+>
+> render_table's `type` describe on `best` now says when to pick multi_badge, icon and rating, and
+> `badgeMap` accepts `primary`. Only render_table moved. Earlier results on `best` that drew no
+> multi_badge, icon or rating column are unaffected. Q26b measured the change directly
+> ([`q26b`](2026-09-25-q26b-table-when-to-pick.json)). The temporary arm `best-table-when` is removed.
 
 > ### ⚠️ 2026-09-25 — `best` CHANGED (after Q25b): small render_chart schema + `get_chart_guidance`, lean render_table schema
 >
