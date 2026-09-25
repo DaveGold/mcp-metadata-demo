@@ -4170,3 +4170,20 @@ Each prompt carries its data and names no type. Scored on the last successful re
 - A type no prompt reaches is a candidate to cut.
 
 Column types, footers and features are now logged in render_table's `shape`, never headers or values.
+
+> **PILOT ANSWERED 2026-09-25 — the table menu works when the data calls for it; no guidance split.**
+> See [`results/2026-09-25-q26-table-paths-pilot.json`](results/2026-09-25-q26-table-paths-pilot.json).
+> 60 runs, audit exact 12/12, 0 of 54 render_table calls refused.
+> - **Reached:** sparkline, trend, image, boolean and search 5/5; progress 4/5 (+1 percentage);
+>   badge 5/5.
+> - **Passed over for a simpler form that reads as well:** a 1–6 condition score went to a
+>   coloured badge 5/5 (rating 0/5); installations per building went to a text list 5/5
+>   (multi_badge 0/5); a status symbol went to badge 3/5 (icon 1/5). The schema itself names
+>   badge for a status.
+> - **Lost to form, not type:** link and footer runs sometimes answered in text without a table.
+>   Every table drawn used the target: link 3/3, footer 2/2.
+>
+> P1, P2 and P4 hold; P3 is falsified on footer (2/5, no table drawn). The nine types were absent
+> earlier because no question called for them. A split would be a cost question only: about 2.6k
+> characters, a few percent per run after a guidance tool's own entry. `render_map` has four
+> marker types of one line each and nothing to split.

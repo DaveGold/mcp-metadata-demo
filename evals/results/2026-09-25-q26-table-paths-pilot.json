@@ -1,0 +1,173 @@
+{
+ "_comment": "Q26 pilot: does the model use render_table's richer column types when the data calls for them? One prompt per rarely used type or option, data in the prompt, no type named. best, haiku, n=5. Registered before the run.",
+ "date": "2026-09-25",
+ "model": "haiku",
+ "n_per_cell": 5,
+ "total_runs": 60,
+ "protocol": "Portable harness, 12 waves of 5, 0 retries.",
+ "headline": [
+  "The menu works when the data calls for it: sparkline, trend, image and boolean 5/5, search 5/5, progress 4/5 (the fifth a percentage). They were absent from the 227 earlier tables because those questions never called for them, not because they are unreachable.",
+  "Two types are passed over for a simpler form: a 1–6 condition score went to a coloured badge 5/5, never rating; a list of installations per building went to a text cell 5/5, never multi_badge. A status symbol went to badge 3/5 and icon 1/5; the schema itself calls badge the type for a status.",
+  "Link and footer lose runs to form, not type: 2 link and 3 footer runs answered in text or a markdown table without calling render_table. Every drawn table used the target: link 3/3, footer 2/2. One icon run declined the question as outside the building domain.",
+  "No render_table call was refused (0 of 54)."
+ ],
+ "predictions": {
+  "P1": "HOLDS — 10 of 12 paths reach the target or an alternative in ≥ 3/5 (not multi_badge 0/5, footer 2/5).",
+  "P2": "HOLDS — sparkline 5/5, progress 4/5, trend 5/5.",
+  "P3": "FALSIFIED on footer — 2/5, because 3 runs drew no table; badge 5/5.",
+  "P4": "HOLDS, vacuously — no refusals."
+ },
+ "what_follows": "No guidance split for render_table: the rarer types are reached when the data calls for them, so the question would be cost alone (about 2.6k of 7.9k characters, a few percent per run after a guidance tool's own entry). rating and multi_badge are passed over for forms that read as well (a coloured badge, a text list); not a defect on this data.",
+ "log_audit": {
+  "waves": 12,
+  "exact": 12,
+  "harness_calls": 54,
+  "log_rows": 54,
+  "note": "render_table rows now carry columnTypes, footers and features in shape."
+ },
+ "cells": {
+  "haiku · table-sparkline · best": {
+   "target": "sparkline",
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "column_type_sets": {
+    "number,sparkline,text": 5
+   }
+  },
+  "haiku · table-progress · best": {
+   "target": "progress",
+   "correct": 4,
+   "n": 5,
+   "verdicts": {
+    "correct": 4,
+    "acceptable": 1
+   },
+   "column_type_sets": {
+    "currency,progress,text": 4,
+    "badge,currency,percentage,text": 1
+   }
+  },
+  "haiku · table-trend · best": {
+   "target": "trend",
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "column_type_sets": {
+    "number,text,trend": 5
+   }
+  },
+  "haiku · table-rating · best": {
+   "target": "rating",
+   "correct": 0,
+   "n": 5,
+   "verdicts": {
+    "acceptable": 5
+   },
+   "column_type_sets": {
+    "badge,text": 5
+   }
+  },
+  "haiku · table-link · best": {
+   "target": "link",
+   "correct": 3,
+   "n": 5,
+   "verdicts": {
+    "correct": 3,
+    "no table (text answer)": 2
+   },
+   "column_type_sets": {
+    "link,text": 3,
+    "none": 2
+   }
+  },
+  "haiku · table-image · best": {
+   "target": "image",
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "column_type_sets": {
+    "image,text": 5
+   }
+  },
+  "haiku · table-boolean · best": {
+   "target": "boolean",
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "column_type_sets": {
+    "boolean,text": 5
+   }
+  },
+  "haiku · table-icon · best": {
+   "target": "icon",
+   "correct": 1,
+   "n": 5,
+   "verdicts": {
+    "acceptable": 3,
+    "correct": 1,
+    "no table (text answer)": 1
+   },
+   "column_type_sets": {
+    "badge,text": 3,
+    "icon,text": 1,
+    "none": 1
+   }
+  },
+  "haiku · table-multi-badge · best": {
+   "target": "multi_badge",
+   "correct": 0,
+   "n": 5,
+   "verdicts": {
+    "wrong": 5
+   },
+   "column_type_sets": {
+    "text": 5
+   }
+  },
+  "haiku · table-badge · best": {
+   "target": "badge",
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "column_type_sets": {
+    "badge,text": 5
+   }
+  },
+  "haiku · table-footer · best": {
+   "target": "footer",
+   "correct": 2,
+   "n": 5,
+   "verdicts": {
+    "no table (text answer)": 3,
+    "correct": 2
+   },
+   "column_type_sets": {
+    "none": 3,
+    "currency,text": 2
+   }
+  },
+  "haiku · table-search · best": {
+   "target": "search",
+   "correct": 5,
+   "n": 5,
+   "verdicts": {
+    "correct": 5
+   },
+   "column_type_sets": {
+    "badge,number,text": 4,
+    "number,text": 1
+   }
+  }
+ }
+}
