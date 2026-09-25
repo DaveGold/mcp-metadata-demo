@@ -75,6 +75,14 @@
     "eval-best-no-type-rules": {
       "type": "http",
       "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBestNoTypeRules"
+    },
+    "eval-best-lean-chart": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBestLeanChart"
+    },
+    "eval-best-no-when": {
+      "type": "http",
+      "url": "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBestNoWhen"
     }
   }
 }

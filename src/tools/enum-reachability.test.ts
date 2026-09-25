@@ -147,48 +147,51 @@ const TABLE_COLUMNS: { type: string; col: Record<string, unknown>; value: unknow
   { type: 'image', col: {}, value: 'data:image/png;base64,iVBORw0KGgo=' },
 ];
 
-describe.each(['best', 'rich'] as ServerVariant[])('every enum value is reachable on %s', (variant) => {
-  it.each(Object.entries(CHART_PAYLOADS))('render_chart type=%s', async (type, payload) => {
-    const r = await call(await connect(variant), 'render_chart', { type, title: 't', ...payload });
-    expect(r.ok, r.text.slice(0, 300)).toBe(true);
-  });
-
-  it('covers every chart type in the enum', async () => {
-    const { tools } = await (await connect(variant)).listTools();
-    const e = (
-      tools.find((t) => t.name === 'render_chart')!.inputSchema as { properties: { type: { enum: string[] } } }
-    ).properties.type.enum;
-    expect(Object.keys(CHART_PAYLOADS).sort()).toEqual([...e].sort());
-  });
-
-  it.each(TABLE_COLUMNS.map((c) => [c.type, c]))('render_table column type=%s', async (type, c) => {
-    const col = c as (typeof TABLE_COLUMNS)[number];
-    const r = await call(await connect(variant), 'render_table', {
-      title: 't',
-      columns: [{ key: 'v', header: 'Value', type, ...col.col }],
-      data: [{ v: col.value }],
+describe.each(['best', 'rich', 'best-lean-chart', 'best-no-when'] as ServerVariant[])(
+  'every enum value is reachable on %s',
+  (variant) => {
+    it.each(Object.entries(CHART_PAYLOADS))('render_chart type=%s', async (type, payload) => {
+      const r = await call(await connect(variant), 'render_chart', { type, title: 't', ...payload });
+      expect(r.ok, r.text.slice(0, 300)).toBe(true);
     });
-    expect(r.ok, r.text.slice(0, 300)).toBe(true);
-  });
 
-  it('covers every table column type in the enum', async () => {
-    const { tools } = await (await connect(variant)).listTools();
-    const e = (
-      tools.find((t) => t.name === 'render_table')!.inputSchema as {
-        properties: { columns: { items: { properties: { type: { enum: string[] } } } } };
-      }
-    ).properties.columns.items.properties.type.enum;
-    expect(TABLE_COLUMNS.map((c) => c.type).sort()).toEqual([...e].sort());
-  });
-
-  it.each(['car', 'building', 'project', 'pin'])('render_map marker type=%s', async (type) => {
-    const r = await call(await connect(variant), 'render_map', {
-      title: 't',
-      markers: [[52.337, 4.875, 'Mahlerlaan 10', 'label A', type]],
+    it('covers every chart type in the enum', async () => {
+      const { tools } = await (await connect(variant)).listTools();
+      const e = (
+        tools.find((t) => t.name === 'render_chart')!.inputSchema as { properties: { type: { enum: string[] } } }
+      ).properties.type.enum;
+      expect(Object.keys(CHART_PAYLOADS).sort()).toEqual([...e].sort());
     });
-    expect(r.ok, r.text.slice(0, 300)).toBe(true);
-  });
-});
+
+    it.each(TABLE_COLUMNS.map((c) => [c.type, c]))('render_table column type=%s', async (type, c) => {
+      const col = c as (typeof TABLE_COLUMNS)[number];
+      const r = await call(await connect(variant), 'render_table', {
+        title: 't',
+        columns: [{ key: 'v', header: 'Value', type, ...col.col }],
+        data: [{ v: col.value }],
+      });
+      expect(r.ok, r.text.slice(0, 300)).toBe(true);
+    });
+
+    it('covers every table column type in the enum', async () => {
+      const { tools } = await (await connect(variant)).listTools();
+      const e = (
+        tools.find((t) => t.name === 'render_table')!.inputSchema as {
+          properties: { columns: { items: { properties: { type: { enum: string[] } } } } };
+        }
+      ).properties.columns.items.properties.type.enum;
+      expect(TABLE_COLUMNS.map((c) => c.type).sort()).toEqual([...e].sort());
+    });
+
+    it.each(['car', 'building', 'project', 'pin'])('render_map marker type=%s', async (type) => {
+      const r = await call(await connect(variant), 'render_map', {
+        title: 't',
+        markers: [[52.337, 4.875, 'Mahlerlaan 10', 'label A', type]],
+      });
+      expect(r.ok, r.text.slice(0, 300)).toBe(true);
+    });
+  },
+);
 
 describe("best's badge colours", () => {
   it.each(['green', 'red', 'yellow', 'blue', 'gray', 'orange', 'primary'])(

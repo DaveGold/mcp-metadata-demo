@@ -139,3 +139,9 @@ export const mcpBestNoTypeRules = onRequest(
   functionOptions,
   createHttpApp({ hosted: true, variant: 'best-no-type-rules' }),
 );
+
+/** Temporary, for the Q27 measurement. */
+export const mcpBestLeanChart = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'best-lean-chart' }));
+
+/** Temporary, for the Q27 measurement. */
+export const mcpBestNoWhen = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'best-no-when' }));
