@@ -4122,3 +4122,18 @@ otherwise lean does. P3 and P4 inform the skill, not the choice.
 
 **Decision rule, fixed before the run:** the type-only call replaces `get_chart_guidance` in
 `best` if P1 and P3 hold. Otherwise `best` keeps the tool. P2 informs the skill.
+
+> **ANSWERED 2026-09-25 — the guidance keeps its own tool.** See
+> [`results/2026-09-25-q25c-guidance-tool-vs-type-only-call.json`](results/2026-09-25-q25c-guidance-tool-vs-type-only-call.json).
+> 260 runs, audit exact 26/26.
+>
+> | | best (`get_chart_guidance`) | inline (type-only render_chart call) |
+> |---|---|---|
+> | 12 non-bar/line paths correct | 119/120 | 113/120 (treemap 7, boxplot 8) |
+> | guidance fetched before the first chart | 110/120 | 78/120 |
+> | median tokens, 12 paths | 24.2k | 24.2k (+0.2%) |
+>
+> P1, P2 and P3 falsified, P4 holds. The model does not treat "call this tool with only `type`
+> first" as a separate step: it tries the payload straight away, and when that is refused it
+> sometimes falls back to bar or line. Saving one tool entry (932 characters) did not lower the
+> cost. By the rule fixed before the run, `best` keeps `get_chart_guidance`.

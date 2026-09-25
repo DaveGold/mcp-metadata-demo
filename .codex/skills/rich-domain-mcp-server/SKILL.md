@@ -296,7 +296,9 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
 - **Thresholded results are returned complete** [Q11b].
 - **Responses stay under the host limit**; guidance lives under the fixed key `interpretation` [Q9].
 - **A pointer to guidance is a requirement** ("REQUIRED: …"), or the guidance is its own tool
-  [Q8b].
+  [Q8b]. Make it its own tool, not a mode of the tool it guides: "call render_chart with only
+  `type` first" was followed 78/120 against 110/120 for `get_chart_guidance`, and saving the tool
+  entry saved no tokens [Q25c].
 - **Every rule, rename and alert has a provenance line in source** — date + the result, incident
   or expert answer behind it — and it is never serialized [Q18].
 - **An empty result names its branch** ("not found — EP-Online not queried" ≠ "0 labels").

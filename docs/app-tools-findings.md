@@ -129,3 +129,7 @@ that never draw a chart. Two smaller versions were measured against `best`
   ([`q25b`](../evals/results/2026-09-25-q25b-lean-vs-guided-confirm.json)): lean 118/120, guided
   117/120, largest gap on a path 2; guided −7.6% against lean. Promoted into `best` on 2026-09-25;
   the temporary variants `best-lean` and `best-guided` are removed.
+- **Its own tool, not a mode of render_chart** ([`q25c`](../evals/results/2026-09-25-q25c-guidance-tool-vs-type-only-call.json)):
+  the same guidance from a render_chart call with only `type` was fetched first 78/120 against
+  110/120, and paths fell to 113/120 against 119/120 (treemap and boxplot: refused, then bar or
+  line). One tool fewer saved no tokens. `best` keeps `get_chart_guidance`.

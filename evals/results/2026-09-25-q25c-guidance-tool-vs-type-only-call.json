@@ -1,0 +1,249 @@
+{
+ "_comment": "Q25c: does the chart guidance need its own tool? best (get_chart_guidance(type), a REQUIRED first call) vs best-inline-guidance (temporary: no guidance tool; render_chart called with only `type` renders nothing and returns the same guidance; a wrong shape is refused with the shape and an example either way). Everything else byte-identical. Registered before the run with a decision rule.",
+ "date": "2026-09-25",
+ "model": "haiku",
+ "total_runs": 260,
+ "n_per_cell": "10 on the 12 non-bar/line paths, 5 on bar and line",
+ "tools_list_chars": {
+  "best": 43954,
+  "best-inline-guidance": 43022
+ },
+ "protocol": "Portable harness, 26 waves of 5+5 interleaved, 0 retries.",
+ "headline": [
+  "Its own tool wins. Correct on the 12 non-bar/line paths: best 119/120, inline 113/120. Inline fell below 9/10 on two paths (treemap 7/10, boxplot 8/10), a gap of 3 on treemap. Bar and line 10/10 in both.",
+  "The pointer to a mode of the same tool is followed far less: a type-only call before the first chart 78/120, against get_chart_guidance 110/120 (inline below 6/10 on pie, radar, funnel, polarArea). The model tries the payload straight away, is refused (16 runs; 15 recover), or falls back to bar or line.",
+  "Nothing is saved: the 932 characters fewer in tools/list are offset, plausibly by the extra refused calls. Median tokens on the 12 paths best 24196, inline 24236 (+0.2%); both a median of 2 calls.",
+  "A type-only call never rendered (P4 holds)."
+ ],
+ "predictions": {
+  "P1": "FALSIFIED — inline below 9/10 on 2 paths (treemap 7, boxplot 8); gap 3 on treemap.",
+  "P2": "FALSIFIED — type-only call first below 6/10 on pie (3), radar (4), funnel (4), polarArea (5); 0/10 on bar and line.",
+  "P3": "FALSIFIED — inline +0.2% median tokens over the 12 paths.",
+  "P4": "HOLDS — 0 type-only calls rendered."
+ },
+ "decision": "best keeps get_chart_guidance (P1 and P3 fail).",
+ "median_tokens": {
+  "12 paths": {
+   "best": 24196,
+   "best-inline-guidance": 24236
+  },
+  "bar and line": {
+   "best": 23486,
+   "best-inline-guidance": 23303
+  }
+ },
+ "guidance_first": {
+  "best": "110/120 (pie 1/10, polarArea 9/10, the rest 10/10)",
+  "best-inline-guidance": "78/120 (pie 3, doughnut 6, radar 4, polarArea 5, bubble 10, scatter 7, sankey 8, matrix 8, treemap 6, boxplot 7, funnel 4, graph 10)"
+ },
+ "log_audit": {
+  "waves": 26,
+  "exact": 26,
+  "harness_calls": 476,
+  "log_rows": 476
+ },
+ "cells": {
+  "haiku · path-bar · best": {
+   "correct": 5,
+   "n": 5,
+   "finals": {
+    "bar": 5
+   }
+  },
+  "haiku · path-bar · best-inline-guidance": {
+   "correct": 5,
+   "n": 5,
+   "finals": {
+    "bar": 5
+   }
+  },
+  "haiku · path-boxplot · best": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "boxplot": 10
+   }
+  },
+  "haiku · path-boxplot · best-inline-guidance": {
+   "correct": 8,
+   "n": 10,
+   "finals": {
+    "boxplot": 8,
+    "line": 2
+   }
+  },
+  "haiku · path-bubble · best": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "bubble": 10
+   }
+  },
+  "haiku · path-bubble · best-inline-guidance": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "bubble": 10
+   }
+  },
+  "haiku · path-doughnut · best": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "doughnut": 10
+   }
+  },
+  "haiku · path-doughnut · best-inline-guidance": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "doughnut": 10
+   }
+  },
+  "haiku · path-funnel · best": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "funnel": 10
+   }
+  },
+  "haiku · path-funnel · best-inline-guidance": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "funnel": 10
+   }
+  },
+  "haiku · path-graph · best": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "graph": 10
+   }
+  },
+  "haiku · path-graph · best-inline-guidance": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "graph": 10
+   }
+  },
+  "haiku · path-line · best": {
+   "correct": 5,
+   "n": 5,
+   "finals": {
+    "line": 5
+   }
+  },
+  "haiku · path-line · best-inline-guidance": {
+   "correct": 5,
+   "n": 5,
+   "finals": {
+    "line": 5
+   }
+  },
+  "haiku · path-matrix · best": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "matrix": 10
+   }
+  },
+  "haiku · path-matrix · best-inline-guidance": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "matrix": 10
+   }
+  },
+  "haiku · path-pie · best": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "pie": 10
+   }
+  },
+  "haiku · path-pie · best-inline-guidance": {
+   "correct": 9,
+   "n": 10,
+   "finals": {
+    "pie": 9,
+    "doughnut": 1
+   }
+  },
+  "haiku · path-polarArea · best": {
+   "correct": 9,
+   "n": 10,
+   "finals": {
+    "polarArea": 9,
+    "bar": 1
+   }
+  },
+  "haiku · path-polarArea · best-inline-guidance": {
+   "correct": 9,
+   "n": 10,
+   "finals": {
+    "polarArea": 9,
+    "bar": 1
+   }
+  },
+  "haiku · path-radar · best": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "radar": 10
+   }
+  },
+  "haiku · path-radar · best-inline-guidance": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "radar": 10
+   }
+  },
+  "haiku · path-sankey · best": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "sankey": 10
+   }
+  },
+  "haiku · path-sankey · best-inline-guidance": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "sankey": 10
+   }
+  },
+  "haiku · path-scatter · best": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "scatter": 10
+   }
+  },
+  "haiku · path-scatter · best-inline-guidance": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "scatter": 10
+   }
+  },
+  "haiku · path-treemap · best": {
+   "correct": 10,
+   "n": 10,
+   "finals": {
+    "treemap": 10
+   }
+  },
+  "haiku · path-treemap · best-inline-guidance": {
+   "correct": 7,
+   "n": 10,
+   "finals": {
+    "treemap": 7,
+    "bar": 1,
+    "none": 2
+   }
+  }
+ }
+}
