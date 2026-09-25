@@ -4097,3 +4097,43 @@ otherwise lean does. P3 and P4 inform the skill, not the choice.
 > Pointer followed 114/120 (pie 6/10, where the small schema already shows the payload). Median
 > tokens guided −7.6% against lean, at 2 calls instead of 1. P1, P2, P4 hold; P3 partly (pie).
 > By the rule fixed before the run, guided goes into `best`.
+
+## Q25c — Does the chart guidance need its own tool? Registered 2026-09-25, BEFORE the run
+
+> **REGISTERED before any run.** `best` now sends the shapes of 12 chart types through a separate
+> `get_chart_guidance(type)` (Q25b). That tool costs 935 characters in `tools/list`, on every turn.
+> The owner asked whether the guidance could come from render_chart itself. `best-inline-guidance`
+> (temporary) has no guidance tool. Its `type` describe says: for any chart other than a plain bar or
+> line, first call render_chart with only `type`. That call renders nothing and returns the same
+> guidance text. A wrong shape is still refused with the expected shape and an example.
+> Everything else is byte-identical to `best`.
+
+**Run.** `best` vs `best-inline-guidance`, haiku.
+- The 12 non-bar/line chart paths at n=10 per cell.
+- `path-bar` and `path-line` at n=5.
+- 5+5 interleaved per wave, 26 waves, 260 runs.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | no loss: inline ≥ 9/10 on at least 11 of the 12 paths, and never ≥ 3 below `best` on a path | inline below 9/10 on 2+ paths, or a gap ≥ 3 |
+| P2 | the pointer is followed: a type-only render_chart call before the first rendering call ≥ 8/10 on every non-bar/line path; ≤ 1/5 on bar and line | < 6/10 on any non-bar/line path |
+| P3 | cost: inline median tokens ≤ `best` over the 12 paths (one tool fewer on every turn, the same number of calls) | inline > `best` |
+| P4 | a type-only call never renders a chart | any type-only call that renders (determinate; a test pins it) |
+
+**Decision rule, fixed before the run:** the type-only call replaces `get_chart_guidance` in
+`best` if P1 and P3 hold. Otherwise `best` keeps the tool. P2 informs the skill.
+
+> **ANSWERED 2026-09-25 — the guidance keeps its own tool.** See
+> [`results/2026-09-25-q25c-guidance-tool-vs-type-only-call.json`](results/2026-09-25-q25c-guidance-tool-vs-type-only-call.json).
+> 260 runs, audit exact 26/26.
+>
+> | | best (`get_chart_guidance`) | inline (type-only render_chart call) |
+> |---|---|---|
+> | 12 non-bar/line paths correct | 119/120 | 113/120 (treemap 7, boxplot 8) |
+> | guidance fetched before the first chart | 110/120 | 78/120 |
+> | median tokens, 12 paths | 24.2k | 24.2k (+0.2%) |
+>
+> P1, P2 and P3 falsified, P4 holds. The model does not treat "call this tool with only `type`
+> first" as a separate step: it tries the payload straight away, and when that is refused it
+> sometimes falls back to bar or line. Saving one tool entry (932 characters) did not lower the
+> cost. By the rule fixed before the run, `best` keeps `get_chart_guidance`.
