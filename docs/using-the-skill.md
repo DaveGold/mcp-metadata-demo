@@ -1,12 +1,12 @@
 # Using the skill in your own repo
 
 The skill is meant to be copied into other repos **unchanged**, so that a later sync is a copy,
-not a merge. Your own knowledge — platform and deploy wiring, auth, vendor quirks, conventions,
-telemetry, your own reference implementations, your own evidence — goes in overlays that the
+not a merge. Your own knowledge (platform and deploy wiring, auth, vendor quirks, conventions,
+telemetry, your own reference implementations, your own evidence) goes in overlays that the
 skill reads at fixed points.
 
-1. **Copy the skill folder** — `.claude/skills/rich-domain-mcp-server/`, and the `.codex/` copy
-   if you use Codex — and record the commit or tag you took. Pin a tag (`skill-v1.0.0`, …) rather
+1. **Copy the skill folder** (`.claude/skills/rich-domain-mcp-server/`, and the `.codex/` copy
+   if you use Codex) and record the commit or tag you took. Pin a tag (`skill-v1.0.0`, …) rather
    than `main`.
 2. **Create `.skill-local/rich-domain-mcp-server/` at your repo root**, starting from the skill's
    [`local-template/`](../.claude/skills/rich-domain-mcp-server/local-template/README.md). One
@@ -21,7 +21,7 @@ skill reads at fixed points.
    node .claude/skills/rich-domain-mcp-server/check-overlays.mjs
    ```
 
-The contract — which documents take an overlay, the version, and what a major bump means — is in
+The contract (which documents take an overlay, the version, and what a major bump means) is in
 [`overlays.json`](../.claude/skills/rich-domain-mcp-server/overlays.json) and in the skill's
 *Local overlays* section. An overlay may tighten any rule; it may relax a rule that carries an
 evidence tag only with a local evidence row that points at a reproducible artifact.

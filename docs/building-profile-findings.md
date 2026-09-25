@@ -1,4 +1,4 @@
-# get_building_profile — findings
+# get_building_profile: findings
 
 BAG (PDOK Locatieserver + BAG OGC v2) and EP-Online V5, via `src/clients/`. Frozen reference
 records: `evals/addresses.json` (captured 2026-09-20 from the live `rich` server; values drift,
@@ -33,7 +33,7 @@ Repro: `npx tsx scripts/smoke.ts 3543AR 1` (NEN 7120), `1082PP 10` (NTA 8800 off
 
 ## 7. Known defects (in this repo's own `rich` arm)
 
-- **EP-1 vs Paris Proof alert** — `src/domain/generate-alerts.ts:102-115` compares
+- **EP-1 vs Paris Proof alert**: `src/domain/generate-alerts.ts:102-115` compares
   `ep1_energiebehoefte_kwh_m2` (NTA 8800, calculated net demand) with "Paris Proof 2040 target
   70 kWh/m² offices / 100 residential", a target defined on MEASURED final energy. It fires on
   the `benchmark-trap` record itself (Mahlerlaan, 81.68 > 70), and on Troelstralaan (132.74) and
@@ -54,10 +54,10 @@ Repro: `npx tsx scripts/smoke.ts 3543AR 1` (NEN 7120), `1082PP 10` (NTA 8800 off
   (char 766, inside the cut; `richPreamble` in `get-building-profile.ts`). benchmark-trap `rich`:
   haiku 0/10 → 10/10, sonnet 1/10 → 10/10; building-size unchanged at 10/10, although QUERY
   STRATEGY item 5 now falls past the cut. The production Duurzaam server has the same defect
-  (MCPSER-81) — fix there needs both halves: remove the alert AND deliver the fact.
-- **BAG-area fallback for totals** — `benchmarkArea()` falls back to the BAG area when there is
+  (MCPSER-81). The fix there needs both halves: remove the alert AND deliver the fact.
+- **BAG-area fallback for totals**: `benchmarkArea()` falls back to the BAG area when there is
   no thermal zone, mixing scopes by up to 1.8×.
-- **Large-pand alert threshold** — fires only above 10 verblijfsobjecten; the scope problem
+- **Large-pand alert threshold**: fires only above 10 verblijfsobjecten; the scope problem
   exists from 2.
 
 ## 8. Re-check when the registers change
@@ -78,17 +78,17 @@ Repro: `npx tsx scripts/smoke.ts 3543AR 1` (NEN 7120), `1082PP 10` (NTA 8800 off
 
 ### 2026-09-23 — `rich` → `best`, following `references/audit.md`
 
-**Step 1 — inventory** (repro: connect `createServer({ variant: 'rich' })` over
+**Step 1: inventory** (repro: connect `createServer({ variant: 'rich' })` over
 `InMemoryTransport`, measure `listTools()` descriptions and `getInstructions()`):
 
 | surface | length | past the 2,048 cut |
 |---|---|---|
-| `get_building_profile` description | 7,360 | everything from INTERPRETATION (char 1,759): Paris Proof line (3,240), CALCULATED vs MEASURED (3,379), overheating threshold (6,183), ALERTS paragraph (6,781) — 72% |
+| `get_building_profile` description | 7,360 | everything from INTERPRETATION (char 1,759): Paris Proof line (3,240), CALCULATED vs MEASURED (3,379), overheating threshold (6,183), ALERTS paragraph (6,781); 72% of the description |
 | server instructions | 2,861 | the tail, including part of the weather section |
 | output schema | 7,375 chars | all of it is undelivered (Q11); the ep1 describe repeats the Paris Proof target |
-| largest response | ~5k chars | — |
+| largest response | ~5k chars | n/a |
 
-**Step 2 — name audit.** Renamed (reason + provenance per row in `best-field-names.ts`):
+**Step 2: name audit.** Renamed (reason + provenance per row in `best-field-names.ts`):
 `oppervlakte_m2` (scope), `aantal_verblijfsobjecten` (scope), ep1/ep2/warmtebehoefte/co2/
 energie_index/aandeel_hernieuwbaar/EMG variants (calculated), `berekend_energieverbruik_kwh_m2`
 (reads as metered), `temperatuuroverschrijding` and `compactheid` (unitless), `sbi_code`
@@ -96,19 +96,19 @@ energie_index/aandeel_hernieuwbaar/EMG variants (calculated), `berekend_energiev
 because the upstream name states the wrong unit for that method. Kept: bouwjaar, gebruiksdoel,
 energielabel, berekeningstype, eis_* (legal limits, already unit-bearing), matchStatus.
 
-**Step 3 — delivery.** New description 1,719 chars: what it is and is NOT (no metered data),
+**Step 3: delivery.** New description of 1,719 chars: what it is and is NOT (no metered data),
 "read `interpretation` first", four record-independent rules as fact + instruction, input
 conventions. Everything record-specific moved to the response rule registry
 (`src/domain/best-building-rules.ts`). Instructions 744 chars.
 
-**Step 4 — wrongness.** Paris Proof comparison removed everywhere (see §7); BAG-area fallback
+**Step 4: wrongness.** Paris Proof comparison removed everywhere (see §7); BAG-area fallback
 replaced by `null` + reason; one-unit-of-many fires from 2 units; BENG stays because both sides
 are calculated (stated in the alert). New computed values: space-heating gas, total CO₂,
-heat-pump band with the margin to the nearest boundary, overheating verdict, area ratio —
+heat-pump band with the margin to the nearest boundary, overheating verdict, area ratio,
 each with unit, basis and provenance, pinned to the eval ground truth in
 `src/tools/best-arm.test.ts`.
 
-**Step 5 — provenance.** Every rule and rename carries a dated provenance line; where the
+**Step 5: provenance.** Every rule and rename carries a dated provenance line; where the
 original reason was never recorded, the line says so ("reason not recorded").
 
-**Step 6 — measure.** Registered as Q19 in `evals/open-questions.md`.
+**Step 6: measure.** Registered as Q19 in `evals/open-questions.md`.

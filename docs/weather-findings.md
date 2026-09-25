@@ -1,4 +1,4 @@
-# get_weather_context — findings
+# get_weather_context: findings
 
 Open-Meteo historical archive (`archive-api.open-meteo.com/v1/archive`) plus the forecast API
 for the archive's ~2-day lag and up to today+14. Keyless. Frozen reference values:
@@ -30,7 +30,7 @@ without new findings are omitted.
 - `gasNormalizationFactor` is returned for any window, including a single quarter (2.53 for
   Q1 2024 = 2800 ÷ 1106.3). The rule against using it sits at description char 3,958, past the
   2,048 cut. Q12b: with no rule 16/20 runs took that road.
-- Zero measured days returns `periodMean: 0`, `gasNormalizationFactor: 0` — zeros that read as
+- Zero measured days returns `periodMean: 0`, `gasNormalizationFactor: 0`: zeros that read as
   measurements.
 - `isFullYear` is "≥ 330 days", not "12 whole months".
 - The fighting-system alert truncates after five dates with "(+N more)"; Q11 sonnet scored
@@ -56,7 +56,7 @@ without new findings are omitted.
   says what the reference is for, but not what NOT to do with it. **Fixed 2026-09-24** with a
   "do not scale it to a full year" clause in the alert, the normalization line and the
   description. Q19b: 18/20 correct, annualising among correct answers 10/16 → 5/18. Reduced, not
-  gone — several runs quote the caveat and annualise anyway.
+  gone: several runs quote the caveat and annualise anyway.
 - **Forecast window (head fixed 2026-09-24, Q19c: calls 10/10, correct 5/10).** On a window ending in the future, haiku made no call at all in 8 of 10 runs
   and asked for the gas figure: the description's "never weather-correct against forecast days"
   was read, and the forecast tail was never shown. `best` 2/10, `rich` 4/10 (a gap under the
@@ -64,7 +64,7 @@ without new findings are omitted.
 
 ## 10. Decisions confirmed
 
-- 2026-09-23: `hdd` / `weightedHdd` names are NOT changed — Q11 measured no confusion
+- 2026-09-23: `hdd` / `weightedHdd` names are NOT changed, because Q11 measured no confusion
   (weightedHdd chosen 20/20). Only `gasNormalizationFactor` is renamed, to
   `fullYearGasNormalizationFactor`, because its validity is the trap.
 
@@ -72,10 +72,10 @@ without new findings are omitted.
 
 ### 2026-09-23 — `rich` → `best`, following `references/audit.md`
 
-**Inventory.** Description 5,291 chars: INTERPRETATION at 3,172, the partial-period rule at
-3,958, the `select` notes at 4,673, ALERTS at 5,100 — 61% past the cut. A full-year response
+**Inventory.** Description 5,291 chars, 61% past the cut: INTERPRETATION at 3,172, the partial-period rule at
+3,958, the `select` notes at 4,673, ALERTS at 5,100. A full-year response
 without projection is ~79k chars, over the host's ~25k-token replacement limit (Q9). The
-`select` field list is in the input schema (delivered) — kept.
+`select` field list is in the input schema (delivered), so it is kept.
 
 **Changes in `best`** (`src/tools/get-weather-context-best.ts`, rules in
 `src/domain/best-weather-rules.ts`):

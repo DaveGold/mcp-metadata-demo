@@ -5,10 +5,10 @@ _By [David Golverdingen](https://davidgolverdingen.nl/en), companion to [_The Mi
 This repository uses the terms below with specific meanings. When this repo says **X**, this page
 says what X means. It does not argue for the ideas; for that:
 
-- [Design](design.md) — the principles and what they cost
-- [Reference implementation](reference-implementation.md) — how `best` implements them
-- [Research](../evals/README.md) — what was measured
-- [Evidence register](../.claude/skills/rich-domain-mcp-server/references/evidence.md) — the run
+- [Design](design.md): the principles and what they cost
+- [Reference implementation](reference-implementation.md): how `best` implements them
+- [Research](../evals/README.md): what was measured
+- [Evidence register](../.claude/skills/rich-domain-mcp-server/references/evidence.md): the run
   behind each rule, by row ID (`Q7`, `BT`, …)
 
 Short formulations of the same ideas, with their evidence status: [Quotes & principles](quotes.md).
@@ -19,8 +19,8 @@ Short formulations of the same ideas, with their evidence status: [Quotes & prin
 
 ### Rich Domain MCP
 
-An architectural pattern for MCP interfaces that own enough correct domain knowledge —
-semantics, constraints, reference data, derived values, record-specific interpretation — for an
+An architectural pattern for MCP interfaces that own enough correct domain knowledge
+(semantics, constraints, reference data, derived values, record-specific interpretation) for an
 agent to use a capability without reconstructing the domain from raw API data, **and** that
 deliver that knowledge through surfaces the host actually passes to the model.
 
@@ -51,7 +51,7 @@ delivery may be projected into names, descriptions, schemas or responses.
 
 ### Anti-metadata
 
-Metadata that makes the model more wrong than no metadata would — typically a name or a line that
+Metadata that makes the model more wrong than no metadata would: typically a name or a line that
 implies a different quantity than the field holds. It overrides the correct prose next to it
 ([N2](../.claude/skills/rich-domain-mcp-server/references/evidence.md#naming),
 [BT](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship)).
@@ -70,7 +70,7 @@ keeps "domain knowledge belongs in the MCP server" from being read as "put all o
 description."
 
 **Projection** is the act of exposing a selected part of canonical knowledge through the surface
-that suits the host and the moment — a name, the description head, the input schema, the
+that suits the host and the moment: a name, the description head, the input schema, the
 response.
 
 ### Protocol-visible vs model-effective
@@ -115,7 +115,7 @@ schema could not express a needed parameter, no amount of prose helped
 
 ### Shipped data
 
-The data a rule needs in order to be applied, returned with the result — rather than a rule that
+The data a rule needs in order to be applied, returned with the result, rather than a rule that
 sends the model off to fetch it. Short form: _if a rule needs data the payload lacks, ship the
 data_ ([Q16, Q16b](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship)).
 Distinct from computation: supply the inputs first; compute when the result is determinate.
@@ -124,7 +124,7 @@ Distinct from computation: supply the inputs first; compute when the result is d
 
 A result that follows reproducibly from known inputs and a defined domain rule. Where it belongs
 to the capability, the server computes it instead of every model reconstructing it. A computed
-value carries its result, unit, basis and provenance — or `null` with the reason it could not be
+value carries its result, unit, basis and provenance, or `null` with the reason it could not be
 computed safely ([L1](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship)).
 
 ### Interpretation
@@ -137,14 +137,14 @@ for this record, not for every possible record.
 
 An **alert** is a conditional message in a successful result: _this applies to what you just got_.
 A **refusal** rejects the call and says how to fix it. Use the refusal when a correction is
-mandatory — an alert after a successful render is read as a note, not as a reason to redo the call
+mandatory: an alert after a successful render is read as a note, not as a reason to redo the call
 ([Q22b, Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
 
 ### queryIntent
 
 A parameter on every data and render tool: the business question behind the call, in the caller's words. It
-turns _a log of calls_ into _a log of questions_. Its role is observability and improvement — it
-tells the server's author what the next gap is — not routing.
+turns _a log of calls_ into _a log of questions_. Its role is observability and improvement (it
+tells the server's author what the next gap is), not routing.
 
 ### Provenance
 
@@ -194,10 +194,10 @@ server's own call log ([method](../.claude/skills/rich-domain-mcp-server/referen
 
 The three tiers served over the same data in this repo.
 
-- **thin** — the raw API as a tool: a one-line description, a bare schema.
-- **rich** — the talk's tier: long descriptions, typed schemas, curated alerts. It predates most
+- **thin**: the raw API as a tool, with a one-line description and a bare schema.
+- **rich**: the talk's tier, with long descriptions, typed schemas and curated alerts. It predates most
   of the eval findings; afterwards only its measured defects were fixed, not its design.
-- **best** — the reference implementation derived from the measured findings. A repository name,
+- **best**: the reference implementation derived from the measured findings. A repository name,
   not a claim that the design is optimal everywhere.
 
 ### The six levels
@@ -206,12 +206,12 @@ The ladder from the talk _Most MCP servers are empty_, by who discovers the mean
 
 | level | name | who discovers the meaning |
 |---|---|---|
-| L1 | API wrapper | nobody — the agent reconstructs the domain |
+| L1 | API wrapper | nobody: the agent reconstructs the domain |
 | L2 | Descriptive tool | the author, briefly |
 | L3 | Domain-aware | a human, in the lead |
 | L4 | Self-teaching | the agent, from the real data (ICE) |
-| L5 | Interactive | how it is shown — MCP Apps |
-| L6 | Safe write | how it is changed — guarded mutation |
+| L5 | Interactive | how it is shown (MCP Apps) |
+| L6 | Safe write | how it is changed (guarded mutation) |
 
 `thin` is L1; `rich` sits at L2–L3; this repo's render tools are L5. L6 is not in this repo.
 
