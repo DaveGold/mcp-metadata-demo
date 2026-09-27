@@ -356,5 +356,83 @@
    "also": "render_table description cut at char 4,096 (\"...badge → scalar value… [truncated]\"; on the wire char 4,096 ends \"→ scalar value\"), the same cap as get_building_profile."
   },
   "not_measured": "ChatGPT Work, the Claude desktop app, Cowork in the desktop app."
+ },
+ "best_instructions_rebaseline": {
+  "_comment": "best server instructions 744 → 492 chars (2026-09-27), deployed to mcpBest; tools/list byte-identical. Re-measured on Codex CLI 0.154 / gpt-5.6-sol with --disable apps, the three pilot questions × 3, run one at a time. A first parallel wave hit the endpoint rate limit (HTTP 429) on 6 of 9 runs and was discarded whole, per the run-eval protocol.",
+  "result": "9/9, the same as the morning pilot with the 744-char instructions (9/9). No regression.",
+  "runs": [
+   {
+    "question": "benchmark-trap",
+    "arm": "best",
+    "rep": 1,
+    "calls": 1,
+    "answer": "ANSWER: The building has label A and calculated energy use of 229.17 kWh/m²/year. However, Paris Proof’s 70 kWh/m² target concerns measured final energy, so a valid comparison or gap cannot be calculated without actual meter data.\nCALLS: 1\nTOOLS: mcp__eval_best__get_building_profile\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Compare Gustav Mahlerlaan 10 office with Paris Proof 2040 target of 70 kWh/m2\"}",
+    "score": "pass"
+   },
+   {
+    "question": "benchmark-trap",
+    "arm": "best",
+    "rep": 2,
+    "calls": 1,
+    "answer": "ANSWER: The building has energy label A and a calculated NTA 8800 energy-use figure of 229.17 kWh/m²/year. This cannot validly be compared with the Paris Proof target of 70 kWh/m²/year, because Paris Proof uses measured final energy, while the available figure is a label-model calculation—not metered consumption. Measured annual final-energy data is needed to determine whether the office meets the target.\nCALLS: 1\nTOOLS: mcp__eval_best__get_building_profile\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Assess Gustav Mahlerlaan 10 Amsterdam against the Paris Proof 2040 office target of 70 kWh/m²\"}",
+    "score": "pass"
+   },
+   {
+    "question": "benchmark-trap",
+    "arm": "best",
+    "rep": 3,
+    "calls": 1,
+    "answer": "ANSWER: The building has energy label A and a calculated NTA 8800 energy-use figure of 229.17 kWh/m²/year. However, Paris Proof’s 70 kWh/m² target concerns measured final energy, so this calculated label figure cannot validly determine whether the office meets the target; actual meter data is required.\nCALLS: 1\nTOOLS: get_building_profile\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Compare Gustav Mahlerlaan 10 Amsterdam with Paris Proof 2040 office target of 70 kWh/m2, while distinguishing calculated label data from measured final energy.\"}",
+    "score": "pass"
+   },
+   {
+    "question": "metered-vs-model",
+    "arm": "best",
+    "rep": 1,
+    "calls": 1,
+    "answer": "ANSWER: No. The address matched exactly, but the available data contains only calculated EP-Online figures—not metered gas consumption.\nCALLS: 1\nTOOLS: mcp__eval_best__get_building_profile\nPARAMS: {\"postcode\":\"3543AR\",\"huisnummer\":1,\"queryIntent\":\"Check whether metered gas consumption is available for Middenwetering 1, Utrecht\"}",
+    "score": "pass"
+   },
+   {
+    "question": "metered-vs-model",
+    "arm": "best",
+    "rep": 2,
+    "calls": 1,
+    "answer": "ANSWER: No. The available data for Middenwetering 1 contains calculated EP-Online energy figures only, not metered gas consumption.\nCALLS: 1\nTOOLS: mcp__eval_best__get_building_profile\nPARAMS: {\"postcode\":\"3543AR\",\"huisnummer\":1,\"queryIntent\":\"Check whether metered gas consumption is available for Middenwetering 1, Utrecht\"}",
+    "score": "pass"
+   },
+   {
+    "question": "metered-vs-model",
+    "arm": "best",
+    "rep": 3,
+    "calls": 0,
+    "answer": "ANSWER: No. The connected building-data tool contains only calculated EP-Online energy figures and has no metered gas-consumption data, so I cannot pull actual gas use for Middenwetering 1.\nCALLS: 0\nTOOLS: none\nPARAMS: none",
+    "score": "pass"
+   },
+   {
+    "question": "overheating",
+    "arm": "best",
+    "rep": 1,
+    "calls": 4,
+    "answer": "ANSWER: The address contains three units: 1-01 has a significant overheating risk (indicator 3.59), while 1-02 and 1-BG have minor risks (1.16 and 1.33). The significant-risk threshold is above 1.5.\nCALLS: 4\nTOOLS: mcp__eval_best__get_building_profile, mcp__eval_best__get_building_profile, mcp__eval_best__get_building_profile, mcp__eval_best__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk at Van Beuningenstraat 1 in Rotterdam\"}, {\"postcode\":\"3039WB\",\"huisnummer\":1,\"toevoeging\":\"01\",\"queryIntent\":\"Assess overheating risk for the specified unit at Van Beuningenstraat 1 in Rotterdam\"}, {\"postcode\":\"3039WB\",\"huisnummer\":1,\"toevoeging\":\"02\",\"queryIntent\":\"Assess overheating risk for the specified unit at Van Beuningenstraat 1 in Rotterdam\"}, {\"postcode\":\"3039WB\",\"huisnummer\":1,\"toevoeging\":\"BG\",\"queryIntent\":\"Assess overheating risk for the specified unit at Van Beuningenstraat 1 in Rotterdam\"}",
+    "score": "pass"
+   },
+   {
+    "question": "overheating",
+    "arm": "best",
+    "rep": 2,
+    "calls": 1,
+    "answer": "ANSWER: Yes—for Van Beuningenstraat 1-01, the calculated overheating indicator is 3.59, indicating significant risk (threshold: above 1.5). The address has three units, so this result applies only to 1-01; the risk for 1-02 and 1-BG is unknown.\nCALLS: 1\nTOOLS: get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk at Van Beuningenstraat 1 in Rotterdam\"}",
+    "score": "pass"
+   },
+   {
+    "question": "overheating",
+    "arm": "best",
+    "rep": 3,
+    "calls": 3,
+    "answer": "ANSWER: The address contains three units, and overheating risk varies by unit. It is significant for 1-01 (indicator 3.59) and minor for 1-02 (1.16) and 1-BG (1.33); the significant-risk threshold is above 1.5.\nCALLS: 3\nTOOLS: get_building_profile, get_building_profile, get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk at Van Beuningenstraat 1 in Rotterdam\"}, {\"postcode\":\"3039WB\",\"huisnummer\":1,\"toevoeging\":\"02\",\"queryIntent\":\"Assess overheating risk for unit 02 at Van Beuningenstraat 1 in Rotterdam\"}, {\"postcode\":\"3039WB\",\"huisnummer\":1,\"toevoeging\":\"BG\",\"queryIntent\":\"Assess overheating risk for ground-floor unit at Van Beuningenstraat 1 in Rotterdam\"}",
+    "score": "pass"
+   }
+  ]
  }
 }
