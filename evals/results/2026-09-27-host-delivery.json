@@ -69,8 +69,11 @@
    "server_instructions": "delivered IN FULL, no marker; ends \"...The tool descriptions below are the strategy in practice.\""
   },
   "claude-app-chat": {
-   "status": "NOT MEASURED",
-   "reason": "The new team connector did not appear in the desktop app's chat connector list (the app had not reloaded its list); the one attempt ran without the connector and is discarded. Assumed to match claude.ai chat, which the app wraps; not verified."
+   "version": "Claude desktop app, Chat, 2026-09-27, default Tool access (load when needed); run by the user in a new chat, answer pasted into this session",
+   "runs": 1,
+   "tool_description": "delivered IN FULL after tool_search: ends \"...a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.\" with no marker; the text after \"normal for pre-2008 homes.\" is \"\\n5. Large panden (aantal_verblijfsobjecten > 10, e.g. shoppi\" (pasted as \"3.\", a Markdown list renumbering).",
+   "server_instructions": "NOT delivered: the tool_search result held only tool schemas plus a note that [third_party_mcp_app] tools need opt-in.",
+   "discarded": "two earlier attempts: one without the connector enabled, one that reopened this sessions web chat and copied its answer word for word."
   }
  },
  "headline": [
@@ -83,7 +86,7 @@
   "Self-report probes (ChatGPT, claude.ai, Cowork) rest on the model quoting verbatim, checked against the wire fingerprints: \"5. Large panden\" (starts at char 2,046) and the true end. ChatGPT 512 cut 2/2; claude.ai 2/2; Cowork 4,096 cut 2/2 on two models. Codex was measured on the request itself.",
   "One ChatGPT Work run. Codex pilot n=3 per cell, one model; a pilot, not a registered question.",
   "ChatGPT model under the default 'Gemiddeld' effort; host behaviour may change without notice (Codex's defer flag is marked 'removed'/true in 0.154).",
-  "Chat in the Claude desktop app is not measured. Cowork in the desktop app has one run."
+  "Chat in the Claude desktop app has one run; Cowork in the desktop app has one run."
  ],
  "codex_pilot": [
   {
