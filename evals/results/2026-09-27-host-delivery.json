@@ -80,7 +80,8 @@
   "The 2,048-char description cut is Claude Code's, and it is the strictest measured. Cowork (web and desktop app) cuts at 4,096; Codex CLI, ChatGPT (Chat and Work) and claude.ai chat (both Tool access settings) deliver the whole 7,978-char description.",
   "Server instructions differ most by host: ChatGPT Chat cuts them at 512; ChatGPT Work and claude.ai chat do not deliver them (Work puts the app description typed in ChatGPT in their place); Cowork delivers them whole (2,829 < 4,096); Codex prepends them to every tool description.",
   "On Codex, ChatGPT Work, claude.ai and Cowork (with many connectors) the tool is deferred: 0 chars in the prompt until the model searches (Codex filters ALL_TOOLS by keyword over name + description; claude.ai uses tool_search). In the Codex pilot the model found and read the configured tool in 20/21 runs and printed its whole description before calling; the 21st picked the account-level ChatGPT copy of the same server.",
-  "Codex pilot (gpt-5.6-sol, n=3): best 9/9; rich 7/9 — benchmark-trap 1/3, the same hedged EP-1-vs-70 verdict Q19 scored as a fail. Same direction as Claude Code, now on a host where rich's text is not cut."
+  "Codex pilot (gpt-5.6-sol, n=3): best 9/9; rich 7/9 — benchmark-trap 1/3, the same hedged EP-1-vs-70 verdict Q19 scored as a fail. Same direction as Claude Code, now on a host where rich's text is not cut.",
+  "Schemas: the input schema arrives in full on Claude Code, claude.ai chat, Cowork and ChatGPT Chat; Codex keeps parameter describes on a small schema and drops all of them on a 20k one. The output schema is not delivered on Claude Code, claude.ai chat or Cowork, arrives inconsistently on ChatGPT Chat (1/3), and arrives in full on Codex."
  ],
  "caveats": [
   "Self-report probes (ChatGPT, claude.ai, Cowork) rest on the model quoting verbatim, checked against the wire fingerprints: \"5. Large panden\" (starts at char 2,046) and the true end. ChatGPT 512 cut 2/2; claude.ai 2/2; Cowork 4,096 cut 2/2 on two models. Codex was measured on the request itself.",
@@ -324,5 +325,36 @@
    "answer": "ANSWER: Yes. The first matched unit, Van Beuningenstraat 1-01, has a significant overheating risk: TOjuli/GTO 3.59, above the 1.5 threshold. The address has three units, so the exact unit needs a suffix to confirm.\nCALLS: 1\nTOOLS: mcp__eval_rich__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk for Van Beuningenstraat 1 in Rotterdam\"}",
    "score": "pass"
   }
- ]
+ ],
+ "schema_probe": {
+  "_comment": "Are the INPUT schema (parameter descriptions) and the OUTPUT schema delivered? Fingerprints, each unique to one surface: render_table input schema (20,181 chars JSON): columns[].type describe ends \"Pick text when the URL is display-only.\" (starts at JSON offset 502), ratingConfig's last example \"Example cell values: 4.5 (half) | 7 (whole) | 3.4 (snaps up to 3½)\" (offset 12,956), maxHeight \"CSS max-height for scrollable table body (e.g. \\\"400px\\\", \\\"60vh\\\"). Header stays sticky. Omit for auto height.\" (offset 19,905 of 20,181). get_building_profile output schema (7,376 chars): aandeel_hernieuwbaar_emg_forfaitair_pct \"Renewable share with standardized area-bound measures (%). NTA 8800 utiliteitsbouw only.\", temperatuuroverschrijding \"Overheating-risk indicator (TOjuli/GTO)\", alerts \"Advisory alerts based on building characteristics\". None of these strings occurs in any description.",
+  "claude-code": {
+   "input_schema": "full (IS, 2026-09-24, up to ~21.7k chars per tool)",
+   "output_schema": "not delivered (Q11, by token accounting)"
+  },
+  "codex-cli": {
+   "method": "ALL_TOOLS entries read with code; declarations printed from the session rollouts",
+   "input_schema": "SIZE-DEPENDENT. get_building_profile (642-char schema): every parameter describe is kept as a // comment. render_table (20,181-char schema): types and enums only, not one describe, not even top-level maxHeight; the whole declaration is 1,833 chars. The ALL_TOOLS entry holds none of the three render_table fingerprints.",
+   "output_schema": "DELIVERED as the TypeScript return type Promise<CallToolResult<{ ... }>> with every field describe as a // comment; both output fingerprints present (get_building_profile entry 15,746 chars = instructions + description + declaration)."
+  },
+  "chatgpt-chat": {
+   "runs": 2,
+   "input_schema": "full (1/1): all three render_table fingerprints verbatim, including maxHeight, no marker. The declaration shows parameter describes as // comments.",
+   "output_schema": "INCONSISTENT, 1 of 3 runs. The first description probe quoted \"ep_online_bouwjaar: number | null, // Advisory alerts based on building characteristics alerts: string[], }>;\" (output-schema text). Both schema probes say no output schema; the second quotes the declaration as \"type get_building_profile = (_: { ... }) => any;\"."
+  },
+  "claude-ai-chat": {
+   "runs": 1,
+   "model": "Sonnet 5 High",
+   "input_schema": "full: all three fingerprints verbatim, no marker",
+   "output_schema": "not delivered: \"the schema I received only defines the input parameters\""
+  },
+  "cowork-web": {
+   "runs": 1,
+   "model": "Sonnet 5 High",
+   "input_schema": "full: all three fingerprints verbatim (\"3½\" rendered as \"31⁄2\")",
+   "output_schema": "not delivered",
+   "also": "render_table description cut at char 4,096 (\"...badge → scalar value… [truncated]\"; on the wire char 4,096 ends \"→ scalar value\"), the same cap as get_building_profile."
+  },
+  "not_measured": "ChatGPT Work, the Claude desktop app, Cowork in the desktop app."
+ }
 }

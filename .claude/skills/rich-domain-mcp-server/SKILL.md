@@ -61,8 +61,8 @@ eval set had already shown to be wrong.
 | field names | **always**, every response | — |
 | tool description | **first 2,048 chars only**, every request [Q7] | ≤ 2,048, ceiling ~1,800 |
 | server instructions | first 2,048 chars [Q7]; other hosts deliver 512, all, or none [HD] | ≤ 512; nothing load-bearing only here |
-| input schema | yes, in full [IS] — re-sent every turn | size it: it is paid on every call |
-| output schema | **no** [Q11] | validation/UI only |
+| input schema | yes, in full [IS] (also claude.ai, Cowork, ChatGPT; Codex drops the describes of a large schema [HD]) — re-sent every turn | size it: it is paid on every call |
+| output schema | **no** [Q11] (nor claude.ai, Cowork; Codex yes, ChatGPT sometimes [HD]) | validation/UI only |
 | response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9] | guard it |
 | guidance tool | only if the pointer is a requirement [Q8b] | — |
 

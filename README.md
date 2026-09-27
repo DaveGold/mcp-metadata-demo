@@ -84,7 +84,7 @@ before its run, every run audited against the server's own call log. Six results
   60 answers wrong; one sentence saying the figures are CALCULATED, not MEASURED, took the same
   question from 0/60 to 59/60. ([BT](.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship))
 - **Delivered is what counts.** Claude Code sends only the first 2,048 characters of a tool
-  description, and never the output schema. Moving one correcting sentence inside the cut took a
+  description, and never the output schema (other hosts differ: [HD](evals/results/2026-09-27-host-delivery.json)). Moving one correcting sentence inside the cut took a
   failing question from 0/10 to 10/10. ([Q7](.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery),
   [Q21](.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19))
 - **Ship the data, not just the rule.** A rule that sent the model off to fetch history: Haiku
