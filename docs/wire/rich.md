@@ -31,9 +31,9 @@ WEATHER TOOL:
 - `get_weather_context` — daily weather + degree-day/solar metrics for a Dutch location and date range (Open-Meteo). Demonstrates the Select mechanism: pass `select` to project daily records down to only the 
 ````
 
-> ✂ **Claude Code cuts here, at character 2,048.** The model never receives the 781 characters below (28%).
+> ✂ **Claude Code cuts here, at character 2,048.** Claude Code never sends the 781 characters below (28%).
 
-<details><summary>Not delivered</summary>
+<details><summary>Not delivered on Claude Code</summary>
 
 ````text
 fields you need instead of the full row set.
@@ -77,9 +77,9 @@ QUERY STRATEGY:
 5. La
 ````
 
-> ✂ **Claude Code cuts here, at character 2,048.** The model never receives the 5,930 characters below (74%).
+> ✂ **Claude Code cuts here, at character 2,048.** Claude Code never sends the 5,930 characters below (74%).
 
-<details><summary>Not delivered</summary>
+<details><summary>Not delivered on Claude Code</summary>
 
 ````text
 rge panden (aantal_verblijfsobjecten > 10, e.g. shopping centers, office parks, care complexes): the returned VBO is the first match — it may be an individual unit with a small oppervlakte_m2. The energielabel and bouwjaar are pand-level and reliable; oppervlakte_m2 is VBO-level and may represent only one unit. For the full-building area, query by huisletter/toevoeging or use BAG directly.
@@ -96,7 +96,13 @@ Which fields are populated depends on the berekeningstype:
 - matchStatus 'not_found': no BAG match — check postcode format (4 digits + 2 uppercase letters) and huisnummer
 - energielabel null: no registered label in EP-Online (common for older or unlabeled buildings)
 - ep1_energiebehoefte_kwh_m2 (NTA 8800 only): Paris Proof 2040 targets — kantoor: 70 kWh/m², woningbouw: 100 kWh/m². No standardized target for onderwijs, gezondheidszorg, industrie.
-- CALCULATED vs MEASURED — ep1_energiebehoefte, ep2_fossiel and berekend_energieverbruik are all CALCULATED NTA 8800 figures, not meter readings: ep1 is net energy DEMAND, ep2 is PRIMARY FOSSIL energy, berekend is modelled total use. Paris Proof and other metered benchmarks are defined on MEASURED FINAL energy at the meter, and this server holds NO metered data, so none of these three can be ranked against such a target as though it were measured consumption — the unit (kWh/m²) matches and the quantity does not. Where a question asks how a building compares to a metered benchmark, say that the comparison cannot be made from this data and why, rather than producing a ratio.
+- CALCULATED vs MEASURED — ep1_energ
+````
+
+> ✂ **Cowork cuts here, at character 4,096.** Cowork never sends the 3,882 characters below (49%).
+
+````text
+iebehoefte, ep2_fossiel and berekend_energieverbruik are all CALCULATED NTA 8800 figures, not meter readings: ep1 is net energy DEMAND, ep2 is PRIMARY FOSSIL energy, berekend is modelled total use. Paris Proof and other metered benchmarks are defined on MEASURED FINAL energy at the meter, and this server holds NO metered data, so none of these three can be ranked against such a target as though it were measured consumption — the unit (kWh/m²) matches and the quantity does not. Where a question asks how a building compares to a metered benchmark, say that the comparison cannot be made from this data and why, rather than producing a ratio.
 - energie_index (pre-NTA 8800): the main performance metric for most existing buildings. EI < 1.2 = A or better; 1.4–1.8 = C; >2.7 = G. No Paris Proof kWh/m² equivalent.
 - gebruiksoppervlakte_thermische_zone_m2 (NTA 8800 only) vs oppervlakte_m2 (BAG): two different scopes, not two measurements of the same thing. BAG = gross floor area of the verblijfsobject; EP-Online = usable floor area of the thermal zone the label covers. The EP-Online figure is often the lower of the two, but when the label covers a whole pand and the VBO is one unit of it, it can be far higher (Gustav Mahlerlaan 10: 118,174 m² EP-Online vs 66,581 m² BAG). Use the EP-Online area as the denominator for every per-m² NTA value (EP-1, EP-2, warmtebehoefte, co2_emissie), and never assume a fixed ratio between the two.
 - label_geldig_tot in the past: label expired, heropname may be needed for Label C obligation compliance
@@ -166,9 +172,9 @@ Question-first decision path (ask these before picking `type`; the per-type rule
 4. What is the purpose — ran
 ````
 
-> ✂ **Claude Code cuts here, at character 2,048.** The model never receives the 5,929 characters below (74%).
+> ✂ **Claude Code cuts here, at character 2,048.** Claude Code never sends the 5,929 characters below (74%).
 
-<details><summary>Not delivered</summary>
+<details><summary>Not delivered on Claude Code</summary>
 
 ````text
 king, distribution, flow, correlation, composition, deviation, trend? This is the primary trigger for the `type` rules.
@@ -192,7 +198,13 @@ Question → chart patterns (use these when the question matches; they cover the
 - Quarter-hourly usage aggregated to hour × weekday → matrix (calendar heatmap; add `options.annotations` box for office hours / weekend columns); per-unit kWh/m² across many buildings → horizontal bar + annotation line on target (e.g. Paris Proof 70 kWh/m² offices, 100 residential)
 - Gas usage vs heating-degree-days → scatter + trendline (slope = m³/HDD efficiency; outliers = heating issues)
 - Revenue × margin × volume → bubble (x=revenue, y=margin%, r=volume) with quadrant annotation lines on x=median and y=median; budgeted vs realised → scatter + 45° diagonal annotation (above line = over budget)
-- Hierarchical breakdown (project → phase → item, ≥6 items, max 3 levels) → treemap; cost flow over 2-3 tiers (budget → discipline → cost item) → sankey
+- Hierarchical breakdown (project → phase → item, ≥6 items, max 3 levels) → tre
+````
+
+> ✂ **Cowork cuts here, at character 4,096.** Cowork never sends the 3,881 characters below (49%).
+
+````text
+emap; cost flow over 2-3 tiers (budget → discipline → cost item) → sankey
 - Pareto — which codes cause 80% → bar sorted desc + line dataset with type="line" for cumulative % + annotation line on 80; lead-time by priority → boxplot + annotation SLA line
 - 1-3 entities over ≤6 normalized dimensions → radar; 10+ entities over the same dimensions → matrix (radar falls apart past 3 overlays)
 - Per-discipline → category → family hierarchy → treemap; element dependencies across systems → graph with layout="force"
@@ -292,9 +304,9 @@ NEVER pass raw API responses — extract, set proper column types, and choose co
 OUTPUT EFFICIENCY (important — tool-call payloads
 ````
 
-> ✂ **Claude Code cuts here, at character 2,048.** The model never receives the 7,922 characters below (79%).
+> ✂ **Claude Code cuts here, at character 2,048.** Claude Code never sends the 7,922 characters below (79%).
 
-<details><summary>Not delivered</summary>
+<details><summary>Not delivered on Claude Code</summary>
 
 ````text
  are user-visible and expensive to stream):
@@ -314,7 +326,13 @@ OUTPUT EFFICIENCY (important — tool-call payloads
 
 DATA VALUE SHAPES (per column type — send the SIMPLEST value that fits; column-level config does the styling):
   text / number / currency / percentage / date / boolean   → scalar (string / number / boolean)
-  badge                                                     → scalar value; badgeMap on the column maps it to label + color  (e.g. value "active" + badgeMap {active:{color:"green", label:"Active"}})
+  badge                                                     → scalar value
+````
+
+> ✂ **Cowork cuts here, at character 4,096.** Cowork never sends the 5,874 characters below (59%).
+
+````text
+; badgeMap on the column maps it to label + color  (e.g. value "active" + badgeMap {active:{color:"green", label:"Active"}})
   icon                                                      → scalar value; iconMap on the column maps it to icon + color
   multi_badge                                               → ARRAY of scalars (string[]); badgeMap maps each element      (e.g. ["priority","external"])
   progress                                                  → number 0..1; progressConfig.thresholds colors the bar
@@ -427,9 +445,9 @@ OUTPUT EFFICIENCY (important — tool-call payloads are user-visible and expensi
   Positional cuts ~40-50% off per-marker tokens by omitting the repeated keys. Use it by default; fall back to keyed objects only when you ha
 ````
 
-> ✂ **Claude Code cuts here, at character 2,048.** The model never receives the 1,665 characters below (45%).
+> ✂ **Claude Code cuts here, at character 2,048.** Claude Code never sends the 1,665 characters below (45%).
 
-<details><summary>Not delivered</summary>
+<details><summary>Not delivered on Claude Code</summary>
 
 ````text
 ve <5 markers and prefer the self-documenting shape.
@@ -515,9 +533,9 @@ WHEN NOT TO USE:
 - Dates more than 14 days ahead — forecast horizon is today+14 (qu
 ````
 
-> ✂ **Claude Code cuts here, at character 2,048.** The model never receives the 3,243 characters below (61%).
+> ✂ **Claude Code cuts here, at character 2,048.** Claude Code never sends the 3,243 characters below (61%).
 
-<details><summary>Not delivered</summary>
+<details><summary>Not delivered on Claude Code</summary>
 
 ````text
 eries beyond it are rejected).
@@ -548,7 +566,13 @@ INTERPRETATION:
   (factor > 1.0) means raw energy use looks low.
   Formula: normalizedHeatingEnergy = actualHeatingEnergy × gasNormalizationFactor.
   IMPORTANT: gasNormalizationFactor is only valid for full-year (Jan 1–Dec 31) queries. For partial-period
-  year-over-year comparison, use the HDD ratio directly: normalizedEnergy = energy × (refPeriodHDD /
+  year-over-year comparison, use 
+````
+
+> ✂ **Cowork cuts here, at character 4,096.** Cowork never sends the 1,195 characters below (23%).
+
+````text
+the HDD ratio directly: normalizedEnergy = energy × (refPeriodHDD /
   thisPeriodHDD).
 - GHI (global horizontal irradiance) in kWh/m² = Peak Sun Hours (PSH) for the period.
   Expected solar yield = totalGHI_kWhM2 × installedKwp × performanceRatio (0.75–0.85 for healthy panels).
@@ -623,9 +647,9 @@ USING THIS TO AUDIT AN EVAL RUN:
   missing. A `variant` filter returning zero looks identical whether the arm was never called or i
 ````
 
-> ✂ **Claude Code cuts here, at character 2,048.** The model never receives the 1,635 characters below (44%).
+> ✂ **Claude Code cuts here, at character 2,048.** Claude Code never sends the 1,635 characters below (44%).
 
-<details><summary>Not delivered</summary>
+<details><summary>Not delivered on Claude Code</summary>
 
 ````text
 s

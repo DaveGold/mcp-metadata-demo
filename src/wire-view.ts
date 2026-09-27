@@ -1,6 +1,7 @@
 /**
  * What a tier actually sends to the model, as readable markdown: server instructions and every
- * model-visible tool's description, with Claude Code's 2,048-char cut marked (Q7), plus the input parameters.
+ * model-visible tool's description, with Claude Code's 2,048-char cut (Q7) and Cowork's 4,096-char cut (HD)
+ * marked, plus the input parameters.
  * The output schema is listed by size only, because the model never receives it (Q11).
  *
  * Generated from the live server factory, never written by hand: `npm run wire-view` rewrites
@@ -12,6 +13,8 @@ import { createServer, type ServerVariant } from './server.js';
 import type { BagClientLike, EpOnlineClientLike } from './tools/get-building-profile.js';
 
 export const CUT = 2048;
+/** Cowork's cut (HD, 2026-09-27). claude.ai chat, ChatGPT and Codex deliver the whole description. */
+export const COWORK_CUT = 4096;
 export const WIRE_VIEW_ARMS: { arm: ServerVariant; blurb: string }[] = [
   {
     arm: 'best',
@@ -38,16 +41,23 @@ const noEp: EpOnlineClientLike = { getByBagVboId: async () => [] };
 
 const fence = (text: string) => '````text\n' + text + '\n````';
 
-/** The text as delivered, with a visible marker where Claude Code stops sending it. */
+/** The text as delivered, with a visible marker where Claude Code, then Cowork, stop sending it. */
 export function markCut(text: string): string {
   if (text.length <= CUT) return fence(text);
+  const pct = (n: number) => Math.round((100 * n) / text.length);
   const lost = text.length - CUT;
+  const past = text.length > COWORK_CUT;
   return (
     fence(text.slice(0, CUT)) +
     `\n\n> ✂ **Claude Code cuts here, at character ${CUT.toLocaleString('en')}.** ` +
-    `The model never receives the ${lost.toLocaleString('en')} characters below (${Math.round((100 * lost) / text.length)}%).\n\n` +
-    '<details><summary>Not delivered</summary>\n\n' +
-    fence(text.slice(CUT)) +
+    `Claude Code never sends the ${lost.toLocaleString('en')} characters below (${pct(lost)}%).\n\n` +
+    '<details><summary>Not delivered on Claude Code</summary>\n\n' +
+    fence(text.slice(CUT, past ? COWORK_CUT : undefined)) +
+    (past
+      ? `\n\n> ✂ **Cowork cuts here, at character ${COWORK_CUT.toLocaleString('en')}.** ` +
+        `Cowork never sends the ${(text.length - COWORK_CUT).toLocaleString('en')} characters below (${pct(text.length - COWORK_CUT)}%).\n\n` +
+        fence(text.slice(COWORK_CUT))
+      : '') +
     '\n\n</details>'
   );
 }
