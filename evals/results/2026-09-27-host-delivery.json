@@ -1,5 +1,5 @@
 {
- "_comment": "Does the 2,048-character tool-description cut measured on Claude Code (Q7) hold on other hosts? Probed on Codex CLI, ChatGPT and claude.ai against the `rich` tier (https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp): get_building_profile description 7,978 chars, server instructions 2,829 chars. Fingerprints: Claude Code's cut ends '...pre-2008 homes.\\n5. La' (char 2,048); the full text ends '...based on warmtebehoefte.'; '5. Large panden' starts at char 2,046, 'CALCULATED vs MEASURED' at ~3,990. Plus a small Codex pilot on three eval questions, rich vs best.",
+ "_comment": "Does the 2,048-character tool-description cut measured on Claude Code (Q7) hold on other hosts? Probed on Codex CLI, ChatGPT, claude.ai and Cowork (web) against the `rich` tier (https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp): get_building_profile description 7,978 chars, server instructions 2,829 chars. Fingerprints: Claude Code's cut ends '...pre-2008 homes.\\n5. La' (char 2,048); the full text ends '...based on warmtebehoefte.'; '5. Large panden' starts at char 2,046, 'CALCULATED vs MEASURED' at 766 and 4,062 (so it does not discriminate between the cuts measured). Plus a small Codex pilot on three eval questions, rich vs best.",
  "date": "2026-09-27",
  "hosts": {
   "claude-code": {
@@ -42,19 +42,30 @@
     "(1) RETURNS:\\nBuilding profile combining BAG data (bouwjaar, oppervlakte, gebruiksdoe (2) also include an estimated annual gas consumption (m3), total CO2 emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte. (no marker) (3) yes, 5. Large panden (aantal_verblijfsobjecten > 10, e.g. shopping centers, office parks, care complexes) (4) yes, twice (5) no server-level instructions (6) ~7,900-8,000 (7) tool_search, then bash to slice a retyped copy",
     "(1) same (2) same, no marker (3) \\n5. Large panden (aantal_verblijfsobjecten > 10, e.g. shoppi (4) yes, twice, identical (5) none anywhere in context (6) only after tool_search; deferred tool"
    ]
+  },
+  "cowork-web": {
+   "version": "claude.ai Cowork (Beta) in the browser, 2026-09-27; same team connector as claude-ai; run 1 Sonnet 5 High, run 2 Opus 5.5 High",
+   "runs": 2,
+   "tool_description": "CUT AT 4,096 CHARS + \"… [truncated]\" (2/2). Both runs quote the end as \"70 kWh/m2, woningbouw: 100 kWh/m2. No standardized target for onderwijs, gezondheidszorg, industrie.\\n- CALCULATED vs MEASURED — ep1_energ… [truncated]\"; on the wire that text ends at exactly char 4,096. Both quote \"\\n5. Large panden ...\" after \"normal for pre-2008 homes.\" (past Claude Code's 2,048). Run 2: the final sentence (\"...warmtepomp-geschiktheidsindicatie based on warmtebehoefte.\") was not received. Deferred: the tool was listed by name only until ToolSearch loaded it.",
+   "server_instructions": "delivered IN FULL (2,829 chars, no marker) in a system-reminder \"MCP Server Instructions\" block (2/2); both quote the true end \"...The tool descriptions below are the strategy in practice.\" Consistent with one 4,096 cap on both surfaces, as Claude Code applies one 2,048 cap to both.",
+   "answers": [
+    "(1) RETURNS:\\nBuilding profile combining BAG data (bouwjaar, oppervlakte, gebruiksdoe (2) ...- CALCULATED vs MEASURED — ep1_energ… [truncated] (3) \\n5. Large panden (aantal_verblijfsobjecten > 10, e.g. shopi (4) yes, twice; the second is cut by the marker (5) yes, in the system-reminder; ends \"...The tool descriptions below are the strategy in practice.\" (6) only after ToolSearch",
+    "(1) ...- CALCULATED vs MEASURED — ep1_energ… [truncated] (2) \\n5. Large panden (aantal_verblijfsobjecten > 10, e.g. shoppi (3) no, not in the part received (4) yes, no marker, ends \"...The tool descriptions below are the strategy in practice.\""
+   ]
   }
  },
  "headline": [
-  "The 2,048-char description cut is a Claude Code number. Codex CLI, ChatGPT (Chat and Work) and claude.ai all deliver the whole 7,978-char description.",
-  "Server instructions are the fragile surface elsewhere: ChatGPT Chat cuts them at 512 chars; ChatGPT Work and claude.ai do not deliver them at all (Work puts the app description typed in ChatGPT in their place); Codex prepends them to every tool description.",
-  "On Codex, ChatGPT Work and claude.ai (with many connectors) the tool is deferred: 0 chars in the prompt until the model searches (Codex filters ALL_TOOLS by keyword over name + description; claude.ai uses tool_search). In the Codex pilot the model found and read the configured tool in 20/21 runs and printed its whole description before calling; the 21st picked the account-level ChatGPT copy of the same server.",
+  "The 2,048-char description cut is Claude Code's, and it is the strictest measured. Cowork (web) cuts at 4,096; Codex CLI, ChatGPT (Chat and Work) and claude.ai chat deliver the whole 7,978-char description.",
+  "Server instructions differ most by host: ChatGPT Chat cuts them at 512; ChatGPT Work and claude.ai chat do not deliver them (Work puts the app description typed in ChatGPT in their place); Cowork delivers them whole (2,829 < 4,096); Codex prepends them to every tool description.",
+  "On Codex, ChatGPT Work, claude.ai and Cowork (with many connectors) the tool is deferred: 0 chars in the prompt until the model searches (Codex filters ALL_TOOLS by keyword over name + description; claude.ai uses tool_search). In the Codex pilot the model found and read the configured tool in 20/21 runs and printed its whole description before calling; the 21st picked the account-level ChatGPT copy of the same server.",
   "Codex pilot (gpt-5.6-sol, n=3): best 9/9; rich 7/9 — benchmark-trap 1/3, the same hedged EP-1-vs-70 verdict Q19 scored as a fail. Same direction as Claude Code, now on a host where rich's text is not cut."
  ],
  "caveats": [
-  "Self-report probes (ChatGPT, claude.ai) rest on the model quoting verbatim, checked against the wire fingerprints. The ChatGPT 512 cut replicated 2/2; claude.ai 2/2. Codex was measured on the request itself.",
+  "Self-report probes (ChatGPT, claude.ai, Cowork) rest on the model quoting verbatim, checked against the wire fingerprints: \"5. Large panden\" (starts at char 2,046) and the true end. ChatGPT 512 cut 2/2; claude.ai 2/2; Cowork 4,096 cut 2/2 on two models. Codex was measured on the request itself.",
   "One ChatGPT Work run. Codex pilot n=3 per cell, one model; a pilot, not a registered question.",
   "ChatGPT model under the default 'Gemiddeld' effort; host behaviour may change without notice (Codex's defer flag is marked 'removed'/true in 0.154).",
-  "claude.ai was measured with ~17 connectors enabled, which is why its tools were deferred. With one connector the tools may sit in the prompt; whether they are cut there is unmeasured."
+  "claude.ai was measured with ~17 connectors enabled, which is why its tools were deferred. With one connector the tools may sit in the prompt; whether they are cut there is unmeasured.",
+  "Cowork in the desktop app and chat in the Claude desktop app are not measured."
  ],
  "codex_pilot": [
   {

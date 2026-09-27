@@ -49,8 +49,8 @@ Canonical truth can be projected through several surfaces, and they do not all a
 | surface | reaches the model? |
 |---|---|
 | field names | always, in every response |
-| tool description | only the head on Claude Code (2,048 chars); in full on Codex, ChatGPT and claude.ai ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
-| server instructions | the head on Claude Code; 512 chars on ChatGPT; not at all on claude.ai ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
+| tool description | only the head: 2,048 chars on Claude Code, 4,096 on Cowork; in full on Codex, ChatGPT and claude.ai chat ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
+| server instructions | the head on Claude Code; 512 chars on ChatGPT; whole on Cowork; not at all in claude.ai chat ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
 | input schema | yes |
 | output schema | no: validation and UI only ([Q11](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
 | response | yes, below a size limit; above it, a file notice replaces it ([Q9](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |

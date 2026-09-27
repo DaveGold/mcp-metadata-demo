@@ -1,0 +1,60 @@
+[mcp_servers.eval-best]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest"
+
+[mcp_servers.eval-best-no-type-rules]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBestNoTypeRules"
+
+[mcp_servers.eval-best-v1]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBestV1"
+
+[mcp_servers.eval-g-recipe]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpGuidanceRecipe"
+
+[mcp_servers.eval-inline]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpInline"
+
+[mcp_servers.eval-inline-conditional]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpInlineConditional"
+
+[mcp_servers.eval-inline-fact]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpInlineFact"
+
+[mcp_servers.eval-inline-instruction]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpInlineInstruction"
+
+[mcp_servers.eval-inline-oneline]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpInlineOneline"
+
+[mcp_servers.eval-inline-recipe]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpInlineRecipe"
+
+[mcp_servers.eval-opaque]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpOpaque"
+
+[mcp_servers.eval-opaque-words]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpOpaqueWords"
+
+[mcp_servers.eval-rich]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp"
+
+[mcp_servers.eval-schema]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpSchema"
+
+[mcp_servers.eval-thin]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpMinimal"
+
+[mcp_servers.eval-words]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpWords"
+
+[mcp_servers.eval-words-recipe]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpWordsRecipe"
+
+[mcp_servers.metadata-demo]
+command = "node"
+args = [
+    "--env-file=.env.local",
+    "dist/stdio.js",
+]
+
+[mcp_servers.metadata-demo-cloud]
+url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp"

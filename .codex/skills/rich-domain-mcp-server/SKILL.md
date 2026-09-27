@@ -60,17 +60,18 @@ eval set had already shown to be wrong.
 |---|---|---|
 | field names | **always**, every response | — |
 | tool description | **first 2,048 chars only**, every request [Q7] | ≤ 2,048, ceiling ~1,800 |
-| server instructions | first 2,048 chars [Q7]; other hosts cut them to 512 or drop them [HD] | ≤ 512; nothing load-bearing only here |
+| server instructions | first 2,048 chars [Q7]; other hosts deliver 512, all, or none [HD] | ≤ 512; nothing load-bearing only here |
 | input schema | yes, in full [IS] — re-sent every turn | size it: it is paid on every call |
 | output schema | **no** [Q11] | validation/UI only |
 | response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9] | guard it |
 | guidance tool | only if the pointer is a requirement [Q8b] | — |
 
-**Other hosts [HD].** Codex CLI, ChatGPT and claude.ai deliver the whole description, often only
-after the model searches for the tool (deferred loading). 2,048 is the strictest cut measured, so
-the budget stays. Server instructions are the weak surface: ChatGPT cuts them at 512 characters,
-claude.ai and ChatGPT Work do not deliver them, Codex prepends them to every tool. Repeat what the
-instructions carry in a description head or in the response.
+**Other hosts [HD].** Cowork (web) cuts descriptions at 4,096; Codex CLI, ChatGPT and claude.ai
+chat deliver them whole, often only after the model searches for the tool (deferred loading).
+2,048 is the strictest cut measured, so the budget stays. Server instructions vary most: ChatGPT
+cuts them at 512, claude.ai chat and ChatGPT Work do not deliver them, Cowork delivers them whole,
+Codex prepends them to every tool. Repeat what the instructions carry in a description head or in
+the response.
 
 The variable is **delivery, not channel**: the same sentence delivered in the description and in
 the response scored 20/20 and 20/20 [Q15]. Details, and how to check it yourself:
@@ -412,7 +413,7 @@ layer). [render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/mai
 
 - **Host-specific numbers.** The 2,048-char cut, the ~25k-token response limit and the absent
   output schema were measured on Claude Code. Description and instructions delivery was also
-  probed on Codex CLI, ChatGPT and claude.ai [HD]; the rest is unmeasured elsewhere. Re-verify on
+  probed on Codex CLI, ChatGPT, claude.ai and Cowork [HD]; the rest is unmeasured elsewhere. Re-verify on
   another host with the techniques in `delivery.md` before relying on them — or design for the
   strictest, as this skill does.
 - **One author, one domain family.** The same party wrote the metadata, questions, ground truth
