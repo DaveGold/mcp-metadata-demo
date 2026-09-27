@@ -66,7 +66,7 @@ eval set had already shown to be wrong.
 | response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9] | guard it |
 | guidance tool | only if the pointer is a requirement [Q8b] | — |
 
-**Other hosts [HD].** Cowork (web) cuts descriptions at 4,096; Codex CLI, ChatGPT and claude.ai
+**Other hosts [HD].** Cowork (web and app) cuts descriptions at 4,096; Codex CLI, ChatGPT and claude.ai
 chat deliver them whole, often only after the model searches for the tool (deferred loading).
 2,048 is the strictest cut measured, so the budget stays. Server instructions vary most: ChatGPT
 cuts them at 512, claude.ai chat and ChatGPT Work do not deliver them, Cowork delivers them whole,
