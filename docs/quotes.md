@@ -70,7 +70,9 @@ One plausible line made 59 of 60 answers wrong; one sentence took the same quest
 
 `MEASURED` · [Q7, Q11](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery) ·
 MCPCon, slide 17. Proven more sharply after the talk: only the first 2,048 characters of a
-description reach the model on Claude Code, and the output schema never does.
+description reach the model on Claude Code, and the output schema never does. Where the line falls
+is the host's: Cowork cuts at 4,096, claude.ai chat not at all, and Codex does send the output
+schema ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 > **Check what the model received, not what the server sent.**
 
@@ -160,7 +162,7 @@ it could not settle.
 > **Unit tests protect the truth of domain knowledge. Evals protect its effect on the model.**
 
 `PRINCIPLE` · [Design §6](design.md#6--domain-knowledge-is-infrastructure). The evals caught what
-the green test suite could not: the 2,048 cut, a stale deploy, this repo's own wrong alert.
+the green test suite could not: Claude Code's 2,048 cut, a stale deploy, this repo's own wrong alert.
 
 > **Plumbing is a day; metadata is the product.**
 
@@ -257,6 +259,7 @@ of the thinking stays inspectable, and so they are not reused by accident.
 | ~~Most MCP servers are empty.~~ | early posts | **Most MCP servers are empty of meaning.** | Literally false: they have tools. |
 | ~~The agent can call every endpoint and understand nothing.~~ | MCPCon announcement | **The models are good. It's the metadata that isn't.** | Models reason well; the premise was missing from the payload. |
 | ~~The tool description reaches the model before the call.~~ | MCPCon, slide 17 | **Only the description head does**: the first 2,048 chars on Claude Code. | [Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery), four days after the talk. |
+| ~~Only the first 2,048 characters of a description reach the model.~~ | README, design notes, talk annotations | **On Claude Code.** Cowork cuts at 4,096; claude.ai chat, ChatGPT and Codex deliver the whole description. | [HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery): every eval ran on Claude Code; the other hosts were measured on 2026-09-27. |
 | ~~The response beats the description.~~ | first eval round | **Delivery decides; the channel did not.** | The description copy sat past the cut ([Q1, reversed](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). |
 | ~~Agents won't call a meta-tool to learn something.~~ | MCPCon talk notes | **They won't on a hint. They will when the pointer says REQUIRED, or the guidance is its own tool.** | Soft pointer 0/10, REQUIRED 10/10 ([Q8b](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). |
 | ~~Specify behaviour, not semantics.~~ | earlier design rule | **Ship the fact with the instruction.** | [Q4](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship) |

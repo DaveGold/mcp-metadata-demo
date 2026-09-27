@@ -48,7 +48,8 @@ The closing slide promised five things. Here they are:
 **What changed since the talk.** The talk said _bound is not the same as delivered_, and marked
 the tool description as reaching the model before the call. Four days later the evals showed that
 on Claude Code only the first **2,048 characters** of a description arrive, and 74% of the rich
-tier's description never did. The thesis held; what changed is where the knowledge has to go.
+tier's description never did. That line is the host's: Cowork cuts at 4,096 and claude.ai chat
+not at all ([HD](evals/results/2026-09-27-host-delivery.json)). The thesis held; what changed is where the knowledge has to go.
 
 - **`rich` is the server from the talk.** Afterwards only its measured defects were fixed, among
   them a wrong alert removed and one correcting sentence moved inside the cut. The rest is as

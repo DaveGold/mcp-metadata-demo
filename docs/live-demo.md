@@ -61,8 +61,8 @@ CALCULATED by the label method, and Paris Proof is defined on MEASURED energy at
 unit, different quantity. `best` states that fact where the model reads it and scores 20/20 on
 haiku. Until 2026-09-24 `rich` itself carried a computed alert that made exactly this comparison,
 and the models repeated it (0/20). Removing that alert alone left `rich` at 0/10 on haiku: the
-question invites the comparison, and `rich`'s CALCULATED vs MEASURED sentence sat past the 2,048
-cut ([Q20](../evals/results/2026-09-24-q20-rich-alert-removed.json)). Moving that one sentence
+question invites the comparison, and `rich`'s CALCULATED vs MEASURED sentence sat past Claude
+Code's 2,048 cut ([Q20](../evals/results/2026-09-24-q20-rich-alert-removed.json)). Moving that one sentence
 inside the cut took it to 10/10 on haiku and on sonnet
 ([Q21](../evals/results/2026-09-24-q21-rich-line-delivered.json)). Removing a wrong line is half
 the fix; delivering the right one is the other half. This is the eval set's headline trap
@@ -106,9 +106,9 @@ Exact bytes per tier: [`thin`](wire/minimal.md) · [`rich`](wire/rich.md) · [`b
 
 | | **thin** (`/mcpThin`) | **rich** (`/mcp`) | **best** (`/mcpBest`) |
 |---|---|---|---|
-| `get_building_profile` description _(model-visible up to char 2,048)_ | one sentence (~50 chars) | ~8,000 chars; 74% past the cut | 1,800 chars, all delivered |
+| `get_building_profile` description _(model-visible up to char 2,048 on Claude Code, 4,096 on Cowork, all of it in claude.ai chat)_ | one sentence (~50 chars) | ~8,000 chars; 74% past Claude Code's cut, 49% past Cowork's | 1,800 chars, all delivered |
 | Input schema _(model-visible)_ | 2 bare fields, no descriptions, no validation | 4 fields, each `.describe()`d, format-validated | each `.describe()`d; weather's `select` lists its exact field names |
-| Output schema _(never model-visible)_ | none (text-only result) | full Zod schema, shape only | shape only; meaning is in the field names |
+| Output schema _(not model-visible on Claude Code, Cowork or claude.ai chat; Codex sees it)_ | none (text-only result) | full Zod schema, shape only | shape only; meaning is in the field names |
 | Response-side meaning _(model-visible)_ | none | curated `alerts[]` | `interpretation` first: alerts, per-record notes, computed values with provenance |
 | Render apps | stripped to one sentence each | full self-describing schemas | audited for delivery (Q22); refuses a mislabelled table |
 

@@ -21,8 +21,9 @@ missing. The talk _Most MCP servers are empty_ added the capabilities that feedb
 The evals kept the thesis and sharpened the delivery half:
 
 - The talk's table marked the tool description as reaching the model before the call. On Claude
-  Code only its first **2,048 characters** do ([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
-  Most of a long description is bound and never delivered.
+  Code only its first **2,048 characters** do ([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)),
+  on Cowork its first 4,096, in claude.ai chat all of it ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
+  On the strictest host, most of a long description is bound and never delivered.
 - Once delivered, the channel does not matter: description and response tie
   ([Q15](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). An earlier
   reading that "the response beats the description" was the cut, not the channel
