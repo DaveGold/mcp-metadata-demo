@@ -1,0 +1,296 @@
+{
+ "_comment": "Does the 2,048-character tool-description cut measured on Claude Code (Q7) hold on other hosts? Probed on Codex CLI, ChatGPT and claude.ai against the `rich` tier (https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp): get_building_profile description 7,978 chars, server instructions 2,829 chars. Fingerprints: Claude Code's cut ends '...pre-2008 homes.\\n5. La' (char 2,048); the full text ends '...based on warmtebehoefte.'; '5. Large panden' starts at char 2,046, 'CALCULATED vs MEASURED' at ~3,990. Plus a small Codex pilot on three eval questions, rich vs best.",
+ "date": "2026-09-27",
+ "hosts": {
+  "claude-code": {
+   "source": "Q7 (2026-09-22)",
+   "tool_description": "first 2,048 chars + '… [truncated]'",
+   "server_instructions": "first 2,048 chars"
+  },
+  "codex-cli": {
+   "version": "codex-cli 0.154.0, gpt-5.6-sol, reasoning high, `codex exec`, isolated CODEX_HOME with one MCP server",
+   "method": "RUST_LOG=trace: the Responses API request echoed in `response.created` (the tools array the model receives), plus the session rollout JSONL",
+   "tool_description": "NOT in the prompt: 0 chars. MCP tools are deferred (feature tool_search_always_defer_mcp_tools = true). The model gets one `exec` tool (a 24,107-char JS code-mode description) that says nested tools are on `tools.*` and listed in `ALL_TOOLS` as {name, description}. When the model filters ALL_TOOLS and prints an entry, it receives the description UNCUT.",
+   "server_instructions": "Not a separate prompt block. Prepended to every tool's ALL_TOOLS description: instructions (2,829) + '\\n\\n' + description (7,978) = 10,809 chars, followed by an 'exec tool declaration' TypeScript block.",
+   "other": "Account-level ChatGPT apps are merged in as mcp__codex_apps__* (here the user's 'Test' dev-mode app pointing at the same rich server). One pilot run called it instead of the configured server. Run evals with `--disable apps`.",
+   "probe_answer": "1. `You are connected to the metadata-demo MCP server — a demonstration of a rich-me`\n2. ` also include an estimated annual gas consumption (m³), total CO₂ emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.`\n3. Yes: `5. Large panden (aantal_verblijfsobjecten > 10, e.g. shopping centers, office parks, care complexes)`\n4. Yes: ` — ep1_energiebehoefte, ep2_fossiel and berekend_energieverbruik are all CALCULATED NTA 8800 figures`\n5. Approximately 10,809 characters."
+  },
+  "chatgpt-chat": {
+   "version": "chatgpt.com Chat mode, 2026-09-27, dev-mode app 'Test' (URL https://mcp-jtc4p3l6nq-ez.a.run.app, the Cloud Run URL of the same `mcp` function, byte-identical tools/list), tools refreshed before the run",
+   "runs": 2,
+   "tool_description": "delivered IN FULL in context. Run 2 quoted the last 150 chars ending exactly '...based on warmtebehoefte.'; run 1 quoted the end of the output schema rendered as TypeScript after the description. Both found '5. Large panden' and 'CALCULATED vs MEASURED' verbatim. Model (run 2): no code or tool used, the definition was in context.",
+   "server_instructions": "CUT AT 512 CHARS + '...'. Both runs quote the end as '...apply the same approach to UI configuration. The schemas t...'; 'The schemas t' ends at exactly char 512 of the 2,829-char instructions.",
+   "answers": [
+    "(1) RETURNS: Building profile combining BAG data (bouwjaar, oppervlakte, gebruiksdoe (2) ...ep_online_bouwjaar: number | null, // Advisory alerts based on building characteristics alerts: string[], }>; ``` (3) yes, 5. Large panden (aantal_verblijfsobjecten > 10, e.g. shopping centers, office parks, care complexes) (4) yes, — ep1_energiebehoefte, ep2_fossiel and berekend_energieverbruik are all CALCULATED NTA 8800 figures (5) yes, ...rnal priming. SELF-DESCRIBING MCP APPS — render_chart, render_table, render_map apply the same approach to UI configuration. The schemas t... (6) ~12,718",
+    "(1) RETURNS: Building profile combining BAG data (bouwjaar, oppervlakte, gebruiksdoe (2) s also include an estimated annual gas consumption (m³), total CO₂ emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte. (3) yes, 5. Large panden (...) (4) yes (5) yes; first 80: You are connected to the metadata-demo MCP server — a demonstration of a rich-me; last: ...The schemas t... (6) ~8,500 (7) no code or tool; in context"
+   ]
+  },
+  "chatgpt-work": {
+   "version": "chatgpt.com Work mode, GPT-6 Sol, same app",
+   "runs": 1,
+   "tool_description": "delivered in full via code: the model 'ran code to read the tool definition from the available tool registry' (same code-mode pattern as Codex). 8,038 chars = the app description typed in ChatGPT ('Test custom mcp server' + '\\n\\n', 24) + 7,978 + ' This tool is part of plugin `Test`.' (36).",
+   "server_instructions": "NOT delivered ('I did not receive server-level instructions'); the ChatGPT-side app description takes their place.",
+   "answer": "(1) Test custom mcp server\\n\\nRETURNS:\\nBuilding profile combining BAG data (bouwjaar, (2) ...warmtepomp-geschiktheidsindicatie based on warmtebehoefte. This tool is part of plugin `Test`. (3) yes (4) yes (5) no server-level instructions (6) 8,038 (7) ran code against the tool registry; did not call the tool"
+  },
+  "claude-ai": {
+   "version": "claude.ai web chat, Sonnet 5 High, 2026-09-27; team custom connector \"Metadata demo (rich)\" = https://mcp-jtc4p3l6nq-ez.a.run.app (No sign-in, detected), ~17 other connectors enabled",
+   "runs": 2,
+   "tool_description": "delivered IN FULL, but only after the model loads it: the tool is DEFERRED (\"it is a deferred tool per my tool list ... not present in my context at the start of this chat\") and arrives in a tool_search result. Both runs quote the end as \"...a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.\" with no marker; run 2 quotes what follows \"normal for pre-2008 homes.\" (where Claude Code cuts, at char 2,048) as \"\\n5. Large panden (aantal_verblijfsobjecten > 10, e.g. shoppi\". Both quote m³/CO₂ as m3/CO2 (run 2 without running code), so the tool_search text may be ASCII-normalised; not verified.",
+   "server_instructions": "NOT delivered, in 2/2 runs: \"I did not receive any such text, in the tool_search result or elsewhere in my context.\"",
+   "connector_setup": "Adding https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcp fails claude.ai's check at \"Connecting to the server: Not found (404)\", both before and after this PR made GET/DELETE answer 405 (deployed to `mcp` on 2026-09-27; tools/list byte-identical before and after). The Cloud Run URL of the same function works and is detected as No sign-in. So the 404 comes from how claude.ai resolves a cloudfunctions.net URL with a path (likely discovery at the domain root), not from the MCP endpoint.",
+   "answers": [
+    "(1) RETURNS:\\nBuilding profile combining BAG data (bouwjaar, oppervlakte, gebruiksdoe (2) also include an estimated annual gas consumption (m3), total CO2 emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte. (no marker) (3) yes, 5. Large panden (aantal_verblijfsobjecten > 10, e.g. shopping centers, office parks, care complexes) (4) yes, twice (5) no server-level instructions (6) ~7,900-8,000 (7) tool_search, then bash to slice a retyped copy",
+    "(1) same (2) same, no marker (3) \\n5. Large panden (aantal_verblijfsobjecten > 10, e.g. shoppi (4) yes, twice, identical (5) none anywhere in context (6) only after tool_search; deferred tool"
+   ]
+  }
+ },
+ "headline": [
+  "The 2,048-char description cut is a Claude Code number. Codex CLI, ChatGPT (Chat and Work) and claude.ai all deliver the whole 7,978-char description.",
+  "Server instructions are the fragile surface elsewhere: ChatGPT Chat cuts them at 512 chars; ChatGPT Work and claude.ai do not deliver them at all (Work puts the app description typed in ChatGPT in their place); Codex prepends them to every tool description.",
+  "On Codex, ChatGPT Work and claude.ai (with many connectors) the tool is deferred: 0 chars in the prompt until the model searches (Codex filters ALL_TOOLS by keyword over name + description; claude.ai uses tool_search). In the Codex pilot the model found and read the configured tool in 20/21 runs and printed its whole description before calling; the 21st picked the account-level ChatGPT copy of the same server.",
+  "Codex pilot (gpt-5.6-sol, n=3): best 9/9; rich 7/9 — benchmark-trap 1/3, the same hedged EP-1-vs-70 verdict Q19 scored as a fail. Same direction as Claude Code, now on a host where rich's text is not cut."
+ ],
+ "caveats": [
+  "Self-report probes (ChatGPT, claude.ai) rest on the model quoting verbatim, checked against the wire fingerprints. The ChatGPT 512 cut replicated 2/2; claude.ai 2/2. Codex was measured on the request itself.",
+  "One ChatGPT Work run. Codex pilot n=3 per cell, one model; a pilot, not a registered question.",
+  "ChatGPT model under the default 'Gemiddeld' effort; host behaviour may change without notice (Codex's defer flag is marked 'removed'/true in 0.154).",
+  "claude.ai was measured with ~17 connectors enabled, which is why its tools were deferred. With one connector the tools may sit in the prompt; whether they are cut there is unmeasured."
+ ],
+ "codex_pilot": [
+  {
+   "question": "benchmark-trap",
+   "arm": "best",
+   "rep": 1,
+   "servers_called": [
+    "eval_best.get_building_profile"
+   ],
+   "input_tokens": 107104,
+   "answer": "ANSWER: It cannot be validly compared with the 70 kWh/m² Paris Proof target because that target uses measured final energy, while the available EP-Online figure is calculated, not metered. The building has energy label A and a calculated NTA 8800 energy use of 229.17 kWh/m²/year.\nCALLS: 1\nTOOLS: get_building_profile\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Assess Gustav Mahlerlaan 10 against the Paris Proof 2040 office target of 70 kWh/m²\"}",
+   "score": "pass"
+  },
+  {
+   "question": "benchmark-trap",
+   "arm": "best",
+   "rep": 2,
+   "servers_called": [
+    "eval_best.get_building_profile"
+   ],
+   "input_tokens": 108316,
+   "answer": "ANSWER: The office has energy label A, with calculated NTA 8800 energy use of 229.17 kWh/m²/year. This cannot be directly compared with the Paris Proof target of 70 kWh/m²/year, because Paris Proof uses measured final energy; actual meter data is needed to assess compliance.\nCALLS: 1\nTOOLS: mcp__eval_best__get_building_profile\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Assess how Gustav Mahlerlaan 10 compares with the Paris Proof 2040 office target of 70 kWh/m².\"}",
+   "score": "pass"
+  },
+  {
+   "question": "benchmark-trap",
+   "arm": "best",
+   "rep": 3,
+   "servers_called": [
+    "eval_best.get_building_profile"
+   ],
+   "input_tokens": 107101,
+   "answer": "ANSWER: The building has energy label A and a calculated, non-metered energy use of 229.17 kWh/m²/year. However, Paris Proof’s 70 kWh/m² target concerns measured final energy, so this label figure cannot validly show whether the building meets or exceeds that target; actual meter data is required.\nCALLS: 1\nTOOLS: get_building_profile\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Compare Gustav Mahlerlaan 10 Amsterdam with the Paris Proof 2040 office target of 70 kWh/m²\"}",
+   "score": "pass"
+  },
+  {
+   "question": "benchmark-trap",
+   "arm": "rich",
+   "rep": 1,
+   "servers_called": [
+    "eval_rich.get_building_profile"
+   ],
+   "input_tokens": 116263,
+   "answer": "ANSWER: The office has energy label A and a calculated EP-1 demand of 81.68 kWh/m²/year—11.68 kWh/m² (16.7%) above 70. However, Paris Proof assesses measured final energy, while EP-1 is modeled demand; without meter data, compliance cannot be determined.\nCALLS: 1\nTOOLS: get_building_profile\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Compare Gustav Mahlerlaan 10 office energy performance with the Paris Proof 2040 target of 70 kWh/m²\"}",
+   "score": "fail (hedged verdict: ranks EP-1 81.68 against 70, \"16.7% above\", then caveats; scored as Q19 hand-read rich-opus)"
+  },
+  {
+   "question": "benchmark-trap",
+   "arm": "rich",
+   "rep": 2,
+   "servers_called": [
+    "eval_rich.get_building_profile"
+   ],
+   "input_tokens": 116525,
+   "answer": "ANSWER: The building has energy label A and a calculated EP-1 demand of 81.68 kWh/m²/year—11.68 kWh/m² (16.7%) above 70. However, Paris Proof targets measured final energy use, while EP-1 is calculated net energy demand, so this is not a like-for-like comparison and the available data cannot establish compliance.\nCALLS: 1\nTOOLS: mcp__eval_rich__get_building_profile\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Compare Gustav Mahlerlaan 10 Amsterdam against the Paris Proof 2040 office target of 70 kWh/m²\"}",
+   "score": "fail (hedged verdict: ranks EP-1 81.68 against 70, \"16.7% above\", then caveats; scored as Q19 hand-read rich-opus)"
+  },
+  {
+   "question": "benchmark-trap",
+   "arm": "rich",
+   "rep": 3,
+   "servers_called": [
+    "eval_rich.get_building_profile"
+   ],
+   "input_tokens": 140051,
+   "answer": "ANSWER: A valid comparison cannot be made: Paris Proof’s 70 kWh/m² target concerns measured final energy, while the available data contains only calculated NTA 8800 values. The office has energy label A, with calculated EP-1 demand of 81.68 kWh/m²/year and EP-2 fossil primary energy of 179.06 kWh/m²/year; neither should be ranked against the Paris Proof target.\nCALLS: 1\nTOOLS: get_building_profile\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Compare this Amsterdam office building with the Paris Proof 2040 office target of 70 kWh/m² using available public-register data.\"}",
+   "score": "pass"
+  },
+  {
+   "question": "metered-vs-model",
+   "arm": "best",
+   "rep": 1,
+   "servers_called": [
+    "eval_best.get_building_profile"
+   ],
+   "input_tokens": 110083,
+   "answer": "ANSWER: No. The available data for Middenwetering 1 contains calculated EP-Online energy figures only, not metered gas consumption.\nCALLS: 1\nTOOLS: mcp__eval_best__get_building_profile\nPARAMS: {\"postcode\":\"3543AR\",\"huisnummer\":1,\"queryIntent\":\"Determine whether metered gas consumption is available for Middenwetering 1, Utrecht\"}",
+   "score": "pass"
+  },
+  {
+   "question": "metered-vs-model",
+   "arm": "best",
+   "rep": 2,
+   "servers_called": [
+    "eval_best.get_building_profile"
+   ],
+   "input_tokens": 110663,
+   "answer": "ANSWER: No. The address matched exactly, but the available data contains only calculated EP-Online figures—not metered gas consumption—so I can’t retrieve the requested meter reading.\nCALLS: 1\nTOOLS: mcp__eval_best__get_building_profile\nPARAMS: {\"postcode\":\"3543AR\",\"huisnummer\":1,\"queryIntent\":\"Retrieve metered gas consumption for Middenwetering 1 in Utrecht\"}",
+   "score": "pass"
+  },
+  {
+   "question": "metered-vs-model",
+   "arm": "best",
+   "rep": 3,
+   "servers_called": [
+    "eval_best.get_building_profile"
+   ],
+   "input_tokens": 120417,
+   "answer": "ANSWER: No. The available data confirms the address, but it contains only calculated EP-Online figures—not metered gas consumption.\nCALLS: 1\nTOOLS: mcp__eval_best__get_building_profile\nPARAMS: {\"postcode\":\"3543AR\",\"huisnummer\":1,\"queryIntent\":\"Check whether metered gas consumption is available for Middenwetering 1, Utrecht\"}",
+   "score": "pass"
+  },
+  {
+   "question": "metered-vs-model",
+   "arm": "rich-noapps",
+   "rep": 1,
+   "servers_called": [
+    "eval_rich.get_building_profile"
+   ],
+   "input_tokens": 74379,
+   "answer": "ANSWER: No. The available data confirms the address but contains no metered gas consumption; its 369.05 kWh/m² figure is calculated total energy use, not a meter reading.\nCALLS: 1\nTOOLS: mcp__eval_rich__get_building_profile\nPARAMS: {\"postcode\":\"3543AR\",\"huisnummer\":1,\"queryIntent\":\"Retrieve metered gas consumption for Middenwetering 1, Utrecht\"}",
+   "score": "pass"
+  },
+  {
+   "question": "metered-vs-model",
+   "arm": "rich-noapps",
+   "rep": 2,
+   "servers_called": [
+    "eval_rich.get_building_profile"
+   ],
+   "input_tokens": 74437,
+   "answer": "ANSWER: No—the connected service does not provide metered gas consumption. It found the exact address, but only provides building and calculated energy-profile data, not meter readings.\nCALLS: 1\nTOOLS: mcp__eval_rich__get_building_profile\nPARAMS: {\"postcode\":\"3543AR\",\"huisnummer\":1,\"queryIntent\":\"Check whether metered gas consumption is available for Middenwetering 1, Utrecht\"}",
+   "score": "pass"
+  },
+  {
+   "question": "metered-vs-model",
+   "arm": "rich-noapps",
+   "rep": 3,
+   "servers_called": [
+    "eval_rich.get_building_profile"
+   ],
+   "input_tokens": 74321,
+   "answer": "ANSWER: No—the address was found, but this MCP server does not provide metered gas consumption. Its modeled energy-use figure is not a meter reading.\nCALLS: 1\nTOOLS: get_building_profile\nPARAMS: {\"postcode\":\"3543AR\",\"huisnummer\":1,\"queryIntent\":\"Check whether metered gas consumption is available for Middenwetering 1, Utrecht.\"}",
+   "score": "pass"
+  },
+  {
+   "question": "metered-vs-model",
+   "arm": "rich",
+   "rep": 1,
+   "servers_called": [
+    "eval_rich.get_building_profile"
+   ],
+   "input_tokens": 138481,
+   "answer": "ANSWER: No. The available record matches Middenwetering 1 exactly, but it provides only calculated energy data—not metered gas consumption.\nCALLS: 1\nTOOLS: mcp__eval_rich__get_building_profile\nPARAMS: {\"postcode\":\"3543AR\",\"huisnummer\":1,\"queryIntent\":\"Check whether metered gas consumption is available for Middenwetering 1, Utrecht\"}",
+   "score": "pass (superseded by the rich-noapps re-run)"
+  },
+  {
+   "question": "metered-vs-model",
+   "arm": "rich",
+   "rep": 2,
+   "servers_called": [],
+   "input_tokens": 107094,
+   "answer": "ANSWER: No. The connected MCP server does not provide metered gas consumption; it only offers public building-register data and calculated energy estimates, which are not meter readings.\nCALLS: 0\nTOOLS: none\nPARAMS: none",
+   "score": "pass (superseded by the rich-noapps re-run)"
+  },
+  {
+   "question": "metered-vs-model",
+   "arm": "rich",
+   "rep": 3,
+   "servers_called": [
+    "codex_apps.test.get_building_profile"
+   ],
+   "input_tokens": 170950,
+   "answer": "ANSWER: I verified the exact address, but the connected tool does not provide metered gas consumption. It only reports calculated energy use of 369.05 kWh/m², which is not meter data.\nCALLS: 1\nTOOLS: mcp__codex_apps__test_get_building_profile\nPARAMS: {\"postcode\":\"3543AR\",\"huisnummer\":1}",
+   "score": "EXCLUDED (called the account-level ChatGPT app \"Test\", not eval_rich)"
+  },
+  {
+   "question": "overheating",
+   "arm": "best",
+   "rep": 1,
+   "servers_called": [
+    "eval_best.get_building_profile",
+    "eval_best.get_building_profile",
+    "eval_best.get_building_profile"
+   ],
+   "input_tokens": 146843,
+   "answer": "ANSWER: Yes, but it varies by unit: 1-01 has a significant overheating risk (indicator 3.59), while 1-02 and 1-BG have minor risks (1.16 and 1.33). The significant-risk threshold is above 1.5.\nCALLS: 3\nTOOLS: get_building_profile, get_building_profile, get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Beoordeel het risico op oververhitting voor Van Beuningenstraat 1 in Rotterdam.\"}, {\"postcode\":\"3039WB\",\"huisnummer\":1,\"toevoeging\":\"02\",\"queryIntent\":\"Beoordeel het risico op oververhitting voor verblijfsobject 1-02 op Van Beuningenstraat 1 in Rotterdam.\"}, {\"postcode\":\"3039WB\",\"huisnummer\":1,\"toevoeging\":\"BG\",\"queryIntent\":\"Beoordeel het risico op oververhitting voor verblijfsobject 1-BG op Van Beuningenstraat 1 in Rotterdam.\"}",
+   "score": "pass"
+  },
+  {
+   "question": "overheating",
+   "arm": "best",
+   "rep": 2,
+   "servers_called": [
+    "eval_best.get_building_profile",
+    "eval_best.get_building_profile",
+    "eval_best.get_building_profile"
+   ],
+   "input_tokens": 174195,
+   "answer": "ANSWER: Yes—the risk varies across the three units. The calculated overheating indicator is significant for 1-01 at 3.59, and minor for 1-02 at 1.16 and 1-BG at 1.33; values above 1.5 indicate significant risk.\nCALLS: 3\nTOOLS: mcp__eval_best__get_building_profile, mcp__eval_best__get_building_profile, mcp__eval_best__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk at Van Beuningenstraat 1 in Rotterdam\"}; {\"postcode\":\"3039WB\",\"huisnummer\":1,\"toevoeging\":\"02\",\"queryIntent\":\"Assess overheating risk at Van Beuningenstraat 1-02 in Rotterdam\"}; {\"postcode\":\"3039WB\",\"huisnummer\":1,\"toevoeging\":\"BG\",\"queryIntent\":\"Assess overheating risk at Van Beuningenstraat 1-BG in Rotterdam\"}",
+   "score": "pass"
+  },
+  {
+   "question": "overheating",
+   "arm": "best",
+   "rep": 3,
+   "servers_called": [
+    "eval_best.get_building_profile",
+    "eval_best.get_building_profile",
+    "eval_best.get_building_profile"
+   ],
+   "input_tokens": 142653,
+   "answer": "ANSWER: Yes. Unit 1-01 has significant overheating risk (indicator 3.59; threshold 1.5), while 1-02 and 1-BG have minor risk (1.16 and 1.33).\nCALLS: 3\nTOOLS: mcp__eval_best__get_building_profile, mcp__eval_best__get_building_profile, mcp__eval_best__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk at Van Beuningenstraat 1 in Rotterdam\"}; {\"postcode\":\"3039WB\",\"huisnummer\":1,\"toevoeging\":\"02\",\"queryIntent\":\"Assess overheating risk for unit 02 at Van Beuningenstraat 1 in Rotterdam\"}; {\"postcode\":\"3039WB\",\"huisnummer\":1,\"toevoeging\":\"BG\",\"queryIntent\":\"Assess overheating risk for ground-floor unit at Van Beuningenstraat 1 in Rotterdam\"}",
+   "score": "pass"
+  },
+  {
+   "question": "overheating",
+   "arm": "rich",
+   "rep": 1,
+   "servers_called": [
+    "eval_rich.get_building_profile"
+   ],
+   "input_tokens": 110091,
+   "answer": "ANSWER: Yes. The returned profile for Van Beuningenstraat 1-01 shows a significant overheating risk: TOjuli/GTO is 3.59, above the 1.5 threshold. Because the address contains three residential units, this result applies to the first matched unit; a suffix is needed to assess another unit exactly.\nCALLS: 1\nTOOLS: get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk at Van Beuningenstraat 1, Rotterdam\"}",
+   "score": "pass"
+  },
+  {
+   "question": "overheating",
+   "arm": "rich",
+   "rep": 2,
+   "servers_called": [
+    "eval_rich.get_building_profile"
+   ],
+   "input_tokens": 138314,
+   "answer": "ANSWER: Yes. The profile for Van Beuningenstraat 1-01 shows a significant overheating risk: TOjuli/GTO 3.59, above the 1.5 threshold. The address has three units, so a suffix is needed to verify another specific unit.\nCALLS: 1\nTOOLS: mcp__eval_rich__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk at Van Beuningenstraat 1 in Rotterdam\"}",
+   "score": "pass"
+  },
+  {
+   "question": "overheating",
+   "arm": "rich",
+   "rep": 3,
+   "servers_called": [
+    "eval_rich.get_building_profile"
+   ],
+   "input_tokens": 105266,
+   "answer": "ANSWER: Yes. The first matched unit, Van Beuningenstraat 1-01, has a significant overheating risk: TOjuli/GTO 3.59, above the 1.5 threshold. The address has three units, so the exact unit needs a suffix to confirm.\nCALLS: 1\nTOOLS: mcp__eval_rich__get_building_profile\nPARAMS: {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Assess overheating risk for Van Beuningenstraat 1 in Rotterdam\"}",
+   "score": "pass"
+  }
+ ]
+}

@@ -6,6 +6,19 @@ Semantic versions; each release is the git tag `skill-v<version>` in
 sharpens rules; a **patch** fixes wording, links or tooling. Every change to the skill bumps
 `metadata.version` in `SKILL.md` and adds an entry here (CI checks both).
 
+## 1.2.0 — 2026-09-27
+
+Delivery measured beyond Claude Code [HD].
+
+- **Server instructions: ≤ 512 characters, and nothing load-bearing only there.** ChatGPT cuts
+  them at 512; claude.ai and ChatGPT Work do not deliver them; Codex prepends them to every tool
+  description. The old budget (≤ 2,048) was Claude Code's.
+- The 2,048-character description budget stays: it is the strictest cut measured. Codex CLI,
+  ChatGPT and claude.ai deliver the whole description, often only after the model searches for
+  the tool.
+- `delivery.md`: how to verify on Codex (the request trace) and on chat hosts (the quote probe
+  with fingerprints on both sides of the cut).
+
 ## 1.1.1 — 2026-09-25
 
 Evidence only; no rule changed.

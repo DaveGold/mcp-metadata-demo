@@ -20,7 +20,7 @@ bottom. Bracketed tags (`[Q7]`) resolve in [`evidence.md`](evidence.md).
 |---|---|---|---|---|
 | **field names** in the returned data | **always** — in every response, on every host | none | what the value IS: quantity, scope, provenance, unit | [N1]–[N6] |
 | **tool description** | **first 2,048 characters only**, re-sent on every request | 2,048 chars (keep a working ceiling ~1,800) | what the tool is and is not, when to pick it, input conventions, the few rules that must hold *before* a call | [Q7] [Q15] [Q15b] |
-| **server instructions** | same 2,048 cut | 2,048 chars | cross-tool routing, "read `interpretation` first", what the server does NOT have | [Q7] |
+| **server instructions** | same 2,048 cut on Claude Code; **512** on ChatGPT, **not at all** on claude.ai and ChatGPT Work | 512 chars | cross-tool routing, "read `interpretation` first", what the server does NOT have — each repeated in a description head or the response | [Q7] [HD] |
 | **input schema** (`.describe()`/`.meta()` per param) | **yes, in full**: no cut seen up to ~21.7k chars per tool — but re-sent every turn, for every tool, used or not | what forming the call needs; cost per turn | formats, working examples, the list of valid `select` names, misbehaving params, how to choose an enum value | [L3] [Q11] [IS] |
 | **output schema** annotations | **no** — a 7,659-char schema difference cost +181–336 tokens | — | validation + UI only; keep shape-only | [Q11] |
 | **tool response** | yes, **up to ~25k tokens**; above that the host replaces the result with a "saved to file" notice | keep < ~25k tokens (this repo guards at 50k chars) | the instance, record-conditional interpretation, computed verdicts, the data a rule needs | [Q9] [Q13] [Q14] [Q16] |
@@ -74,6 +74,13 @@ text [Q7]. Check the model side.
 - **Ask the model where its description ends.** Spawn a fresh subagent that has the tool and ask
   it to quote the last 100 characters of the tool's description. A cut shows as a quote that
   stops mid-sentence with `… [truncated]` at exactly char 2,048. (This is how Q7 was found.)
+- **On another host, read the request or fingerprint the cut** [HD]. Codex CLI: run with
+  `RUST_LOG=trace`; the `response.created` event echoes the tools the model got (MCP tools are
+  deferred there, reachable through `ALL_TOOLS` in the `exec` tool). Chat hosts (ChatGPT,
+  claude.ai): in a fresh chat, ask for the first 80 and last 150 characters of the description and
+  of the server instructions, and for the text right after the sentence that ends at char 2,048.
+  Compare with `tools/list`; a quote of the true end, twice, is the evidence. Run Codex evals with
+  `--disable apps`, or the account's ChatGPT apps join the tool list.
 - **Token accounting.** Change only surface X by N characters and compare per-run input tokens.
   If a 7,659-char change moves input by ~200 tokens, X is not in the request [Q11].
 - **Measure offsets in CI.** A test that asserts `description.length <= 2048` and that each
