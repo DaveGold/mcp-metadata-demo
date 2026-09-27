@@ -54,7 +54,7 @@ Do not skip the audit because the metadata looks rich. In this repo the richest 
 28% of its own description to the model, and one of its computed alerts asserted a verdict the
 eval set had already shown to be wrong.
 
-## What reaches the model (Claude Code; verify for other hosts)
+## What reaches the model (Claude Code, the strictest host measured)
 
 | surface | delivered | budget |
 |---|---|---|
@@ -66,12 +66,21 @@ eval set had already shown to be wrong.
 | response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9] | guard it |
 | guidance tool | only if the pointer is a requirement [Q8b] | — |
 
-**Other hosts [HD].** Cowork (web and app) cuts descriptions at 4,096; Codex CLI, ChatGPT and claude.ai
-chat deliver them whole, often only after the model searches for the tool (deferred loading).
-2,048 is the strictest cut measured, so the budget stays. Server instructions vary most: ChatGPT
-cuts them at 512, claude.ai chat and ChatGPT Work do not deliver them, Cowork delivers them whole,
-Codex prepends them to every tool. Repeat what the instructions carry in a description head or in
-the response.
+**Works on every host [HD].** Other hosts cut elsewhere or not at all: Cowork at 4,096; claude.ai
+chat, ChatGPT and Codex deliver the whole description. Design for the strictest value per surface
+and the server works on all of them:
+
+- **Description:** what must hold before a call goes in the first 2,048 characters (Claude Code).
+  The whole description ≤ 2,048 arrives whole everywhere.
+- **Server instructions:** none of them reach claude.ai chat or ChatGPT Work, and ChatGPT gets
+  512. Keep them ≤ 512, and repeat each rule in a description head or in the response.
+- **Input schema:** delivered everywhere except the describes of a large schema on Codex
+  (dropped at 20k chars, kept at 642). Keep schemas small; carry choices in enums and names,
+  which survive.
+- **Output schema:** absent on Claude Code, claude.ai chat and Cowork. Never the only home of
+  meaning.
+- **Found before read:** claude.ai, Cowork and Codex defer tools until the model searches. The tool
+  name and the first sentence of the description must hold the words a user would search with.
 
 The variable is **delivery, not channel**: the same sentence delivered in the description and in
 the response scored 20/20 and 20/20 [Q15]. Details, and how to check it yourself:
@@ -148,7 +157,7 @@ Copy this checklist into your response and tick it off:
 - [ ] E. Examine the data (probe matrix) and the model (what it received, which field it used, how many calls)
 - [ ] F. Flag: every finding carries [CONFIDENCE: …  TODO: DOMAIN EXPERT — …]
 - [ ] V. Validate by the agent against the data; measure with a minimal eval (evaluation.md §0)
-- [ ] E. Encode: names, description ≤2,048, input schema, `interpretation` rules + computed values, provenance per rule
+- [ ] E. Encode: names, description ≤2,048, instructions ≤512, input schema, `interpretation` rules + computed values, provenance per rule
 - [ ] I. Iterate: fresh session, re-measure, then telemetry
 - [ ] V. Expert session for what the agent could not settle (validation.md), then one more pass
 - [ ] H. Harden: regression suite (evaluation.md §7), docs/<name>-findings.md, agent guide
@@ -239,8 +248,8 @@ one more pass of the loop with the answers encoded.
 What the talk calls "tests, a findings log": concretely, the parts of the eval that keep guarding
 after the loop has stabilised ([`references/evaluation.md`](references/evaluation.md) §7):
 
-- **Budget tests:** description and instructions ≤ 2,048 (ceiling ~1,800), load-bearing sentences
-  before fixed offsets, worst-case response under the size guard.
+- **Budget tests:** description ≤ 2,048 (ceiling ~1,800), instructions ≤ 512, load-bearing
+  sentences before fixed offsets, worst-case response under the size guard.
 - **Name and rule tests:** units in names, a provenance line on every rename and rule, each rule
   on a fixture record that triggers it.
 - **Ground-truth tests:** every eval question's expected value re-derived from frozen fixtures.
@@ -255,8 +264,8 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
 ## Hard rules
 
 - **Never claim what you have not observed.** Give the count, or the confidence marker.
-- **Nothing load-bearing past char 2,048** of a description or the instructions; a test enforces
-  it [Q7].
+- **Nothing load-bearing past char 2,048** of a description, and nothing load-bearing only in the
+  instructions; a test enforces it [Q7] [HD].
 - **No model-facing meaning only in the output schema** [Q11].
 - **No field name that implies a quantity it is not; every numeric name carries its unit; calculated
   values say so in the name** when a measured counterpart exists [N2] [N5].

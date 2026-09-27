@@ -16,6 +16,11 @@ Delivery measured beyond Claude Code [HD].
 - The 2,048-character description budget stays: it is the strictest cut measured. Cowork (web)
   cuts at 4,096; Codex CLI, ChatGPT and claude.ai chat deliver the whole description, often only
   after the model searches for the tool.
+- **Works on every host:** one rule per surface, set to the strictest host measured. Description
+  head ≤ 2,048; instructions ≤ 512 and repeated elsewhere; input schemas small, choices in enums
+  and names (Codex drops the describes of a 20k schema); no meaning only in the output schema; the
+  tool name and first sentence hold the search words, because claude.ai, Cowork and Codex defer
+  tools until the model searches.
 - `delivery.md`: how to verify on Codex (the request trace) and on chat hosts (the quote probe
   with fingerprints on both sides of the cut).
 
