@@ -24,10 +24,9 @@ Delivery measured beyond Claude Code [HD].
   output schema is a validation contract; the response carries this record's meaning and the
   server enforces what must not go wrong; the tool name and first sentence say what the user can
   do, because claude.ai, Cowork and Codex defer tools until the model searches.
-- `best` follows it: server instructions 744 → 492 characters, every line also in a description
-  head.
-- `delivery.md`: how to verify on Codex (the request trace) and on chat hosts (the quote probe
-  with fingerprints on both sides of the cut).
+- `best` follows it for the instructions (744 → 492 characters, every line also in a description
+  head). Its `render_table` input schema (6,155 characters) is over the new schema budget: on
+  Codex it arrives without a single describe.
 
 ## 1.1.1 — 2026-09-25
 
