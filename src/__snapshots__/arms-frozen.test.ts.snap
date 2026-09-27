@@ -3,7 +3,7 @@
 exports[`frozen arms — wire surface unchanged > tools/list and instructions hash to the recorded snapshot for every pre-best arm 1`] = `
 {
   "best": {
-    "instructions": "3bd554dd32969922c8efbede582e0e2e01774a5cf1c2e40b6b8f09c4c439368d",
+    "instructions": "5c3de892307ce0f115b48295d7dd5834b3f345a557d658a93091a03f39c16f74",
     "tools": "37a5925117af46d9019e44adb894433e33d0dbd67aeac70d07c955929152f4ae",
   },
   "best-no-type-rules": {

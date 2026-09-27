@@ -33,6 +33,7 @@ import { registerGetToolCallLogTool } from './tools/get-tool-call-log.js';
 import { registerGetBuildingProfileBestTool } from './tools/get-building-profile-best.js';
 import { registerGetWeatherContextBestTool } from './tools/get-weather-context-best.js';
 import { bestInstructions } from './tools/best-instructions.js';
+import { bestInstructionsV1 } from './tools/best-instructions-v1.js';
 
 const VERSION = packageJson.version;
 
@@ -160,7 +161,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     // fetch_image. Frozen, so the app-tool change in `best` (Q22) stays comparable.
     const server = new McpServer(
       { name: 'metadata-demo-best-v1', version: VERSION },
-      { instructions: bestInstructions },
+      { instructions: bestInstructionsV1 },
     );
     registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
     registerGetWeatherContextBestTool(server);
@@ -175,7 +176,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
     // Q23 arm C: `best` exactly, except that render_chart's `type` carries no per-type rules.
     const server = new McpServer(
       { name: 'metadata-demo-best-no-type-rules', version: VERSION },
-      { instructions: bestInstructions },
+      { instructions: bestInstructionsV1 },
     );
     registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
     registerGetWeatherContextBestTool(server);

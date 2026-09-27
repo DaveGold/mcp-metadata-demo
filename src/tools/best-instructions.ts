@@ -1,12 +1,13 @@
 /**
- * Server instructions (reference implementation). Hosts cut these at 2,048 characters like tool
- * descriptions; kept far below. They deliberately repeat the two things that must hold before any
- * call: what the server does NOT have, and where the guidance is.
+ * Server instructions (reference implementation). Kept within 512 characters: some hosts cut them
+ * there and some never deliver them, so every line is also in a tool description head
+ * (evals/results/2026-09-27-host-delivery.json). They repeat the two things that must hold before
+ * any call: what the server does NOT have, and where the guidance is.
  */
 export const bestInstructions = `\
-Dutch building and weather data for energy questions, plus chart/table/map rendering.
+Dutch building (BAG, EP-Online label) and weather data for energy questions, plus chart/table/map rendering.
 
-- get_building_profile: BAG register facts and the registered EP-Online energy label for one address. Every EP-Online energy figure is CALCULATED by the label method; this server has NO metered energy consumption.
-- get_weather_context: daily weather, weighted degree days and solar irradiance for a Dutch location; pass get_building_profile coordinaten.lat/lon as latitude/longitude.
-- Every data tool returns \`interpretation\` (alerts, notes, constants) as its first key. Read it first: it holds the computed values and the reading rules for the returned record.
+- Every EP-Online energy figure is CALCULATED; this server has NO metered energy consumption.
+- Pass get_building_profile coordinaten.lat/lon to get_weather_context.
+- Every data tool returns \`interpretation\` first: read it before the data; it holds the computed values and reading rules.
 - render_chart / render_table / render_map draw data you already fetched; they fetch nothing.`;

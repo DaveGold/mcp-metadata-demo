@@ -79,7 +79,8 @@ describe('best — delivery budgets (the host cuts at 2,048)', () => {
       const d = tools.find((t) => t.name === name)!.description!;
       expect(d.length, name).toBeLessThanOrEqual(CEILING);
     }
-    expect((client.getInstructions() ?? '').length).toBeLessThanOrEqual(900);
+    // Instructions: 512 is the strictest cut measured, and some hosts drop them entirely.
+    expect((client.getInstructions() ?? '').length).toBeLessThanOrEqual(512);
     expect(bestBuildingDescription.length).toBeLessThan(HOST_CUT);
   });
 
