@@ -334,8 +334,126 @@
   },
   "codex-cli": {
    "method": "ALL_TOOLS entries read with code; declarations printed from the session rollouts",
-   "input_schema": "SIZE-DEPENDENT. get_building_profile (642-char schema): every parameter describe is kept as a // comment. render_table (20,181-char schema): types and enums only, not one describe, not even top-level maxHeight; the whole declaration is 1,833 chars. The ALL_TOOLS entry holds none of the three render_table fingerprints.",
-   "output_schema": "DELIVERED as the TypeScript return type Promise<CallToolResult<{ ... }>> with every field describe as a // comment; both output fingerprints present (get_building_profile entry 15,746 chars = instructions + description + declaration)."
+   "input_schema": "SIZE-DEPENDENT: every describe kept on schemas up to 2,998 chars, every describe dropped from 6,155 chars (best render_table) up; types and enums always kept. See describe_threshold.",
+   "output_schema": "DELIVERED as the TypeScript return type Promise<CallToolResult<{ ... }>> with every field describe as a // comment; both output fingerprints present (get_building_profile entry 15,746 chars = instructions + description + declaration).",
+   "describe_threshold": {
+    "_comment": "Per tool, the ALL_TOOLS declaration of the input schema: characters of the args type and the number of // describe comments kept. Input-schema size is the JSON length of inputSchema from tools/list; nesting is the maximum { depth.",
+    "best": {
+     "mcp__eval_best__get_building_profile": {
+      "argsChars": 439,
+      "describeComments": 5
+     },
+     "mcp__eval_best__get_chart_guidance": {
+      "argsChars": 214,
+      "describeComments": 1
+     },
+     "mcp__eval_best__get_tool_call_log": {
+      "argsChars": 411,
+      "describeComments": 3
+     },
+     "mcp__eval_best__get_weather_context": {
+      "argsChars": 1353,
+      "describeComments": 10
+     },
+     "mcp__eval_best__render_chart": {
+      "argsChars": 2463,
+      "describeComments": 26
+     },
+     "mcp__eval_best__render_map": {
+      "argsChars": 2384,
+      "describeComments": 25
+     },
+     "mcp__eval_best__render_table": {
+      "argsChars": 1654,
+      "describeComments": 0
+     }
+    },
+    "rich": {
+     "mcp__eval_rich__get_building_profile": {
+      "argsChars": 356,
+      "describeComments": 5
+     },
+     "mcp__eval_rich__get_tool_call_log": {
+      "argsChars": 736,
+      "describeComments": 3
+     },
+     "mcp__eval_rich__get_weather_context": {
+      "argsChars": 1707,
+      "describeComments": 7
+     },
+     "mcp__eval_rich__render_chart": {
+      "argsChars": 1138,
+      "describeComments": 0
+     },
+     "mcp__eval_rich__render_map": {
+      "argsChars": 2384,
+      "describeComments": 25
+     },
+     "mcp__eval_rich__render_table": {
+      "argsChars": 1642,
+      "describeComments": 0
+     }
+    },
+    "schema_sizes": {
+     "best": {
+      "get_building_profile": [
+       739,
+       4
+      ],
+      "get_weather_context": [
+       1872,
+       4
+      ],
+      "render_chart": [
+       2998,
+       7
+      ],
+      "get_chart_guidance": [
+       318,
+       3
+      ],
+      "render_table": [
+       6155,
+       10
+      ],
+      "render_map": [
+       2966,
+       7
+      ],
+      "get_tool_call_log": [
+       586,
+       3
+      ]
+     },
+     "rich": {
+      "get_building_profile": [
+       642,
+       4
+      ],
+      "render_chart": [
+       20548,
+       11
+      ],
+      "render_table": [
+       20181,
+       10
+      ],
+      "render_map": [
+       2966,
+       7
+      ],
+      "get_weather_context": [
+       2115,
+       4
+      ],
+      "get_tool_call_log": [
+       937,
+       3
+      ]
+     }
+    },
+    "finding": "Every describe kept up to 2,998 chars (nesting ≤ 7); every describe dropped from 6,155 chars (nesting ≥ 10), types and enums kept. Size and nesting move together in these schemas, so which one triggers it is not separated. best render_table (6,155) is over it."
+   }
   },
   "chatgpt-chat": {
    "runs": 2,

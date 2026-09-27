@@ -61,7 +61,7 @@ eval set had already shown to be wrong.
 | field names | **always**, every response | — |
 | tool description | **first 2,048 chars only**, every request [Q7] | ≤ 2,048, ceiling ~1,800 |
 | server instructions | first 2,048 chars [Q7]; other hosts deliver 512, all, or none [HD] | ≤ 512; nothing load-bearing only here |
-| input schema | yes, in full [IS] (also claude.ai, Cowork, ChatGPT; Codex drops the describes of a large schema [HD]) — re-sent every turn | size it: it is paid on every call |
+| input schema | yes, in full [IS] (also claude.ai, Cowork, ChatGPT; Codex drops every describe past ~3,000 chars [HD]) — re-sent every turn | ≤ 3,000 per tool; paid on every call |
 | output schema | **no** [Q11] (nor claude.ai, Cowork; Codex yes, ChatGPT sometimes [HD]) | validation/UI only |
 | response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9] | guard it |
 | guidance tool | only if the pointer is a requirement [Q8b] | — |
@@ -75,9 +75,9 @@ claude.ai chat, ChatGPT and Codex whole), so one budget per surface, set by the 
 - **Server instructions:** best-effort guidance, never a correctness boundary. claude.ai chat and
   ChatGPT Work receive none, ChatGPT 512. Keep them ≤ 512 and repeat each rule in a description
   head or in the response.
-- **Input schema:** delivered on every host measured, except that Codex drops every describe of a
-  large schema (kept at 642 chars, dropped at 20k). Keep it small, measure each tool's serialized
-  schema in a budget test, and carry choices in enums and names, which survive.
+- **Input schema:** delivered on every host measured, except that Codex keeps every describe up to
+  ~3,000 characters of serialized schema and drops all of them from ~6,000 (types and enums stay).
+  Budget-test each tool's schema at ≤ 3,000, and carry choices in enums and names, which survive.
 - **Output schema:** a validation contract, not a delivery channel: absent on Claude Code,
   claude.ai chat and Cowork.
 - **Response:** the meaning of this record travels with it, and a server-side verdict or refusal
@@ -252,8 +252,8 @@ one more pass of the loop with the answers encoded.
 What the talk calls "tests, a findings log": concretely, the parts of the eval that keep guarding
 after the loop has stabilised ([`references/evaluation.md`](references/evaluation.md) §7):
 
-- **Budget tests:** description ≤ 2,048 (ceiling ~1,800), instructions ≤ 512, load-bearing
-  sentences before fixed offsets, worst-case response under the size guard.
+- **Budget tests:** description ≤ 2,048 (ceiling ~1,800), instructions ≤ 512, input schema ≤ 3,000
+  per tool, load-bearing sentences before fixed offsets, worst-case response under the size guard.
 - **Name and rule tests:** units in names, a provenance line on every rename and rule, each rule
   on a fixture record that triggers it.
 - **Ground-truth tests:** every eval question's expected value re-derived from frozen fixtures.

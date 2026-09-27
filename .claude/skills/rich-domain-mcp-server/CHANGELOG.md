@@ -19,7 +19,8 @@ Delivery measured beyond Claude Code [HD].
 - **Works on every host:** design against what every measured host delivers; richer surfaces are
   an enhancement. One budget per surface, set by the strictest host: description head ≤ 2,048;
   instructions ≤ 512, best-effort, each rule repeated elsewhere; input schemas small and measured
-  in a budget test, choices in enums and names (Codex drops the describes of a 20k schema); the
+  at ≤ 3,000 characters per tool (Codex keeps every describe up to ~3,000 and drops all of them
+  from ~6,000), choices in enums and names; the
   output schema is a validation contract; the response carries this record's meaning and the
   server enforces what must not go wrong; the tool name and first sentence say what the user can
   do, because claude.ai, Cowork and Codex defer tools until the model searches.
