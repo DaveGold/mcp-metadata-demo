@@ -1,12 +1,6 @@
 [mcp_servers.eval-best]
 url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBest"
 
-[mcp_servers.eval-best-no-type-rules]
-url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBestNoTypeRules"
-
-[mcp_servers.eval-best-v1]
-url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpBestV1"
-
 [mcp_servers.eval-g-recipe]
 url = "https://europe-west4-mcp-metadata-demo.cloudfunctions.net/mcpGuidanceRecipe"
 

@@ -130,12 +130,3 @@ export const mcpGuidanceRecipe = onRequest(
  * rule registry, computed values, shipped reference data. Measured as open-questions.md Q19.
  */
 export const mcpBest = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'best' }));
-
-/** `best` before its app tools were rebuilt (Q22): frozen for comparison. */
-export const mcpBestV1 = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'best-v1' }));
-
-/** `best` without render_chart's per-type rules: Q23 arm C. */
-export const mcpBestNoTypeRules = onRequest(
-  functionOptions,
-  createHttpApp({ hosted: true, variant: 'best-no-type-rules' }),
-);

@@ -137,6 +137,12 @@ Read that before quoting any number from this directory.
 > `best-v1`. From Q22 on, `best` has the rebuilt app tools, and its `tools/list` grew from 67.7k to
 > 72.5k characters. Token figures of `best` from before and after are not comparable.
 
+> ### 2026-09-28 — `best-v1` and `best-no-type-rules` RETIRED
+>
+> The two frozen arms behind Q22 (`best-v1`) and Q23 arm C (`best-no-type-rules`) are no longer in
+> the code or deployed. Their results stay as recorded. To run them again, check out commit
+> `6e1796e` and deploy `mcpBestV1` / `mcpBestNoTypeRules` from there.
+
 > ### ⚠️ DESCRIPTION TRUNCATION — read before quoting ANY description-channel number
 >
 > Found 2026-09-22 by Q7. The host every run here used sends only the **first 2,048
