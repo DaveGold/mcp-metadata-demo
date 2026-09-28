@@ -193,7 +193,6 @@ export function registerGetBuildingProfileBestTool(
   server: McpServer,
   bagClient: BagClientLike,
   epOnlineClient: EpOnlineClientLike,
-  outputSchema: z.ZodTypeAny = bestBuildingOutputSchema,
 ): void {
   server.registerTool(
     'get_building_profile',
@@ -201,7 +200,7 @@ export function registerGetBuildingProfileBestTool(
       title: 'Building Profile (BAG + Energy Label)',
       description: bestBuildingDescription,
       inputSchema: z.object(bestBuildingInputSchema),
-      outputSchema,
+      outputSchema: bestBuildingOutputSchema,
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     },
     async (args: {

@@ -3765,6 +3765,8 @@ line leaves the error in place; delivering the right one fixes it.
 
 ## Q22 — Does applying the skill to the APP tools help, and what does it cost? Registered 2026-09-24, BEFORE the run
 
+> **Arm retired 2026-09-28.** The frozen arm this question compares with (`best-v1`, `best-no-type-rules`) is no longer in the code; it is at commit `6e1796e`.
+
 > **ANSWERED 2026-09-24.** See [`results/2026-09-24-q22-app-tools.json`](results/2026-09-24-q22-app-tools.json).
 > - **The trap:** `best` leaves the Paris Proof line off the EP-2 bars and says why: haiku 6/10
 >   (+4 drew it with the caveat), sonnet 10/10. `best-v1` draws it in 20/20, always with a caveat,
@@ -3868,6 +3870,8 @@ LAST successful render_table call.
 | P4 | `best` median tokens ≤ +20% of `best-v1` (the retry costs a call) | > +35% |
 
 ## Q23 — Does the chart and table guidance make the model choose the right FORM from the data? Registered 2026-09-24, NOT YET RUN
+
+> **Arm retired 2026-09-28.** The frozen arm this question compares with (`best-v1`, `best-no-type-rules`) is no longer in the code; it is at commit `6e1796e`.
 
 > **ANSWERED 2026-09-24 — of 14 chart types, 2 are used, and the rules do one thing.** See
 > [`results/2026-09-24-q23-chart-choice.json`](results/2026-09-24-q23-chart-choice.json). 240 runs.

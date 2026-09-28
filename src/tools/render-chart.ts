@@ -841,7 +841,6 @@ export function registerRenderChartTool(
   opts: {
     minimal?: boolean;
     best?: boolean;
-    typeRules?: boolean;
     decisionTree?: boolean;
     guided?: boolean;
   } = {},
@@ -869,8 +868,6 @@ export function registerRenderChartTool(
         : opts.best
           ? {
               ...inputSchema,
-              // A measured variant without the per-type rules, to see whether the rules do the work.
-              ...(opts.typeRules === false ? { type: inputSchema.type.describe('Chart type.') } : {}),
               ...(opts.decisionTree
                 ? {
                     type: inputSchema.type.describe(

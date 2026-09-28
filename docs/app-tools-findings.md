@@ -43,7 +43,7 @@ returned. This file follows the skill's findings-doc structure
 | `get_tool_call_log` | 3,683 | 44%; its block on auditing an eval run is harness guidance | 937; `variant` lists the eval arms |
 | `fetch_image` | 195 | none | app-only |
 
-`best` before this audit (now frozen as `best-v1`): one-line descriptions for the app tools, the
+`best` before this audit (frozen as `best-v1`, retired on 2026-09-28; last at commit `6e1796e`): one-line descriptions for the app tools, the
 same full input schemas. Its `tools/list` was 67.7k characters; after, 72.5k (`rich`: 104.7k).
 
 Much of the `rich` descriptions came from another domain (hours per employee, revenue × margin,
