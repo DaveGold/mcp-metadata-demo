@@ -95,11 +95,6 @@ const outputOnly = (tool) => {
 };
 const appOnly = (t) => Array.isArray(t._meta?.ui?.visibility) && t._meta.ui.visibility.every((v) => v === 'app');
 
-function grade(value, limit) {
-  if (limit === null || limit === undefined) return 'green';
-  return value <= limit ? 'green' : 'red';
-}
-
 function analyse(server) {
   const tools = server.tools.filter((t) => !appOnly(t)).map((t) => {
     const d = len(t.description);
@@ -126,8 +121,40 @@ function analyse(server) {
   const listChars = JSON.stringify(server.tools).length;
   const descTotal = tools.reduce((n, t) => n + t.descriptionChars, 0);
   const instructionsHeavy = instr > 512 && instr > descTotal;
+  const worst = (...st) => (st.includes('red') ? 'red' : st.includes('amber') ? 'amber' : 'green');
+  const n = tools.length;
   const summary = {};
-  for (const key of Object.keys(CLIENTS)) summary[key] = { toolsRed: tools.filter((t) => t.perClient[key].status === 'red').length, toolsAmber: tools.filter((t) => t.perClient[key].status === 'amber').length, tools: tools.length, instructions: instrByClient[key].status };
+  for (const [key, c] of Object.entries(CLIENTS)) {
+    const descOver = c.desc ? tools.filter((t) => t.descriptionChars > c.desc) : [];
+    const schemaOver = c.schema ? tools.filter((t) => t.inputSchemaChars > c.schema && t.parameterDescribes > 0) : [];
+    const withOutput = tools.filter((t) => t.outputSchemaChars);
+    const outReview = c.output ? [] : tools.filter((t) => t.outputOnlyFields.length);
+    const i = instrByClient[key];
+    const surfaces = {
+      description: {
+        status: descOver.length ? 'red' : 'green',
+        cell: c.desc ? `${descOver.length} of ${n} over ${c.desc.toLocaleString('en')}` : 'no cut measured',
+        tools: descOver.map((t) => t.name),
+      },
+      instructions: {
+        status: instructionsHeavy ? 'red' : i.status,
+        cell: instr === 0 ? 'none shipped' : `${i.note}${instructionsHeavy ? '; the guidance lives here' : ''}; some clients deliver none`,
+      },
+      inputSchema: {
+        status: schemaOver.length ? 'red' : 'green',
+        cell: c.schema ? `${schemaOver.length} of ${n} over ${c.schema.toLocaleString('en')} (describes dropped)` : 'delivered whole',
+        tools: schemaOver.map((t) => t.name),
+      },
+      outputSchema: {
+        status: outReview.length ? 'amber' : 'green',
+        cell: !withOutput.length ? 'none shipped' : c.output ? `${withOutput.length} of ${n} shipped; delivered on Codex and Work` : `${withOutput.length} of ${n} shipped, never delivered${outReview.length ? `; ${outReview.length} carry meaning to check` : ''}`,
+        tools: outReview.map((t) => t.name),
+      },
+    };
+    const toolsFailing = tools.filter((t) => t.perClient[key].status === 'red').length;
+    const verdict = worst(...Object.values(surfaces).map((x) => x.status));
+    summary[key] = { verdict, surfaces, toolsFailing, tools: n };
+  }
   return { server: server.serverInfo, instructionsChars: instr, instructions: instrByClient, instructionsHeavy, descriptionCharsTotal: descTotal, toolsListChars: listChars, tools, summary };
 }
 
@@ -137,9 +164,18 @@ function markdown(r, target) {
   const o = [];
   o.push(`# MCP compatibility check — ${r.server.name ?? target} ${r.server.version ?? ''}`.trim(), '');
   o.push(`Target: \`${target}\` · ${r.tools.length} model-visible tools · tools/list ${r.toolsListChars.toLocaleString('en')} chars (re-sent every turn) · instructions ${r.instructionsChars.toLocaleString('en')} chars`, '');
-  o.push('| | ' + Object.values(CLIENTS).map((c) => c.label).join(' | ') + ' |', '|---|' + Object.keys(CLIENTS).map(() => '---').join('|') + '|');
-  o.push('| tools within the limits | ' + Object.keys(CLIENTS).map((k) => { const s = r.summary[k]; return `${s.toolsRed ? dot.red : s.toolsAmber ? dot.amber : dot.green} ${s.tools - s.toolsRed}/${s.tools}${s.toolsAmber ? ` (${s.toolsAmber} to review)` : ''}`; }).join(' | ') + ' |');
-  o.push('| server instructions | ' + Object.keys(CLIENTS).map((k) => dot[r.instructions[k].status] + ' ' + r.instructions[k].note).join(' | ') + ' |', '');
+  const cols = Object.keys(CLIENTS);
+  o.push('## Verdict', '', '| | ' + cols.map((k) => CLIENTS[k].label).join(' | ') + ' |', '|---|' + cols.map(() => '---').join('|') + '|');
+  const SURF = [['description', 'tool description'], ['instructions', 'server instructions'], ['inputSchema', 'input schema'], ['outputSchema', 'output schema']];
+  const overall = (k) => {
+    const sm = r.summary[k];
+    const bad = SURF.filter(([key]) => sm.surfaces[key].status === sm.verdict && sm.verdict !== 'green').map(([, l]) => l);
+    return `${dot[sm.verdict]} **${sm.verdict === 'green' ? 'within every limit' : (sm.verdict === 'red' ? 'fails on ' : 'check ') + bad.join(', ')}** · ${sm.toolsFailing} of ${sm.tools} tools affected`;
+  };
+  o.push('| **overall** | ' + cols.map(overall).join(' | ') + ' |');
+  for (const [key, label] of SURF)
+    o.push(`| ${label} | ` + cols.map((k) => `${dot[r.summary[k].surfaces[key].status]} ${r.summary[k].surfaces[key].cell}`).join(' | ') + ' |');
+  o.push('', '🔴 does not reach the model on some client in that column · 🟡 arrives, or is never needed, but check it · 🟢 within every measured limit', '');
   if (r.instructionsHeavy) o.push(`🔴 **The guidance lives in the server instructions** (${r.instructionsChars.toLocaleString('en')} chars, against ${r.descriptionCharsTotal.toLocaleString('en')} in all tool descriptions together). On claude.ai chat and ChatGPT Work none of it reaches the model; move each rule into the description head of the tool it governs.`, '');
   else if (r.instructionsChars) o.push('Server instructions reach no model on claude.ai chat or ChatGPT Work: every rule in them must also be in a description head or a response.', '');
   const reds = r.tools.filter((t) => t.perClient.all.status === 'red').sort((a, b) => b.perClient.all.issues.length - a.perClient.all.issues.length || b.descriptionChars - a.descriptionChars);

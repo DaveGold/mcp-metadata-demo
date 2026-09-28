@@ -241,5 +241,320 @@
   "Static: no tool calls, so responses are not checked.",
   "The limits are the client versions measured on 2026-09-27.",
   "Hugging Face was read anonymously; a signed-in account may get more tools."
- ]
+ ],
+ "verdicts": {
+  "_comment": "Per-surface verdict matrix (check.mjs after the per-surface report, 2026-09-28). verdict: per client column, the worst of the four surfaces. allClients: each surface for the all-clients column.",
+  "servers": {
+   "metadata-demo best": {
+    "source": "demo-mcpBest",
+    "tools": 7,
+    "instructionsChars": 492,
+    "toolsListChars": 41776,
+    "verdict": {
+     "claude": "amber",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 7 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "amber",
+      "cell": "492 ≤ 512; some clients deliver none"
+     },
+     "inputSchema": {
+      "status": "red",
+      "cell": "1 of 7 over 5,000 (describes dropped)",
+      "tools": [
+       "render_table"
+      ]
+     },
+     "outputSchema": {
+      "status": "amber",
+      "cell": "3 of 7 shipped, never delivered; 1 carry meaning to check",
+      "tools": [
+       "get_building_profile"
+      ]
+     }
+    }
+   },
+   "metadata-demo rich": {
+    "source": "demo-mcp",
+    "tools": 6,
+    "instructionsChars": 2829,
+    "toolsListChars": 104750,
+    "verdict": {
+     "claude": "red",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "red",
+      "cell": "6 of 6 over 2,048",
+      "tools": [
+       "get_building_profile",
+       "render_chart",
+       "render_table",
+       "render_map",
+       "get_weather_context",
+       "get_tool_call_log"
+      ]
+     },
+     "instructions": {
+      "status": "red",
+      "cell": "2,829 > 512; some clients deliver none"
+     },
+     "inputSchema": {
+      "status": "red",
+      "cell": "2 of 6 over 5,000 (describes dropped)",
+      "tools": [
+       "render_chart",
+       "render_table"
+      ]
+     },
+     "outputSchema": {
+      "status": "amber",
+      "cell": "3 of 6 shipped, never delivered; 3 carry meaning to check",
+      "tools": [
+       "get_building_profile",
+       "get_weather_context",
+       "get_tool_call_log"
+      ]
+     }
+    }
+   },
+   "DeepWiki": {
+    "source": "mcp_deepwiki_com_mcp",
+    "tools": 3,
+    "instructionsChars": 3097,
+    "toolsListChars": 1538,
+    "verdict": {
+     "claude": "red",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 3 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "red",
+      "cell": "3,097 > 512; the guidance lives here; some clients deliver none"
+     },
+     "inputSchema": {
+      "status": "green",
+      "cell": "0 of 3 over 5,000 (describes dropped)",
+      "tools": []
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "3 of 3 shipped, never delivered",
+      "tools": []
+     }
+    }
+   },
+   "Microsoft Learn": {
+    "source": "learn_microsoft_com_api_mcp",
+    "tools": 3,
+    "instructionsChars": 1545,
+    "toolsListChars": 4858,
+    "verdict": {
+     "claude": "amber",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 3 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "red",
+      "cell": "1,545 > 512; some clients deliver none"
+     },
+     "inputSchema": {
+      "status": "green",
+      "cell": "0 of 3 over 5,000 (describes dropped)",
+      "tools": []
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "2 of 3 shipped, never delivered",
+      "tools": []
+     }
+    }
+   },
+   "Cloudflare docs": {
+    "source": "docs_mcp_cloudflare_com_mcp",
+    "tools": 2,
+    "instructionsChars": 0,
+    "toolsListChars": 1793,
+    "verdict": {
+     "claude": "green",
+     "openai": "green",
+     "all": "green"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 2 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "green",
+      "cell": "none shipped"
+     },
+     "inputSchema": {
+      "status": "green",
+      "cell": "0 of 2 over 5,000 (describes dropped)",
+      "tools": []
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "1 of 2 shipped, never delivered",
+      "tools": []
+     }
+    }
+   },
+   "Context7": {
+    "source": "mcp_context7_com_mcp",
+    "tools": 2,
+    "instructionsChars": 632,
+    "toolsListChars": 4860,
+    "verdict": {
+     "claude": "amber",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 2 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "red",
+      "cell": "632 > 512; some clients deliver none"
+     },
+     "inputSchema": {
+      "status": "green",
+      "cell": "0 of 2 over 5,000 (describes dropped)",
+      "tools": []
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "none shipped",
+      "tools": []
+     }
+    }
+   },
+   "Hugging Face": {
+    "source": "huggingface_co_mcp",
+    "tools": 4,
+    "instructionsChars": 1555,
+    "toolsListChars": 18818,
+    "verdict": {
+     "claude": "red",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "red",
+      "cell": "1 of 4 over 2,048",
+      "tools": [
+       "hf_fs"
+      ]
+     },
+     "instructions": {
+      "status": "red",
+      "cell": "1,555 > 512; some clients deliver none"
+     },
+     "inputSchema": {
+      "status": "green",
+      "cell": "0 of 4 over 5,000 (describes dropped)",
+      "tools": []
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "2 of 4 shipped, never delivered",
+      "tools": []
+     }
+    }
+   },
+   "GitHub (default toolsets)": {
+    "source": "github-default",
+    "tools": 45,
+    "instructionsChars": 1802,
+    "toolsListChars": 123729,
+    "verdict": {
+     "claude": "amber",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 45 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "red",
+      "cell": "1,802 > 512; some clients deliver none"
+     },
+     "inputSchema": {
+      "status": "green",
+      "cell": "0 of 45 over 5,000 (describes dropped)",
+      "tools": []
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "none shipped",
+      "tools": []
+     }
+    }
+   },
+   "GitHub (all toolsets)": {
+    "source": "github-all",
+    "tools": 90,
+    "instructionsChars": 6731,
+    "toolsListChars": 256560,
+    "verdict": {
+     "claude": "red",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 90 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "red",
+      "cell": "6,731 > 512; some clients deliver none"
+     },
+     "inputSchema": {
+      "status": "red",
+      "cell": "1 of 90 over 5,000 (describes dropped)",
+      "tools": [
+       "projects_write"
+      ]
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "none shipped",
+      "tools": []
+     }
+    }
+   }
+  }
+ }
 }
