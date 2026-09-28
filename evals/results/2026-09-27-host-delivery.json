@@ -701,5 +701,201 @@
     "score": "pass"
    }
   ]
+ },
+ "best_all_green": {
+  "_comment": "best made portable on every client column (2026-09-28): render_table wire schema 6,155 → 4,861 chars (presentation knobs with good defaults left out, describes tightened, when-to-pick lines kept); get_building_profile output schema shape only. Deployed to mcpBest. Short re-measure: the 14 table-path questions (evals/questions-table-paths.json) on Codex CLI 0.154 / gpt-5.6-sol, n=1 each, one at a time. Before this change Codex received render_table without any describe, so there is no Codex baseline to compare with.",
+  "result": "12/14",
+  "misses": "trend and the NEN 2767 condition score miss on Codex: 0/4 each on the new schema (types number + badge, and badge). A/B against a local build of the previous best (6,155-char schema, which Codex receives without describes): also 0/4 each. Not a regression from the trim; gpt-5.6-sol on Codex picks number/badge for these two paths either way.",
+  "runs": [
+   {
+    "id": "table-sparkline",
+    "target": "sparkline",
+    "columnTypes": [
+     "text",
+     "number",
+     "sparkline"
+    ],
+    "features": {
+     "pageSize": 10
+    },
+    "pass": true
+   },
+   {
+    "id": "table-progress",
+    "target": "progress",
+    "columnTypes": [
+     "text",
+     "currency",
+     "currency",
+     "progress",
+     "percentage",
+     "currency",
+     "badge"
+    ],
+    "features": {
+     "filtering": true,
+     "pageSize": 10
+    },
+    "pass": true
+   },
+   {
+    "id": "table-trend",
+    "target": "trend",
+    "columnTypes": [
+     "text",
+     "number",
+     "badge",
+     "number"
+    ],
+    "features": null,
+    "pass": false
+   },
+   {
+    "id": "table-rating",
+    "target": "rating",
+    "columnTypes": [
+     "text",
+     "badge"
+    ],
+    "features": {
+     "filtering": false,
+     "globalSearch": false,
+     "pageSize": 10
+    },
+    "pass": false
+   },
+   {
+    "id": "table-rating-stars",
+    "target": "rating",
+    "columnTypes": [
+     "text",
+     "rating"
+    ],
+    "features": {
+     "pageSize": 10
+    },
+    "pass": true
+   },
+   {
+    "id": "table-link",
+    "target": "link",
+    "columnTypes": [
+     "text",
+     "link"
+    ],
+    "features": {
+     "pageSize": 10
+    },
+    "pass": true
+   },
+   {
+    "id": "table-image",
+    "target": "image",
+    "columnTypes": [
+     "text",
+     "image"
+    ],
+    "features": null,
+    "pass": true
+   },
+   {
+    "id": "table-boolean",
+    "target": "boolean",
+    "columnTypes": [
+     "text",
+     "boolean",
+     "boolean",
+     "boolean"
+    ],
+    "features": {
+     "pageSize": 10
+    },
+    "pass": true
+   },
+   {
+    "id": "table-icon",
+    "target": "icon",
+    "columnTypes": [
+     "text",
+     "icon",
+     "badge"
+    ],
+    "features": {
+     "filtering": true,
+     "pageSize": 10
+    },
+    "pass": true
+   },
+   {
+    "id": "table-multi-badge",
+    "target": "multi_badge",
+    "columnTypes": [
+     "text",
+     "multi_badge"
+    ],
+    "features": null,
+    "pass": true
+   },
+   {
+    "id": "table-multi-badge-array",
+    "target": "multi_badge",
+    "columnTypes": [
+     "text",
+     "multi_badge"
+    ],
+    "features": {
+     "pageSize": 10
+    },
+    "pass": true
+   },
+   {
+    "id": "table-badge",
+    "target": "badge",
+    "columnTypes": [
+     "text",
+     "badge",
+     "badge"
+    ],
+    "features": {
+     "filtering": true,
+     "globalSearch": false,
+     "pageSize": 10
+    },
+    "pass": true
+   },
+   {
+    "id": "table-footer",
+    "target": "footer",
+    "columnTypes": [
+     "text",
+     "currency"
+    ],
+    "features": null,
+    "pass": true
+   },
+   {
+    "id": "table-search",
+    "target": "search",
+    "columnTypes": [
+     "text",
+     "badge",
+     "number"
+    ],
+    "features": {
+     "globalSearch": true,
+     "filtering": true,
+     "pageSize": 10
+    },
+    "pass": true
+   }
+  ],
+  "ab_previous_best": {
+   "trend": "0/4 (text,number,badge ×4)",
+   "rating": "0/4 (badge columns)"
+  },
+  "new_best_reruns": {
+   "trend": "0/4",
+   "rating": "0/4"
+  }
  }
 }
