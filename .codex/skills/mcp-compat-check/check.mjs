@@ -8,6 +8,7 @@
  *   node check.mjs --header "Authorization: Bearer $T" https://…
  *   node check.mjs --stdio -- node server.js           # stdio
  *   node check.mjs --json …                            # machine-readable
+ *   node check.mjs --timeout 300 …                     # seconds to wait (default 180)
  */
 import { spawn } from 'node:child_process';
 
@@ -211,6 +212,8 @@ function markdown(r, target) {
 // ── main ─────────────────────────────────────────────────────────────────────
 const argv = process.argv.slice(2);
 const json = argv.includes('--json');
+const timeoutS = Number(argv[argv.indexOf('--timeout') + 1]) || 180;
+setTimeout(() => { console.error(`no answer within ${timeoutS}s`); process.exit(1); }, timeoutS * 1000).unref();
 const headers = {};
 for (let i = 0; i < argv.length; i++) if (argv[i] === '--header') { const [k, ...v] = argv[i + 1].split(':'); headers[k.trim()] = v.join(':').trim(); }
 let session, target;
@@ -219,7 +222,7 @@ if (argv.includes('--stdio')) {
   target = rest.join(' ');
   session = stdioSession(rest[0], rest.slice(1));
 } else {
-  target = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--header').pop();
+  target = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--header' && argv[i - 1] !== '--timeout').pop();
   if (!target) { console.error('usage: check.mjs [--json] [--header "K: V"] <url> | --stdio -- <cmd> [args]'); process.exit(2); }
   session = await httpSession(target, headers);
 }
