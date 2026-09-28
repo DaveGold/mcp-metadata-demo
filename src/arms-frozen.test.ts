@@ -32,10 +32,6 @@ const FROZEN_ARMS: ServerVariant[] = [
   'guidance-recipe',
   // Frozen after Q19b (2026-09-24): measured as the post-fix reference implementation.
   'best',
-  // `best` as measured in Q19–Q19d, kept when its app tools were rebuilt (Q22).
-  'best-v1',
-  // Q23 arm C: best without render_chart's per-type rules.
-  'best-no-type-rules',
 ];
 
 const noBag: BagClientLike = {

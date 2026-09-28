@@ -21,8 +21,9 @@ missing. The talk _Most MCP servers are empty_ added the capabilities that feedb
 The evals kept the thesis and sharpened the delivery half:
 
 - The talk's table marked the tool description as reaching the model before the call. On Claude
-  Code only its first **2,048 characters** do ([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
-  Most of a long description is bound and never delivered.
+  Code only its first **2,048 characters** do ([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)),
+  on Cowork its first 4,096, in claude.ai chat all of it ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
+  On the strictest host, most of a long description is bound and never delivered.
 - Once delivered, the channel does not matter: description and response tie
   ([Q15](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). An earlier
   reading that "the response beats the description" was the cut, not the channel
@@ -49,8 +50,8 @@ Canonical truth can be projected through several surfaces, and they do not all a
 | surface | reaches the model? |
 |---|---|
 | field names | always, in every response |
-| tool description | only the head (the first 2,048 chars on Claude Code) |
-| server instructions | the head, and it is server-wide, not bound to a tool |
+| tool description | only the head: 2,048 chars on Claude Code, 4,096 on Cowork; in full on Codex, ChatGPT and claude.ai chat ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
+| server instructions | the head on Claude Code; 512 chars on ChatGPT; whole on Cowork; not at all in claude.ai chat ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
 | input schema | yes |
 | output schema | no: validation and UI only ([Q11](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
 | response | yes, below a size limit; above it, a file notice replaces it ([Q9](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |

@@ -103,7 +103,9 @@ could not settle. Harden with tests and a findings log. _The spec gives you the 
 gives you the meaning._
 
 **Since the talk:** "the channel the model actually reads" became concrete: the description head
-within the first 2,048 characters, the input schema, and the response; not the output schema. The
+(the first 2,048 characters on Claude Code, 4,096 on Cowork, all of it in claude.ai chat), the
+input schema, and the response; not the output schema, except on Codex
+([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). The
 [skill](../.claude/skills/rich-domain-mcp-server/SKILL.md) now runs this loop, with an audit step
 for existing servers. "Three to four times" is production practice, not measured here.
 
@@ -115,8 +117,8 @@ up front. _Three of those groups are needed at three different moments._
 
 **Since the talk:** the block names cost nothing
 ([Q19h](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)),
-but where they sit decides everything: in the `rich` tier the interpretation sat past the 2,048
-cut and never arrived
+but where they sit decides everything: in the `rich` tier the interpretation sat past Claude
+Code's 2,048 cut and never arrived there
 ([Q20, Q21](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
 `best` keeps WHEN and HOW in the description head and moves WHAT into the response:
 [reference implementation](../docs/reference-implementation.md).
@@ -199,12 +201,19 @@ called only when the pointer says it is required
 the table got stricter. One view of it all:
 [evals §14](../evals/README.md#14--where-this-host-drops-what-you-ship--one-table).
 
+**Then measured on other hosts (2026-09-27):** those numbers are Claude Code's, the host every
+eval ran on. Cowork cuts descriptions at 4,096 characters; claude.ai chat, ChatGPT and Codex
+deliver them whole. The output schema reaches only Codex (and ChatGPT sometimes)
+([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). "Bound is not the same as delivered" holds on every host; where the line falls
+does not.
+
 **On server instructions:** the slide marks them client-dependent, and the 2026-07-28 spec keeps
 it that way: with the `initialize` handshake gone, `instructions` moved to the result of
 `server/discover`, which clients _may_ call
 ([changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog)). Claude Code
 delivers their first 2,048 characters
-([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
+([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); Cowork delivers
+them whole, ChatGPT the first 512, and claude.ai chat none at all ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 ## 18 · One string. Three moments.
 
@@ -236,9 +245,10 @@ delivery, explicit facts and shipped data matter most; the strongest often compe
 exactly how a thin interface hides
 ([model differences](../.claude/skills/rich-domain-mcp-server/references/evidence.md#model-differences)).
 Once the server computes a determinate value, every model saturates on it, so tailoring per model
-bought almost nothing. Two things are _not_ measured: other model families, and other hosts. What
-reaches the model is set by the host, not the protocol (the 2,048 cut is Claude Code's), so check
-it per client: [what reaches the model, and how to check](../docs/design.md#2--ownership-is-not-delivery).
+bought almost nothing. Answers from other model families are _not_ measured. Other hosts were
+measured for delivery only ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)): the 2,048 cut is Claude Code's, Cowork cuts at 4,096,
+and claude.ai chat, ChatGPT and Codex do not cut the description. What reaches the model is set by
+the host, not the protocol, so check it per client: [what reaches the model, and how to check](../docs/design.md#2--ownership-is-not-delivery).
 
 **Who may see which data?** Warmtebouw is an open company: almost anyone can use almost all of
 the data, and breaking down data silos is part of the point. HR and other sensitive data sit

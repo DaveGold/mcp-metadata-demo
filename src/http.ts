@@ -81,6 +81,21 @@ export function createHttpApp(options: CreateHttpAppOptions = {}): Express {
   app.post('/', ...mcpMiddleware, handleMcpRequest);
   app.post('/mcp', ...mcpMiddleware, handleMcpRequest);
 
+  // Stateless, no SSE stream and no sessions: the spec says GET and DELETE MUST
+  // then answer 405, not Express's default 404.
+  const methodNotAllowed = (_req: Request, res: Response): void => {
+    res
+      .set('Allow', 'POST')
+      .status(405)
+      .json({
+        jsonrpc: '2.0',
+        error: { code: -32000, message: 'Method not allowed.' },
+        id: null,
+      });
+  };
+  app.get(['/', '/mcp'], methodNotAllowed);
+  app.delete(['/', '/mcp'], methodNotAllowed);
+
   return app;
 }
 
@@ -105,8 +120,6 @@ if (isMain) {
       'opaque-words',
       'guidance-recipe',
       'best',
-      'best-v1',
-      'best-no-type-rules',
     ] as const
   ).includes(rawVariant as never)
     ? (rawVariant as ServerVariant)

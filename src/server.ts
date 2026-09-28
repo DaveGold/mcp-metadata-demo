@@ -78,9 +78,7 @@ export type ServerVariant =
   | 'opaque'
   | 'opaque-words'
   | 'guidance-recipe'
-  | 'best'
-  | 'best-v1'
-  | 'best-no-type-rules';
+  | 'best';
 
 export interface CreateServerOptions {
   /** Optional injected clients — useful for tests. Production code should omit these. */
@@ -154,38 +152,6 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
   const bagClient = options.bagClient ?? new BagClient();
   const epOnlineClient = options.epOnlineClient ?? new EpOnlineClient();
   const variant = options.variant ?? 'rich';
-
-  if (variant === 'best-v1') {
-    // `best` as measured in Q19–Q19d: the two data tools, minimal render and log tools, no
-    // fetch_image. Frozen, so the app-tool change in `best` (Q22) stays comparable.
-    const server = new McpServer(
-      { name: 'metadata-demo-best-v1', version: VERSION },
-      { instructions: bestInstructions },
-    );
-    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
-    registerGetWeatherContextBestTool(server);
-    registerRenderChartTool(server, { minimal: true });
-    registerRenderTableTool(server, { minimal: true });
-    registerRenderMapTool(server, { minimal: true });
-    registerGetToolCallLogTool(server, { minimal: true });
-    return server;
-  }
-
-  if (variant === 'best-no-type-rules') {
-    // Q23 arm C: `best` exactly, except that render_chart's `type` carries no per-type rules.
-    const server = new McpServer(
-      { name: 'metadata-demo-best-no-type-rules', version: VERSION },
-      { instructions: bestInstructions },
-    );
-    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
-    registerGetWeatherContextBestTool(server);
-    registerRenderChartTool(server, { best: true, typeRules: false });
-    registerRenderTableTool(server, { best: true });
-    registerRenderMapTool(server, { best: true });
-    registerFetchImageTool(server, { openWorld: true });
-    registerGetToolCallLogTool(server, { best: true });
-    return server;
-  }
 
   if (variant === 'best') {
     // The reference implementation, built with the rich-domain-mcp-server skill's audit flow

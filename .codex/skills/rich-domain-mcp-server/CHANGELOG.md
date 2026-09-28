@@ -6,6 +6,29 @@ Semantic versions; each release is the git tag `skill-v<version>` in
 sharpens rules; a **patch** fixes wording, links or tooling. Every change to the skill bumps
 `metadata.version` in `SKILL.md` and adds an entry here (CI checks both).
 
+## 1.2.0 — 2026-09-27
+
+Delivery measured beyond Claude Code [HD].
+
+- **Server instructions: ≤ 512 characters, and nothing load-bearing only there.** ChatGPT cuts
+  them at 512; claude.ai chat and ChatGPT Work do not deliver them; Cowork delivers them whole;
+  Codex prepends them to every tool description. The old budget (≤ 2,048) was Claude Code's.
+- The 2,048-character description budget stays: it is the strictest cut measured. Cowork (web)
+  cuts at 4,096; Codex CLI, ChatGPT and claude.ai chat deliver the whole description, often only
+  after the model searches for the tool.
+- **Budgets by target client:** one table with three columns (Claude only, ChatGPT / Codex only,
+  all clients). For all clients: server instructions ≤ 512 with nothing required in them;
+  description ≤ 2,048; input schema ≤ 5,000 per tool (Codex and ChatGPT Work drop every describe
+  above that hard limit; nesting does not matter); output schema for validation only; the meaning
+  of the record in the response. Detail that does not fit goes in a REQUIRED guidance tool, and the
+  tool name and first sentence say what the user can do, because claude.ai, Cowork, Codex and
+  ChatGPT Work defer tools until the model searches.
+- Points to the new `mcp-compat-check` skill, which scores a server's `tools/list` against the
+  table per client, statically.
+- `best` follows it for the instructions (744 → 492 characters, every line also in a description
+  head). Its `render_table` input schema (6,155 characters) is over the 5,000 limit: on Codex and
+  ChatGPT Work it arrives without a single describe.
+
 ## 1.1.1 — 2026-09-25
 
 Evidence only; no rule changed.

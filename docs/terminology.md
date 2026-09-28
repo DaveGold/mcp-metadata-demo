@@ -92,7 +92,9 @@ On Claude Code, only the first **2,048 characters** of a tool description (and o
 instructions) reach the model, on every request
 ([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). _The cut_ is that
 boundary; _the delivered budget_ is the space before it. _The description head_ is what sits
-inside it. The number is host-specific: verify it per client.
+inside it. The number is host-specific: verify it per client. Cowork (web) cuts at 4,096; Codex
+CLI, ChatGPT and claude.ai chat deliver the whole description; ChatGPT cuts server instructions at
+512 characters and claude.ai chat does not deliver them ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 ### Channel
 

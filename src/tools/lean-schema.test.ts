@@ -47,17 +47,29 @@ function validatorServer() {
 }
 
 describe('lean input schemas', () => {
-  it('render_table on best has the structure of the full schema, with fewer words and one more badge colour', async () => {
+  it('render_table on best is a subset of the full schema, with fewer words and one more badge colour', async () => {
     const [best, rich] = await Promise.all([schemas('best'), schemas('rich')]);
+    // best leaves out presentation knobs whose defaults are right (align, density, striped, …) to
+    // stay under 5,000 characters; every property it keeps has the full schema's shape.
     // best's badgeMap also takes 'primary', a colour models reach for and the renderer draws.
-    type Json = { properties: Record<string, Json>; items: Json; additionalProperties: Json; enum: string[] };
-    const badgeColour = (t: unknown) =>
-      (t as Json).properties.columns.items.properties.badgeMap.additionalProperties.properties.color;
-    const b = strip(best.render_table);
-    expect(badgeColour(b).enum).toEqual([...badgeColour(strip(rich.render_table)).enum, 'primary']);
-    badgeColour(b).enum = badgeColour(b).enum.filter((c) => c !== 'primary');
-    expect(b).toEqual(strip(rich.render_table));
-    expect(JSON.stringify(best.render_table).length).toBeLessThan(JSON.stringify(rich.render_table).length * 0.7);
+    type Json = { properties?: Record<string, Json>; items?: Json; additionalProperties?: Json; enum?: string[] };
+    const subsetOf = (b: Json, r: Json, path: string): void => {
+      if (b.properties)
+        for (const k of Object.keys(b.properties)) {
+          expect(r.properties?.[k], `${path}.${k} exists in the full schema`).toBeDefined();
+          subsetOf(b.properties[k], r.properties![k], `${path}.${k}`);
+        }
+      if (b.items) subsetOf(b.items, r.items!, `${path}[]`);
+      if (b.additionalProperties && typeof b.additionalProperties === 'object')
+        subsetOf(b.additionalProperties, r.additionalProperties!, `${path}{}`);
+      if (b.enum)
+        expect(
+          b.enum.filter((c) => c !== 'primary'),
+          path,
+        ).toEqual(r.enum!.filter((c) => c !== 'primary'));
+    };
+    subsetOf(strip(best.render_table) as Json, strip(rich.render_table) as Json, 'render_table');
+    expect(JSON.stringify(best.render_table).length).toBeLessThan(JSON.stringify(rich.render_table).length * 0.3);
   });
 
   it("render_chart's validator on best has the structure of the full schema, with fewer words", async () => {

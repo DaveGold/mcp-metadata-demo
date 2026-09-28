@@ -14,7 +14,8 @@ To see what a tier actually sends, with the 2,048-character cut marked, read its
 ## 1 · WHEN — before the call
 
 Does this tool fit the question, what is it not for, what does it join with? These must be in the
-first 2,048 characters of the description, because the model decides before it has any response:
+first 2,048 characters of the description (Claude Code's cut, the strictest measured), because the
+model decides before it has any response:
 
 - building: [`WHEN TO USE` · `WHEN NOT TO USE` · `RELATED TOOLS`](../src/tools/get-building-profile-best.ts#L33-L37),
   including the refusal that must be possible without a call ("this server has NO metered energy
