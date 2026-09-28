@@ -520,8 +520,8 @@
   }
  },
  "headline": [
-  "24 servers checked. 8 are portable on every client measured: Cloudflare docs, Exa, OpenAI docs, GitMCP, Astro docs, Playwright, Chrome DevTools, Kubernetes.",
-  "Server instructions are the most common problem: 11 of 24 ship more than 512 characters (262–6,731). Two keep their guidance there, so claude.ai chat and ChatGPT Work get little more than tool names: DeepWiki (3,097 against 212 in all descriptions) and Terraform (4,295 against 3,497).",
+  "22 public server configurations checked (21 servers; GitHub with default and with all toolsets), plus this repo's best and rich. 8 are portable on every client measured: Cloudflare docs, Exa, OpenAI docs, GitMCP, Astro docs, Playwright, Chrome DevTools, Kubernetes.",
+  "Server instructions are the most common problem: 9 of the 22 ship more than 512 characters (632–6,731). Two keep their guidance there, so claude.ai chat and ChatGPT Work get little more than tool names: DeepWiki (3,097 against 212 in all descriptions) and Terraform (4,295 against 3,497).",
   "The worst real cases. AWS API: its two tools (call_aws, suggest_aws_commands) lose 36–38% of their descriptions on Claude Code. MongoDB: four core query tools (aggregate, create-index, explain, export, 9–12k schemas) lose all 21–31 parameter describes on Codex and ChatGPT Work.",
   "Tool definitions re-sent per turn: up to 257k chars (GitHub, all toolsets); 74–78k for Notion, Azure, Grafana and MongoDB.",
   "23 remote servers needed OAuth even to list tools, so the hosted versions of Notion, Linear, Stripe, Atlassian and others are not in the sample."
