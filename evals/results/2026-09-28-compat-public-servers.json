@@ -2014,5 +2014,26 @@
   "mcp.box.com",
   "mcp.globalping.dev"
  ],
- "oauth_note": "Hosted servers read with check.mjs --oauth: the user signed in in their own browser (free accounts); the token lived only in the checking process and was discarded. Supabase was captured on a second run; Stripe was not (its sign-in completed after that step had timed out); Asana and Monday were skipped."
+ "oauth_note": "Hosted servers read with check.mjs --oauth: the user signed in in their own browser (free accounts); the token lived only in the checking process and was discarded. Supabase was captured on a second run; Stripe was not (its sign-in completed after that step had timed out); Asana and Monday were skipped.",
+ "summary_table": {
+  "_comment": "The selection shown in summaries: one row per pattern, with the reason it is shown. All 30 configurations stay in servers and verdicts.",
+  "rows": [
+   "| server | why it is here | tools | tools/list | Claude | ChatGPT / Codex | all clients | description | instructions | input schema | output schema |",
+   "|---|---|---:|---:|:-:|:-:|:-:|---|---|---|---|",
+   "| Notion (hosted) | worst overall: long descriptions and huge schemas | 45 | 242k | 🔴 | 🔴 | 🔴 | 🔴 10 of 45 over 2,048 | 🔴 1,291 > 512 | 🔴 6 of 45 over 5,000 | 🟢 ok |",
+   "| Vercel (hosted) | scale: 243 tools, 15 schemas over 5,000 | 243 | 561k | 🟡 | 🔴 | 🔴 | 🟢 ok | 🔴 1,520 > 512 | 🔴 15 of 243 over 5,000 | 🟢 none |",
+   "| Canva (hosted) | descriptions cut on Claude Code | 41 | 112k | 🔴 | 🔴 | 🔴 | 🔴 2 of 41 over 2,048 | 🟢 none | 🔴 2 of 41 over 5,000 | 🟡 5 to check |",
+   "| MongoDB | query tools lose every parameter describe on Codex | 31 | 78k | 🟡 | 🔴 | 🔴 | 🟢 ok | 🟢 none | 🔴 4 of 31 over 5,000 | 🟡 3 to check |",
+   "| AWS API | both tools lose a third of their description | 2 | 8k | 🔴 | 🟡 | 🔴 | 🔴 2 of 2 over 2,048 | 🟡 338 ≤ 512 | 🟢 ok | 🟢 ok |",
+   "| DeepWiki | guidance lives in the server instructions | 3 | 2k | 🔴 | 🔴 | 🔴 | 🟢 ok | 🔴 3,097 > 512 | 🟢 ok | 🟢 ok |",
+   "| Terraform | the same, with 4,295 chars of instructions | 9 | 10k | 🔴 | 🔴 | 🔴 | 🟢 ok | 🔴 4,295 > 512 | 🟢 ok | 🟢 none |",
+   "| GitHub (all toolsets) | the most common problem, at scale | 90 | 257k | 🔴 | 🔴 | 🔴 | 🟢 ok | 🔴 6,731 > 512 | 🔴 1 of 90 over 5,000 | 🟢 none |",
+   "| Supabase (hosted) | instructions only: the typical finding | 29 | 22k | 🟡 | 🔴 | 🔴 | 🟢 ok | 🔴 1,304 > 512 | 🟢 ok | 🟢 none |",
+   "| Atlassian (hosted) | one schema just over 5,000 | 32 | 51k | 🟢 | 🔴 | 🔴 | 🟢 ok | 🟢 none | 🔴 1 of 32 over 5,000 | 🟢 none |",
+   "| Sentry (hosted) | portable | 9 | 26k | 🟢 | 🟢 | 🟢 | 🟢 ok | 🟢 none | 🟢 ok | 🟢 ok |",
+   "| Playwright | portable at 25 tools | 25 | 20k | 🟢 | 🟢 | 🟢 | 🟢 ok | 🟢 none | 🟢 ok | 🟢 none |",
+   "| metadata-demo rich | this repo: the talk tier | 6 | 105k | 🔴 | 🔴 | 🔴 | 🔴 6 of 6 over 2,048 | 🔴 2,829 > 512 | 🔴 2 of 6 over 5,000 | 🟡 3 to check |",
+   "| metadata-demo best | this repo: the reference | 7 | 42k | 🟡 | 🔴 | 🔴 | 🟢 ok | 🟡 492 ≤ 512 | 🔴 1 of 7 over 5,000 | 🟡 1 to check |"
+  ]
+ }
 }
