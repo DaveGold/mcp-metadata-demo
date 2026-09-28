@@ -877,11 +877,11 @@
     "source": "demo-mcpBest",
     "tools": 7,
     "instructionsChars": 492,
-    "toolsListChars": 41776,
+    "toolsListChars": 38187,
     "verdict": {
-     "claude": "amber",
-     "openai": "red",
-     "all": "red"
+     "claude": "green",
+     "openai": "green",
+     "all": "green"
     },
     "allClients": {
      "description": {
@@ -890,24 +890,57 @@
       "tools": []
      },
      "instructions": {
-      "status": "amber",
-      "cell": "492 ≤ 512; some clients deliver none"
+      "status": "green",
+      "cell": "492 ≤ 512; not delivered on every client, so nothing may be required there"
      },
      "inputSchema": {
-      "status": "red",
-      "cell": "1 of 7 over 5,000 (describes dropped)",
-      "tools": [
-       "render_table"
-      ]
+      "status": "green",
+      "cell": "0 of 7 over 5,000",
+      "tools": []
      },
      "outputSchema": {
-      "status": "amber",
-      "cell": "3 of 7 shipped, never delivered; 1 carry meaning to check",
-      "tools": [
-       "get_building_profile"
-      ]
+      "status": "green",
+      "cell": "3 of 7 shipped, never delivered",
+      "tools": []
      }
-    }
+    },
+    "before_fix": {
+     "source": "demo-mcpBest",
+     "tools": 7,
+     "instructionsChars": 492,
+     "toolsListChars": 41776,
+     "verdict": {
+      "claude": "amber",
+      "openai": "red",
+      "all": "red"
+     },
+     "allClients": {
+      "description": {
+       "status": "green",
+       "cell": "0 of 7 over 2,048",
+       "tools": []
+      },
+      "instructions": {
+       "status": "amber",
+       "cell": "492 ≤ 512; some clients deliver none"
+      },
+      "inputSchema": {
+       "status": "red",
+       "cell": "1 of 7 over 5,000 (describes dropped)",
+       "tools": [
+        "render_table"
+       ]
+      },
+      "outputSchema": {
+       "status": "amber",
+       "cell": "3 of 7 shipped, never delivered; 1 carry meaning to check",
+       "tools": [
+        "get_building_profile"
+       ]
+      }
+     }
+    },
+    "note": "Re-checked 2026-09-28 after best was made portable: render_table wire schema 6,155 → 4,861 chars, get_building_profile output schema shape only (evals/results/2026-09-27-host-delivery.json, best_all_green). before_fix is the row this file first recorded."
    },
    "metadata-demo rich": {
     "source": "demo-mcp",
@@ -2033,7 +2066,7 @@
    "| Sentry (hosted) | portable | 9 | 26k | 🟢 | 🟢 | 🟢 | 🟢 ok | 🟢 none | 🟢 ok | 🟢 ok |",
    "| Playwright | portable at 25 tools | 25 | 20k | 🟢 | 🟢 | 🟢 | 🟢 ok | 🟢 none | 🟢 ok | 🟢 none |",
    "| metadata-demo rich | this repo: the talk tier | 6 | 105k | 🔴 | 🔴 | 🔴 | 🔴 6 of 6 over 2,048 | 🔴 2,829 > 512 | 🔴 2 of 6 over 5,000 | 🟡 3 to check |",
-   "| metadata-demo best | this repo: the reference | 7 | 42k | 🟡 | 🔴 | 🔴 | 🟢 ok | 🟡 492 ≤ 512 | 🔴 1 of 7 over 5,000 | 🟡 1 to check |"
+   "| metadata-demo best | this repo: the reference, after its fix | 7 | 38k | 🟢 | 🟢 | 🟢 | 🟢 ok | 🟢 492 ≤ 512 | 🟢 ok | 🟢 ok |"
   ]
  }
 }
