@@ -22,7 +22,7 @@ const INSTR_SOFT = { claude: 2048, openai: 512, all: 512 };
 const HOST_NOTES = {
   desc: 'Claude Code cuts at 2,048, Cowork at 4,096; claude.ai chat, ChatGPT and Codex deliver it whole.',
   instr: 'claude.ai chat and ChatGPT Work deliver none; ChatGPT Chat cuts at 512; Claude Code at 2,048.',
-  schema: 'Codex and ChatGPT Work drop every describe once the serialized input schema passes 5,000 chars.',
+  schema: 'Codex drops every describe once the serialized input schema passes 5,000 chars (bisected: 5,000 kept, 5,001 dropped); ChatGPT Work behaves the same (20k dropped, 739 kept; not bisected).',
   output: 'Not delivered on Claude Code, claude.ai chat or Cowork; delivered on Codex and ChatGPT Work.',
 };
 
@@ -142,7 +142,7 @@ function analyse(server) {
       },
       inputSchema: {
         status: schemaOver.length ? 'red' : 'green',
-        cell: c.schema ? `${schemaOver.length} of ${n} over ${c.schema.toLocaleString('en')} (describes dropped)` : 'delivered whole',
+        cell: c.schema ? `${schemaOver.length} of ${n} over ${c.schema.toLocaleString('en')}${schemaOver.length ? ' (describes dropped)' : ''}` : 'delivered whole',
         tools: schemaOver.map((t) => t.name),
       },
       outputSchema: {
@@ -170,12 +170,12 @@ function markdown(r, target) {
   const overall = (k) => {
     const sm = r.summary[k];
     const bad = SURF.filter(([key]) => sm.surfaces[key].status === sm.verdict && sm.verdict !== 'green').map(([, l]) => l);
-    return `${dot[sm.verdict]} **${sm.verdict === 'green' ? 'within every limit' : (sm.verdict === 'red' ? 'fails on ' : 'check ') + bad.join(', ')}** · ${sm.toolsFailing} of ${sm.tools} tools affected`;
+    return `${dot[sm.verdict]} **${sm.verdict === 'green' ? 'portable' : (sm.verdict === 'red' ? 'not portable: ' : 'host-dependent: ') + bad.join(', ')}** · ${sm.toolsFailing} of ${sm.tools} tools affected`;
   };
   o.push('| **overall** | ' + cols.map(overall).join(' | ') + ' |');
   for (const [key, label] of SURF)
     o.push(`| ${label} | ` + cols.map((k) => `${dot[r.summary[k].surfaces[key].status]} ${r.summary[k].surfaces[key].cell}`).join(' | ') + ' |');
-  o.push('', '🔴 does not reach the model on some client in that column · 🟡 arrives, or is never needed, but check it · 🟢 within every measured limit', '');
+  o.push('', '🟢 portable under the measured limits · 🟡 host-dependent: arrives on some clients, or is never needed; review it · 🔴 not portable: relies on a surface or size that some measured client in that column does not deliver.', '', '_A portability finding, not a quality rating: a protocol-correct server can still be red._', '');
   if (r.instructionsHeavy) o.push(`🔴 **The guidance lives in the server instructions** (${r.instructionsChars.toLocaleString('en')} chars, against ${r.descriptionCharsTotal.toLocaleString('en')} in all tool descriptions together). On claude.ai chat and ChatGPT Work none of it reaches the model; move each rule into the description head of the tool it governs.`, '');
   else if (r.instructionsChars) o.push('Server instructions reach no model on claude.ai chat or ChatGPT Work: every rule in them must also be in a description head or a response.', '');
   const reds = r.tools.filter((t) => t.perClient.all.status === 'red').sort((a, b) => b.perClient.all.issues.length - a.perClient.all.issues.length || b.descriptionChars - a.descriptionChars);
@@ -197,6 +197,12 @@ function markdown(r, target) {
   if (noAnn.length) o.push(`- ${noAnn.length}/${r.tools.length} tools leave annotations implicit (${[...new Set(noAnn.flatMap((t) => t.annotationsMissing))].join(', ')}).`);
   const shortHeads = r.tools.filter((t) => t.firstSentence.length < 25);
   if (shortHeads.length) o.push(`- ${shortHeads.length} tools have a first sentence under 25 chars; on clients that load tools by search (claude.ai, Cowork, Codex, ChatGPT Work) the name and first sentence decide whether the tool is found.`);
+  o.push('', '## Rules behind the columns', '', '| surface | Claude only | ChatGPT / Codex only | all clients |', '|---|---|---|---|',
+    '| tool description | red if > 2,048 (Claude Code cut) | no limit (none measured) | red if > 2,048 |',
+    '| server instructions | red if > 2,048; else amber if any (claude.ai chat delivers none) | red if > 512 (ChatGPT Chat cut); else amber if any (Work delivers none) | red if > 512; else amber if any |',
+    '| input schema | no limit (delivered whole up to ~21.7k) | red if serialized > 5,000 and it has describes (Codex cut, bisected; Work consistent) | red if > 5,000 with describes |',
+    '| output schema | amber if a field is described only there (never delivered) | green (delivered on Codex and Work) | amber if described only there |',
+    '| overall | the worst of the four | the worst of the four | the worst of the four |', '');
   o.push(`- Measured limits: ${HOST_NOTES.desc} ${HOST_NOTES.instr} ${HOST_NOTES.schema} ${HOST_NOTES.output}`);
   o.push('', '_Static check of what the server ships against client limits measured on 2026-09-27. It does not call tools, so response size and response-side meaning are not checked._');
   return o.join('\n') + '\n';

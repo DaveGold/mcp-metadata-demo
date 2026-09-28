@@ -75,7 +75,7 @@ never the only home of a rule. Pick the column for the clients the server must w
 |---|---|---|---|
 | server instructions | nothing required (claude.ai chat gets none); ≤ 2,048 | nothing required (Work gets none; Codex prepends them to every tool); ≤ 512 | nothing required; ≤ 512 |
 | tool description | ≤ 2,048 (Claude Code; Cowork cuts at 4,096) | no cut measured; the head still decides the search | ≤ 2,048 |
-| input schema | whole; size it for cost only | ≤ 5,000 per tool (Codex, Work drop every describe above it) | ≤ 5,000 per tool |
+| input schema | whole; size it for cost only | ≤ 5,000 per tool (Codex drops every describe above it, bisected; Work consistent, not bisected) | ≤ 5,000 per tool |
 | output schema | validation only (never delivered) | may help (Codex, Work deliver it; Chat 1 in 3); never required | validation only |
 | response | the meaning of the record; < ~25k tokens on Claude Code | the meaning of the record | the meaning of the record |
 

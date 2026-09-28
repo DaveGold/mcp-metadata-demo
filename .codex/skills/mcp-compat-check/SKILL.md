@@ -38,7 +38,7 @@ and pass the variable.
 |---|---|---|---|
 | tool description | ≤ 2,048 (Claude Code cuts there) | no cut measured | ≤ 2,048 |
 | server instructions | ≤ 2,048, and nothing required (claude.ai chat gets none) | ≤ 512, and nothing required (Work gets none) | ≤ 512, nothing required |
-| input schema | whole | ≤ 5,000 serialized, or every describe is dropped | ≤ 5,000 |
+| input schema | whole | ≤ 5,000 serialized, or every describe is dropped (bisected on Codex; ChatGPT Work consistent, not bisected) | ≤ 5,000 |
 | output schema | never delivered: meaning there is review-only | delivered on Codex and Work | review-only |
 
 It also flags: guidance that lives mostly in the server instructions, tools with a first sentence
@@ -57,11 +57,16 @@ The **Verdict** table has one column per client group and one row per surface:
 | input schema | tools whose serialized schema is over 5,000, so Codex and ChatGPT Work drop every describe |
 | output schema | tools that ship one; on the Claude clients it never arrives, so meaning found only there is flagged |
 
-- 🔴 **red**: part of the metadata does not reach the model on some client in that column.
-- 🟡 **amber**: it arrives, or is never needed, but check it. Output-schema meaning is fine if the
-  same meaning travels in the field names or the response, which a static check cannot see.
-  Server instructions within budget are amber because some clients deliver none.
-- 🟢 **green**: within every measured limit for that column.
+- 🟢 **portable**: within every measured limit for that column.
+- 🟡 **host-dependent**: it arrives on some clients, or is never needed; review it. Output-schema
+  meaning is fine if the same meaning travels in the field names or the response, which a static
+  check cannot see. Server instructions within budget are amber because some clients deliver none.
+- 🔴 **not portable**: the server relies on a surface or size that some measured client in that
+  column does not deliver.
+
+**A portability finding, not a quality rating.** A protocol-correct, well-built server can be red:
+the protocol lets it ship metadata that some clients never pass on. The report's last section lists
+the rule behind every cell, so anyone can recompute the matrix.
 
 Start with the "Start here" list. For each fix, use the `rich-domain-mcp-server` skill: its
 *Budgets by target client* table has the rule and its evidence, and its REQUIRED guidance-tool
