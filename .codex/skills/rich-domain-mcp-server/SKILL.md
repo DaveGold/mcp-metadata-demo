@@ -66,27 +66,34 @@ eval set had already shown to be wrong.
 | response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9] | guard it |
 | guidance tool | only if the pointer is a requirement [Q8b] | — |
 
-**Works on every host [HD].** Design against what every measured host delivers; use a host's
-richer surfaces only as an enhancement. Other hosts cut elsewhere or not at all (Cowork at 4,096;
-claude.ai chat, ChatGPT and Codex whole), so one budget per surface, set by the strictest:
+### Budgets by target client [HD]
 
-- **Description:** what must hold before a call goes in the first 2,048 characters (Claude Code).
-  A description ≤ 2,048 arrived whole on every host measured.
-- **Server instructions:** best-effort guidance, never a correctness boundary. claude.ai chat and
-  ChatGPT Work receive none, ChatGPT 512. Keep them ≤ 512 and repeat each rule in a description
-  head or in the response.
-- **Input schema:** delivered whole on Claude Code, claude.ai chat, Cowork and ChatGPT Chat. Codex
-  and ChatGPT Work drop every describe once the serialized schema passes 5,000 characters (names,
-  types and enums stay). If those hosts matter, keep each schema ≤ 5,000 or move the detail into a
-  REQUIRED guidance tool, whose response arrives everywhere [Q8b] [Q25c]; carry choices in enums
-  and names either way.
-- **Output schema:** a validation contract, not a delivery channel: absent on Claude Code,
-  claude.ai chat and Cowork.
-- **Response:** the meaning of this record travels with it, and a server-side verdict or refusal
-  enforces what must not go wrong. It is the call's own result (measured on Claude Code and Codex);
-  keep it under ~25k tokens [Q9].
-- **Found before read:** claude.ai, Cowork and Codex defer tools until the model searches. The tool
-  name and first sentence say what the user can do with it, in the words they would search with.
+Design against what every host you target delivers; a host's richer surfaces are an enhancement,
+never the only home of a rule. Pick the column for the clients the server must work in:
+
+| surface | Claude only (Code, claude.ai, Cowork) | ChatGPT / Codex only | all clients |
+|---|---|---|---|
+| server instructions | nothing required (claude.ai chat gets none); ≤ 2,048 | nothing required (Work gets none; Codex prepends them to every tool); ≤ 512 | nothing required; ≤ 512 |
+| tool description | ≤ 2,048 (Claude Code; Cowork cuts at 4,096) | no cut measured; the head still decides the search | ≤ 2,048 |
+| input schema | whole; size it for cost only | ≤ 5,000 per tool (Codex, Work drop every describe above it) | ≤ 5,000 per tool |
+| output schema | validation only (never delivered) | may help (Codex, Work deliver it; Chat 1 in 3); never required | validation only |
+| response | the meaning of the record; < ~25k tokens on Claude Code | the meaning of the record | the meaning of the record |
+
+In every column:
+
+- **Nothing load-bearing only in the server instructions.** They are best-effort guidance, never
+  a correctness boundary: repeat each rule in a description head or in the response.
+- **The response carries this record's meaning**, and a server-side verdict or refusal enforces
+  what must not go wrong. It is the call's own result: measured on Claude Code and Codex, not
+  probed separately elsewhere.
+- **Detail that does not fit a budget goes in a REQUIRED guidance tool.** Its answer is a
+  response, so it arrives on every host [Q8b] [Q25c]. Choices carried in enums and names survive
+  every cut.
+- **Found before read.** claude.ai, Cowork, Codex and ChatGPT Work defer tools until the model
+  searches. The tool name and first sentence say what the user can do with it, in the words they
+  would search with.
+- **These are one day's host versions (2026-09-27).** Re-verify with `references/delivery.md`
+  before relying on a number.
 
 The variable is **delivery, not channel**: the same sentence delivered in the description and in
 the response scored 20/20 and 20/20 [Q15]. Details, and how to check it yourself:

@@ -39,6 +39,26 @@ that never draw a chart; moving the shapes of the rarer chart types behind a REQ
 applied [Q25]. Confirmed at n=10 on the rarer shapes: as reliable as the trimmed schema (117
 against 118 of 120) and 7.6% cheaper, so `best` uses the guided form.
 
+## Per host (measured 2026-09-27) [HD]
+
+What each client delivered from the `rich` tier (a 7,978-char description, 2,829-char server
+instructions, a 20,181-char `render_table` input schema). SKILL.md turns this into budgets per
+target client.
+
+| client | tool description | server instructions | input schema | output schema |
+|---|---|---|---|---|
+| Claude Code | cut at 2,048 | cut at 2,048 | whole | not delivered |
+| Cowork (web, desktop app) | cut at 4,096 | whole | whole | not delivered |
+| claude.ai chat (web, desktop app) | whole, after tool search | **none** | whole | not delivered |
+| ChatGPT Chat | whole | cut at 512 | whole | sometimes (1 in 3) |
+| ChatGPT Work | whole, read with code | **none**; the app description typed in ChatGPT instead | describes dropped past 5,000 | delivered |
+| Codex CLI 0.154 | whole, once the model looks it up (0 chars in the prompt) | prepended to every tool | describes dropped past 5,000 | delivered, as a TypeScript return type |
+
+The 5,000 limit is on the serialized input schema: 5,000 keeps all 26 describes, 5,001 drops all 26,
+and nesting has no effect. ChatGPT Work is the Codex tool runtime (its tools are named
+`mcp__codex_apps__*`). The chat-host rows are quote probes checked against fingerprints; the Codex
+row is read from the request.
+
 ## What follows from it
 
 1. **The variable is delivery, not channel.** Delivered in both channels, the same sentence

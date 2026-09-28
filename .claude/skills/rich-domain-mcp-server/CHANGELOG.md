@@ -16,14 +16,13 @@ Delivery measured beyond Claude Code [HD].
 - The 2,048-character description budget stays: it is the strictest cut measured. Cowork (web)
   cuts at 4,096; Codex CLI, ChatGPT and claude.ai chat deliver the whole description, often only
   after the model searches for the tool.
-- **Works on every host:** design against what every measured host delivers; richer surfaces are
-  an enhancement. One budget per surface, set by the strictest host: description head ≤ 2,048;
-  instructions ≤ 512, best-effort, each rule repeated elsewhere; input schemas ≤ 5,000 characters
-  where Codex or ChatGPT Work matter (both drop every describe above that hard limit; nesting does
-  not matter), or the detail in a REQUIRED guidance tool, choices in enums and names; the
-  output schema is a validation contract; the response carries this record's meaning and the
-  server enforces what must not go wrong; the tool name and first sentence say what the user can
-  do, because claude.ai, Cowork and Codex defer tools until the model searches.
+- **Budgets by target client:** one table with three columns (Claude only, ChatGPT / Codex only,
+  all clients). For all clients: server instructions ≤ 512 with nothing required in them;
+  description ≤ 2,048; input schema ≤ 5,000 per tool (Codex and ChatGPT Work drop every describe
+  above that hard limit; nesting does not matter); output schema for validation only; the meaning
+  of the record in the response. Detail that does not fit goes in a REQUIRED guidance tool, and the
+  tool name and first sentence say what the user can do, because claude.ai, Cowork, Codex and
+  ChatGPT Work defer tools until the model searches.
 - `best` follows it for the instructions (744 → 492 characters, every line also in a description
   head). Its `render_table` input schema (6,155 characters) is over the 5,000 limit: on Codex and
   ChatGPT Work it arrives without a single describe.
