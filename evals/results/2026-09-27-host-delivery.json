@@ -81,7 +81,7 @@
   "Server instructions differ most by host: ChatGPT Chat cuts them at 512; ChatGPT Work and claude.ai chat do not deliver them (Work puts the app description typed in ChatGPT in their place); Cowork delivers them whole (2,829 < 4,096); Codex prepends them to every tool description.",
   "On Codex, ChatGPT Work, claude.ai and Cowork (with many connectors) the tool is deferred: 0 chars in the prompt until the model searches (Codex filters ALL_TOOLS by keyword over name + description; claude.ai uses tool_search). In the Codex pilot the model found and read the configured tool in 20/21 runs and printed its whole description before calling; the 21st picked the account-level ChatGPT copy of the same server.",
   "Codex pilot (gpt-5.6-sol, n=3): best 9/9; rich 7/9 — benchmark-trap 1/3, the same hedged EP-1-vs-70 verdict Q19 scored as a fail. Same direction as Claude Code, now on a host where rich's text is not cut.",
-  "Schemas: the input schema arrives in full on Claude Code, claude.ai chat, Cowork and ChatGPT Chat; Codex keeps parameter describes on a small schema and drops all of them on a 20k one. The output schema is not delivered on Claude Code, claude.ai chat or Cowork, arrives inconsistently on ChatGPT Chat (1/3), and arrives in full on Codex."
+  "Schemas: the input schema arrives in full on Claude Code, claude.ai chat, Cowork and ChatGPT Chat. Codex and ChatGPT Work (the same runtime) drop every parameter describe once the serialized schema passes 5,000 characters, a hard limit; nesting does not matter. The output schema reaches Codex and ChatGPT Work, not Claude Code, claude.ai chat or Cowork, and ChatGPT Chat only sometimes (1/3)."
  ],
  "caveats": [
   "Self-report probes (ChatGPT, claude.ai, Cowork) rest on the model quoting verbatim, checked against the wire fingerprints: \"5. Large panden\" (starts at char 2,046) and the true end. ChatGPT 512 cut 2/2; claude.ai 2/2; Cowork 4,096 cut 2/2 on two models. Codex was measured on the request itself.",
@@ -334,7 +334,7 @@
   },
   "codex-cli": {
    "method": "ALL_TOOLS entries read with code; declarations printed from the session rollouts",
-   "input_schema": "SIZE-DEPENDENT: every describe kept on schemas up to 2,998 chars, every describe dropped from 6,155 chars (best render_table) up; types and enums always kept. See describe_threshold.",
+   "input_schema": "HARD LIMIT: every describe kept while the serialized input schema is <= 5,000 chars, every describe dropped above it (names, types and enums stay). Nesting has no effect. See describe_limit.",
    "output_schema": "DELIVERED as the TypeScript return type Promise<CallToolResult<{ ... }>> with every field describe as a // comment; both output fingerprints present (get_building_profile entry 15,746 chars = instructions + description + declaration).",
    "describe_threshold": {
     "_comment": "Per tool, the ALL_TOOLS declaration of the input schema: characters of the args type and the number of // describe comments kept. Input-schema size is the JSON length of inputSchema from tools/list; nesting is the maximum { depth.",
@@ -452,7 +452,149 @@
       ]
      }
     },
-    "finding": "Every describe kept up to 2,998 chars (nesting ≤ 7); every describe dropped from 6,155 chars (nesting ≥ 10), types and enums kept. Size and nesting move together in these schemas, so which one triggers it is not separated. best render_table (6,155) is over it."
+    "finding": "Superseded by describe_limit. The real-server data fit the 5,000-char limit: kept at <= 2,998, dropped at >= 6,155."
+   },
+   "describe_limit": {
+    "_comment": "Local stdio probe server (evals/host-probe/schema-probe-server.mjs): flat schemas of 1k-15k chars (nesting 3), deep chains of 1-2k chars (nesting 11-27), an array of objects like columns[] (2k, 7k), then a bisection and schemas of exactly 4,999-5,002 chars. Each describe is tagged M_<tool>_<i>; ALL_TOOLS entries counted with code. Sizes are compact JSON.stringify(inputSchema).",
+    "sweep": {
+     "arrobj_2k": {
+      "chars": 2054,
+      "markersKept": 11
+     },
+     "arrobj_6k": {
+      "chars": 666,
+      "markersKept": 0
+     },
+     "flat_16k": {
+      "chars": 1274,
+      "markersKept": 0
+     },
+     "flat_1k": {
+      "chars": 1017,
+      "markersKept": 5
+     },
+     "flat_3k": {
+      "chars": 2732,
+      "markersKept": 15
+     },
+     "flat_5k": {
+      "chars": 4452,
+      "markersKept": 25
+     },
+     "flat_8k": {
+      "chars": 712,
+      "markersKept": 0
+     },
+     "nest12_small": {
+      "chars": 1455,
+      "markersKept": 25
+     },
+     "nest4_small": {
+      "chars": 909,
+      "markersKept": 9
+     },
+     "nest8_small": {
+      "chars": 1225,
+      "markersKept": 17
+     }
+    },
+    "bisect": {
+     "arrobj_2k": {
+      "chars": 2054,
+      "markersKept": 11
+     },
+     "arrobj_6k": {
+      "chars": 666,
+      "markersKept": 0
+     },
+     "flat_16k": {
+      "chars": 1274,
+      "markersKept": 0
+     },
+     "flat_1k": {
+      "chars": 1017,
+      "markersKept": 5
+     },
+     "flat_3k": {
+      "chars": 2732,
+      "markersKept": 15
+     },
+     "flat_5k": {
+      "chars": 4452,
+      "markersKept": 25
+     },
+     "flat_8k": {
+      "chars": 712,
+      "markersKept": 0
+     },
+     "flat_n26": {
+      "chars": 4626,
+      "markersKept": 26
+     },
+     "flat_n27": {
+      "chars": 532,
+      "markersKept": 0
+     },
+     "flat_n28": {
+      "chars": 546,
+      "markersKept": 0
+     },
+     "flat_n29": {
+      "chars": 560,
+      "markersKept": 0
+     },
+     "flat_n30": {
+      "chars": 574,
+      "markersKept": 0
+     },
+     "flat_n31": {
+      "chars": 588,
+      "markersKept": 0
+     },
+     "flat_n32": {
+      "chars": 602,
+      "markersKept": 0
+     },
+     "nest12_small": {
+      "chars": 1455,
+      "markersKept": 25
+     },
+     "nest4_small": {
+      "chars": 909,
+      "markersKept": 9
+     },
+     "nest8_small": {
+      "chars": 1225,
+      "markersKept": 17
+     }
+    },
+    "exact": {
+     "exact_4999": {
+      "chars": 4631,
+      "markersKept": 26
+     },
+     "exact_5000": {
+      "chars": 4632,
+      "markersKept": 26
+     },
+     "exact_5001": {
+      "chars": 522,
+      "markersKept": 0
+     },
+     "exact_5002": {
+      "chars": 522,
+      "markersKept": 0
+     },
+     "flat_n26": {
+      "chars": 4626,
+      "markersKept": 26
+     },
+     "flat_n27": {
+      "chars": 532,
+      "markersKept": 0
+     }
+    },
+    "finding": "A HARD LIMIT OF 5,000 CHARACTERS on the serialized input schema: at 5,000 all 26 describes are kept, at 5,001 all 26 are dropped. Nesting does not matter (a 2,024-char chain at nesting 27 kept all 25). Past the limit the declaration keeps names, types and enums only."
    }
   },
   "chatgpt-chat": {
@@ -473,7 +615,14 @@
    "output_schema": "not delivered",
    "also": "render_table description cut at char 4,096 (\"...badge → scalar value… [truncated]\"; on the wire char 4,096 ends \"→ scalar value\"), the same cap as get_building_profile."
   },
-  "not_measured": "ChatGPT Work, the Claude desktop app, Cowork in the desktop app."
+  "not_measured": "the Claude desktop app, Cowork in the desktop app.",
+  "chatgpt-work": {
+   "runs": 1,
+   "model": "GPT-6 Sol",
+   "note": "ChatGPT Work runs the Codex tool runtime: the tools are named mcp__codex_apps__test_* and declared as TypeScript.",
+   "input_schema": "as on Codex: render_table (20,181-char schema) has none of the three describes; get_building_profile keeps its parameter describes (\"// Huisnummer (alleen getal)\").",
+   "output_schema": "DELIVERED, as on Codex: \"Overheating-risk indicator (TOjuli/GTO)\" is in get_building_profile's definition."
+  }
  },
  "best_instructions_rebaseline": {
   "_comment": "best server instructions 744 → 492 chars (2026-09-27), deployed to mcpBest; tools/list byte-identical. Re-measured on Codex CLI 0.154 / gpt-5.6-sol with --disable apps, the three pilot questions × 3, run one at a time. A first parallel wave hit the endpoint rate limit (HTTP 429) on 6 of 9 runs and was discarded whole, per the run-eval protocol.",

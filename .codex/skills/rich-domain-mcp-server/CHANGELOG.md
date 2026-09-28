@@ -18,15 +18,15 @@ Delivery measured beyond Claude Code [HD].
   after the model searches for the tool.
 - **Works on every host:** design against what every measured host delivers; richer surfaces are
   an enhancement. One budget per surface, set by the strictest host: description head ≤ 2,048;
-  instructions ≤ 512, best-effort, each rule repeated elsewhere; input schemas small and measured
-  at ≤ 3,000 characters per tool (Codex keeps every describe up to ~3,000 and drops all of them
-  from ~6,000), choices in enums and names; the
+  instructions ≤ 512, best-effort, each rule repeated elsewhere; input schemas ≤ 5,000 characters
+  where Codex or ChatGPT Work matter (both drop every describe above that hard limit; nesting does
+  not matter), or the detail in a REQUIRED guidance tool, choices in enums and names; the
   output schema is a validation contract; the response carries this record's meaning and the
   server enforces what must not go wrong; the tool name and first sentence say what the user can
   do, because claude.ai, Cowork and Codex defer tools until the model searches.
 - `best` follows it for the instructions (744 → 492 characters, every line also in a description
-  head). Its `render_table` input schema (6,155 characters) is over the new schema budget: on
-  Codex it arrives without a single describe.
+  head). Its `render_table` input schema (6,155 characters) is over the 5,000 limit: on Codex and
+  ChatGPT Work it arrives without a single describe.
 
 ## 1.1.1 — 2026-09-25
 
