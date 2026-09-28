@@ -517,12 +517,337 @@
    "descriptionCharsTotal": 1740,
    "toolsListChars": 23854,
    "red": []
+  },
+  "mcp-atlassian (community)": {
+   "source": "uvx mcp-atlassian (sooperset), dummy Jira/Confluence credentials",
+   "server": {
+    "name": "Atlassian MCP",
+    "version": "3.4.7"
+   },
+   "tools": 98,
+   "instructionsChars": 0,
+   "instructionsHeavy": false,
+   "descriptionCharsTotal": 17481,
+   "toolsListChars": 114974,
+   "red": []
+  },
+  "Angular CLI": {
+   "source": "npx @angular/cli mcp",
+   "server": {
+    "name": "angular-cli-server",
+    "version": "22.2.0"
+   },
+   "tools": 9,
+   "instructionsChars": 1462,
+   "instructionsHeavy": false,
+   "descriptionCharsTotal": 9681,
+   "toolsListChars": 20520,
+   "red": []
+  },
+  "Sentry (hosted)": {
+   "source": "https://mcp.sentry.dev/mcp, OAuth",
+   "server": {
+    "name": "Sentry MCP",
+    "version": "0.42.0"
+   },
+   "tools": 9,
+   "instructionsChars": 0,
+   "instructionsHeavy": false,
+   "descriptionCharsTotal": 11092,
+   "toolsListChars": 26062,
+   "red": []
+  },
+  "Atlassian (hosted)": {
+   "source": "https://mcp.atlassian.com/v1/mcp, OAuth",
+   "server": {
+    "name": "atlassian-mcp-server",
+    "icons": [
+     {
+      "src": "data:image/png;base64,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",
+      "mimeType": "image/png",
+      "sizes": [
+       "192x192"
+      ]
+     }
+    ],
+    "version": "1.0.0"
+   },
+   "tools": 32,
+   "instructionsChars": 0,
+   "instructionsHeavy": false,
+   "descriptionCharsTotal": 4151,
+   "toolsListChars": 50719,
+   "red": [
+    {
+     "tool": "createConfluenceInlineComment",
+     "issues": [
+      "input schema 5,493 > 5,000: all 10 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    }
+   ]
+  },
+  "Notion (hosted)": {
+   "source": "https://mcp.notion.com/mcp, OAuth",
+   "server": {
+    "name": "Notion MCP",
+    "icons": [
+     {
+      "src": "https://mcp.notion.com/notion-logo-block-sticker.svg",
+      "mimeType": "image/svg+xml"
+     }
+    ],
+    "version": "1.2.0",
+    "websiteUrl": "https://developers.notion.com/docs/mcp",
+    "description": "Notion's official MCP server lets you use your Notion workspace as a system of record for knowledge work and software development. Search questions about the codebase and business, fetch links to pages such as tech specs and PRDs, and track tasks with your team."
+   },
+   "tools": 45,
+   "instructionsChars": 1291,
+   "instructionsHeavy": false,
+   "descriptionCharsTotal": 66975,
+   "toolsListChars": 242346,
+   "red": [
+    {
+     "tool": "notion-ai-search",
+     "issues": [
+      "input schema 5,045 > 5,000: all 20 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "notion-fetch",
+     "issues": [
+      "description 3,774 > 2,048: 1,726 chars (46%) not delivered on the strictest client"
+     ]
+    },
+    {
+     "tool": "notion-create-attachment",
+     "issues": [
+      "description 3,242 > 2,048: 1,194 chars (37%) not delivered on the strictest client"
+     ]
+    },
+    {
+     "tool": "notion-create-pages",
+     "issues": [
+      "description 8,754 > 2,048: 6,706 chars (77%) not delivered on the strictest client"
+     ]
+    },
+    {
+     "tool": "notion-update-page",
+     "issues": [
+      "description 9,425 > 2,048: 7,377 chars (78%) not delivered on the strictest client",
+      "input schema 5,726 > 5,000: all 23 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "notion-create-database",
+     "issues": [
+      "description 2,071 > 2,048: 23 chars (1%) not delivered on the strictest client"
+     ]
+    },
+    {
+     "tool": "notion-update-data-source",
+     "issues": [
+      "description 2,351 > 2,048: 303 chars (13%) not delivered on the strictest client"
+     ]
+    },
+    {
+     "tool": "notion-create-comment",
+     "issues": [
+      "description 2,243 > 2,048: 195 chars (9%) not delivered on the strictest client",
+      "input schema 8,323 > 5,000: all 48 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "notion-query-data-sources",
+     "issues": [
+      "description 3,609 > 2,048: 1,561 chars (43%) not delivered on the strictest client",
+      "input schema 75,908 > 5,000: all 537 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "notion-query-meeting-notes",
+     "issues": [
+      "description 6,008 > 2,048: 3,960 chars (66%) not delivered on the strictest client",
+      "input schema 16,335 > 5,000: all 97 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "notion-query-sessions",
+     "issues": [
+      "input schema 17,238 > 5,000: all 125 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "notion-create-view",
+     "issues": [
+      "description 2,948 > 2,048: 900 chars (31%) not delivered on the strictest client"
+     ]
+    }
+   ]
+  },
+  "Vercel (hosted)": {
+   "source": "https://mcp.vercel.com, OAuth",
+   "server": {
+    "name": "Vercel MCP Server",
+    "title": "Vercel MCP Server",
+    "icons": [
+     {
+      "src": "https://mcp.vercel.com/icons/vercel-light.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": [
+       "any"
+      ],
+      "theme": "light"
+     },
+     {
+      "src": "https://mcp.vercel.com/icons/vercel-dark.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": [
+       "any"
+      ],
+      "theme": "dark"
+     }
+    ],
+    "version": "0.1.0",
+    "websiteUrl": "https://vercel.com",
+    "description": "Vercel's official MCP server — Vercel platform tools, deployment management, and documentation for AI assistants."
+   },
+   "tools": 243,
+   "instructionsChars": 1520,
+   "instructionsHeavy": false,
+   "descriptionCharsTotal": 39672,
+   "toolsListChars": 561171,
+   "red": [
+    {
+     "tool": "update_flag",
+     "issues": [
+      "input schema 9,564 > 5,000: all 41 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "update_firewall_config",
+     "issues": [
+      "input schema 17,747 > 5,000: all 25 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "update_connector",
+     "issues": [
+      "input schema 23,012 > 5,000: all 175 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "update_sandbox",
+     "issues": [
+      "input schema 16,058 > 5,000: all 83 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "update_project",
+     "issues": [
+      "input schema 23,781 > 5,000: all 86 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "create_connector",
+     "issues": [
+      "input schema 54,341 > 5,000: all 386 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "create_project_env",
+     "issues": [
+      "input schema 5,516 > 5,000: all 32 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "create_project",
+     "issues": [
+      "input schema 10,654 > 5,000: all 37 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "create_deployment",
+     "issues": [
+      "input schema 16,066 > 5,000: all 55 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "create_sandboxes_v2",
+     "issues": [
+      "input schema 17,903 > 5,000: all 97 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "update_session_network_policy",
+     "issues": [
+      "input schema 11,118 > 5,000: all 59 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "create_sandboxes_v3",
+     "issues": [
+      "input schema 17,602 > 5,000: all 96 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "create_sandboxes_v4",
+     "issues": [
+      "input schema 17,782 > 5,000: all 96 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "create_flag",
+     "issues": [
+      "input schema 9,455 > 5,000: all 38 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "put_firewall_config",
+     "issues": [
+      "input schema 8,821 > 5,000: all 15 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    }
+   ]
+  },
+  "Canva (hosted)": {
+   "source": "https://mcp.canva.com/mcp, OAuth",
+   "server": {
+    "name": "Canva MCP Server",
+    "version": "1.0.0"
+   },
+   "tools": 41,
+   "instructionsChars": 0,
+   "instructionsHeavy": false,
+   "descriptionCharsTotal": 30148,
+   "toolsListChars": 112227,
+   "red": [
+    {
+     "tool": "perform-editing-operations",
+     "issues": [
+      "input schema 9,239 > 5,000: all 50 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "generate-design",
+     "issues": [
+      "description 5,642 > 2,048: 3,594 chars (64%) not delivered on the strictest client",
+      "input schema 6,712 > 5,000: all 7 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    },
+    {
+     "tool": "generate-image",
+     "issues": [
+      "description 2,925 > 2,048: 877 chars (30%) not delivered on the strictest client"
+     ]
+    }
+   ]
   }
  },
  "headline": [
-  "22 public server configurations checked (21 servers; GitHub with default and with all toolsets), plus this repo's best and rich. 8 are portable on every client measured: Cloudflare docs, Exa, OpenAI docs, GitMCP, Astro docs, Playwright, Chrome DevTools, Kubernetes.",
-  "Server instructions are the most common problem: 9 of the 22 ship more than 512 characters (632–6,731). Two keep their guidance there, so claude.ai chat and ChatGPT Work get little more than tool names: DeepWiki (3,097 against 212 in all descriptions) and Terraform (4,295 against 3,497).",
+  "29 public server configurations checked (28 servers; GitHub with default and all toolsets), plus this repo's best and rich. 10 are portable on every client measured: Cloudflare docs, Exa, OpenAI docs, GitMCP, Astro docs, Playwright, Chrome DevTools, Kubernetes, mcp-atlassian and Sentry (hosted).",
+  "Server instructions are the most common problem: 12 of the 29 ship more than 512 characters (632–6,731). Two keep their guidance there, so claude.ai chat and ChatGPT Work get little more than tool names: DeepWiki (3,097 against 212 in all descriptions) and Terraform (4,295 against 3,497).",
   "The worst real cases. AWS API: its two tools (call_aws, suggest_aws_commands) lose 36–38% of their descriptions on Claude Code. MongoDB: four core query tools (aggregate, create-index, explain, export, 9–12k schemas) lose all 21–31 parameter describes on Codex and ChatGPT Work.",
+  "The worst are hosted: Notion (45 tools, 242k chars of tool definitions per turn; notion-update-page 9,425-char description, 78% cut on Claude Code; notion-query-data-sources a 75,908-char input schema whose 537 describes Codex drops; 12 of 45 tools red) and Vercel (243 tools, 561k chars per turn; 15 schemas over 5,000, create_connector 54,341). Canva generate-design loses 64% of its description on Claude Code.",
   "Tool definitions re-sent per turn: up to 257k chars (GitHub, all toolsets); 74–78k for Notion, Azure, Grafana and MongoDB.",
   "23 remote servers needed OAuth even to list tools, so the hosted versions of Notion, Linear, Stripe, Atlassian and others are not in the sample."
  ],
@@ -1343,23 +1668,296 @@
       "tools": []
      }
     }
+   },
+   "mcp-atlassian (community, sooperset)": {
+    "source": "mcp-atlassian",
+    "tools": 98,
+    "instructionsChars": 0,
+    "toolsListChars": 114974,
+    "verdict": {
+     "claude": "green",
+     "openai": "green",
+     "all": "green"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 98 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "green",
+      "cell": "none shipped"
+     },
+     "inputSchema": {
+      "status": "green",
+      "cell": "0 of 98 over 5,000",
+      "tools": []
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "93 of 98 shipped, never delivered",
+      "tools": []
+     }
+    }
+   },
+   "Angular CLI": {
+    "source": "angular-cli",
+    "tools": 9,
+    "instructionsChars": 1462,
+    "toolsListChars": 20520,
+    "verdict": {
+     "claude": "amber",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 9 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "red",
+      "cell": "1,462 > 512; some clients deliver none"
+     },
+     "inputSchema": {
+      "status": "green",
+      "cell": "0 of 9 over 5,000",
+      "tools": []
+     },
+     "outputSchema": {
+      "status": "amber",
+      "cell": "6 of 9 shipped, never delivered; 5 carry meaning to check",
+      "tools": [
+       "list_projects",
+       "run_target",
+       "devserver_start",
+       "devserver_stop",
+       "devserver_wait_for_build"
+      ]
+     }
+    }
+   },
+   "Sentry (hosted, OAuth)": {
+    "source": "oauth-sentry",
+    "tools": 9,
+    "instructionsChars": 0,
+    "toolsListChars": 26062,
+    "verdict": {
+     "claude": "green",
+     "openai": "green",
+     "all": "green"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 9 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "green",
+      "cell": "none shipped"
+     },
+     "inputSchema": {
+      "status": "green",
+      "cell": "0 of 9 over 5,000",
+      "tools": []
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "3 of 9 shipped, never delivered",
+      "tools": []
+     }
+    }
+   },
+   "Atlassian (hosted, OAuth)": {
+    "source": "oauth-atlassian",
+    "tools": 32,
+    "instructionsChars": 0,
+    "toolsListChars": 50719,
+    "verdict": {
+     "claude": "green",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 32 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "green",
+      "cell": "none shipped"
+     },
+     "inputSchema": {
+      "status": "red",
+      "cell": "1 of 32 over 5,000 (describes dropped)",
+      "tools": [
+       "createConfluenceInlineComment"
+      ]
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "none shipped",
+      "tools": []
+     }
+    }
+   },
+   "Notion (hosted, OAuth)": {
+    "source": "oauth-notion",
+    "tools": 45,
+    "instructionsChars": 1291,
+    "toolsListChars": 242346,
+    "verdict": {
+     "claude": "red",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "red",
+      "cell": "10 of 45 over 2,048",
+      "tools": [
+       "notion-fetch",
+       "notion-create-attachment",
+       "notion-create-pages",
+       "notion-update-page",
+       "notion-create-database",
+       "notion-update-data-source",
+       "notion-create-comment",
+       "notion-query-data-sources",
+       "notion-query-meeting-notes",
+       "notion-create-view"
+      ]
+     },
+     "instructions": {
+      "status": "red",
+      "cell": "1,291 > 512; some clients deliver none"
+     },
+     "inputSchema": {
+      "status": "red",
+      "cell": "6 of 45 over 5,000 (describes dropped)",
+      "tools": [
+       "notion-ai-search",
+       "notion-update-page",
+       "notion-create-comment",
+       "notion-query-data-sources",
+       "notion-query-meeting-notes",
+       "notion-query-sessions"
+      ]
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "2 of 45 shipped, never delivered",
+      "tools": []
+     }
+    }
+   },
+   "Vercel (hosted, OAuth)": {
+    "source": "oauth-vercel",
+    "tools": 243,
+    "instructionsChars": 1520,
+    "toolsListChars": 561171,
+    "verdict": {
+     "claude": "amber",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 243 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "red",
+      "cell": "1,520 > 512; some clients deliver none"
+     },
+     "inputSchema": {
+      "status": "red",
+      "cell": "15 of 243 over 5,000 (describes dropped)",
+      "tools": [
+       "update_flag",
+       "update_firewall_config",
+       "update_connector",
+       "update_sandbox",
+       "update_project",
+       "create_connector",
+       "create_project_env",
+       "create_project",
+       "create_deployment",
+       "create_sandboxes_v2",
+       "update_session_network_policy",
+       "create_sandboxes_v3",
+       "create_sandboxes_v4",
+       "create_flag",
+       "put_firewall_config"
+      ]
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "none shipped",
+      "tools": []
+     }
+    }
+   },
+   "Canva (hosted, OAuth)": {
+    "source": "oauth-canva",
+    "tools": 41,
+    "instructionsChars": 0,
+    "toolsListChars": 112227,
+    "verdict": {
+     "claude": "red",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "red",
+      "cell": "2 of 41 over 2,048",
+      "tools": [
+       "generate-design",
+       "generate-image"
+      ]
+     },
+     "instructions": {
+      "status": "green",
+      "cell": "none shipped"
+     },
+     "inputSchema": {
+      "status": "red",
+      "cell": "2 of 41 over 5,000 (describes dropped)",
+      "tools": [
+       "perform-editing-operations",
+       "generate-design"
+      ]
+     },
+     "outputSchema": {
+      "status": "amber",
+      "cell": "8 of 41 shipped, never delivered; 5 carry meaning to check",
+      "tools": [
+       "create-upload-url",
+       "create-design",
+       "get-create-design-async-job",
+       "separate-image-layers",
+       "get-separate-image-layers-job"
+      ]
+     }
+    }
    }
   }
  },
  "remote_needing_auth": [
   "api.githubcopilot.com/mcp",
-  "mcp.notion.com",
   "mcp.linear.app",
   "mcp.stripe.com",
-  "mcp.atlassian.com",
-  "mcp.sentry.dev",
   "mcp.supabase.com",
-  "mcp.vercel.com",
   "mcp.paypal.com",
   "mcp.zapier.com",
   "mcp.apify.com",
   "mcp.asana.com",
-  "mcp.canva.com",
   "mcp.close.com",
   "mcp.intercom.com",
   "mcp.monday.com",
@@ -1370,5 +1968,6 @@
   "mcp.wix.com",
   "mcp.box.com",
   "mcp.globalping.dev"
- ]
+ ],
+ "oauth_note": "Hosted servers read with check.mjs --oauth: the user signed in in their own browser (free accounts); the token lived only in the checking process and was discarded. Supabase and Stripe were authorised but not captured (the sign-in completed after that step had timed out); Asana and Monday were skipped."
 }

@@ -9,6 +9,7 @@
  *   node check.mjs --stdio -- node server.js           # stdio
  *   node check.mjs --json …                            # machine-readable
  *   node check.mjs --timeout 300 …                     # seconds to wait (default 180)
+ *   node check.mjs --oauth https://mcp.example.com/mcp # sign in in the browser; token kept in memory only
  */
 import { spawn } from 'node:child_process';
 
@@ -82,6 +83,67 @@ async function readServer(session) {
     cursor = page.nextCursor;
   } while (cursor);
   return { serverInfo: init.serverInfo ?? {}, instructions: init.instructions ?? '', tools };
+}
+
+// OAuth servers: the user signs in in their own browser; the token lives only in this process.
+// Needs @modelcontextprotocol/sdk resolvable from this file (npm i @modelcontextprotocol/sdk).
+async function readServerOAuth(url) {
+  const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
+  const { StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
+  const { createServer } = await import('node:http');
+  const PORT = 33418;
+  const redirect = `http://127.0.0.1:${PORT}/callback`;
+  let gotCode;
+  const code = new Promise((resolve) => (gotCode = resolve));
+  const callback = createServer((req, res) => {
+    const u = new URL(req.url, redirect);
+    if (u.pathname !== '/callback') return res.writeHead(404).end();
+    const c = u.searchParams.get('code');
+    res.end(c ? 'Signed in. You can close this tab.' : `No code: ${u.searchParams.get('error') ?? 'unknown'}`);
+    if (c) gotCode(c);
+  }).listen(PORT, '127.0.0.1');
+  const mem = {};
+  const provider = {
+    get redirectUrl() { return redirect; },
+    get clientMetadata() {
+      return { client_name: 'mcp-compat-check', redirect_uris: [redirect], grant_types: ['authorization_code', 'refresh_token'], response_types: ['code'], token_endpoint_auth_method: 'none' };
+    },
+    clientInformation: () => mem.client,
+    saveClientInformation: (c) => (mem.client = c),
+    tokens: () => mem.tokens,
+    saveTokens: (t) => (mem.tokens = t),
+    saveCodeVerifier: (v) => (mem.verifier = v),
+    codeVerifier: () => mem.verifier,
+    redirectToAuthorization: (u) => {
+      console.error(`Sign in to continue: ${u}`);
+      spawn(process.platform === 'darwin' ? 'open' : 'xdg-open', [u.toString()], { stdio: 'ignore', detached: true }).unref();
+    },
+  };
+  const open = async () => {
+    const client = new Client({ name: 'mcp-compat-check', version: '1.0.0' });
+    await client.connect(new StreamableHTTPClientTransport(new URL(url), { authProvider: provider }));
+    return client;
+  };
+  let client;
+  try {
+    client = await open();
+  } catch (e) {
+    if (!/unauthori[sz]ed/i.test(`${e?.name} ${e?.message}`)) throw e;
+    const t = new StreamableHTTPClientTransport(new URL(url), { authProvider: provider });
+    await t.finishAuth(await code);
+    client = await open();
+  }
+  const tools = [];
+  let cursor;
+  do {
+    const page = await client.listTools(cursor ? { cursor } : undefined);
+    tools.push(...page.tools);
+    cursor = page.nextCursor;
+  } while (cursor);
+  const out = { serverInfo: client.getServerVersion() ?? {}, instructions: client.getInstructions() ?? '', tools };
+  await client.close();
+  callback.close();
+  return out;
 }
 
 // ── checks ───────────────────────────────────────────────────────────────────
@@ -217,7 +279,11 @@ setTimeout(() => { console.error(`no answer within ${timeoutS}s`); process.exit(
 const headers = {};
 for (let i = 0; i < argv.length; i++) if (argv[i] === '--header') { const [k, ...v] = argv[i + 1].split(':'); headers[k.trim()] = v.join(':').trim(); }
 let session, target;
-if (argv.includes('--stdio')) {
+const oauth = argv.includes('--oauth');
+if (oauth) {
+  target = argv.filter((a, i) => !a.startsWith('--') && argv[i - 1] !== '--header' && argv[i - 1] !== '--timeout').pop();
+  session = { rpc: null, close: async () => {} };
+} else if (argv.includes('--stdio')) {
   const rest = argv.slice(argv.indexOf('--') + 1);
   target = rest.join(' ');
   session = stdioSession(rest[0], rest.slice(1));
@@ -227,7 +293,7 @@ if (argv.includes('--stdio')) {
   session = await httpSession(target, headers);
 }
 try {
-  const report = analyse(await readServer(session));
+  const report = analyse(oauth ? await readServerOAuth(target) : await readServer(session));
   process.stdout.write(json ? JSON.stringify(report, null, 1) + '\n' : markdown(report, target));
 } catch (e) {
   console.error(`could not read ${target}: ${e.message}`);
