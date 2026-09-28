@@ -51,7 +51,7 @@ ALERTS: interpretation.alerts — computed verdicts and this record's branch (no
 
 ### Output schema (not delivered)
 
-7,627 chars, 49 top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.
+5,332 chars, 49 top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.
 
 ## `get_weather_context`
 
@@ -179,14 +179,9 @@ INTERPRETATION: a header must not claim more than the field does. Label figures 
 | parameter | type | description |
 |---|---|---|
 | `columns` * | array | Columns, left to right; the identifying column first. |
-| `data` * |  | Rows, one shape for all: positional arrays in the order of columns (preferred above ~20 rows), e.g. [["Gustav Mahlerlaan 10", "A", 179.06]], or objects keyed by column key. At most 500 rows. Numbers as numbers, dates as ISO strings. |
-| `features` | object | Defaults: sorting and pagination on. Add filtering or globalSearch above ~50 rows. |
+| `data` * |  | Rows, one shape for all: positional arrays in column order (preferred above ~20 rows), e.g. [["Gustav Mahlerlaan 10", "A", 179.06]], or objects by column key. Max 500. Numbers as numbers, dates ISO. |
+| `features` | object | Sorting and pagination (10 rows) are on. Add filtering or globalSearch above ~50 rows. |
 | `title` | string | Short title, in the language of the conversation. |
-| `emptyMessage` | string |  |
-| `density` | `compact` · `normal` · `comfortable` | compact for many columns. |
-| `striped` | boolean |  |
-| `bordered` | boolean |  |
-| `maxHeight` | string | CSS max-height for a scrolling body, e.g. "400px". |
 | `queryIntent` | string | The business question this call answers. Used for observability. |
 
 ### Output schema (not delivered)

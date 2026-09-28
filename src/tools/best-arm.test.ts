@@ -84,6 +84,26 @@ describe('best — delivery budgets (the host cuts at 2,048)', () => {
     expect(bestBuildingDescription.length).toBeLessThan(HOST_CUT);
   });
 
+  it('every input schema fits the 5,000 chars past which some clients drop every describe', async () => {
+    const client = await connectBest();
+    const { tools } = await client.listTools();
+    for (const t of tools) expect(JSON.stringify(t.inputSchema).length, t.name).toBeLessThanOrEqual(5000);
+  });
+
+  it('the output schema carries shape only; meaning travels in names and the response', async () => {
+    const client = await connectBest();
+    const { tools } = await client.listTools();
+    // No top-level result field is explained only in the output schema, which the Claude clients
+    // never receive.
+    const building = tools.find((t) => t.name === 'get_building_profile')!;
+    const props = (building.outputSchema as { properties: Record<string, { description?: string }> }).properties;
+    expect(
+      Object.entries(props)
+        .filter(([, v]) => v.description)
+        .map(([k]) => k),
+    ).toEqual([]);
+  });
+
   it('load-bearing sentences sit early in the description', () => {
     expect(bestBuildingDescription.indexOf('NO metered')).toBeGreaterThan(-1);
     expect(bestBuildingDescription.indexOf('NO metered')).toBeLessThan(400);

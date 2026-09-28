@@ -180,7 +180,7 @@ function analyse(server) {
   });
   const instr = len(server.instructions);
   const instrByClient = {};
-  for (const key of Object.keys(CLIENTS)) instrByClient[key] = { status: instr === 0 ? 'green' : instr > INSTR_SOFT[key] ? 'red' : 'amber', note: instr === 0 ? 'none shipped' : instr > INSTR_SOFT[key] ? `${instr.toLocaleString('en')} > ${INSTR_SOFT[key].toLocaleString('en')}` : `${instr.toLocaleString('en')} ≤ ${INSTR_SOFT[key].toLocaleString('en')}` };
+  for (const key of Object.keys(CLIENTS)) instrByClient[key] = { status: instr > INSTR_SOFT[key] ? 'red' : 'green', note: instr === 0 ? 'none shipped' : instr > INSTR_SOFT[key] ? `${instr.toLocaleString('en')} > ${INSTR_SOFT[key].toLocaleString('en')}` : `${instr.toLocaleString('en')} ≤ ${INSTR_SOFT[key].toLocaleString('en')}` };
   const listChars = JSON.stringify(server.tools).length;
   const descTotal = tools.reduce((n, t) => n + t.descriptionChars, 0);
   const instructionsHeavy = instr > 512 && instr > descTotal;
@@ -201,7 +201,7 @@ function analyse(server) {
       },
       instructions: {
         status: instructionsHeavy ? 'red' : i.status,
-        cell: instr === 0 ? 'none shipped' : `${i.note}${instructionsHeavy ? '; the guidance lives here' : ''}; some clients deliver none`,
+        cell: instr === 0 ? 'none shipped' : `${i.note}${instructionsHeavy ? '; the guidance lives here' : ''}; not delivered on every client, so nothing may be required there`,
       },
       inputSchema: {
         status: schemaOver.length ? 'red' : 'green',
@@ -262,7 +262,7 @@ function markdown(r, target) {
   if (shortHeads.length) o.push(`- ${shortHeads.length} tools have a first sentence under 25 chars; on clients that load tools by search (claude.ai, Cowork, Codex, ChatGPT Work) the name and first sentence decide whether the tool is found.`);
   o.push('', '## Rules behind the columns', '', '| surface | Claude only | ChatGPT / Codex only | all clients |', '|---|---|---|---|',
     '| tool description | red if > 2,048 (Claude Code cut) | no limit (none measured) | red if > 2,048 |',
-    '| server instructions | red if > 2,048; else amber if any (claude.ai chat delivers none) | red if > 512 (ChatGPT Chat cut); else amber if any (Work delivers none) | red if > 512; else amber if any |',
+    '| server instructions | red if > 2,048, or if they hold more text than all descriptions together | red if > 512 (ChatGPT Chat cut), or the same | red if > 512, or the same |',
     '| input schema | no limit (delivered whole up to ~21.7k) | red if serialized > 5,000 and it has describes (Codex cut, bisected; Work consistent) | red if > 5,000 with describes |',
     '| output schema | amber if a field is described only there (never delivered) | green (delivered on Codex and Work) | amber if described only there |',
     '| overall | the worst of the four | the worst of the four | the worst of the four |', '');

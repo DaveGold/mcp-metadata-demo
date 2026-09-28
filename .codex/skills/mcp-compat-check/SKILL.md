@@ -56,14 +56,14 @@ The **Verdict** table has one column per client group and one row per surface:
 |---|---|
 | **overall** | the worst surface in that column, which surfaces fail, and how many tools are affected |
 | tool description | tools whose description is longer than the column's cut |
-| server instructions | their length against the column's budget; they are never required, because some clients deliver none |
+| server instructions | their length against the column's budget, and whether the guidance lives there; within budget is green, with a note that some clients deliver none |
 | input schema | tools whose serialized schema is over 5,000, so Codex and ChatGPT Work drop every describe |
 | output schema | tools that ship one; on the Claude clients it never arrives, so meaning found only there is flagged |
 
 - 🟢 **portable**: within every measured limit for that column.
 - 🟡 **host-dependent**: it arrives on some clients, or is never needed; review it. Output-schema
   meaning is fine if the same meaning travels in the field names or the response, which a static
-  check cannot see. Server instructions within budget are amber because some clients deliver none.
+  check cannot see.
 - 🔴 **not portable**: the server relies on a surface or size that some measured client in that
   column does not deliver.
 

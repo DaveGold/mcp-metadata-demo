@@ -31,6 +31,7 @@ import { registerFetchImageTool } from './tools/fetch-image.js';
 import { registerGetWeatherContextTool } from './tools/get-weather-context.js';
 import { registerGetToolCallLogTool } from './tools/get-tool-call-log.js';
 import { registerGetBuildingProfileBestTool } from './tools/get-building-profile-best.js';
+import { bestBuildingOutputSchemaV1 } from './tools/get-building-profile-best-v1-output.js';
 import { registerGetWeatherContextBestTool } from './tools/get-weather-context-best.js';
 import { bestInstructions } from './tools/best-instructions.js';
 import { bestInstructionsV1 } from './tools/best-instructions-v1.js';
@@ -163,7 +164,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
       { name: 'metadata-demo-best-v1', version: VERSION },
       { instructions: bestInstructionsV1 },
     );
-    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
+    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient, bestBuildingOutputSchemaV1);
     registerGetWeatherContextBestTool(server);
     registerRenderChartTool(server, { minimal: true });
     registerRenderTableTool(server, { minimal: true });
@@ -178,7 +179,7 @@ export function createServer(options: CreateServerOptions = {}): McpServer {
       { name: 'metadata-demo-best-no-type-rules', version: VERSION },
       { instructions: bestInstructionsV1 },
     );
-    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient);
+    registerGetBuildingProfileBestTool(server, bagClient, epOnlineClient, bestBuildingOutputSchemaV1);
     registerGetWeatherContextBestTool(server);
     registerRenderChartTool(server, { best: true, typeRules: false });
     registerRenderTableTool(server, { best: true });
