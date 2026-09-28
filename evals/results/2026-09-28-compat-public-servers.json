@@ -1,0 +1,245 @@
+{
+ "_comment": "The mcp-compat-check skill (static: tools/list + instructions against the per-client limits of HD, evals/results/2026-09-27-host-delivery.json) run against well-known public MCP servers. Server versions as served on 2026-09-28.",
+ "date": "2026-09-28",
+ "tool": ".claude/skills/mcp-compat-check/check.mjs v1.0.0",
+ "servers": {
+  "DeepWiki": {
+   "source": "https://mcp.deepwiki.com/mcp",
+   "server": {
+    "name": "DeepWiki",
+    "version": "2.14.3"
+   },
+   "tools": 3,
+   "instructionsChars": 3097,
+   "toolsListChars": 1538,
+   "fit": {
+    "claude": "3/3",
+    "openai": "3/3",
+    "all": "3/3"
+   },
+   "red": [],
+   "largestInputSchema": {
+    "tool": "ask_wiki_question",
+    "chars": 327
+   },
+   "longestDescription": {
+    "tool": "ask_wiki_question",
+    "chars": 108
+   }
+  },
+  "Microsoft Learn": {
+   "source": "https://learn.microsoft.com/api/mcp",
+   "server": {
+    "name": "Microsoft Learn MCP Server",
+    "version": "1.0.0"
+   },
+   "tools": 3,
+   "instructionsChars": 1545,
+   "toolsListChars": 4858,
+   "fit": {
+    "claude": "3/3",
+    "openai": "3/3",
+    "all": "3/3"
+   },
+   "red": [],
+   "largestInputSchema": {
+    "tool": "microsoft_code_sample_search",
+    "chars": 565
+   },
+   "longestDescription": {
+    "tool": "microsoft_docs_fetch",
+    "chars": 1065
+   }
+  },
+  "Cloudflare docs": {
+   "source": "https://docs.mcp.cloudflare.com/mcp",
+   "server": {
+    "name": "docs-ai-search",
+    "version": "0.4.13"
+   },
+   "tools": 2,
+   "instructionsChars": 0,
+   "toolsListChars": 1793,
+   "fit": {
+    "claude": "2/2",
+    "openai": "2/2",
+    "all": "2/2"
+   },
+   "red": [],
+   "largestInputSchema": {
+    "tool": "search_cloudflare_documentation",
+    "chars": 136
+   },
+   "longestDescription": {
+    "tool": "search_cloudflare_documentation",
+    "chars": 538
+   }
+  },
+  "Context7": {
+   "source": "https://mcp.context7.com/mcp",
+   "server": {
+    "name": "Context7",
+    "version": "4.1.1",
+    "websiteUrl": "https://context7.com",
+    "description": "Context7 provides up-to-date documentation and code examples for libraries and frameworks.",
+    "icons": [
+     {
+      "src": "https://context7.com/context7-icon-green.png",
+      "mimeType": "image/png"
+     }
+    ]
+   },
+   "tools": 2,
+   "instructionsChars": 632,
+   "toolsListChars": 4860,
+   "fit": {
+    "claude": "2/2",
+    "openai": "2/2",
+    "all": "2/2"
+   },
+   "red": [],
+   "largestInputSchema": {
+    "tool": "query-docs",
+    "chars": 1202
+   },
+   "longestDescription": {
+    "tool": "resolve-library-id",
+    "chars": 2006
+   }
+  },
+  "Hugging Face": {
+   "source": "https://huggingface.co/mcp (anonymous)",
+   "server": {
+    "name": "huggingface.co/mcp",
+    "version": "0.4.23",
+    "title": "Hugging Face",
+    "websiteUrl": "https://huggingface.co/mcp",
+    "icons": [
+     {
+      "src": "https://huggingface.co/favicon.ico"
+     }
+    ]
+   },
+   "tools": 4,
+   "instructionsChars": 1555,
+   "toolsListChars": 18818,
+   "fit": {
+    "claude": "3/4",
+    "openai": "4/4",
+    "all": "3/4"
+   },
+   "red": [
+    {
+     "tool": "hf_fs",
+     "issues": [
+      "description 2,875 > 2,048: 827 chars (29%) not delivered on the strictest client"
+     ]
+    }
+   ],
+   "largestInputSchema": {
+    "tool": "hub_repo_details",
+    "chars": 1396
+   },
+   "longestDescription": {
+    "tool": "hf_fs",
+    "chars": 2875
+   }
+  },
+  "GitHub (default toolsets)": {
+   "source": "docker ghcr.io/github/github-mcp-server stdio, dummy token",
+   "server": {
+    "name": "github-mcp-server",
+    "title": "GitHub MCP Server",
+    "version": "v1.12.2",
+    "icons": [
+     {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAADK0lEQVRIibWVQWhcVRSGv3Pfy0zGdBIMRWk7iziMTpORptpqiNSNG1dNizaFFlxIoYuCC7NwJdiVlhYprtwpighCF9GtuhCRtuCoaWdqGF7HkE4aWm1CpklmJpl3j4vMS99M2k4G9N+8d8659/8u9553H/zPkscVM5lMf03do6iOKbJXIAGgUBJ0GpHvolKfzOfzCx0BEonRWDRemRD0PaC3zSKXED1fLfdcLJUuV9oC0ukXdluxkyq81Ma4VX9Y4x4p5rOzjwSkUvsSdMkVYE+H5oHmjM9IoTA1FyRM8JJIjMbokm83zUW/Vvi5raXwC8rnjWiPdXRyYGCgOyi7wUs0XpkAXmyEa/XV8qmZmZnqc0P7XrXKW2BuKDovgorqLoWMFb4p3rj2I4w7qcHCMSAOctDt7n0X+GiDT6NbrPsXDw50xftzKg7odvcmtXf4DsJTjXBpzbXPzF6/vmgAauoepblbnGTyQLvu2VQmk4kgxEKpvui6cwSCM1Ada5qheq5YzC5tF5DP59dQzjYlZcOzccgyGK65mC+2ax7IWPfLcGxhKARgV7i4vBy70ymgUMj+A9SDWGB3GOCEB/f0VJ/sFJBKjfQS6srAOwD8HR7su/7BTgE2Umn98u9uAgR+ayqpnOkUIK1zZMPTACjyQzOA11ND+z+E8aate4TMs4PD7wu80ezP940nJJMH+ky0XgKeAHkH1TcRXgNywFeoueJN//5T2CCZGT7kWBlV9CSwvwV6n/XuhOddLRuAYjG7hMjHgEH1tEb0BEgWeB44J8aebF2243Nc0fMPMUfgguddLUOoe/r7dlwWJzqGMCxq6q5Wz/jSVQZ+Nb795N69u4thk/6dT7uInNiyYcoU9ZW3FxYWfAjdpp7n1XzjHAbmUJ3wTXQ8gvOZb+oXV1d3zLf6WEcWW3MoJXX9w57n1YKUCdeL+eysOv4oyrQqn65Tv+1adz4WrxzaskXWNs0V5Jq6/is3c7lb4byhRTdzuVvUV0ZQPgDuA6jqlj+fqhvkllE9q+vLL7eab4Afo1RqpJdI9Rhr3ZeCQwuUTqfjvoket7WuS51cjP+5/gWC8y5uIkrtDQAAAABJRU5ErkJggg==",
+      "mimeType": "image/png",
+      "theme": "light"
+     },
+     {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAB8ElEQVRIibWVu09UQRSHv9k1IgW7AY0RBWKsTGx9ND4qS5F/wEYLDb0xAY0UxkdrZ2NHYWfsaYyVT4iJwZpNjJooLBQEYz6LvZsdxmH3LtFfN3PO+X5zzzwu/GeFbkF1BJgCJoHjwFgRagDLwAvgeQjhR1+u6qA6q67ZW6vqjDpYFn5YfV0CnOqDOtELPqY2dgFvq6Ee6daWd1HyvPqyBPSV+jQav1H3tbkhMpgF7hXDLaAeQthUzwFXgE/AF0BgFDgBPAshLKhV4CcwVNTPhBAexKsfcfuGbqhdT1imA1+j+lV1GKBSxKeAWpRfTca94HuB+BTVgcuxwWRS8zCEsFbWIISwBcwl0x2m+jnZuKNl4RHjQMJYjoPNJFju0vxt8itiNKHTomqSO7wLeA3YE01VYoPvSf7Jfg2AU8n4W2zwPglO78Igrekw1enMDb1fXKCuUivq7Uz99Tiprq6rvwuzhSLpo3pLvZABn1Vv2nrkUjWLPdlWMFcEF9WD6tuo4EnG4HEG3Nad3KcOqEtRe/bb+ic8Uo9l8i/tAF9UB3bq54StJ3dTvaGOqofM3IuiRalW1PH8bnUKx4tVxLqYyTuf5Czl4JV0IoSwApwB7gLr7enMWtpzG7TeodNFbXmpNfWq6YloxYbUa2q9L+i/1h8/EAGdUrF9ZQAAAABJRU5ErkJggg==",
+      "mimeType": "image/png",
+      "theme": "dark"
+     }
+    ]
+   },
+   "tools": 45,
+   "instructionsChars": 1802,
+   "instructionsHeavy": false,
+   "descriptionCharsTotal": 6555,
+   "toolsListChars": 123729,
+   "fit": {
+    "claude": "45/45",
+    "openai": "45/45",
+    "all": "45/45"
+   },
+   "red": [],
+   "largestInputSchema": {
+    "tool": "issue_write",
+    "chars": 3518
+   },
+   "longestDescription": {
+    "tool": "pull_request_review_write",
+    "chars": 1115
+   }
+  },
+  "GitHub (all toolsets)": {
+   "source": "same, GITHUB_TOOLSETS=all",
+   "server": {
+    "name": "github-mcp-server",
+    "title": "GitHub MCP Server",
+    "version": "v1.12.2",
+    "icons": [
+     {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAADK0lEQVRIibWVQWhcVRSGv3Pfy0zGdBIMRWk7iziMTpORptpqiNSNG1dNizaFFlxIoYuCC7NwJdiVlhYprtwpighCF9GtuhCRtuCoaWdqGF7HkE4aWm1CpklmJpl3j4vMS99M2k4G9N+8d8659/8u9553H/zPkscVM5lMf03do6iOKbJXIAGgUBJ0GpHvolKfzOfzCx0BEonRWDRemRD0PaC3zSKXED1fLfdcLJUuV9oC0ukXdluxkyq81Ma4VX9Y4x4p5rOzjwSkUvsSdMkVYE+H5oHmjM9IoTA1FyRM8JJIjMbokm83zUW/Vvi5raXwC8rnjWiPdXRyYGCgOyi7wUs0XpkAXmyEa/XV8qmZmZnqc0P7XrXKW2BuKDovgorqLoWMFb4p3rj2I4w7qcHCMSAOctDt7n0X+GiDT6NbrPsXDw50xftzKg7odvcmtXf4DsJTjXBpzbXPzF6/vmgAauoepblbnGTyQLvu2VQmk4kgxEKpvui6cwSCM1Ada5qheq5YzC5tF5DP59dQzjYlZcOzccgyGK65mC+2ax7IWPfLcGxhKARgV7i4vBy70ymgUMj+A9SDWGB3GOCEB/f0VJ/sFJBKjfQS6srAOwD8HR7su/7BTgE2Umn98u9uAgR+ayqpnOkUIK1zZMPTACjyQzOA11ND+z+E8aate4TMs4PD7wu80ezP940nJJMH+ky0XgKeAHkH1TcRXgNywFeoueJN//5T2CCZGT7kWBlV9CSwvwV6n/XuhOddLRuAYjG7hMjHgEH1tEb0BEgWeB44J8aebF2243Nc0fMPMUfgguddLUOoe/r7dlwWJzqGMCxq6q5Wz/jSVQZ+Nb795N69u4thk/6dT7uInNiyYcoU9ZW3FxYWfAjdpp7n1XzjHAbmUJ3wTXQ8gvOZb+oXV1d3zLf6WEcWW3MoJXX9w57n1YKUCdeL+eysOv4oyrQqn65Tv+1adz4WrxzaskXWNs0V5Jq6/is3c7lb4byhRTdzuVvUV0ZQPgDuA6jqlj+fqhvkllE9q+vLL7eab4Afo1RqpJdI9Rhr3ZeCQwuUTqfjvoket7WuS51cjP+5/gWC8y5uIkrtDQAAAABJRU5ErkJggg==",
+      "mimeType": "image/png",
+      "theme": "light"
+     },
+     {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAB8ElEQVRIibWVu09UQRSHv9k1IgW7AY0RBWKsTGx9ND4qS5F/wEYLDb0xAY0UxkdrZ2NHYWfsaYyVT4iJwZpNjJooLBQEYz6LvZsdxmH3LtFfN3PO+X5zzzwu/GeFbkF1BJgCJoHjwFgRagDLwAvgeQjhR1+u6qA6q67ZW6vqjDpYFn5YfV0CnOqDOtELPqY2dgFvq6Ee6daWd1HyvPqyBPSV+jQav1H3tbkhMpgF7hXDLaAeQthUzwFXgE/AF0BgFDgBPAshLKhV4CcwVNTPhBAexKsfcfuGbqhdT1imA1+j+lV1GKBSxKeAWpRfTca94HuB+BTVgcuxwWRS8zCEsFbWIISwBcwl0x2m+jnZuKNl4RHjQMJYjoPNJFju0vxt8itiNKHTomqSO7wLeA3YE01VYoPvSf7Jfg2AU8n4W2zwPglO78Igrekw1enMDb1fXKCuUivq7Uz99Tiprq6rvwuzhSLpo3pLvZABn1Vv2nrkUjWLPdlWMFcEF9WD6tuo4EnG4HEG3Nad3KcOqEtRe/bb+ic8Uo9l8i/tAF9UB3bq54StJ3dTvaGOqofM3IuiRalW1PH8bnUKx4tVxLqYyTuf5Czl4JV0IoSwApwB7gLr7enMWtpzG7TeodNFbXmpNfWq6YloxYbUa2q9L+i/1h8/EAGdUrF9ZQAAAABJRU5ErkJggg==",
+      "mimeType": "image/png",
+      "theme": "dark"
+     }
+    ]
+   },
+   "tools": 90,
+   "instructionsChars": 6731,
+   "instructionsHeavy": false,
+   "descriptionCharsTotal": 11916,
+   "toolsListChars": 256560,
+   "fit": {
+    "claude": "90/90",
+    "openai": "89/90",
+    "all": "89/90"
+   },
+   "red": [
+    {
+     "tool": "projects_write",
+     "issues": [
+      "input schema 7,035 > 5,000: all 38 parameter describes dropped on Codex / ChatGPT Work"
+     ]
+    }
+   ],
+   "largestInputSchema": {
+    "tool": "projects_write",
+    "chars": 7035
+   },
+   "longestDescription": {
+    "tool": "pull_request_review_write",
+    "chars": 1115
+   }
+  }
+ },
+ "headline": [
+  "Every public server but Cloudflare docs ships server instructions over 512 chars (632–6,731), which ChatGPT cuts and claude.ai chat and ChatGPT Work do not deliver at all.",
+  "DeepWiki keeps its guidance in the instructions (3,097 chars against 212 in all three tool descriptions), so on claude.ai chat and ChatGPT Work the model gets the tool names and little else.",
+  "Descriptions are short everywhere (only Hugging Face hf_fs, 2,875, passes Claude Code 2,048), and input schemas stay under Codex 5,000 except GitHub projects_write (7,035) in the all-toolsets build.",
+  "GitHub re-sends 123,729 chars of tool definitions per turn with its default toolsets and 256,560 with all 90 tools."
+ ],
+ "caveats": [
+  "Static: no tool calls, so responses are not checked.",
+  "The limits are the client versions measured on 2026-09-27.",
+  "Hugging Face was read anonymously; a signed-in account may get more tools."
+ ]
+}

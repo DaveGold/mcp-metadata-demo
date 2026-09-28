@@ -95,6 +95,10 @@ In every column:
 - **These are one day's host versions (2026-09-27).** Re-verify with `references/delivery.md`
   before relying on a number.
 
+To score an existing server against this table in a minute, run the `mcp-compat-check` skill
+(`.claude/skills/mcp-compat-check/check.mjs <url>`): red per tool and per client column, with the
+characters or describes each client loses.
+
 The variable is **delivery, not channel**: the same sentence delivered in the description and in
 the response scored 20/20 and 20/20 [Q15]. Details, and how to check it yourself:
 [`references/delivery.md`](references/delivery.md).

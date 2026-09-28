@@ -23,6 +23,8 @@ Delivery measured beyond Claude Code [HD].
   of the record in the response. Detail that does not fit goes in a REQUIRED guidance tool, and the
   tool name and first sentence say what the user can do, because claude.ai, Cowork, Codex and
   ChatGPT Work defer tools until the model searches.
+- Points to the new `mcp-compat-check` skill, which scores a server's `tools/list` against the
+  table per client, statically.
 - `best` follows it for the instructions (744 → 492 characters, every line also in a description
   head). Its `render_table` input schema (6,155 characters) is over the 5,000 limit: on Codex and
   ChatGPT Work it arrives without a single describe.
