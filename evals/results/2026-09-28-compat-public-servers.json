@@ -841,11 +841,25 @@
      ]
     }
    ]
+  },
+  "Supabase (hosted)": {
+   "source": "https://mcp.supabase.com/mcp, OAuth",
+   "server": {
+    "name": "supabase",
+    "title": "Supabase",
+    "version": "0.13.0"
+   },
+   "tools": 29,
+   "instructionsChars": 1304,
+   "instructionsHeavy": false,
+   "descriptionCharsTotal": 6638,
+   "toolsListChars": 21979,
+   "red": []
   }
  },
  "headline": [
-  "29 public server configurations checked (28 servers; GitHub with default and all toolsets), plus this repo's best and rich. 10 are portable on every client measured: Cloudflare docs, Exa, OpenAI docs, GitMCP, Astro docs, Playwright, Chrome DevTools, Kubernetes, mcp-atlassian and Sentry (hosted).",
-  "Server instructions are the most common problem: 12 of the 29 ship more than 512 characters (632–6,731). Two keep their guidance there, so claude.ai chat and ChatGPT Work get little more than tool names: DeepWiki (3,097 against 212 in all descriptions) and Terraform (4,295 against 3,497).",
+  "30 public server configurations checked (29 servers; GitHub with default and all toolsets), plus this repo's best and rich. 10 are portable on every client measured: Cloudflare docs, Exa, OpenAI docs, GitMCP, Astro docs, Playwright, Chrome DevTools, Kubernetes, mcp-atlassian and Sentry (hosted).",
+  "Server instructions are the most common problem: 13 of the 30 ship more than 512 characters (632–6,731). Two keep their guidance there, so claude.ai chat and ChatGPT Work get little more than tool names: DeepWiki (3,097 against 212 in all descriptions) and Terraform (4,295 against 3,497).",
   "The worst real cases. AWS API: its two tools (call_aws, suggest_aws_commands) lose 36–38% of their descriptions on Claude Code. MongoDB: four core query tools (aggregate, create-index, explain, export, 9–12k schemas) lose all 21–31 parameter describes on Codex and ChatGPT Work.",
   "The worst are hosted: Notion (45 tools, 242k chars of tool definitions per turn; notion-update-page 9,425-char description, 78% cut on Claude Code; notion-query-data-sources a 75,908-char input schema whose 537 describes Codex drops; 12 of 45 tools red) and Vercel (243 tools, 561k chars per turn; 15 schemas over 5,000, create_connector 54,341). Canva generate-design loses 64% of its description on Claude Code.",
   "Tool definitions re-sent per turn: up to 257k chars (GitHub, all toolsets); 74–78k for Notion, Azure, Grafana and MongoDB.",
@@ -1946,6 +1960,38 @@
       ]
      }
     }
+   },
+   "Supabase (hosted, OAuth)": {
+    "source": "oauth-supabase",
+    "tools": 29,
+    "instructionsChars": 1304,
+    "toolsListChars": 21979,
+    "verdict": {
+     "claude": "amber",
+     "openai": "red",
+     "all": "red"
+    },
+    "allClients": {
+     "description": {
+      "status": "green",
+      "cell": "0 of 29 over 2,048",
+      "tools": []
+     },
+     "instructions": {
+      "status": "red",
+      "cell": "1,304 > 512; some clients deliver none"
+     },
+     "inputSchema": {
+      "status": "green",
+      "cell": "0 of 29 over 5,000",
+      "tools": []
+     },
+     "outputSchema": {
+      "status": "green",
+      "cell": "none shipped",
+      "tools": []
+     }
+    }
    }
   }
  },
@@ -1953,7 +1999,6 @@
   "api.githubcopilot.com/mcp",
   "mcp.linear.app",
   "mcp.stripe.com",
-  "mcp.supabase.com",
   "mcp.paypal.com",
   "mcp.zapier.com",
   "mcp.apify.com",
@@ -1969,5 +2014,5 @@
   "mcp.box.com",
   "mcp.globalping.dev"
  ],
- "oauth_note": "Hosted servers read with check.mjs --oauth: the user signed in in their own browser (free accounts); the token lived only in the checking process and was discarded. Supabase and Stripe were authorised but not captured (the sign-in completed after that step had timed out); Asana and Monday were skipped."
+ "oauth_note": "Hosted servers read with check.mjs --oauth: the user signed in in their own browser (free accounts); the token lived only in the checking process and was discarded. Supabase was captured on a second run; Stripe was not (its sign-in completed after that step had timed out); Asana and Monday were skipped."
 }
