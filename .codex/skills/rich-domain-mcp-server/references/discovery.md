@@ -190,7 +190,7 @@ few hundred rows it is `HIGH`.
   where field population changes?
 - Sentinel dates (`0001-01-01`, `1900-01-01`, `9999-12-31`) and sentinel numbers. Normalise them
   to null in `transform`, and say so where the model reads it: the input `.meta()` for a
-  param, otherwise a response rule (the output schema is not delivered [Q11]).
+  param, otherwise a response rule (no Claude host delivers the output schema [Q11] [HD]).
 - Soft-deleted / inactive rows: are they returned by default? Can you filter them out?
 - Aggregation semantics: is a "meter reading" a period value (summable) or a running totalizer
   (summing it is 100× wrong)? Same unit, different meaning. Detect and route, never silently sum.

@@ -85,7 +85,7 @@ Repro: `npx tsx scripts/smoke.ts 3543AR 1` (NEN 7120), `1082PP 10` (NTA 8800 off
 |---|---|---|
 | `get_building_profile` description | 7,360 | everything from INTERPRETATION (char 1,759): Paris Proof line (3,240), CALCULATED vs MEASURED (3,379), overheating threshold (6,183), ALERTS paragraph (6,781); 72% of the description |
 | server instructions | 2,861 | the tail, including part of the weather section |
-| output schema | 7,375 chars | all of it is undelivered (Q11); the ep1 describe repeats the Paris Proof target |
+| output schema | 7,375 chars | all of it is undelivered on Claude Code (Q11), Cowork and claude.ai chat (HD); the ep1 describe repeats the Paris Proof target |
 | largest response | ~5k chars | n/a |
 
 **Step 2: name audit.** Renamed (reason + provenance per row in `best-field-names.ts`):

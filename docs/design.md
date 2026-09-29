@@ -51,15 +51,16 @@ Canonical truth can be projected through several surfaces, and they do not all a
 |---|---|
 | field names | always, in every response |
 | tool description | only the head: 2,048 chars on Claude Code, 4,096 on Cowork; in full on Codex, ChatGPT and claude.ai chat ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
-| server instructions | the head on Claude Code; 512 chars on ChatGPT; whole on Cowork; not at all in claude.ai chat ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
-| input schema | yes |
-| output schema | no: validation and UI only ([Q11](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
-| response | yes, below a size limit; above it, a file notice replaces it ([Q9](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
+| server instructions | the first 2,048 chars on Claude Code; 512 on ChatGPT Chat; whole on Cowork; prepended to every tool on Codex; not at all in claude.ai chat or ChatGPT Work ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
+| input schema | in full on Claude Code, Cowork, claude.ai chat and ChatGPT Chat; on Codex and ChatGPT Work every parameter describe is dropped once the schema passes 5,000 chars ([IS, HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
+| output schema | not on Claude Code, Cowork or claude.ai chat ([Q11, HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); on Codex and ChatGPT Work yes, on ChatGPT Chat sometimes. Keep it for validation and UI |
+| response | yes, below a size limit; above it, Claude Code replaces it with a file notice ([Q9](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); other hosts unmeasured |
 | a skill, a resource, a guidance tool | only if something makes the model fetch it ([Q8, Q8b](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
 
-Two consequences. **Verify delivery per host**: these numbers are Claude Code's; do not assume
-another client behaves the same. And **audit what you already ship**: a line past the cut is
-dead weight, and a wrong line inside it is worse than none.
+Two consequences. **Verify delivery per host**: the table covers the host versions measured on
+2026-09-27, and the response limit only Claude Code; re-measure for the clients you deploy to.
+And **audit what you already ship**: a line past the cut is dead weight, and a wrong line inside
+it is worse than none.
 
 ## 3 · Before the call
 
@@ -140,7 +141,7 @@ Treat it like code:
 - **Test its truth deterministically**: pin every computed value to ground truth, check the
   description budget and rule coverage.
 - **Eval its effect on the model**, and keep those evals as regression tests. Evals found what the
-  green test suite could not: the 2,048 cut, a stale deploy, a quota the tool exhausted itself, and
+  green test suite could not: Claude Code's 2,048 cut, a stale deploy, a quota the tool exhausted itself, and
   this repo's own wrong alert.
 - **Have a person who knows the business validate** what the agent could not settle from the data.
   You review; you do not author.
@@ -156,7 +157,7 @@ call carries a `queryIntent`, which turns a log of calls into a log of questions
 ## 8 · Portability
 
 Design correctness at the capability layer, where every host sees it: names, the description
-head, the input schema, the response. Host-specific surfaces (skills, hooks, raised client caps)
+head, an input schema under 5,000 characters, the response. Host-specific surfaces (skills, hooks, raised client caps)
 can improve activation and convenience, but correctness should not depend on one host. Raising a
 client's description cap, for example, delivers the block but taxes every tool on every request
 ([Q15b](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
@@ -166,7 +167,8 @@ client's description cap, for example, delivers the block but taxes every tool o
 Every principle above resolves to a row with a status: `settled`, `direction`, `null`,
 `reversed` or `open`. Read the status before quoting a principle as fact. The standing caveat on
 all of it: one author wrote the metadata, questions, ground truth and scoring; one domain family
-(Dutch building and weather data); one host (Claude Code); one model family (Claude haiku, sonnet,
-opus). Thirteen of the first twenty-three preregistered predictions were wrong, which is the
+(Dutch building and weather data); one host for every effect on answers (Claude Code), with what
+arrives also measured on five more clients ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery));
+one model family (Claude haiku, sonnet, opus). Thirteen of the first twenty-three preregistered predictions were wrong, which is the
 argument for measuring rather than reasoning about what a model reads. Open questions and their
 predictions: [`evals/open-questions.md`](../evals/open-questions.md).

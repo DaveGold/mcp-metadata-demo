@@ -170,7 +170,7 @@ running session may not reach a variant added after it began; a new `claude -p` 
 
 Once the loop stabilises, keep these running (CI where possible, a scheduled re-run otherwise):
 
-- [ ] **Budget tests:** description and instructions ≤ 2,048 (ceiling ~1,800), load-bearing
+- [ ] **Budget tests:** description ≤ 2,048 (ceiling ~1,800), instructions ≤ 512, load-bearing
       sentences before fixed offsets, worst-case response under the size guard.
 - [ ] **Name and rule tests:** units in names, provenance on every rename and rule, each rule on a
       fixture record that triggers it, no numeric threshold that compares calculated with measured.

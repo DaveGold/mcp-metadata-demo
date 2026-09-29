@@ -62,6 +62,14 @@ export function markCut(text: string): string {
   );
 }
 
+/** Codex and ChatGPT Work drop every parameter describe once the serialized input schema passes 5,000 chars (HD). */
+const SCHEMA_CUT = 5000;
+const schemaNote = (chars: number) =>
+  `${chars.toLocaleString('en')} chars serialized. ` +
+  (chars > SCHEMA_CUT
+    ? `Over ${SCHEMA_CUT.toLocaleString('en')}: Codex and ChatGPT Work drop every description below (HD).`
+    : `Under ${SCHEMA_CUT.toLocaleString('en')}, so every measured client receives the descriptions below (HD).`);
+
 type Prop = { type?: string; description?: string; enum?: unknown[] };
 
 export async function renderWireView(arm: ServerVariant, blurb: string): Promise<string> {
@@ -102,6 +110,8 @@ export async function renderWireView(arm: ServerVariant, blurb: string): Promise
       '',
       '### Input parameters (delivered)',
       '',
+      schemaNote(JSON.stringify(tool.inputSchema).length),
+      '',
       '| parameter | type | description |',
       '|---|---|---|',
       ...Object.entries(props).map(
@@ -109,10 +119,10 @@ export async function renderWireView(arm: ServerVariant, blurb: string): Promise
           `| \`${k}\`${required.has(k) ? ' *' : ''} | ${p.enum ? p.enum.map((v) => `\`${String(v)}\``).join(' · ') : (p.type ?? '')} | ${(p.description ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ')} |`,
       ),
       '',
-      '### Output schema (not delivered)',
+      '### Output schema (not delivered on Claude hosts)',
       '',
       tool.outputSchema
-        ? `${JSON.stringify(tool.outputSchema).length.toLocaleString('en')} chars, ${Object.keys((tool.outputSchema as { properties?: object }).properties ?? {}).length} top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.`
+        ? `${JSON.stringify(tool.outputSchema).length.toLocaleString('en')} chars, ${Object.keys((tool.outputSchema as { properties?: object }).properties ?? {}).length} top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.`
         : '_none_',
     );
   }

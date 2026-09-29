@@ -310,7 +310,9 @@ spec. `openWorldHint: true` whenever the tool calls an external system.
 
 ## Server instructions
 
-Cut at 2,048 like descriptions [Q7]; keep them well under (~900). Use them for what spans tools:
+Claude Code cuts them at 2,048 like descriptions [Q7]; ChatGPT Chat cuts them at 512, claude.ai chat
+and ChatGPT Work do not deliver them, and Codex prepends them to every tool description [HD]. Keep
+them ≤ 512. Use them for what spans tools:
 what the server is, what it does **not** have, "every data tool returns `interpretation` — read it
 first", the join chain between tools (`coordinaten` → `latitude`/`longitude`). Do not make them the
 only home of anything essential; some clients do not read them.

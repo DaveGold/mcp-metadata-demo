@@ -41,6 +41,8 @@ ALERTS: interpretation.alerts — computed verdicts and this record's branch (no
 
 ### Input parameters (delivered)
 
+739 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `postcode` * | string | Dutch postcode: 4 digits + 2 capital letters, no space. Example: "3543AR". |
@@ -49,9 +51,9 @@ ALERTS: interpretation.alerts — computed verdicts and this record's branch (no
 | `toevoeging` | string | House-number addition, e.g. "bis", "I", "II". |
 | `queryIntent` | string | The business question this call answers. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
-5,332 chars, 49 top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.
+5,332 chars, 49 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
 
 ## `get_weather_context`
 
@@ -80,6 +82,8 @@ ALERTS: interpretation.alerts — the correction valid for THIS window, all figh
 
 ### Input parameters (delivered)
 
+1,872 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `latitude` | number | Latitude, decimal degrees, Netherlands 50.75–53.55. Default 52.09 (Utrecht). Use get_building_profile coordinaten.lat. |
@@ -93,9 +97,9 @@ ALERTS: interpretation.alerts — the correction valid for THIS window, all figh
 | `solarYieldKwh` | number | Actual solar production in this window (kWh), for the computed solar check. |
 | `queryIntent` | string | The business question this call answers. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
-4,610 chars, 4 top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.
+4,610 chars, 4 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
 
 ## `render_chart`
 
@@ -119,6 +123,8 @@ ALERTS: interpretation.alerts — problems found in this call, each with its fix
 
 ### Input parameters (delivered)
 
+2,998 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `type` * | `bar` · `line` · `pie` · `doughnut` · `radar` · `polarArea` · `bubble` · `scatter` · `sankey` · `matrix` · `treemap` · `boxplot` · `funnel` · `graph` | Chart type. Decide from what the data IS, in this order. 1. Structure first: - amounts flowing from one stage to the next (source → system → end use) → sankey - stages where each is a subset of the one before (lead → quote → order) → funnel - links between items, many-to-many (which system depends on which) → graph - a hierarchy with a value per leaf, part-to-whole, 6+ leaves (project → phase → cost item) → treemap - two categorical axes with a value per cell (hour × weekday) → matrix - many samples per category, and the question is about spread or outliers → boxplot - three numeric measures per item (x, y and size) → bubble - two numeric measures per item, and the question is whether they move together → scatter 2. Otherwise one value per category or time step: - a trend over continuous time or numbers → line - a cycle (weekdays, hours, months) and the question is about the cycle → polarArea - shares of one whole, 2–5 parts → pie; the same with one total or KPI to show in the centre → doughnut - one or two items scored on 3–6 comparable measures on one scale → radar - a ranking or comparison of categories → bar (horizontal above 8 items) REQUIRED: for any chart other than a plain bar or line chart (and for any option, such as a target line), call get_chart_guidance with the type first. It returns the exact payload. |
@@ -134,7 +140,7 @@ ALERTS: interpretation.alerts — problems found in this call, each with its fix
 | `height` | number |  |
 | `queryIntent` | string | The business question this call answers. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
 _none_
 
@@ -148,11 +154,13 @@ WHEN TO USE: REQUIRED before render_chart for any chart other than a plain bar o
 
 ### Input parameters (delivered)
 
+318 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `type` * | `bar` · `line` · `pie` · `doughnut` · `radar` · `polarArea` · `bubble` · `scatter` · `sankey` · `matrix` · `treemap` · `boxplot` · `funnel` · `graph` | The chart type you are about to render. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
 _none_
 
@@ -176,6 +184,8 @@ INTERPRETATION: a header must not claim more than the field does. Label figures 
 
 ### Input parameters (delivered)
 
+4,861 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `columns` * | array | Columns, left to right; the identifying column first. |
@@ -184,7 +194,7 @@ INTERPRETATION: a header must not claim more than the field does. Label figures 
 | `title` | string | Short title, in the language of the conversation. |
 | `queryIntent` | string | The business question this call answers. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
 _none_
 
@@ -206,6 +216,8 @@ RETURNS: the map, rendered inline for the user, and `interpretation.alerts` when
 
 ### Input parameters (delivered)
 
+2,966 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `markers` * |  | Array of markers to place on the map. Two accepted shapes: 1. Array of ARRAYS (positional, preferred for >10 markers — ~40-50% smaller payload):    [[lat, lng, label, description?, type?, color?], ...]  — values in this fixed order. Trailing fields may be omitted.    Example: [[52.09, 5.11, "Utrecht hub"], [52.37, 4.90, "Amsterdam", "Hoofdkantoor", "building"]] 2. Array of OBJECTS (keyed, fine for small sets):    [{lat, lng, label, description?, type?, color?}, ...] Each marker has a position (lat/lng), label, and optional description/type/color. Maximum 500 markers. |
@@ -215,7 +227,7 @@ RETURNS: the map, rendered inline for the user, and `interpretation.alerts` when
 | `height` | number | Map height in pixels. Default: 500. Use 400 for compact views, 600 for detail-rich maps. |
 | `queryIntent` | string | Describe what this call is being used for. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
 _none_
 
@@ -235,12 +247,14 @@ INTERPRETATION: environment "local" is this process's in-memory buffer (last 50 
 
 ### Input parameters (delivered)
 
+586 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `tool` | string | Filter to calls for this exact tool name (e.g. "get_building_profile"). |
 | `variant` | string | Filter to calls served by one server variant, e.g. "best". Read summary.countByVariant first. |
 | `limit` | integer | Maximum number of calls to return, most recent first. Default 20, max 500. One eval batch does not fit in 100 rows — size this to the whole window you are auditing. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
-2,656 chars, 3 top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.
+2,656 chars, 3 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
