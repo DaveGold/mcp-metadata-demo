@@ -20,12 +20,14 @@ Look up a Dutch building by postcode and house number.
 
 ### Input parameters (delivered)
 
+181 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `postcode` * | string |  |
 | `huisnummer` * | number |  |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
 _none_
 
@@ -38,6 +40,8 @@ Render data as a chart.
 ````
 
 ### Input parameters (delivered)
+
+20,548 chars serialized. Over 5,000: Codex and ChatGPT Work drop every description below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -54,7 +58,7 @@ Render data as a chart.
 | `height` | number | Chart height in pixels. Default: 400. Use 300 for sparklines, 500 for complex charts with many labels. |
 | `queryIntent` | string | Describe what this call is being used for. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
 _none_
 
@@ -67,6 +71,8 @@ Render data as a table.
 ````
 
 ### Input parameters (delivered)
+
+20,181 chars serialized. Over 5,000: Codex and ChatGPT Work drop every description below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -81,7 +87,7 @@ Render data as a table.
 | `maxHeight` | string | CSS max-height for scrollable table body (e.g. "400px", "60vh"). Header stays sticky. Omit for auto height. |
 | `queryIntent` | string | Describe what this call is being used for. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
 _none_
 
@@ -95,6 +101,8 @@ Render data as a map with markers.
 
 ### Input parameters (delivered)
 
+2,966 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `markers` * |  | Array of markers to place on the map. Two accepted shapes: 1. Array of ARRAYS (positional, preferred for >10 markers — ~40-50% smaller payload):    [[lat, lng, label, description?, type?, color?], ...]  — values in this fixed order. Trailing fields may be omitted.    Example: [[52.09, 5.11, "Utrecht hub"], [52.37, 4.90, "Amsterdam", "Hoofdkantoor", "building"]] 2. Array of OBJECTS (keyed, fine for small sets):    [{lat, lng, label, description?, type?, color?}, ...] Each marker has a position (lat/lng), label, and optional description/type/color. Maximum 500 markers. |
@@ -104,7 +112,7 @@ Render data as a map with markers.
 | `height` | number | Map height in pixels. Default: 500. Use 400 for compact views, 600 for detail-rich maps. |
 | `queryIntent` | string | Describe what this call is being used for. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
 _none_
 
@@ -118,6 +126,8 @@ Look up daily weather and degree-day/solar metrics for a Dutch location and date
 
 ### Input parameters (delivered)
 
+2,115 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `latitude` | number | Latitude in decimal degrees. Netherlands range: 50.75–53.55. Default: 52.09 (Utrecht). Get from get_building_profile coordinaten.lat, or use the regional default. |
@@ -128,9 +138,9 @@ Look up daily weather and degree-day/solar metrics for a Dutch location and date
 | `select` | array | Return only these fields per daily record — a token saver for a long range where you need per-day detail (e.g. a full-year calendar or chart), not just the summary. Fields: date, tempMean, tempMin, tempMax, hdd, cdd, weightedHdd, ghiKwhM2, sunshineDurationHours, weatherCode, weatherLabel, isForecast. Ignored when summaryOnly=true (no records returned either way). |
 | `queryIntent` | string | Describe what this weather data is being used for. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
-5,564 chars, 4 top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.
+5,564 chars, 4 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
 
 ## `get_tool_call_log`
 
@@ -142,12 +152,14 @@ Look up recent tool calls and their queryIntent values.
 
 ### Input parameters (delivered)
 
+937 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `tool` | string | Filter to calls for this exact tool name (e.g. "get_building_profile"). |
 | `variant` | string | Filter to calls served by one arm ("rich" \| "words" \| "words-recipe" \| "inline" \| "inline-recipe" \| "inline-conditional" \| "inline-fact" \| "inline-instruction" \| "schema" \| "minimal" \| "opaque" \| "opaque-words"). Applied AFTER the page is fetched, so pass a large `limit` alongside it. Read `summary.countByVariant` from an UNFILTERED call first: a filter returning zero cannot tell "never called" from "not stamping". |
 | `limit` | integer | Maximum number of calls to return, most recent first. Default 20, max 500. One eval batch does not fit in 100 rows — size this to the whole window you are auditing. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
-2,656 chars, 3 top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.
+2,656 chars, 3 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.

@@ -142,8 +142,8 @@ works against a local stdio or HTTP server with no custom UI needed (this repo: 
 
 Co-locate as `<file>.test.ts`. Worth testing, in priority order:
 
-0. **Delivery budgets**: every description and the server instructions `length <= 2048` (working
-   ceiling ~1,800), load-bearing sentences before fixed offsets, and a worst-case response under
+0. **Delivery budgets**: every description `length <= 2048` (working ceiling ~1,800), the server
+   instructions `length <= 512`, every serialized input schema `<= 5000` [HD], load-bearing sentences before fixed offsets, and a worst-case response under
    the size guard. Measure through the real transport (`InMemoryTransport` + `client.listTools()`),
    not only on the constants.
 1. The client's auth/token-cache logic and error mapping, if it has one.

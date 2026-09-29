@@ -126,6 +126,8 @@ ALERTS: Always check interpretation.alerts — they contain bouwjaar era warning
 
 ### Input parameters (delivered)
 
+642 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `postcode` * | string | Postcode in P6 formaat zonder spatie (bijv. 3751LN) |
@@ -134,9 +136,9 @@ ALERTS: Always check interpretation.alerts — they contain bouwjaar era warning
 | `toevoeging` | string | Huisnummertoevoeging (bijv. bis, I, II) |
 | `queryIntent` | string | Describe what this call is being used for. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
-7,376 chars, 45 top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.
+7,376 chars, 45 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
 
 ## `render_chart`
 
@@ -246,6 +248,8 @@ Labels array is REQUIRED for bar, line, pie, doughnut, radar, polarArea, boxplot
 
 ### Input parameters (delivered)
 
+20,548 chars serialized. Over 5,000: Codex and ChatGPT Work drop every description below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `type` * | `bar` · `line` · `pie` · `doughnut` · `radar` · `polarArea` · `bubble` · `scatter` · `sankey` · `matrix` · `treemap` · `boxplot` · `funnel` · `graph` | Chart type. Each rule has a primary trigger and a hard rejection — pick the type whose trigger matches the question, then check the rejection clause: - bar: rankings and 'hoeveel per X'. Horizontal for >8 items or long labels (projectnamen, adressen); vertical for time buckets. Sort desc for ranking, stacked cap 4 segments. REFUSE on continuous x-axis (use line) or truncated y-axis. - line: trend over continuous x-axis (time/numeric). ≤5 series; otherwise filter top-N or split. Area (fill=true) only for 1 series or a meaningful stacked total. REFUSE on categorical x-axis (use bar). - pie: 2-5 slices with one clear dominance. Hard cap 5 — aggregate to 'top 4 + overig' beyond that. REFUSE for ranking questions, similar-sized slices, or side-by-side period comparison. - doughnut: pie with a KPI in the center hole. Without a center value, use pie instead. - radar: one profile across ≤6 axes with the same scale, OR ≤3 overlays normalized to a shared scale (0-100). REFUSE on >8 axes, >3 series, mixed units, or ranking questions. - polarArea: cyclical data only (months, weekdays, hours). REFUSE on non-cyclical categories (leveranciers, projecten) — use bar. - bubble: 3 numeric dimensions (x, y, size). Size = area (plot √value), normalize r to 5-40px. REFUSE when size ranking is the actual question (use scatter + label) or when sizes vary >10×. - scatter: correlation/distribution of 2 numeric variables. Add a trendline for correlation questions; add a 45° diagonal for actual-vs-target. REFUSE on categorical x-axis. - sankey: flows across 2-3 tiers, ≤10 flows per tier, consistent unit across flows. Use the sankey field. REFUSE without a natural flow (sales per regio is not flow), >3 tiers (hairball), or cycles/loops (use graph). - matrix: 2 categorical dimensions + numeric intensity per cell. Use the matrix field. Sweet spots 7×24, 12×N, 52×N. REFUSE on one dense continuous dimension (365 daily dates → line) or on two numeric dimensions (→ scatter). - treemap: hierarchical part-to-whole, 6+ items, area = value. Use the treemap field. Max 3 levels. REFUSE on flat data (→ bar), on one item >80% (it swallows the rest), or on precise-ranking questions. - boxplot: distribution (median, IQR, outliers) per category, n≥5 per box. Use samples or stats on each dataset. REFUSE on n<5 (→ dot plot) or when the question is only about the mean. - funnel: 3-6 strictly decreasing stages where each stage is a subset of the previous one. REFUSE on non-linear processes, branching, or stages that can grow (→ bar). - graph: relational networks where edges carry meaning (dependencies, many-to-many, cross-tier). Use the graph field; layouts: force / tree / dendrogram. REFUSE on strict parent-child hierarchy (→ treemap) or on plain list views (→ table). |
@@ -261,7 +265,7 @@ Labels array is REQUIRED for bar, line, pie, doughnut, radar, polarArea, boxplot
 | `height` | number | Chart height in pixels. Default: 400. Use 300 for sparklines, 500 for complex charts with many labels. |
 | `queryIntent` | string | Describe what this call is being used for. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
 _none_
 
@@ -390,6 +394,8 @@ Do not combine footer aggregation with pagination — the footer shows totals ac
 
 ### Input parameters (delivered)
 
+20,181 chars serialized. Over 5,000: Codex and ChatGPT Work drop every description below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `columns` * | array | Column definitions. Order determines display order left to right. Tip: put the most important identifying column first (e.g. id, name, reference number), status/badge columns near the end, numeric totals right-aligned. |
@@ -403,7 +409,7 @@ Do not combine footer aggregation with pagination — the footer shows totals ac
 | `maxHeight` | string | CSS max-height for scrollable table body (e.g. "400px", "60vh"). Header stays sticky. Omit for auto height. |
 | `queryIntent` | string | Describe what this call is being used for. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
 _none_
 
@@ -484,6 +490,8 @@ Netherlands coordinates are roughly: lat 50.7-53.6, lng 3.3-7.2.
 
 ### Input parameters (delivered)
 
+2,966 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `markers` * |  | Array of markers to place on the map. Two accepted shapes: 1. Array of ARRAYS (positional, preferred for >10 markers — ~40-50% smaller payload):    [[lat, lng, label, description?, type?, color?], ...]  — values in this fixed order. Trailing fields may be omitted.    Example: [[52.09, 5.11, "Utrecht hub"], [52.37, 4.90, "Amsterdam", "Hoofdkantoor", "building"]] 2. Array of OBJECTS (keyed, fine for small sets):    [{lat, lng, label, description?, type?, color?}, ...] Each marker has a position (lat/lng), label, and optional description/type/color. Maximum 500 markers. |
@@ -493,7 +501,7 @@ Netherlands coordinates are roughly: lat 50.7-53.6, lng 3.3-7.2.
 | `height` | number | Map height in pixels. Default: 500. Use 400 for compact views, 600 for detail-rich maps. |
 | `queryIntent` | string | Describe what this call is being used for. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
 _none_
 
@@ -595,6 +603,8 @@ composition, fighting-system risk days, select-projection notes, and data qualit
 
 ### Input parameters (delivered)
 
+2,115 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `latitude` | number | Latitude in decimal degrees. Netherlands range: 50.75–53.55. Default: 52.09 (Utrecht). Get from get_building_profile coordinaten.lat, or use the regional default. |
@@ -605,9 +615,9 @@ composition, fighting-system risk days, select-projection notes, and data qualit
 | `select` | array | Return only these fields per daily record — a token saver for a long range where you need per-day detail (e.g. a full-year calendar or chart), not just the summary. Fields: date, tempMean, tempMin, tempMax, hdd, cdd, weightedHdd, ghiKwhM2, sunshineDurationHours, weatherCode, weatherLabel, isForecast. Ignored when summaryOnly=true (no records returned either way). |
 | `queryIntent` | string | Describe what this weather data is being used for. Used for observability. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
-5,564 chars, 4 top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.
+5,564 chars, 4 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
 
 ## `get_tool_call_log`
 
@@ -680,12 +690,14 @@ ALERTS: notes when the environment is "local" (so an empty or short list isn't m
 
 ### Input parameters (delivered)
 
+937 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+
 | parameter | type | description |
 |---|---|---|
 | `tool` | string | Filter to calls for this exact tool name (e.g. "get_building_profile"). |
 | `variant` | string | Filter to calls served by one arm ("rich" \| "words" \| "words-recipe" \| "inline" \| "inline-recipe" \| "inline-conditional" \| "inline-fact" \| "inline-instruction" \| "schema" \| "minimal" \| "opaque" \| "opaque-words"). Applied AFTER the page is fetched, so pass a large `limit` alongside it. Read `summary.countByVariant` from an UNFILTERED call first: a filter returning zero cannot tell "never called" from "not stamping". |
 | `limit` | integer | Maximum number of calls to return, most recent first. Default 20, max 500. One eval batch does not fit in 100 rows — size this to the whole window you are auditing. |
 
-### Output schema (not delivered)
+### Output schema (not delivered on Claude hosts)
 
-2,656 chars, 3 top-level fields. Claude Code does not pass it to the model (Q11), so nothing in it can carry meaning.
+2,656 chars, 3 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.

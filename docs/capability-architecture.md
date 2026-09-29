@@ -236,7 +236,7 @@ capability, more composition, skills that capture what works. Then the loop star
 
 | claim | status | where the evidence is |
 |---|---|---|
-| delivery, expressibility, naming, shipped data, computation, refusals, guidance activation, on one host | `MEASURED` | [evals](../evals/README.md), [evidence register](../.claude/skills/rich-domain-mcp-server/references/evidence.md) |
+| expressibility, naming, shipped data, computation, refusals, guidance activation, on one host (Claude Code); delivery on six clients | `MEASURED` | [evals](../evals/README.md), [evidence register](../.claude/skills/rich-domain-mcp-server/references/evidence.md) |
 | one general model over many domain servers, used mostly by non-developers | `PRODUCTION` | [who built this](../README.md#who-built-this-and-why) |
 | ambassadors first; usage picks the next gap | `PRODUCTION` | this page, §5 |
 | domain experts build their own skills; some run on a schedule | `PRODUCTION` | this page, §6 |

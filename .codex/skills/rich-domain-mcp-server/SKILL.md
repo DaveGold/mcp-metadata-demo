@@ -3,8 +3,8 @@ name: rich-domain-mcp-server
 description: >-
   Guides building a NEW rich-domain MCP server or tool, and auditing an EXISTING one up to a
   measured reference, using Introspective Context Engineering: discover the domain from live
-  data, name fields so they cannot be misread, deliver guidance where the model actually receives
-  it (description head, input schema, response — not the output schema, not past char 2,048),
+  data, name fields so they cannot be misread, deliver guidance where every target client receives
+  it (description head, input schema, response — not the output schema, not past the host's cut),
   compute determinate verdicts, record provenance per rule, and measure the result. Invoke when
   asked to add, build, scaffold or wire an MCP server or tool; review, audit, enrich or fix tool
   metadata (descriptions, inputSchema, outputSchema, field names, alerts, interpretation,
@@ -14,7 +14,7 @@ description: >-
   triggers on "the agent picks the wrong tool", "the agent misreads this field", "the agent
   ignores the description", user-feedback triage, and tool-call-log pattern analysis.
 metadata:
-  version: 1.2.0
+  version: 1.2.1
 ---
 
 # rich-domain-mcp-server — build, audit and measure MCP tools
@@ -439,8 +439,9 @@ layer). [render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/mai
 ## Caveats
 
 - **Host-specific numbers.** The 2,048-char cut, the ~25k-token response limit and the absent
-  output schema were measured on Claude Code. Description and instructions delivery was also
-  probed on Codex CLI, ChatGPT, claude.ai and Cowork [HD]; the rest is unmeasured elsewhere. Re-verify on
+  output schema were measured on Claude Code. Delivery of the description, instructions and both
+  schemas was also probed on Codex CLI, ChatGPT, claude.ai and Cowork [HD]; the response limit and
+  every effect on answers are unmeasured elsewhere. Re-verify on
   another host with the techniques in `delivery.md` before relying on them — or design for the
   strictest, as this skill does.
 - **One author, one domain family.** The same party wrote the metadata, questions, ground truth

@@ -6,6 +6,19 @@ Semantic versions; each release is the git tag `skill-v<version>` in
 sharpens rules; a **patch** fixes wording, links or tooling. Every change to the skill bumps
 `metadata.version` in `SKILL.md` and adds an entry here (CI checks both).
 
+## 1.2.1 — 2026-09-29
+
+Wording brought in line with the per-client delivery measurements [HD]; no rule changes.
+
+- The server-instructions budget of 1.2.0 (≤ 512) now also holds in `audit.md`, `evaluation.md`,
+  `scaffolding.md`, `metadata.md` and the local overlay template, which still said ≤ 2,048 (or ~900).
+  The scaffolding test adds the 5,000-character input-schema check.
+- The output schema is scoped per client everywhere: not delivered on Claude Code, Cowork or
+  claude.ai chat; delivered on Codex and ChatGPT Work. The HD row in `evidence.md` left out ChatGPT
+  Work; the Q11 and IS rows are now scoped to Claude Code and point at HD for the other clients.
+- The skill description says "where every target client receives it … not past the host's cut"
+  instead of a fixed 2,048.
+
 ## 1.2.0 — 2026-09-27
 
 Delivery measured beyond Claude Code [HD].

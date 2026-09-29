@@ -3,8 +3,8 @@ name: rich-domain-mcp-server
 description: >-
   Guides building a NEW rich-domain MCP server or tool, and auditing an EXISTING one up to a
   measured reference, using Introspective Context Engineering: discover the domain from live
-  data, name fields so they cannot be misread, deliver guidance where the model actually receives
-  it (description head, input schema, response — not the output schema, not past char 2,048),
+  data, name fields so they cannot be misread, deliver guidance where every target client receives
+  it (description head, input schema, response — not the output schema, not past the host's cut),
   compute determinate verdicts, record provenance per rule, and measure the result. Invoke when
   asked to add, build, scaffold or wire an MCP server or tool; review, audit, enrich or fix tool
   metadata (descriptions, inputSchema, outputSchema, field names, alerts, interpretation,
@@ -14,7 +14,7 @@ description: >-
   triggers on "the agent picks the wrong tool", "the agent misreads this field", "the agent
   ignores the description", user-feedback triage, and tool-call-log pattern analysis.
 metadata:
-  version: 1.2.0
+  version: 1.2.1
 ---
 
 Read and follow the canonical project skill at
