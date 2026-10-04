@@ -31,6 +31,10 @@ company. → [Capability architecture](docs/capability-architecture.md)
 
 ## If you came from a talk
 
+_At VibeKode Utrecht?_ The slides are here:
+[_Domain knowledge belongs in the MCP server_ (PDF)](talks/domain-knowledge-belongs-in-the-mcp-server-vibekode-2026.pdf).
+The list below is the closing slide of the MCPCon talk it builds on; everything in it applies.
+
 The closing slide promised five things. Here they are:
 
 1. **A skill that runs the loop on your server**: builds a new one or audits an existing one,
@@ -206,7 +210,7 @@ the measurements stop.
   · Amsterdam · Sep 17–18 2026 ([slides, PDF](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
   · [slide by slide](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.md))
 - **Domain knowledge belongs in the MCP server**: [VibeKode Netherlands 2026](https://vibekode.it/agentic-engineering/domain-knowledge-belongs-in-the-mcp-server/)
-  · Utrecht · Oct 7 2026
+  · Utrecht · Oct 7 2026 ([slides, PDF](talks/domain-knowledge-belongs-in-the-mcp-server-vibekode-2026.pdf))
 - **Adoption is the hard part: six months of MCP in production at an HVAC company**:
   [Update Conference Prague 2026](https://prague.updateconference.net/en/2026/schedule/adoption-is-the-hard-part-six-months-of-mcp-in-production-at-an-hvac-company)
   · Prague · Nov 12–13 2026
