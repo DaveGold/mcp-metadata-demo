@@ -82,7 +82,7 @@ wrong.
 
 ## What the evals changed
 
-More than 3,700 scored live runs across Claude Haiku, Sonnet and Opus, every prediction registered
+More than 6,000 scored live runs across Claude Haiku, Sonnet and Opus, every prediction registered
 before its run, every run audited against the server's own call log. Six results that shaped `best`:
 
 - **Wrong is worse than missing.** One plausible line (`EP-1 … Paris Proof: 70 kWh/m²`) made 59 of
