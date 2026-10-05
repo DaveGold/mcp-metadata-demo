@@ -28,6 +28,42 @@ Shared endpoints, rate-limited: fine for a demo. For sustained use,
 [deploy your own](running.md#deploy-your-own-copy). Every call's `queryIntent` is stored and
 readable back by anyone through `get_tool_call_log`; see [Logging](running.md#logging).
 
+## The demo: thin vs best on one building
+
+Two chats side by side, one with only the `thin` connector, one with only `best`; every other
+connector off. Paste the same prompt into both:
+
+> _"Our office is at Middenwetering 1, 3543AR Utrecht. How far are we from the Paris Proof target of 70 kWh/m² for offices? Draw a bar chart of our figure against the target with the render_chart tool."_
+
+Middenwetering 1 is an office with label A++ whose only energy figure is a calculated 369 kWh/m²,
+inflated by the NEN 7120 method. Paris Proof is defined on measured energy at the meter: same
+unit, different quantity, so the comparison cannot be made from this data.
+
+| tier | runs | what it did |
+|---|---|---|
+| **thin** | 8/8 wrong | draws 369 against 70 and reports "5.3× the target"; the caveat, where there is one, is a line ("directionally it's far off") |
+| **best** | 5/5 right | draws no chart, says why: 369 is calculated, inflated under this method, and not a benchmark |
+
+The audience sees an A++ building charted at five times the target on the left, and on the right
+the reason that chart would be wrong. It is the [`benchmark-trap`](../evals/questions.json) on a
+building people know.
+
+Tried 2026-10-05 on Sonnet: 5 runs per tier as Claude Code subagents, 3 as clean `claude -p`
+runs with only that tier's server. The runs are small and unrecorded, so treat them as a
+rehearsal, not a result. Rehearse on the host you present on, with every other connector off:
+another server's instructions can leak into the answer (the subagent runs could see the
+Warmtebouw Duurzaam instructions and quoted them). On claude.ai, 2026-10-05, one run per tier
+with only that tier's connector on and web search off gave the same split.
+
+**Why the prompt names `render_chart`.** claude.ai loads connector tools through a search over
+their descriptions. `thin`'s chart tool is described as `Render data as a chart.` (23
+characters), and in one claude.ai run Claude searched the connector directory instead, did not
+find it, and built the chart as an artifact: still 369 against 70, still "5.3×", but not the
+inline chart. Naming the tool keeps `thin` on its own renderer; both tiers have `render_chart`,
+so the comparison stays fair. Drop the tool name to show discovery as a second point, at the cost
+of not knowing which outcome you get. The runs in the table above used the wording without the
+tool name; rehearse this one once on claude.ai.
+
 ## The prompts
 
 ### 1 — The talk's opening example: same null
