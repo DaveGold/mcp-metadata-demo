@@ -1,8 +1,5 @@
 # Rich Domain MCP
 
-Companion repo to the talk _[Most MCP servers are empty](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)_
-(MCPCon Europe 2026) and the paper _[The Missing Layer](https://davidgolverdingen.nl/en/the-missing-layer)_.
-
 Most MCP servers expose data. This repo shows what happens when the server also carries the domain
 knowledge an agent needs to use that data correctly, and measures whether that knowledge actually
 reaches the model.
@@ -13,7 +10,7 @@ reaches the model.
 Built from seven months of MCP in production at a 350-person Dutch building-services contractor
 ([who and why](#who-built-this-and-why)).
 
-**[Try it live](#try-it-live)** · **[How it's built](docs/reference-implementation.md)** · **[The research](evals/README.md)** · **[From a talk?](#if-you-came-from-a-talk)**
+**[Try it live](#try-it-live)** · **[How it's built](docs/reference-implementation.md)** · **[The research](evals/README.md)** · **[The paper](https://davidgolverdingen.nl/en/the-missing-layer)** · **[From a talk?](#if-you-came-from-a-talk)**
 
 ## The larger idea
 
@@ -31,23 +28,33 @@ company. → [Capability architecture](docs/capability-architecture.md)
 
 ## If you came from a talk
 
-_At VibeKode Utrecht?_ The slides are here:
-[_Domain knowledge belongs in the MCP server_ (PDF)](talks/domain-knowledge-belongs-in-the-mcp-server-vibekode-2026.pdf).
-The list below is the closing slide of the MCPCon talk it builds on; everything in it applies.
+### VibeKode Utrecht: _Domain knowledge belongs in the MCP server_
 
-The closing slide promised five things. Here they are:
+The closing slide promised six things. Here they are:
 
 1. **A skill that runs the loop on your server**: builds a new one or audits an existing one,
    every rule linked to the run behind it: [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md)
    · [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md)
-2. **The practitioner paper**: [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)
-3. **Example code**: the reference implementation, walked through by WHY / HOW / WHAT:
-   [`docs/reference-implementation.md`](docs/reference-implementation.md)
-4. **A thin and a rich MCP server on the same public API**, plus a third, `best`:
-   [try it live](#try-it-live)
-5. **The slides, as a PDF**: [_Most MCP servers are empty_](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf)
-   · [slide by slide](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.md), with what the evals
-   changed since
+2. **A check of what each client drops from it**: reads your server's `tools/list` and scores it
+   against the measured limits of Claude Code, claude.ai, Cowork, ChatGPT and Codex:
+   [Claude Code](.claude/skills/mcp-compat-check/SKILL.md)
+   · [Codex](.codex/skills/mcp-compat-check/SKILL.md)
+3. **The practitioner paper**: [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)
+4. **The reference implementation, and the runs behind it**: walked through by WHY / HOW / WHAT in
+   [`docs/reference-implementation.md`](docs/reference-implementation.md); every run, with its
+   registered prediction, in [`evals/`](evals/README.md). The 3.59 from the opening slide, in
+   code: [`bp.overheating`](src/domain/best-building-rules.ts#L287), and
+   [how to try it](#try-it-live)
+5. **thin, rich and best: three MCP servers on the same public API**: [try it live](#try-it-live)
+6. **These slides, as a PDF**: [_Domain knowledge belongs in the MCP server_](talks/domain-knowledge-belongs-in-the-mcp-server-vibekode-2026.pdf)
+
+### MCPCon Europe: _Most MCP servers are empty_
+
+The talk the VibeKode one builds on. Its slides:
+[PDF](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.pdf) ·
+[slide by slide](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.md), with what the evals
+changed since. The skill, the paper, the reference implementation and the servers above are the
+ones its closing slide promised.
 
 **What changed since the talk.** The talk said _bound is not the same as delivered_, and marked
 the tool description as reaching the model before the call. Four days later the evals showed that
@@ -82,7 +89,7 @@ wrong.
 
 ## What the evals changed
 
-More than 3,700 scored live runs across Claude Haiku, Sonnet and Opus, every prediction registered
+About 6,100 scored runs across Claude Haiku, Sonnet and Opus, every prediction registered
 before its run, every run audited against the server's own call log. Six results that shaped `best`:
 
 - **Wrong is worse than missing.** One plausible line (`EP-1 … Paris Proof: 70 kWh/m²`) made 59 of
@@ -150,6 +157,24 @@ differs:
 
 Then ask each the **same question**:
 
+> _"Is there an overheating risk at Van Beuningenstraat 1 in Rotterdam, 3039WB?"_
+
+The VibeKode talk's opening example. Thin returns `temperatuuroverschrijding: 3.59` and nothing
+about what it counts, so the model picks a unit, and 3.59 hours or degrees sounds like low risk.
+It is a unitless indicator, and above 1.5 means significant. Best says so in its response:
+_"Overheating risk: SIGNIFICANT — indicator 3.59 (TOjuli/GTO, unitless; not °C, not hours)"_.
+In code, that one line is three pieces:
+
+- the field name that carries the unit:
+  [`temperatuuroverschrijding_indicator_eenheidloos`](src/domain/best-field-names.ts#L107)
+- the verdict the server computes, against [the 1.5 threshold](src/domain/best-building-rules.ts#L26):
+  [`overheatingRisk`](src/domain/best-building-rules.ts#L166)
+- the rule that renders it, only when the value is there, with its provenance:
+  [`bp.overheating`](src/domain/best-building-rules.ts#L287)
+
+The eval behind it: [Q14](evals/results/2026-09-22-q14-one-line-response.json), where the
+threshold was cited 0 of 20 times without the line and 20 of 20 with it.
+
 > _"Gustav Mahlerlaan 10, 1082PP Amsterdam — how does it stack up against the Paris Proof 2040 office target of 70 kWh/m²?"_
 
 The eval set's headline trap. The right answer: it **cannot be ranked from this data**, because
@@ -157,7 +182,7 @@ the label figures are calculated and Paris Proof is defined on measured energy. 
 
 > _"What's the energy label of Museumstraat 1, 1071XX Amsterdam, and what should I keep in mind about this building?"_
 
-The talk's opening example, and on this data not one that separates the tiers. Every tier gets
+The MCPCon talk's opening example, and on this data not one that separates the tiers. Every tier gets
 `energielabel: null`, but also `labelCount: 0`, so even thin usually reads it as _none
 registered_; in the eval set the same case (`invented-label`) is a control every arm passes. What
 differs is the rest of the answer: rich flags the pre-1992 insulation caveat, best says not to
