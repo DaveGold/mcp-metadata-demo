@@ -64,6 +64,31 @@ so the comparison stays fair. Drop the tool name to show discovery as a second p
 of not knowing which outcome you get. The runs in the table above used the wording without the
 tool name; rehearse this one once on claude.ai.
 
+### Second demo: the 3.59, on Haiku
+
+Same two chats, same setup, model set to **Haiku**:
+
+> _"Is there an overheating risk at Van Beuningenstraat 1 in Rotterdam, 3039WB?"_
+
+The VibeKode opening example. The label gives `temperatuuroverschrijding` 3.59: a unitless
+indicator (TOjuli/GTO), significant above 1.5. `thin` returns the bare number; `best` names the
+field `temperatuuroverschrijding_indicator_eenheidloos` and computes the verdict.
+
+| tier | runs | what it did |
+|---|---|---|
+| **thin** | 3/3 wrong | reads it as degrees and calls the risk low ("3.59°C … below 4–5°C is considered low risk") or moderate; one run answered for another unit at the address (1-BG, 1.33, "low") |
+| **best** | 3/3 right | "significant", 3.59 against the 1.5 threshold, unitless |
+
+**The model decides this one.** On Sonnet the same prompt barely separates: `thin` said "yes"
+in 3 of 4 runs, though against a threshold it supplied itself (1.2 or 1.18, the Bbl new-build
+limit, a different rule from the label's 1.5). Present it on Haiku, Paris Proof on Sonnet.
+
+Tried 2026-10-06 as clean `claude -p` runs with only that tier's server; not yet on claude.ai.
+Asking "how many hours a year does it overheat?" draws `thin`'s most quotable answer ("Excellent
+news! only 3.59 hours per year") but sent `best` on Haiku to the weather tool in 2 of 3 runs, so
+it is not stage-safe. The endpoints are rate-limited: eight parallel runs got HTTP 429, so do not
+rehearse in a burst right before going on.
+
 ## The prompts
 
 ### 1 — The talk's opening example: same null
