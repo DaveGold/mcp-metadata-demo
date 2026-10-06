@@ -166,7 +166,7 @@ _"Overheating risk: SIGNIFICANT — indicator 3.59 (TOjuli/GTO, unitless; not °
 In code, that one line is three pieces:
 
 - the field name that carries the unit:
-  [`temperatuuroverschrijding_indicator_eenheidloos`](src/domain/best-field-names.ts#L107)
+  [`temperatuuroverschrijding_indicator_eenheidloos`](src/domain/best-field-names.ts#L107-L108)
 - the verdict the server computes, against [the 1.5 threshold](src/domain/best-building-rules.ts#L26):
   [`overheatingRisk`](src/domain/best-building-rules.ts#L166)
 - the rule that renders it, only when the value is there, with its provenance:
