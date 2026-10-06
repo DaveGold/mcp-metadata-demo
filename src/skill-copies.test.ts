@@ -1,8 +1,8 @@
 /**
- * The rich-domain-mcp-server skill ships in three places: `.claude/skills` (Claude Code),
- * `.codex/skills` (canonical for Codex) and a pointer in `.agents/skills`. They are kept in
- * sync by hand; this test is the drift guard, and it checks that every relative link in
- * the skill (evidence files, reference implementation) still resolves.
+ * The rich-domain-mcp-server and mcp-compat-check skills ship in three places: `.claude/skills`
+ * (Claude Code), `.codex/skills` (canonical for Codex) and a pointer in `.agents/skills`. They are
+ * kept in sync by hand; this test is the drift guard, and it checks that every relative link in
+ * the rich-domain skill (evidence files, reference implementation) still resolves.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -71,5 +71,24 @@ describe('rich-domain-mcp-server skill copies', () => {
     expect(version).toBeDefined();
     const changelog = readFileSync(join(CLAUDE, 'CHANGELOG.md'), 'utf8');
     expect(changelog.match(/^## (\d+\.\d+\.\d+) /m)?.[1], 'the newest CHANGELOG entry').toBe(version);
+  });
+});
+
+describe('mcp-compat-check skill copies', () => {
+  const claude = join(ROOT, '.claude/skills/mcp-compat-check');
+  const codex = join(ROOT, '.codex/skills/mcp-compat-check');
+  const agents = join(ROOT, '.agents/skills/mcp-compat-check/SKILL.md');
+
+  it('.claude and .codex are byte-identical', () => {
+    expect(files(codex)).toEqual(files(claude));
+    for (const f of files(claude))
+      expect(readFileSync(join(codex, f), 'utf8'), f).toBe(readFileSync(join(claude, f), 'utf8'));
+  });
+
+  it('the .agents pointer carries the same frontmatter and points at an existing file', () => {
+    const pointer = readFileSync(agents, 'utf8');
+    expect(frontmatter(pointer)).toBe(frontmatter(readFileSync(join(claude, 'SKILL.md'), 'utf8')));
+    const target = pointer.match(/\]\(([^)]+SKILL\.md)\)/)?.[1];
+    expect(target && existsSync(resolve(dirname(agents), target))).toBe(true);
   });
 });
