@@ -97,8 +97,8 @@ What the combinations add is paths between systems that stay separate:
 | BIM | what is in this building? |
 | energy | how is this building performing? |
 | BIM + energy | which physical characteristics may explain that performance? |
-| + ERP | what does that mean technically and financially for this project? |
-| + tickets | do building characteristics, energy, maintenance and cost relate? |
+| + ERP (finance) | what does that mean financially for this project? |
+| + ERP (service history) | do building characteristics, energy, maintenance and cost relate? |
 
 Nothing is merged into one data platform. What goes away is the boundary around what can be
 _asked_ across the systems. That works not because the model invents what is missing, but because two correct
