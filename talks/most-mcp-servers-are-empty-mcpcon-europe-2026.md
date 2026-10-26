@@ -103,7 +103,7 @@ could not settle. Harden with tests and a findings log. _The spec gives you the 
 gives you the meaning._
 
 **Since the talk:** "the channel the model actually reads" became concrete: the description head
-(the first 2,048 characters on Claude Code, 4,096 on Cowork, all of it in claude.ai chat), the
+(the first 2,048 characters on Claude Code up to 2.1.294, 4,096 on Cowork and on later Claude Code, all of it in claude.ai chat), the
 input schema, and the response; not the output schema, except on Codex
 ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). The
 [skill](../.claude/skills/rich-domain-mcp-server/SKILL.md) now runs this loop, with an audit step
@@ -117,8 +117,8 @@ up front. _Three of those groups are needed at three different moments._
 
 **Since the talk:** the block names cost nothing
 ([Q19h](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)),
-but where they sit decides everything: in the `rich` tier the interpretation sat past Claude
-Code's 2,048 cut and never arrived there
+but where they sit decides everything: in the `rich` tier the interpretation sat past the 2,048
+cut of the Claude Code the evals ran on and never arrived there
 ([Q20, Q21](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
 `best` keeps WHEN and HOW in the description head and moves WHAT into the response:
 [reference implementation](../docs/reference-implementation.md).
@@ -175,9 +175,12 @@ this repo.
 
 **Since the talk:** derived values measured as the most reliable form
 ([L1](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship)).
-Alerts narrowed: when a correction is mandatory, an alert after a successful call is read as a
-note, so refuse the call instead
-([Q22b, Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
+Alerts narrowed: when a correction is mandatory, refuse the call instead
+([Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)). The reason first given, "an alert is read as a
+note" (Q22b), was withdrawn on 2026-10-26: on Claude Code that alert sat in the result's `content`
+text, which Claude Code drops from a `structuredContent` result, so it never arrived
+([Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). Delivered, it is
+acted on ([Q22d](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
 The same mechanism as selective retrieval, on other data and with other numbers: the weather
 tool's `select` ([live demo](../docs/live-demo.md)).
 
@@ -207,12 +210,16 @@ deliver them whole. The output schema reaches only Codex (and ChatGPT sometimes)
 ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). "Bound is not the same as delivered" holds on every host; where the line falls
 does not.
 
+**And the line moves (2026-10-26):** Claude Code itself raised its cut to 4,096 in 2.1.296,
+and to 16,384 for a tool loaded through tool search ([CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). The 74% above is what
+Claude Code up to 2.1.294 lost; the point stands, the number is a version's.
+
 **On server instructions:** the slide marks them client-dependent, and the 2026-07-28 spec keeps
 it that way: with the `initialize` handshake gone, `instructions` moved to the result of
 `server/discover`, which clients _may_ call
 ([changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog)). Claude Code
-delivers their first 2,048 characters
-([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); Cowork delivers
+delivered their first 2,048 characters
+([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)), 4,096 since 2.1.296 ([CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); Cowork delivers
 them whole, ChatGPT the first 512, and claude.ai chat none at all ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 ## 18 · One string. Three moments.
@@ -246,7 +253,7 @@ exactly how a thin interface hides
 ([model differences](../.claude/skills/rich-domain-mcp-server/references/evidence.md#model-differences)).
 Once the server computes a determinate value, every model saturates on it, so tailoring per model
 bought almost nothing. Answers from other model families are _not_ measured. Other hosts were
-measured for delivery only ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)): the 2,048 cut is Claude Code's, Cowork cuts at 4,096,
+measured for delivery only ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)): the 2,048 cut was Claude Code's up to 2.1.294 (4,096 since: [CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)), Cowork cuts at 4,096,
 and claude.ai chat, ChatGPT and Codex do not cut the description. What reaches the model is set by
 the host, not the protocol, so check it per client: [what reaches the model, and how to check](../docs/design.md#2--ownership-is-not-delivery).
 

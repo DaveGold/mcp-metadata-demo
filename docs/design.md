@@ -21,9 +21,10 @@ missing. The talk _Most MCP servers are empty_ added the capabilities that feedb
 The evals kept the thesis and sharpened the delivery half:
 
 - The talk's table marked the tool description as reaching the model before the call. On Claude
-  Code only its first **2,048 characters** do ([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)),
-  on Cowork its first 4,096, in claude.ai chat all of it ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
-  On the strictest host, most of a long description is bound and never delivered.
+  Code up to 2.1.294 only its first **2,048 characters** did ([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)),
+  on Cowork its first 4,096, in claude.ai chat all of it ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery));
+  Claude Code 2.1.296+ cuts at 4,096, or 16,384 through tool search ([CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
+  On the strictest client still in use, most of a long description is bound and never delivered.
 - Once delivered, the channel does not matter: description and response tie
   ([Q15](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). An earlier
   reading that "the response beats the description" was the cut, not the channel
@@ -33,7 +34,11 @@ The evals kept the thesis and sharpened the delivery half:
   ([BT](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship),
   [Q20](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
 - A fix the model must make needs a refusal, not an alert
-  ([Q22b, Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
+  ([Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)):
+  a refusal is an error result, and every host delivers an error's text. A successful result
+  arrives through a different channel per host (Claude Code `structuredContent`, claude.ai chat
+  `content`, ChatGPT both), so mirror the two
+  ([Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 ## 1 · The capability owns the knowledge
 
@@ -50,8 +55,8 @@ Canonical truth can be projected through several surfaces, and they do not all a
 | surface | reaches the model? |
 |---|---|
 | field names | always, in every response |
-| tool description | only the head: 2,048 chars on Claude Code, 4,096 on Cowork; in full on Codex, ChatGPT and claude.ai chat ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
-| server instructions | the first 2,048 chars on Claude Code; 512 on ChatGPT Chat; whole on Cowork; prepended to every tool on Codex; not at all in claude.ai chat or ChatGPT Work ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
+| tool description | only the head: 2,048 chars on Claude Code up to 2.1.294, 4,096 on Cowork and on Claude Code 2.1.296+ (16,384 through tool search); in full on Codex, ChatGPT and claude.ai chat ([HD, CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
+| server instructions | the first 2,048 chars on Claude Code up to 2.1.294, 4,096 since; 512 on ChatGPT Chat; whole on Cowork; prepended to every tool on Codex; not at all in claude.ai chat or ChatGPT Work ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
 | input schema | in full on Claude Code, Cowork, claude.ai chat and ChatGPT Chat; on Codex and ChatGPT Work every parameter describe is dropped once the schema passes 5,000 chars ([IS, HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
 | output schema | not on Claude Code, Cowork or claude.ai chat ([Q11, HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); on Codex and ChatGPT Work yes, on ChatGPT Chat sometimes. Keep it for validation and UI |
 | response | yes, below a size limit; above it, Claude Code replaces it with a file notice ([Q9](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); other hosts unmeasured |
@@ -110,8 +115,10 @@ The response has no description budget, and it arrives exactly when meaning is n
   ([AS](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship)).
 - **Guard the response size**: drop records before you lose the interpretation to a file notice.
 - **Alert or refuse.** Use an alert when the user should know something. Refuse the call, with the
-  fix in the message, when the operation must be corrected before it continues: a model reads an
-  alert after a successful call as a note, not as a reason to redo it.
+  fix in the message, when the operation must be corrected before it continues: a refusal is an
+  error result, and every measured path delivers its text
+  ([Q22c, Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). An alert must reach every host: put it in both result
+  channels, the same JSON in `structuredContent` and as the text.
 
 ## 5 · What you do not need to worry about
 
@@ -141,7 +148,7 @@ Treat it like code:
 - **Test its truth deterministically**: pin every computed value to ground truth, check the
   description budget and rule coverage.
 - **Eval its effect on the model**, and keep those evals as regression tests. Evals found what the
-  green test suite could not: Claude Code's 2,048 cut, a stale deploy, a quota the tool exhausted itself, and
+  green test suite could not: Claude Code's 2,048 cut (since raised), a stale deploy, a quota the tool exhausted itself, and
   this repo's own wrong alert.
 - **Have a person who knows the business validate** what the agent could not settle from the data.
   You review; you do not author.

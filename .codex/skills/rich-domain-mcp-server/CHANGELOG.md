@@ -6,6 +6,58 @@ Semantic versions; each release is the git tag `skill-v<version>` in
 sharpens rules; a **patch** fixes wording, links or tooling. Every change to the skill bumps
 `metadata.version` in `SKILL.md` and adds an entry here (CI checks both).
 
+## 1.4.1 — 2026-10-26
+
+Q22b re-run with the alert delivered [Q22d]; no rule changes.
+
+- One experiment build of `best`, the header alert on a rendered table in two channels. haiku 4.5:
+  mirrored, the alert arrived in 6/6 runs it fired in, and all 6 re-rendered and fixed the table;
+  in `content` only it arrived in 0/2, and neither did. haiku 5.5 is at ceiling on the question.
+- The refusal rule stands (a refusal does not depend on delivery or reading); its parenthesis on
+  Q22b is replaced by Q22d. New evidence row Q22d.
+
+## 1.4.0 — 2026-10-26
+
+**Description budget raised from 2,048 to 4,096 characters** (working ceiling ~3,600) [CC].
+
+- Claude Code cuts a description sent up front at 4,096 since 2.1.296, and Cowork cuts at 4,096.
+  Claude Code updates itself, so the versions that cut at 2,048 are no longer a target, and 2,048
+  had become too tight for the before-the-call blocks. Rules: nothing load-bearing past char 4,096;
+  most important first, because tool search ranks on the head.
+- Claude-only server instructions: ≤ 4,096. For ChatGPT / Codex and all clients they stay ≤ 512.
+- Evals that need the old cut set `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=2048`.
+
+## 1.3.0 — 2026-10-26
+
+Which result channel reaches the model [Q28].
+
+- **New rule: mirror the result, the same JSON in `structuredContent` and as the `content`
+  text.** Each host reads a different channel: Claude Code (2.1.296, 2.1.308) only
+  `structuredContent`; claude.ai chat only `content` (`structuredContent` when content is empty);
+  ChatGPT Chat both, or only `structuredContent` once an `outputSchema` is declared. No host
+  delivered `_meta`; every host delivered an error's text. Probe server, Claude Code read from the
+  delivered tool_result, chat hosts 2/2 by fingerprint. Cowork, ChatGPT Work and Codex not run.
+- **Q22b withdrawn.** Its alert sat in `content` beside a `structuredContent` echo and never
+  arrived; the eval transcripts show the echo in every render result of Q22–Q24. The refusal rule
+  stands on Q22c, which now has its mechanism.
+- `handlers.md`, `delivery.md` and the SKILL.md table say where the response's meaning must sit.
+- The reference implementation follows the rule: `best`'s render tools put `interpretation` first
+  in `structuredContent`, before the UI payload, and mirror it as the text.
+
+## 1.2.2 — 2026-10-26
+
+Claude Code's description cut moved [CC]; no rule changes.
+
+- Claude Code cut descriptions and server instructions at 2,048 up to 2.1.294. Since 2.1.296 it
+  cuts descriptions sent up front and server instructions at 4,096, and since 2.1.295 a description
+  loaded through tool search (the default for MCP tools) at 16,384. Changelog, binary and a live
+  probe on 2.1.308 agree. New evidence row CC; Q7 is scoped to the versions it ran on.
+- The 2,048 description budget stays, now because it is the strictest cut a client in use applies
+  (older Claude Code installs), not because current Claude Code applies it. Cowork still cuts at
+  4,096. (Superseded by 1.4.0.)
+- `delivery.md` gets a Claude Code 2.1.296+ row, and notes that
+  `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=2048` reproduces the old cut for an eval that needs it.
+
 ## 1.2.1 — 2026-09-29
 
 Wording brought in line with the per-client delivery measurements [HD]; no rule changes.

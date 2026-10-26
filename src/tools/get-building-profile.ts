@@ -4,7 +4,7 @@
  * Looking for an example to copy? Read get-building-profile-best.ts: the reference implementation.
  * This file is the older, description-heavy tier. Its text is split into named pieces because the
  * measured eval arms compose different subsets of the SAME bytes (src/server.ts picks per arm).
- * What each arm actually sends, with the 2,048-char cut marked: docs/wire/.
+ * What each arm actually sends, with the 4,096-char cut marked: docs/wire/.
  *
  * Pieces, in the order they appear in the rich description:
  *   descriptionPreamble  RETURNS, WHEN TO USE, WHEN NOT TO USE, QUERY STRATEGY
@@ -111,7 +111,7 @@ DERIVED FIGURES YOU MUST COMPUTE YOURSELF (nothing below is returned):
 /** The promise of `alerts`; arms that return no alerts omit it. */
 const alertsParagraph = `ALERTS: Always check interpretation.alerts — they contain bouwjaar era warnings (suppressed for good labels A/A+/A++/A+++/A++++), multiple-VBO disambiguation, large pand oppervlakte warning (>10 VBOs), label expiry notices, BENG compliance violations, VBO status warnings, bouwjaar discrepancies, and district heating impact notes. For residential buildings alerts also include an estimated annual gas consumption (m³), total CO₂ emission (kg/year), and a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.`;
 
-/** rich only (Q21): the CALCULATED vs MEASURED line also sits before QUERY STRATEGY, inside the 2,048-char cut. */
+/** rich only (Q21): the CALCULATED vs MEASURED line also sits before QUERY STRATEGY, inside the 2,048-char cut of Claude Code up to 2.1.294. */
 const richPreamble = descriptionPreamble.replace(
   '\n\nQUERY STRATEGY:',
   '\n\n' + calcVsMeasuredLine + '\n\nQUERY STRATEGY:',

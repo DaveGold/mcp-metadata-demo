@@ -34,8 +34,9 @@ import type { BagClientLike, EpOnlineClientLike } from './get-building-profile.j
 import addresses from '../../evals/addresses.json' with { type: 'json' };
 import weatherFixtures from '../../evals/weather-fixtures.json' with { type: 'json' };
 
-const HOST_CUT = 2048;
-const CEILING = 1800;
+// Claude Code 2.1.296+ for a tool sent up front, and Cowork (CC, HD). 2,048 before 2.1.296 (Q7).
+const HOST_CUT = 4096;
+const CEILING = 3600;
 
 const noBag: BagClientLike = {
   findAddress: async () => [],
@@ -71,7 +72,7 @@ const text = (r: ReturnType<typeof buildBestBuildingResponse>) => JSON.stringify
 
 // ── Delivery ───────────────────────────────────────────────────────────────────
 
-describe('best — delivery budgets (the host cuts at 2,048)', () => {
+describe('best — delivery budgets (the host cuts at 4,096)', () => {
   it('both descriptions and the instructions fit the cut, with a working ceiling, on the wire', async () => {
     const client = await connectBest();
     const { tools } = await client.listTools();
@@ -108,7 +109,7 @@ describe('best — delivery budgets (the host cuts at 2,048)', () => {
     expect(bestBuildingDescription.indexOf('NO metered')).toBeGreaterThan(-1);
     expect(bestBuildingDescription.indexOf('NO metered')).toBeLessThan(400);
     // The eight-block order (WHEN TO USE … RETURNS, then INTERPRETATION) puts the rules after
-    // RETURNS; they must still sit at least ~500 chars inside the 2,048 cut.
+    // RETURNS; they must still sit early, where a model and tool search read first.
     expect(bestBuildingDescription.indexOf('CALCULATED vs MEASURED')).toBeLessThan(1500);
     expect(bestWeatherDescription.indexOf('referencePeriodWeightedHDD')).toBeLessThan(1500);
     expect(bestWeatherDescription.indexOf('never apply the annual 2800')).toBeLessThan(1500);
@@ -163,10 +164,10 @@ describe('best — delivery budgets (the host cuts at 2,048)', () => {
     expect((fetchImage._meta as { ui?: { visibility?: string[] } }).ui?.visibility).toEqual(['app']);
   });
 
-  it('every model-visible description fits the 2,048 cut with room to spare, and says what NOT to use it for', async () => {
+  it('every model-visible description fits the 4,096 cut with room to spare, and says what NOT to use it for', async () => {
     const { tools } = await (await connectBest()).listTools();
     for (const t of tools.filter((t) => t.name !== 'fetch_image')) {
-      expect(t.description!.length, t.name).toBeLessThanOrEqual(1800);
+      expect(t.description!.length, t.name).toBeLessThanOrEqual(CEILING);
       expect(t.description, t.name).toContain('WHEN TO USE:');
       expect(t.description, t.name).toContain('WHEN NOT TO USE:');
     }

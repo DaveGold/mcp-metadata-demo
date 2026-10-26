@@ -1,0 +1,44 @@
+{
+  "_comment": "CC: Claude Code no longer cuts MCP tool descriptions and server instructions at 2,048 characters. Q7 (2026-09-22, Claude Code 2.1.275) and Q15 (2.1.280) measured that cut; it held until 2.1.294. Found 2026-10-26 when an eval smoke run in another repo saw the old variant quote facts at chars 2,782 and 7,677. Confirmed three ways: the Claude Code changelog, the shipped binary, and a live probe in the Code tab of the desktop app. Nothing re-run: the earlier results stay valid for the versions they name.",
+  "date": "2026-10-26",
+  "host": "Claude Code. CLI 2.1.296 (Homebrew cask, binary read); desktop app Code tab 2.1.308 (live probe; the host every eval in this repo runs on).",
+  "changelog": {
+    "source": "https://raw.githubusercontent.com/anthropics/claude-code/main/CHANGELOG.md, read 2026-10-26 (newest entry 2.1.310)",
+    "entries": {
+      "2.1.280": "Added CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH to change the 2,048-character cap on MCP tool descriptions and server instructions for every MCP server in the session",
+      "2.1.295": "MCP tool descriptions the model loads through tool search are cut at 16,384 characters instead of 2,048",
+      "2.1.296": "The default limit on MCP tool descriptions sent up front and on MCP server instructions changed from 2,048 to 4,096 characters",
+      "2.1.299": "Descriptions and server instructions from Anthropic's first-party MCP servers at api.anthropic.com reach Claude in full instead of being cut at 4,096"
+    }
+  },
+  "binary": {
+    "file": "/opt/homebrew/Caskroom/claude-code@latest/2.1.296/claude",
+    "limit_function": "function Px(e=!1){return a.CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH??(e?Gns:vxn)} with vxn=4096, Gns=16384",
+    "callers": [
+      "server instructions: Zt(instructions, 'Server instructions', name) with the default Px() = 4,096",
+      "tool description: two cuts per tool, Zt(desc) at Px() = 4,096 for a tool sent up front and Zt(desc, …, Px(!0)) = 16,384 for a tool loaded through tool search",
+      "MCP tools are deferred to tool search by default (isMcp → defer) unless the tool has alwaysLoad or tool search is off"
+    ],
+    "marker": "'… [truncated]' appended at the cut, as in Q7"
+  },
+  "live_probe": {
+    "host": "desktop app Code tab, Claude Code 2.1.308, Opus 5.5, 2026-10-26",
+    "server_instructions": "eval-rich (`rich` tier, 2,829 chars) arrived whole in the session's system prompt, ending on 'The tool descriptions below are the strategy in practice.' with no '… [truncated]'. Under the old cut it stopped at char 2,048.",
+    "tool_description": "eval-rich get_building_profile (7,978 chars), loaded through ToolSearch, arrived whole: it ends on the ALERTS paragraph ('… a warmtepomp-geschiktheidsindicatie based on warmtebehoefte.') with no '… [truncated]'. Q7 saw the same description stop at char 2,048.",
+    "not_probed": "a description sent up front (alwaysLoad, or tool search off), which the binary cuts at 4,096; subagents, which the Q-series used"
+  },
+  "headline": [
+    "Claude Code's 2,048 cut is gone since 2.1.296. Descriptions sent up front and server instructions are cut at 4,096; a description loaded through tool search, the default path for MCP tools, at 16,384. On the current host the 7,978-char `rich` description arrives whole.",
+    "Q7, Q15, Q15b, Q20 and Q21 stay valid for the versions they ran on (2.1.275–2.1.280). What changes is the present-tense claim 'Claude Code cuts at 2,048': it is now a claim about Claude Code up to 2.1.294.",
+    "The 2,048 design budget stays, now for a different reason: Claude Code up to 2.1.294 is still installed and pinned in places, Cowork cuts at 4,096, and the head of the description is what tool search ranks on. No measured current host cuts at 2,048 any more."
+  ],
+  "consequences": [
+    "Arms that differ only past char 2,048 (rich vs words-front, the Q20/Q21 pair, any old-vs-new pair whose facts sit past 2,048) no longer differ on delivery on today's host. Comparisons that depend on the cut must pin Claude Code ≤ 2.1.294 or set CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=2048.",
+    "Anything past char 4,096 of a description still misses a tool sent up front and Cowork; anything past 16,384 misses every Claude Code path."
+  ],
+  "caveats": [
+    "The live probe is one session's self-observation of its own context, checked against the true end of the description; no subagent run, no n.",
+    "Cowork's 4,096 (HD, 2026-09-27) was not re-probed; it may follow Claude Code's changes since it runs on the Agent SDK."
+  ],
+  "decision": "2026-10-26, same day: the design budget moved from 2,048 to 4,096 (ceiling ~3,600), the cut of Claude Code 2.1.296+ for a tool sent up front and of Cowork. Claude Code updates itself, so the versions that cut at 2,048 are no longer a target. The third headline above records the first view (keep 2,048); this field supersedes it."
+}

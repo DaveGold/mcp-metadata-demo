@@ -24,7 +24,7 @@ regulation:
 **Level 2: self-describing app config.** The same agent then picks an appropriate visualisation.
 The chart-type metadata tells it sankey is for flows, treemap for hierarchical area shares, bar for
 category comparison, no wrapper logic
-([see the `type` REFUSE rules](../src/tools/render-chart.ts#L162-L200)):
+([see the `type` REFUSE rules](../src/tools/render-chart.ts#L168-L206)):
 
 ```
 > Agent looks at three buildings' data and chooses render_chart({ type: 'bar', ... })
@@ -41,7 +41,8 @@ Two things the evals added for app tools
 ([Q22](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)):
 an example in an app's input schema is delivered, and is copied, including a Paris Proof line
 drawn on calculated bars. And a fix the model _must_ make needs the call refused with the fix in
-the message; an alert after a successful render is read as a note, not as a reason to redo it.
+the message, which arrives because a refusal is an error result. (An alert after a successful
+render never arrived on Claude Code: see the fix below.)
 
 ## Refuse what would mislead
 
@@ -65,9 +66,17 @@ example in the input schema, and fixed it
 
 **Refuse or alert.** Not every problem is a refusal. Where the render is usable but could be better
 (a pie above five slices, too many line series, an overfull radar), `best` renders and returns an
-alert with the fix. Where the fix is mandatory, it refuses: an alert after a successful render was
-acted on 2/10, a refusal 10/10
-([Q22b, Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
+alert with the fix. Where the fix is mandatory, it refuses: a refusal was acted on 10/10
+([Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
+**Fixed 2026-10-26:** those alerts sat in the result's `content` text, and on Claude Code a
+result with `structuredContent` (here the payload for the UI) reaches the model as that JSON only.
+The alerts never arrived; Q22b's 2/10 measured their absence. Delivered, the same alert was
+acted on in 6/6 runs
+([Q22d](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)). claude.ai chat does the opposite
+(it reads `content` only), and ChatGPT reads both. `best` now puts `interpretation`
+first in `structuredContent`, before the UI payload, and mirrors the same JSON as the text
+([`bestRenderResult`](../src/tools/app-tools-best.ts))
+([Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 The details: [`app-tools-findings.md`](app-tools-findings.md).
 
 This is where the interaction design in the [capability architecture](capability-architecture.md#7--a-skill-is-a-journey)

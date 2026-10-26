@@ -14,7 +14,7 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { bestTableDescription, tableAlerts } from './app-tools-best.js';
+import { bestRenderResult, bestTableDescription, tableAlerts } from './app-tools-best.js';
 import { bestTableInputSchema } from './render-table-schema-best.js';
 import { z } from 'zod';
 import { logger } from '../logger.js';
@@ -659,8 +659,8 @@ export function registerRenderTableTool(
         }
 
         // A header that names a calculated label figure as if it were consumption is refused, not
-        // flagged: after a successful render the model does not redo the call
-        // (evals/results/2026-09-24-q22b-table-alert.json).
+        // flagged: a refusal is an error result, which every measured path delivers as text, and it
+        // was acted on 10/10 (evals/results/2026-09-24-q22c-table-refusal.json).
         const headerProblems = opts.best ? tableAlerts(args.columns, args.data) : [];
         if (headerProblems.length) {
           await logToolCall({ auth, args, start, status: 'error' });
@@ -669,18 +669,10 @@ export function registerRenderTableTool(
 
         await logToolCall({ auth, args, start, status: 'success' });
 
+        const rendered = `"${args.title ?? 'Untitled'}" — ${args.data.length} rows, ${args.columns.length} columns`;
+        if (opts.best) return bestRenderResult(tableAlerts(args.columns, args.data), rendered, { ...args });
         return {
-          content: [
-            {
-              type: 'text' as const,
-              text: opts.best
-                ? JSON.stringify({
-                    interpretation: { alerts: tableAlerts(args.columns, args.data), notes: [] },
-                    rendered: `"${args.title ?? 'Untitled'}" — ${args.data.length} rows, ${args.columns.length} columns`,
-                  })
-                : `Table rendered: "${args.title ?? 'Untitled'}" — ${args.data.length} rows, ${args.columns.length} columns`,
-            },
-          ],
+          content: [{ type: 'text' as const, text: `Table rendered: ${rendered}` }],
           structuredContent: { ...args },
         };
       } catch (error) {

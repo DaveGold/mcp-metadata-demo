@@ -10,7 +10,7 @@ metadata here. **Where** each piece goes is decided by what reaches the model �
 | surface | delivered | use it for |
 |---|---|---|
 | field names | always | what each value is |
-| description | first 2,048 chars | what the tool is/is not, input conventions, record-independent rules |
+| description | the head: 4,096 chars on Claude Code (sent up front) and Cowork [CC] | what the tool is/is not, input conventions, record-independent rules |
 | input schema | yes | formats, examples, valid names, misbehaving params |
 | output schema | **no** | validation and UI only |
 | response | yes, < ~25k tokens | interpretation of THIS record, computed verdicts, constants, the data a rule needs |
@@ -59,12 +59,14 @@ Rules:
 - Keep names identical across the tools of one server (`latitude`/`longitude` in the input of
   one tool should match what another tool returns, or the RELATED TOOLS chain breaks).
 
-## 1. Tool description — 2,048 characters, most important first
+## 1. Tool description — 4,096 characters, most important first
 
-The description is truncated at 2,048 characters on Claude Code, and re-sent on every request
-[Q7]. It is also paid for on every turn, relevant or not [Q5]. Treat it as a budget:
+The description is truncated at 4,096 characters on Claude Code 2.1.296+ for a tool sent up front
+(16,384 for one loaded through tool search) and on Cowork, and re-sent on every request [CC] [HD]
+[Q7]. Before 2.1.296 Claude Code cut at 2,048; those versions are no longer a target. It is also
+paid for on every turn, relevant or not [Q5]. Treat it as a budget:
 
-- **Hard limit 2,048; working ceiling ~1,800**, enforced by a test on `.length`, so an edit
+- **Hard limit 4,096; working ceiling ~3,600**, enforced by a test on `.length`, so an edit
   cannot silently push a rule past the cut.
 - **Order by what must be known before the first call.** Anything that interprets returned
   values can wait for the response.
@@ -103,11 +105,11 @@ needs them. The evals made that grouping literal: each moment has its own channe
 | and one more | FEEDBACK | one line in the head or instructions | only if a feedback mechanism exists |
 
 Why the third group moved: an INTERPRETATION block in the description arrived only up to char
-2,048 [Q7], and a description is written before the data exists, so it cannot be conditional on the
+2,048 [Q7] (4,096 on Cowork and on Claude Code 2.1.296+ [CC]), and a description is written before the data exists, so it cannot be conditional on the
 record. In the response it is always delivered and can be.
 
 **Naming the blocks costs little.** Eight headers are ~30–40 tokens per tool (~0.1% of a typical
-run, not separately measured), and ~110 chars of the 2,048 budget. Use the canonical names when
+run, not separately measured), and ~110 chars of the 4,096 budget. Use the canonical names when
 there is room: a model and a maintainer both find the blocks by name. Merge or rename a header only
 when the budget forces it, and say which block it stands for.
 
@@ -310,7 +312,7 @@ spec. `openWorldHint: true` whenever the tool calls an external system.
 
 ## Server instructions
 
-Claude Code cuts them at 2,048 like descriptions [Q7]; ChatGPT Chat cuts them at 512, claude.ai chat
+Claude Code cut them at 2,048 like descriptions up to 2.1.294 [Q7], at 4,096 since [CC]; ChatGPT Chat cuts them at 512, claude.ai chat
 and ChatGPT Work do not deliver them, and Codex prepends them to every tool description [HD]. Keep
 them ≤ 512. Use them for what spans tools:
 what the server is, what it does **not** have, "every data tool returns `interpretation` — read it
@@ -340,7 +342,7 @@ parameterless tool [Q8b]. `z.object({})` breaks parameterless tools — use `{}`
 ## Per-tool checklist
 
 - [ ] Name audit done: every numeric name has unit + scope; no name implies another quantity; calculated values say so; renames in a mapping table with reason + provenance
-- [ ] Description ≤ 2,048 (test), ceiling ~1,800, load-bearing sentences pinned to offsets
+- [ ] Description ≤ 4,096 (test), ceiling ~3,600, load-bearing sentences pinned to offsets
 - [ ] Description head: what it is and is NOT, "read `interpretation` first", record-independent rules as fact + instruction, input conventions
 - [ ] RETURNS names literal field identifiers
 - [ ] Input: typed, regex/enum where it prevents wrong-entity calls, working examples, valid-name lists, `queryIntent`, `summaryOnly`
@@ -360,7 +362,7 @@ parameterless tool [Q8b]. `z.object({})` breaks parameterless tools — use `{}`
 
 | anti-pattern | why | evidence |
 |---|---|---|
-| Interpretation past char 2,048 | never delivered | Q7 |
+| Interpretation past char 4,096 | not delivered on Cowork or on Claude Code for a tool sent up front | Q7, CC, HD |
 | Meaning only in output `.describe()` | never delivered | Q11 |
 | A readable name that implies another quantity | overrides the prose beside it | N2 |
 | An opaque code without a delivered glossary | confidently misread | N3, N6 |

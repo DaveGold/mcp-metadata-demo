@@ -1,0 +1,1544 @@
+{
+ "_comment": "Q22d: Q22b re-run with the alert DELIVERED. Q28 found that Q22b's alert sat in content beside a structuredContent echo, which Claude Code drops, so Q22b's 'alert read as a note' measured an absent alert. Here one experiment build of best (current source + patch below) serves the same header alert on a rendered table in two channels: content only (Q22b's form) or mirrored in both (the Q28 fix). Registered in evals/open-questions.md before the run; the haiku 4.5 batch was added, and registered, after the haiku 5.5 batch saturated.",
+ "date": "2026-10-26",
+ "question": "table-label-figures (evals/questions-apps.json)",
+ "protocol": "Portable harness (.claude/skills/rich-domain-mcp-server/references/harness), headless parent on Claude Code 2.1.296, 5 waves of 2+2 interleaved per batch, 0 retries. Both arms served locally over stdio from one build (MCP_VARIANT=best, Q22D_CHANNEL=content|mirror), live BAG/EP-Online. Scored on the LAST successful render_table call with the server check itself (tableAlerts returns nothing = CORRECT), as in Q22b/Q22c. Alert delivery read from the delivered tool_result in each subagent transcript.",
+ "build": {
+  "base_commit": "ea32aa0",
+  "patch": "diff --git a/src/tools/render-table.ts b/src/tools/render-table.ts\nindex cb8af7d..51d797a 100644\n--- a/src/tools/render-table.ts\n+++ b/src/tools/render-table.ts\n@@ -661,7 +661,9 @@ export function registerRenderTableTool(\n         // A header that names a calculated label figure as if it were consumption is refused, not\n         // flagged: a refusal is an error result, which every measured path delivers as text, and it\n         // was acted on 10/10 (evals/results/2026-09-24-q22c-table-refusal.json).\n-        const headerProblems = opts.best ? tableAlerts(args.columns, args.data) : [];\n+        // Q22d experiment build: the header check is an alert on a rendered table (as in Q22b), not a refusal.\n+        const q22d = process.env.Q22D_CHANNEL;\n+        const headerProblems = opts.best && !q22d ? tableAlerts(args.columns, args.data) : [];\n         if (headerProblems.length) {\n           await logToolCall({ auth, args, start, status: 'error' });\n           return { content: [{ type: 'text' as const, text: headerProblems.join(' ') }], isError: true };\n@@ -670,6 +672,15 @@ export function registerRenderTableTool(\n         await logToolCall({ auth, args, start, status: 'success' });\n \n         const rendered = `\"${args.title ?? 'Untitled'}\" — ${args.data.length} rows, ${args.columns.length} columns`;\n+        if (opts.best && q22d) {\n+          const alerts = tableAlerts(args.columns, args.data).map((a) => a.replace(/^Not rendered\\. /, 'Rendered, but check the headers: '));\n+          if (q22d === 'mirror') return bestRenderResult(alerts, rendered, { ...args });\n+          // q22d === 'content': Q22b's channel — the alerts only in the content text, the payload as structuredContent.\n+          return {\n+            content: [{ type: 'text' as const, text: JSON.stringify({ interpretation: { alerts, notes: [] }, rendered }) }],\n+            structuredContent: { ...args },\n+          };\n+        }\n         if (opts.best) return bestRenderResult(tableAlerts(args.columns, args.data), rendered, { ...args });\n         return {\n           content: [{ type: 'text' as const, text: `Table rendered: ${rendered}` }],\n",
+  "alert_text": "Rendered, but check the headers: \"<header>\": a label figure headed as if it were consumption. It is CALCULATED by the label method; say so in the header (e.g. \"EP-2 berekend (kWh/m²)\") and call render_table again."
+ },
+ "cells": [
+  {
+   "model": "claude-haiku-4-5-20251001",
+   "arm": "q22d-content",
+   "n": 10,
+   "correct": 8,
+   "alert_fired": 2,
+   "alert_delivered": 0,
+   "rerendered_after_alert": 0,
+   "fixed_after_alert": 0,
+   "prose_says_calculated": 10,
+   "median_tokens": 24472.5,
+   "render_errors": 0
+  },
+  {
+   "model": "claude-haiku-4-5-20251001",
+   "arm": "q22d-mirror",
+   "n": 10,
+   "correct": 10,
+   "alert_fired": 6,
+   "alert_delivered": 6,
+   "rerendered_after_alert": 6,
+   "fixed_after_alert": 6,
+   "prose_says_calculated": 9,
+   "median_tokens": 25670.5,
+   "render_errors": 0
+  },
+  {
+   "model": "claude-haiku-5-5",
+   "arm": "q22d-content",
+   "n": 10,
+   "correct": 10,
+   "alert_fired": 0,
+   "alert_delivered": 0,
+   "rerendered_after_alert": 0,
+   "fixed_after_alert": 0,
+   "prose_says_calculated": 10,
+   "median_tokens": 32296.5,
+   "render_errors": 0
+  },
+  {
+   "model": "claude-haiku-5-5",
+   "arm": "q22d-mirror",
+   "n": 10,
+   "correct": 10,
+   "alert_fired": 2,
+   "alert_delivered": 2,
+   "rerendered_after_alert": 2,
+   "fixed_after_alert": 2,
+   "prose_says_calculated": 10,
+   "median_tokens": 32708.0,
+   "render_errors": 0
+  }
+ ],
+ "headline": [
+  "A delivered alert is acted on. haiku 4.5: every run whose first table drew the alert re-rendered and fixed the headers when the alert was mirrored (6/6); with the alert in content only it never arrived and none did (0/2). Ends CORRECT: mirror 10/10, content 8/10.",
+  "haiku 5.5 (what 'haiku' resolves to now) is at ceiling on this question: 20/20 CORRECT; the alert fired twice, both in the mirror arm, both delivered and acted on (2/2).",
+  "Q22b's 'an alert after a successful render is read as a note' does not hold once the alert arrives. The refusal (Q22c, 10/10) stays the sure form for a fix that must happen; an alert is acted on when it is delivered, and delivery is the mirror rule of Q28."
+ ],
+ "predictions": {
+  "P1": {
+   "verdict": "FALSIFIED",
+   "detail": "Delivery part holds: the alert reached 0 of the 2 content runs it fired in, and 0 re-rendered. The score part fails: content ends 8/10 CORRECT, not <= 2/10, because 8/10 first tables were already marked. The baseline moved since Q22b (2026-09-24: 2/10), cross-sitting; the table description and schema have changed since."
+  },
+  "P2": {
+   "verdict": "CONFIRMED",
+   "detail": "mirror: alert delivered in 6/6 runs that fired (haiku 5.5: 2/2)"
+  },
+  "P3": {
+   "verdict": "CONFIRMED",
+   "detail": "mirror re-rendered in 6/10 runs, every run in which the alert fired (6/6)"
+  },
+  "P4": {
+   "verdict": "CONFIRMED",
+   "detail": "mirror 10/10 CORRECT"
+  },
+  "P5": {
+   "verdict": "CONFIRMED",
+   "detail": "mirror median tokens +4.9% of content (25,670.5 vs 24,472.5)"
+  }
+ },
+ "log_audit": {
+  "method": "No server-side log: a local stdio server has no request context, so logToolCall writes nothing. Calls are read from the host transcripts (the subagent tool_use and tool_result blocks), not from the models self-reports.",
+  "tool_uses_vs_transcript": "match in 40/40 runs"
+ },
+ "caveats": [
+  "n is small where it matters: the alert fired in 2 content and 6 mirror runs (haiku 4.5). The effect is 6/6 vs 0/2, not a rate.",
+  "Whether the first table is wrong is not controlled; it is the same model on the same question, so it is balanced by randomisation only (haiku 4.5 first-table wrong: content 2/10, mirror 6/10).",
+  "The experiment build is not a shipped arm: the shipped best refuses this header (Q22c). The patch is above.",
+  "Claude Code 2.1.296 only; the mirror delivers on claude.ai and ChatGPT too (Q28), but no chat host was run here.",
+  "haiku 4.5 is pinned via ANTHROPIC_DEFAULT_HAIKU_MODEL; the haiku 5.5 batch is reported, not scored against P1-P5."
+ ],
+ "runs": [
+  {
+   "batch": "haiku-4.5",
+   "wave": 1,
+   "slot": 1,
+   "arm": "q22d-content",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 24448,
+   "duration_ms": 21416,
+   "answer_chars": 987,
+   "answer": "ANSWER: Both buildings hold an A energy label and are calculated figures by the NTA 8800 method (not measured consumption). Gustav Mahlerlaan 10 (Amsterdam, 1999 office) has lower heat demand (16.46 kWh/m²) but higher primary fossil energy (179.06 kWh/m²) due to its utility use profile, and includes 21.6% renewable energy. Van Beuningenstraat 1 (Rotterdam, 1937 apartment) shows much higher heat demand (99.12 kWh/m²) reflecting its age, with no renewable energy contribution and lower primary fossil energy (156.01 kWh/m²). Note: the Rotterdam address is one of three residential units in the building; only that single unit's label is shown.\n\nCALLS: 2\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Fetch energy label figures for Gustav Mahlerlaan 10 Amsterdam\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Fetch energy label figures for Van Beuningenstraat 1 Rotterdam\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy label",
+      "Building type",
+      "Built",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Renewable energy (%)",
+      "CO₂ berekend (kg/m²)",
+      "Total energy berekend (kWh/m²)",
+      "Heat demand berekend (kWh/m²)"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 1,
+   "slot": 2,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 24892,
+   "duration_ms": 26154,
+   "answer_chars": 1941,
+   "answer": "ANSWER: Both buildings hold an A energy label (the best under NTA 8800). Gustav Mahlerlaan 10 is a large 1999 office building with higher EP-2 (primary fossil) and CO₂ per m² but 21.6% renewable energy; Van Beuningenstraat 1-01 is a small 1937 residential apartment with lower EP-2 and CO₂ but no renewable energy. Note: Van Beuningenstraat 1 contains 3 units (01, 02, BG); the table shows unit 01, the first match returned.\n\nCALLS: 2\nTOOLS: mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Retrieve energy label data for Gustav Mahlerlaan 10 Amsterdam for side-by-side comparison\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Retrieve energy label data for Van Beuningenstraat 1 Rotterdam for side-by-side comparison\"},{\"title\":\"Energy-label figures: Gustav Mahlerlaan 10 vs Van Beuningenstraat 1\",\"columns\":[{\"key\":\"address\",\"header\":\"Address\",\"type\":\"text\"},{\"key\":\"label\",\"header\":\"Energy Label\",\"type\":\"badge\",\"badgeMap\":{\"A\":{\"color\":\"green\",\"label\":\"A\"},\"B\":{\"color\":\"green\",\"label\":\"B\"},\"C\":{\"color\":\"green\",\"label\":\"C\"},\"D\":{\"color\":\"yellow\",\"label\":\"D\"},\"E\":{\"color\":\"orange\",\"label\":\"E\"},\"F\":{\"color\":\"orange\",\"label\":\"F\"},\"G\":{\"color\":\"red\",\"label\":\"G\"}}},{\"key\":\"ep1\",\"header\":\"EP-1 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"ep2\",\"header\":\"EP-2 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"renewable\",\"header\":\"Renewable share (%)\",\"type\":\"percentage\"},{\"key\":\"co2\",\"header\":\"CO₂ berekend (kg/m²)\",\"type\":\"number\"},{\"key\":\"usage\",\"header\":\"Building usage\",\"type\":\"text\"},{\"key\":\"year\",\"header\":\"Built\",\"type\":\"text\"}],\"data\":[[\"Gustav Mahlerlaan 10, Amsterdam (1082PP)\",\"A\",81.68,179.06,0.216,53.47,\"Office (kantoorfunctie)\",\"1999\"],[\"Van Beuningenstraat 1-01, Rotterdam (3039WB)\",\"A\",110.74,156.01,0,28.59,\"Residential (woonfunctie)\",\"1937\"]],\"queryIntent\":\"Side-by-side comparison of energy-label figures for two addresses\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy Label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Renewable share (%)",
+      "CO₂ berekend (kg/m²)",
+      "Building usage",
+      "Built"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 1,
+   "slot": 3,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 2,
+   "alert_fired": true,
+   "alert_delivered": true,
+   "rerendered_after_alert": true,
+   "prose_says_calculated": true,
+   "tool_uses": 4,
+   "subagent_tokens": 26212,
+   "duration_ms": 29897,
+   "answer_chars": 1826,
+   "answer": "ANSWER: The table above shows the energy-label figures (EP-1, EP-2, renewable share, CO₂, and heat demand) calculated by the NTA 8800 method for both addresses. Both hold energy label A. The Gustav Mahlerlaan office (1999, 118,174 m² thermal zone) has lower heating demand (16.46 kWh/m²) but higher primary fossil energy (179 kWh/m²). Van Beuningenstraat 1-01 (1937, one of three residential units) shows significant heating demand (99.12 kWh/m²) as a historic apartment building with no renewable contribution. *Note: Van Beuningenstraat has 3 verblijfsobjecten; this row is the first unit only.\n\nCALLS: 3\nTOOLS: get_building_profile, get_building_profile, render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Fetch energy label and building data for Gustav Mahlerlaan 10, Amsterdam\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Fetch energy label and building data for Van Beuningenstraat 1, Rotterdam\"},{\"type\":\"table\",\"title\":\"Energy-label figures: Gustav Mahlerlaan 10 vs Van Beuningenstraat 1\",\"columns\":[{\"key\":\"address\",\"header\":\"Address\",\"type\":\"text\"},{\"key\":\"energielabel\",\"header\":\"Energy Label\",\"type\":\"badge\"},{\"key\":\"ep1\",\"header\":\"EP-1 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"ep2\",\"header\":\"EP-2 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"renewable\",\"header\":\"Hernieuwbare energie berekend (%)\",\"type\":\"percentage\"},{\"key\":\"co2\",\"header\":\"CO₂ berekend (kg/m²)\",\"type\":\"number\"},{\"key\":\"heating\",\"header\":\"Warmtebehoefte berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"purpose\",\"header\":\"Gebruiksdoel\",\"type\":\"text\"},{\"key\":\"year\",\"header\":\"Bouwjaar\",\"type\":\"text\"}],\"data\":[[\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"A\",81.68,179.06,0.216,53.47,16.46,\"Kantoorfunctie\",\"1999\"],[\"Van Beuningenstraat 1-01, 3039WB Rotterdam*\",\"A\",110.74,156.01,0.0,28.59,99.12,\"Woonfunctie\",\"1937\"]]}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy Label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Hernieuwbare energie (%)",
+      "CO₂ berekend (kg/m²)",
+      "Warmtebehoefte (kWh/m²)",
+      "Gebruiksdoel",
+      "Bouwjaar"
+     ],
+     "error": false,
+     "alert_fired": true,
+     "alert_delivered": true
+    },
+    {
+     "headers": [
+      "Address",
+      "Energy Label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Hernieuwbare energie berekend (%)",
+      "CO₂ berekend (kg/m²)",
+      "Warmtebehoefte berekend (kWh/m²)",
+      "Gebruiksdoel",
+      "Bouwjaar"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 1,
+   "slot": 4,
+   "arm": "q22d-content",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 25122,
+   "duration_ms": 27576,
+   "answer_chars": 834,
+   "answer": "ANSWER: Both buildings hold an A energy label. Gustav Mahlerlaan 10 (Amsterdam, 1999 office) has higher calculated fossil energy use (EP-2: 179.06 kWh/m²) and CO₂ emissions (53.47 kg/m²), but includes 21.6% renewable energy. Van Beuningenstraat 1-01 (Rotterdam, 1937 residential) shows lower EP-2 (156.01) and substantially lower CO₂ (28.59), with no renewable share. Note: Rotterdam's figures are for the first of 3 residential units at that address; all energy figures are calculated by the NTA 8800 label method, not metered consumption.\n\nCALLS: 2\nTOOLS: get_building_profile, render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"fetch energy label figures for Gustav Mahlerlaan 10 Amsterdam\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"fetch energy label figures for Van Beuningenstraat 1 Rotterdam\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Renewable share berekend (%)",
+      "CO₂ berekend (kg/m²)",
+      "Build year",
+      "Usage type"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 2,
+   "slot": 1,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 2,
+   "alert_fired": true,
+   "alert_delivered": true,
+   "rerendered_after_alert": true,
+   "prose_says_calculated": true,
+   "tool_uses": 4,
+   "subagent_tokens": 25391,
+   "duration_ms": 25261,
+   "answer_chars": 1738,
+   "answer": "ANSWER: The table above compares the energy-label figures (all calculated by NTA 8800 method, not measured) for both buildings. Both have energy label A. Gustav Mahlerlaan 10 is a 1999 office building with lower heat demand (16.46 kWh/m²) but higher primary fossil energy (179.06 kWh/m²) and 21.6% renewable share. Van Beuningenstraat 1-01 is a 1937 residential apartment with much higher heat demand (99.12 kWh/m²), lower fossil energy (156.01 kWh/m²), and 0% renewable share. Note: Van Beuningenstraat has 3 residential units; this profile covers the first unit (1-01) only.\n\nCALLS: 3\nTOOLS: get_building_profile, get_building_profile, render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Get energy label figures for Gustav Mahlerlaan 10, Amsterdam\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Get energy label figures for Van Beuningenstraat 1, Rotterdam\"},{\"title\":\"Energy-label figures (calculated): Gustav Mahlerlaan 10 (Amsterdam) vs Van Beuningenstraat 1 (Rotterdam)\",\"columns\":[{\"key\":\"metric\",\"header\":\"Metric\",\"type\":\"text\"},{\"key\":\"gustav\",\"header\":\"Gustav Mahlerlaan 10, Amsterdam (1082PP)\",\"type\":\"text\"},{\"key\":\"vanbeuningen\",\"header\":\"Van Beuningenstraat 1-01, Rotterdam (3039WB)\",\"type\":\"text\"}],\"data\":[[\"Energy label\",\"A\",\"A\"],[\"EP-1 berekend (kWh/m²)\",\"81.68\",\"110.74\"],[\"EP-2 berekend (kWh/m²)\",\"179.06\",\"156.01\"],[\"Renewable share berekend (%)\",\"21.6\",\"0\"],[\"CO₂ berekend (kg/m²/year)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte berekend (kWh/m²/year)\",\"16.46\",\"99.12\"],[\"Building type\",\"Office (utility)\",\"Apartment (residential)\"],[\"Construction year\",\"1999\",\"1937\"],[\"Thermal zone area (m²)\",\"118,174\",\"92\"]],\"queryIntent\":\"Compare energy-label figures for two Dutch buildings side by side\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Metric",
+      "Gustav Mahlerlaan 10, Amsterdam (1082PP)",
+      "Van Beuningenstraat 1-01, Rotterdam (3039WB)"
+     ],
+     "error": false,
+     "alert_fired": true,
+     "alert_delivered": true
+    },
+    {
+     "headers": [
+      "Metric",
+      "Gustav Mahlerlaan 10, Amsterdam (1082PP)",
+      "Van Beuningenstraat 1-01, Rotterdam (3039WB)"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 2,
+   "slot": 2,
+   "arm": "q22d-content",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 24944,
+   "duration_ms": 26041,
+   "answer_chars": 1032,
+   "answer": "ANSWER: Both buildings hold energy label A. Gustav Mahlerlaan 10 (1999 office building, 118,174 m² thermal zone) has lower net energy demand (EP-1: 81.68 kWh/m²) but higher primary fossil energy use (EP-2: 179.06 kWh/m²) and higher CO₂ emissions (53.47 kg/m²) than Van Beuningenstraat 1-01 (1937 apartment, 92 m² thermal zone). The apartment has significantly higher heat demand (99.12 vs 16.46 kWh/m²) and zero renewable energy, while the office includes 21.6% renewable sources. Note: Van Beuningenstraat 1 contains three separate units; this profile shows the first unit (1-01). All figures are calculated by the NTA 8800 method, not measured energy consumption.\nCALLS: 2\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Fetch energy label and building profile for Gustav Mahlerlaan 10 Amsterdam\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Fetch energy label and building profile for Van Beuningenstraat 1 Rotterdam\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Building type",
+      "Year",
+      "Energy label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "CO₂ berekend (kg/m²)",
+      "Heat demand berekend (kWh/m²)",
+      "Renewable share (%)",
+      "Thermal zone (m²)"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 2,
+   "slot": 3,
+   "arm": "q22d-content",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 24053,
+   "duration_ms": 19422,
+   "answer_chars": 776,
+   "answer": "ANSWER: The table above presents the energy-label figures for both buildings side by side. Both hold an A energy label, but Gustav Mahlerlaan is an office building (1999) while Van Beuningenstraat 1-01 is a residential apartment (1937). All figures are calculated by the NTA 8800 method, not measured consumption. Note: Van Beuningenstraat has three units; the data shown is for unit 01 only. The residential unit has significant overheating risk (indicator 3.59), while the office building has none.\n\nCALLS: 2\n\nTOOLS: get_building_profile, render_table\n\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"fetch energy label figures for Gustav Mahlerlaan 10\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"fetch energy label figures for Van Beuningenstraat 1\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Metric",
+      "Gustav Mahlerlaan 10, Amsterdam",
+      "Van Beuningenstraat 1, Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 2,
+   "slot": 4,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": false,
+   "tool_uses": 3,
+   "subagent_tokens": 24112,
+   "duration_ms": 17976,
+   "answer_chars": 700,
+   "answer": "ANSWER: Both buildings hold energy label A. Gustav Mahlerlaan 10 (Amsterdam office, 1999) has higher primary fossil energy (EP-2: 179.06 kWh/m²) with 21.6% renewable energy, while Van Beuningenstraat 1-01 (Rotterdam apartment, 1937) has lower EP-2 (156.01 kWh/m²) but much higher heat demand (99.12 kWh/m²) and zero renewable energy. Note: Van Beuningenstraat 1 contains 3 separate units; this table shows unit -01 only.\n\nCALLS: 2\n\nTOOLS: get_building_profile, render_table\n\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Fetch energy label for Gustav Mahlerlaan 10 Amsterdam\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Fetch energy label for Van Beuningenstraat 1 Rotterdam\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Renewable energy (%)",
+      "CO₂ emissions berekend (kg/m²)",
+      "Energy consumption berekend (kWh/m²)",
+      "Heat requirement berekend (kWh/m²)",
+      "Built",
+      "Building type"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 3,
+   "slot": 1,
+   "arm": "q22d-content",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "wrong",
+   "render_calls": 1,
+   "alert_fired": true,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 24379,
+   "duration_ms": 21103,
+   "answer_chars": 901,
+   "answer": "ANSWER: Both buildings carry an A energy label. The Amsterdam office (Gustav Mahlerlaan 10, 1999) shows lower energy demand (EP-1 81.68 kWh/m²) but higher primary fossil energy (EP-2 179.06) and CO₂ per square metre (53.47 kg/m²); it includes 21.6% renewable energy. The Rotterdam apartment (Van Beuningenstraat 1-01, 1937) has higher net demand (EP-1 110.74) but lower primary energy (EP-2 156.01), much higher heating demand (99.12 kWh/m²), and lower CO₂ intensity (28.59 kg/m²), though it currently sources no renewable energy. All figures are calculated by the NTA 8800 label method, not measured consumption.\n\nCALLS: 2\nTOOLS: get_building_profile, render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Fetch energy label data for Gustav Mahlerlaan 10 Amsterdam\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Fetch energy label data for Van Beuningenstraat 1 Rotterdam\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy label",
+      "Built",
+      "Building class",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Warmtebehoefte (kWh/m²)",
+      "CO₂ emissie berekend (kg/m²)",
+      "Hernieuwbare energie (%)",
+      "Thermische zone (m²)"
+     ],
+     "error": false,
+     "alert_fired": true,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 3,
+   "slot": 2,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 24968,
+   "duration_ms": 25553,
+   "answer_chars": 2241,
+   "answer": "ANSWER: The table above shows the calculated energy label figures for both buildings, both rated A. Gustav Mahlerlaan 10 (Amsterdam, 1999 office building) has lower net energy demand (EP1: 81.68 vs 110.74 kWh/m²) but higher primary fossil energy (EP2: 179.06 vs 156.01 kWh/m²) than the Rotterdam address. The Rotterdam building (1937 residential apartment 1-01) has much higher heat demand (99.12 vs 16.46 kWh/m²); note that Van Beuningenstraat 1 contains 3 separate units, and this table shows only the first one. All figures are calculated by the NTA 8800 method and are not metered consumption.\n\nCALLS: 3\nTOOLS: get_building_profile, get_building_profile, render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Retrieve energy label figures for Gustav Mahlerlaan 10 Amsterdam\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Retrieve energy label figures for Van Beuningenstraat 1 Rotterdam\"},{\"title\":\"Energy Label Figures: Gustav Mahlerlaan 10 (Amsterdam) vs Van Beuningenstraat 1 (Rotterdam)\",\"columns\":[{\"key\":\"address\",\"header\":\"Address\",\"type\":\"text\"},{\"key\":\"label\",\"header\":\"Energy Label\",\"type\":\"badge\",\"badgeMap\":{\"A\":{\"color\":\"green\",\"label\":\"A\"},\"B\":{\"color\":\"green\",\"label\":\"B\"},\"C\":{\"color\":\"yellow\",\"label\":\"C\"},\"D\":{\"color\":\"orange\",\"label\":\"D\"},\"E\":{\"color\":\"red\",\"label\":\"E\"}}},{\"key\":\"bouwjaar\",\"header\":\"Built\",\"type\":\"text\"},{\"key\":\"type\",\"header\":\"Building type\",\"type\":\"text\"},{\"key\":\"ep1\",\"header\":\"EP1 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"ep2\",\"header\":\"EP2 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"warmtebehoefte\",\"header\":\"Heat demand berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"renewable\",\"header\":\"Renewable energy berekend (%)\",\"type\":\"percentage\"},{\"key\":\"co2\",\"header\":\"CO₂ emissions berekend (kg/m²)\",\"type\":\"number\"}],\"data\":[{\"address\":\"Gustav Mahlerlaan 10\\n1082PP Amsterdam\",\"label\":\"A\",\"bouwjaar\":\"1999\",\"type\":\"Office building\",\"ep1\":81.68,\"ep2\":179.06,\"warmtebehoefte\":16.46,\"renewable\":0.216,\"co2\":53.47},{\"address\":\"Van Beuningenstraat 1-01\\n3039WB Rotterdam\",\"label\":\"A\",\"bouwjaar\":\"1937\",\"type\":\"Apartment (corner)\",\"ep1\":110.74,\"ep2\":156.01,\"warmtebehoefte\":99.12,\"renewable\":0,\"co2\":28.59}],\"queryIntent\":\"Compare energy label figures between two buildings\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy Label",
+      "Built",
+      "Building type",
+      "EP1 berekend (kWh/m²)",
+      "EP2 berekend (kWh/m²)",
+      "Heat demand berekend (kWh/m²)",
+      "Renewable energy berekend (%)",
+      "CO₂ emissions berekend (kg/m²)"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 3,
+   "slot": 3,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 2,
+   "alert_fired": true,
+   "alert_delivered": true,
+   "rerendered_after_alert": true,
+   "prose_says_calculated": true,
+   "tool_uses": 4,
+   "subagent_tokens": 26212,
+   "duration_ms": 29697,
+   "answer_chars": 2534,
+   "answer": "Both addresses hold an **A energy label**. The key contrasts: Gustav Mahlerlaan 10 is a 1999 office building with much lower heating demand (16.5 kWh/m²) and higher primary fossil energy per m² (179 kWh/m²) but 21.6% renewable share; Van Beuningenstraat 1-01 is a 1937 apartment with significant heating demand (99 kWh/m²), lower fossil energy (156 kWh/m²), zero renewables, and lower CO₂ intensity. Note: all figures are **calculated by the NTA 8800 method, not measured**. The Rotterdam address is one of 3 dwelling units in the building.\n\nANSWER: Both buildings hold an A energy label. The office (Gustav Mahlerlaan 10, 1999) has lower heating demand (16.5 kWh/m²) but higher primary fossil energy (179 kWh/m²) with 21.6% renewables; the apartment (Van Beuningenstraat 1-01, 1937) has substantial heating demand (99 kWh/m²) and zero renewables but slightly lower fossil energy (156 kWh/m²). All figures are calculated by the NTA 8800 method and per thermal-zone m².\nCALLS: 2\nTOOLS: mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Fetch energy label figures for Gustav Mahlerlaan 10 Amsterdam\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Fetch energy label figures for Van Beuningenstraat 1 Rotterdam\"}], [{\"title\":\"Energy Label Figures: Two Addresses\",\"queryIntent\":\"Compare energy label figures for Gustav Mahlerlaan 10 Amsterdam and Van Beuningenstraat 1 Rotterdam\",\"columns\":[{\"key\":\"address\",\"header\":\"Address\",\"type\":\"text\"},{\"key\":\"label\",\"header\":\"Energy Label\",\"type\":\"badge\",\"badgeMap\":{\"A\":{\"color\":\"green\",\"label\":\"A\"},\"B\":{\"color\":\"green\",\"label\":\"B\"},\"C\":{\"color\":\"yellow\",\"label\":\"C\"},\"D\":{\"color\":\"orange\",\"label\":\"D\"},\"E\":{\"color\":\"red\",\"label\":\"E\"},\"F\":{\"color\":\"red\",\"label\":\"F\"},\"G\":{\"color\":\"red\",\"label\":\"G\"}}},{\"key\":\"ep1\",\"header\":\"EP-1 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"ep2\",\"header\":\"EP-2 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"warmte\",\"header\":\"Warmtebehoefte berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"renewable\",\"header\":\"Hernieuwbare % berekend\",\"type\":\"percentage\"},{\"key\":\"co2\",\"header\":\"CO₂-emissie berekend (kg/m²)\",\"type\":\"number\"},{\"key\":\"buildingType\",\"header\":\"Gebruiksdoel\",\"type\":\"text\"},{\"key\":\"yearBuilt\",\"header\":\"Bouwjaar\",\"type\":\"text\"}],\"data\":[[\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"A\",81.68,179.06,16.46,0.216,53.47,\"Kantoor (utiliteitsbouw)\",\"1999\"],[\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"A\",110.74,156.01,99.12,0,28.59,\"Woning (appartement)\",\"1937\"]]}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy Label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Warmtebehoefte (kWh/m²)",
+      "Hernieuwbare % berekend",
+      "CO₂-emissie (kg/m²)",
+      "Gebruiksdoel",
+      "Bouwjaar"
+     ],
+     "error": false,
+     "alert_fired": true,
+     "alert_delivered": true
+    },
+    {
+     "headers": [
+      "Address",
+      "Energy Label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Warmtebehoefte berekend (kWh/m²)",
+      "Hernieuwbare % berekend",
+      "CO₂-emissie berekend (kg/m²)",
+      "Gebruiksdoel",
+      "Bouwjaar"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 3,
+   "slot": 4,
+   "arm": "q22d-content",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 24393,
+   "duration_ms": 21092,
+   "answer_chars": 1129,
+   "answer": "ANSWER: Both buildings hold an A energy label. The Gustav Mahlerlaan office (1999) shows lower net energy demand (EP1: 81.68 vs 110.74 kWh/m²) but higher primary fossil energy (EP2: 179.06 vs 156.01 kWh/m²); it also includes 21.6% renewable energy, whereas the Rotterdam apartment (1937, unit 01) has none. All figures shown are calculated by the NTA 8800 label method, not measured consumption. Note: Van Beuningenstraat 1 contains 3 units; the table shows unit 01.\n\nCALLS: 3\nTOOLS: get_building_profile, get_building_profile, render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10},{\"postcode\":\"3039WB\",\"huisnummer\":1},{\"title\":\"Energy Label Figures: Gustav Mahlerlaan 10 (Amsterdam) & Van Beuningenstraat 1 (Rotterdam)\",\"data\":[{\"address\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"buildingType\":\"Kantoorfunctie (office)\",\"yearBuilt\":1999,\"label\":\"A\",\"ep1\":81.68,\"ep2\":179.06,\"renewable\":21.6,\"co2\":53.47,\"area\":118174},{\"address\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"buildingType\":\"Woonfunctie (residential apartment)\",\"yearBuilt\":1937,\"label\":\"A\",\"ep1\":110.74,\"ep2\":156.01,\"renewable\":0,\"co2\":28.59,\"area\":92}]}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Building Type",
+      "Year Built",
+      "Energy Label",
+      "EP1 berekend (kWh/m²)",
+      "EP2 berekend (kWh/m²)",
+      "Renewable share (%)",
+      "CO2 berekend (kg/m²)",
+      "Thermal zone area (m²)"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 4,
+   "slot": 1,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 24827,
+   "duration_ms": 23187,
+   "answer_chars": 1763,
+   "answer": "ANSWER: Both buildings hold energy label A. Gustav Mahlerlaan 10 (Amsterdam office, 1999) shows lower heating needs (16.46 kWh/m²) but higher fossil primary energy (179.06 kWh/m²) and CO₂ (53.47 kg/m²) per m². Van Beuningenstraat 1-01 (Rotterdam apartment, 1937) shows much higher heating needs (99.12 kWh/m²) typical of older residential stock, with lower fossil primary energy (156.01 kWh/m²) and CO₂ (28.59 kg/m²) per m². Note: Van Beuningenstraat contains 3 units; this table shows unit 01 only.\n\nCALLS: 3\nTOOLS: get_building_profile, get_building_profile, render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10},{\"postcode\":\"3039WB\",\"huisnummer\":1},{\"title\":\"Energy label figures (berekend)\",\"columns\":[{\"key\":\"address\",\"header\":\"Address\",\"type\":\"text\"},{\"key\":\"label\",\"header\":\"Energy label\",\"type\":\"badge\"},{\"key\":\"ep1\",\"header\":\"EP-1 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"ep2\",\"header\":\"EP-2 primair fossiel berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"co2\",\"header\":\"CO₂ emissie berekend (kg/m²)\",\"type\":\"number\"},{\"key\":\"renewable\",\"header\":\"Hernieuwbare energie (%)\",\"type\":\"percentage\"},{\"key\":\"heating\",\"header\":\"Warmtebehoefte berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"usage\",\"header\":\"Energieverbruik berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"year\",\"header\":\"Bouwjaar\",\"type\":\"text\"},{\"key\":\"purpose\",\"header\":\"Gebruiksdoel\",\"type\":\"text\"}],\"data\":[{\"address\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"label\":\"A\",\"ep1\":81.68,\"ep2\":179.06,\"co2\":53.47,\"renewable\":0.216,\"heating\":16.46,\"usage\":229.17,\"year\":\"1999\",\"purpose\":\"Kantoor\"},{\"address\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"label\":\"A\",\"ep1\":110.74,\"ep2\":156.01,\"co2\":28.59,\"renewable\":0,\"heating\":99.12,\"usage\":155.77,\"year\":\"1937\",\"purpose\":\"Woning (appartement)\"}]}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 primair fossiel berekend (kWh/m²)",
+      "CO₂ emissie berekend (kg/m²)",
+      "Hernieuwbare energie (%)",
+      "Warmtebehoefte berekend (kWh/m²)",
+      "Energieverbruik berekend (kWh/m²)",
+      "Bouwjaar",
+      "Gebruiksdoel"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 4,
+   "slot": 2,
+   "arm": "q22d-content",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 24497,
+   "duration_ms": 21518,
+   "answer_chars": 845,
+   "answer": "ANSWER: The table above shows the calculated energy-label figures for both buildings side by side, both rated A. Gustav Mahlerlaan 10 (1999 office) has lower EP-1 (81.68 vs 110.74 kWh/m²) and higher renewable-energy share (21.6% vs 0%), reflecting its modern systems and larger building scale. Van Beuningenstraat 1 (1937 apartment, unit 1-01 of 3) shows high heating demand (99.12 kWh/m²) typical of older residential stock. All figures are calculated by the NTA 8800 label method, not metered consumption.\n\nCALLS: 2\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Get energy label figures for Gustav Mahlerlaan 10 Amsterdam\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Get energy label figures for Van Beuningenstraat 1 Rotterdam\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Warmtebehoefte berekend (kWh/m²)",
+      "Hernieuwbare energie (%)",
+      "CO₂ emissie berekend (kg/m²)",
+      "Bouwjaar",
+      "Gebouwtype"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 4,
+   "slot": 3,
+   "arm": "q22d-content",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 24273,
+   "duration_ms": 20405,
+   "answer_chars": 864,
+   "answer": "ANSWER: Both buildings hold energy label A. Gustav Mahlerlaan 10 (office, 1999) shows lower primary fossil energy (EP2) at 179.06 kWh/m², while the Rotterdam apartment (1937) scores 156.01 kWh/m². The apartment's heating demand is significantly higher (99.12 vs 16.46 kWh/m²); the office benefits from 21.6% renewable energy, whereas the apartment has none. Note: Van Beuningenstraat 1 contains 3 units; this table shows the first unit (1-01) only. All figures are calculated per NTA 8800 method, not metered.\n\nCALLS: 2\n\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\n\nPARAMS: [{\"postcode\": \"1082PP\", \"huisnummer\": 10, \"queryIntent\": \"Fetch energy label figures for Gustav Mahlerlaan 10 Amsterdam\"}, {\"postcode\": \"3039WB\", \"huisnummer\": 1, \"queryIntent\": \"Fetch energy label figures for Van Beuningenstraat 1 Rotterdam\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Metric",
+      "Gustav Mahlerlaan 10 (1082PP Amsterdam)",
+      "Van Beuningenstraat 1-01 (3039WB Rotterdam)"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 4,
+   "slot": 4,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 2,
+   "alert_fired": true,
+   "alert_delivered": true,
+   "rerendered_after_alert": true,
+   "prose_says_calculated": true,
+   "tool_uses": 4,
+   "subagent_tokens": 26116,
+   "duration_ms": 28830,
+   "answer_chars": 2186,
+   "answer": "ANSWER: Both buildings hold an A energy label. The Amsterdam office (Gustav Mahlerlaan 10, 1999) shows lower net energy demand (EP-1 81.68 kWh/m²) and includes 21.6% renewable energy, whereas the Rotterdam residential unit (1-01, 1937) requires significantly more heat (99.12 kWh/m² warmtebehoefte) with no renewable share. The office's large thermal zone (118,174 m²) and lower CO2 emissions (53.47 kg/m²) reflect modern climate control infrastructure, while the older apartment (92 m² zone, 28.59 kg CO2/m²) shows typical early-20th-century construction. All figures are calculated by the NTA 8800 label method, not measured consumption.\nCALLS: 3\nTOOLS: get_building_profile, get_building_profile, render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Fetch energy label data for Gustav Mahlerlaan 10\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Fetch energy label data for Van Beuningenstraat 1\"},{\"title\":\"Energy Label Figures: Gustav Mahlerlaan 10 (Amsterdam) vs Van Beuningenstraat 1-01 (Rotterdam)\",\"columns\":[{\"key\":\"address\",\"header\":\"Address\",\"type\":\"text\"},{\"key\":\"label\",\"header\":\"Energy Label\",\"type\":\"badge\",\"badgeMap\":{\"A\":{\"color\":\"green\",\"label\":\"A\"},\"B\":{\"color\":\"green\",\"label\":\"B\"},\"C\":{\"color\":\"yellow\",\"label\":\"C\"},\"D\":{\"color\":\"yellow\",\"label\":\"D\"},\"E\":{\"color\":\"orange\",\"label\":\"E\"},\"F\":{\"color\":\"red\",\"label\":\"F\"},\"G\":{\"color\":\"red\",\"label\":\"G\"}}},{\"key\":\"building_type\",\"header\":\"Building Type\",\"type\":\"text\"},{\"key\":\"year\",\"header\":\"Built\",\"type\":\"text\"},{\"key\":\"ep1\",\"header\":\"EP-1 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"ep2\",\"header\":\"EP-2 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"renewable\",\"header\":\"Renewable Share (%)\",\"type\":\"percentage\"},{\"key\":\"co2\",\"header\":\"CO₂ berekend (kg/m²)\",\"type\":\"number\"},{\"key\":\"heating\",\"header\":\"Warmtebehoefte berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"area\",\"header\":\"Thermal Zone (m²)\",\"type\":\"number\"}],\"data\":[[\"Gustav Mahlerlaan 10, Amsterdam\",\"A\",\"Office\",\"1999\",81.68,179.06,0.216,53.47,16.46,118174],[\"Van Beuningenstraat 1-01, Rotterdam\",\"A\",\"Residential\",\"1937\",110.74,156.01,0,28.59,99.12,92]],\"queryIntent\":\"Compare energy-label figures for two buildings side by side\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy Label",
+      "Building Type",
+      "Built",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Renewable Share (%)",
+      "CO₂ berekend (kg/m²)",
+      "Heat Demand (kWh/m²)",
+      "Thermal Zone (m²)"
+     ],
+     "error": false,
+     "alert_fired": true,
+     "alert_delivered": true
+    },
+    {
+     "headers": [
+      "Address",
+      "Energy Label",
+      "Building Type",
+      "Built",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Renewable Share (%)",
+      "CO₂ berekend (kg/m²)",
+      "Warmtebehoefte berekend (kWh/m²)",
+      "Thermal Zone (m²)"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 5,
+   "slot": 1,
+   "arm": "q22d-content",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 25426,
+   "duration_ms": 29046,
+   "answer_chars": 2517,
+   "answer": "ANSWER: Both buildings hold an A energy label (calculated figures). The Amsterdam office (1999, 118,174 m² thermal zone) has lower energy demand (EP-1: 81.68 kWh/m²) but higher primary fossil energy use (EP-2: 179.06 kWh/m²) with 21.6% renewable share. The Rotterdam unit -01 (1937, 92 m² thermal zone) shows higher energy demand (EP-1: 110.74 kWh/m²), lower primary fossil energy (EP-2: 156.01 kWh/m²), no renewables, 6× the heat demand (99.12 vs 16.46 kWh/m²), and significant overheating risk (3.59). Note: Van Beuningenstraat 1 has three residential units; the table shows unit -01; CO2 figures are calculated per m² of thermal zone, not metered consumption.\n\nCALLS: 2\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: [{\"postcode\": \"1082PP\", \"huisnummer\": 10, \"queryIntent\": \"Fetch energy label figures for Gustav Mahlerlaan 10 Amsterdam\"}, {\"postcode\": \"3039WB\", \"huisnummer\": 1, \"queryIntent\": \"Fetch energy label figures for Van Beuningenstraat 1 Rotterdam\"}, {\"title\": \"Energy label figures: Gustav Mahlerlaan 10 vs Van Beuningenstraat 1\", \"columns\": [{\"key\": \"address\", \"header\": \"Address\", \"type\": \"text\"}, {\"key\": \"label\", \"header\": \"Energy label\", \"type\": \"badge\", \"badgeMap\": {\"A\": {\"color\": \"green\"}, \"B\": {\"color\": \"green\"}, \"C\": {\"color\": \"yellow\"}, \"D\": {\"color\": \"orange\"}, \"E\": {\"color\": \"red\"}, \"F\": {\"color\": \"red\"}, \"G\": {\"color\": \"red\"}}}, {\"key\": \"ep1\", \"header\": \"EP-1 berekend (kWh/m2)\", \"type\": \"number\"}, {\"key\": \"ep2\", \"header\": \"EP-2 berekend (kWh/m2)\", \"type\": \"number\"}, {\"key\": \"renewable\", \"header\": \"Renewable share berekend (%)\", \"type\": \"percentage\"}, {\"key\": \"co2\", \"header\": \"CO2 berekend (kg/m2)\", \"type\": \"number\"}, {\"key\": \"heat\", \"header\": \"Heat demand berekend (kWh/m2)\", \"type\": \"number\"}, {\"key\": \"overheating\", \"header\": \"Overheating risk indicator\", \"type\": \"number\"}, {\"key\": \"buildyear\", \"header\": \"Build year\", \"type\": \"text\"}, {\"key\": \"usage\", \"header\": \"Usage\", \"type\": \"text\"}], \"data\": [{\"address\": \"Gustav Mahlerlaan 10, 1082PP Amsterdam\", \"label\": \"A\", \"ep1\": 81.68, \"ep2\": 179.06, \"renewable\": 0.216, \"co2\": 53.47, \"heat\": 16.46, \"overheating\": 0, \"buildyear\": \"1999\", \"usage\": \"Office (kantoorfunctie)\"}, {\"address\": \"Van Beuningenstraat 1-01, 3039WB Rotterdam\", \"label\": \"A\", \"ep1\": 110.74, \"ep2\": 156.01, \"renewable\": 0, \"co2\": 28.59, \"heat\": 99.12, \"overheating\": 3.59, \"buildyear\": \"1937\", \"usage\": \"Residential (woonfunctie)\"}], \"queryIntent\": \"Compare energy label figures between two Dutch buildings\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy label",
+      "EP-1 berekend (kWh/m2)",
+      "EP-2 berekend (kWh/m2)",
+      "Renewable share berekend (%)",
+      "CO2 berekend (kg/m2)",
+      "Heat demand berekend (kWh/m2)",
+      "Overheating risk indicator",
+      "Build year",
+      "Usage"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 5,
+   "slot": 2,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 2,
+   "alert_fired": true,
+   "alert_delivered": true,
+   "rerendered_after_alert": true,
+   "prose_says_calculated": true,
+   "tool_uses": 4,
+   "subagent_tokens": 26116,
+   "duration_ms": 28866,
+   "answer_chars": 2166,
+   "answer": "ANSWER: Both buildings hold an A energy label. Gustav Mahlerlaan 10 (Amsterdam, 1999 office) shows lower energy demand (EP-1 81.68 kWh/m², EP-2 179.06 kWh/m²) with 21.6% renewable energy and minimal heat demand (16.46 kWh/m²). Van Beuningenstraat 1-01 (Rotterdam, 1937 apartment) has higher heat demand (99.12 kWh/m², slightly below the heat-pump suitability threshold) and no renewable energy. All figures are calculated per m² of thermal zone, not metered. Note: Van Beuningenstraat has 3 units at that address; this table shows the first one (1-01).\n\nCALLS: 3\n\nTOOLS: get_building_profile, get_building_profile, render_table\n\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy label comparison: Gustav Mahlerlaan 10 Amsterdam\"}, {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy label comparison: Van Beuningenstraat 1 Rotterdam\"}, {\"title\":\"Energy label figures (calculated per m² thermal zone)\",\"columns\":[{\"key\":\"address\",\"header\":\"Address\",\"type\":\"text\"},{\"key\":\"label\",\"header\":\"Energy label\",\"type\":\"badge\",\"badgeMap\":{\"A\":{\"color\":\"green\"},\"B\":{\"color\":\"green\"},\"C\":{\"color\":\"yellow\"},\"D\":{\"color\":\"orange\"},\"E\":{\"color\":\"red\"},\"F\":{\"color\":\"red\"},\"G\":{\"color\":\"red\"}}},{\"key\":\"ep1\",\"header\":\"EP-1 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"ep2\",\"header\":\"EP-2 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"renewable_pct\",\"header\":\"Renewable share berekend (%)\",\"type\":\"number\"},{\"key\":\"co2\",\"header\":\"CO₂ berekend (kg/m²)\",\"type\":\"number\"},{\"key\":\"heat_demand\",\"header\":\"Heat demand berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"building_year\",\"header\":\"Built\",\"type\":\"text\"},{\"key\":\"building_type\",\"header\":\"Building type\",\"type\":\"text\"}],\"data\":[{\"address\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"label\":\"A\",\"ep1\":81.68,\"ep2\":179.06,\"renewable_pct\":21.6,\"co2\":53.47,\"heat_demand\":16.46,\"building_year\":\"1999\",\"building_type\":\"Office (kantoorfunctie)\"},{\"address\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"label\":\"A\",\"ep1\":110.74,\"ep2\":156.01,\"renewable_pct\":0,\"co2\":28.59,\"heat_demand\":99.12,\"building_year\":\"1937\",\"building_type\":\"Residential apartment\"}],\"queryIntent\":\"Compare energy label figures between two addresses\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy label",
+      "EP-1 energy demand (kWh/m²)",
+      "EP-2 primary fossil (kWh/m²)",
+      "Renewable share (%)",
+      "CO₂ emissions (kg/m²)",
+      "Heat demand (kWh/m²)",
+      "Built",
+      "Building type"
+     ],
+     "error": false,
+     "alert_fired": true,
+     "alert_delivered": true
+    },
+    {
+     "headers": [
+      "Address",
+      "Energy label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Renewable share berekend (%)",
+      "CO₂ berekend (kg/m²)",
+      "Heat demand berekend (kWh/m²)",
+      "Built",
+      "Building type"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 5,
+   "slot": 3,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "correct",
+   "render_calls": 2,
+   "alert_fired": true,
+   "alert_delivered": true,
+   "rerendered_after_alert": true,
+   "prose_says_calculated": true,
+   "tool_uses": 4,
+   "subagent_tokens": 25950,
+   "duration_ms": 30100,
+   "answer_chars": 1734,
+   "answer": "ANSWER: The table above shows the calculated energy label figures for both addresses side by side. Both buildings hold energy label A. The office building (Gustav Mahlerlaan 10, 1999) has lower net energy demand (EP-1) but higher primary fossil energy use (EP-2) and 21.6% renewable energy. The residential apartment (Van Beuningenstraat 1-01, 3037WB, 1937) has significantly higher space heating demand (99.12 vs 16.46 kWh/m²), zero renewable energy, and lower per-m² CO2 emissions. Note: Van Beuningenstraat's data shown is for unit 1-01 only; the building has 3 separate residential units.\n\nCALLS: 3\nTOOLS: get_building_profile, get_building_profile, render_table\nPARAMS: [{\"postcode\": \"1082PP\", \"huisnummer\": 10}, {\"postcode\": \"3039WB\", \"huisnummer\": 1}, {\"title\": \"Energy label figures — Gustav Mahlerlaan 10 vs Van Beuningenstraat 1\", \"columns\": [{\"key\": \"address\", \"header\": \"Address\", \"type\": \"text\"}, {\"key\": \"label\", \"header\": \"Energy label\", \"type\": \"badge\", \"badgeMap\": {\"A\": {\"color\": \"green\"}}}, {\"key\": \"ep1\", \"header\": \"EP-1 berekend (kWh/m²)\", \"type\": \"number\"}, {\"key\": \"ep2\", \"header\": \"EP-2 berekend (kWh/m²)\", \"type\": \"number\"}, {\"key\": \"renewable\", \"header\": \"Hernieuwbare energie berekend (%)\", \"type\": \"percentage\"}, {\"key\": \"co2\", \"header\": \"CO₂ emissie berekend (kg/m²)\", \"type\": \"number\"}, {\"key\": \"heating\", \"header\": \"Warmtebehoefte berekend (kWh/m²)\", \"type\": \"number\"}, {\"key\": \"type\", \"header\": \"Building type\", \"type\": \"text\"}, {\"key\": \"year\", \"header\": \"Built\", \"type\": \"text\"}], \"data\": [[\"Gustav Mahlerlaan 10, 1082PP Amsterdam\", \"A\", 81.68, 179.06, 0.216, 53.47, 16.46, \"Office\", \"1999\"], [\"Van Beuningenstraat 1-01, 3039WB Rotterdam\", \"A\", 110.74, 156.01, 0, 28.59, 99.12, \"Apartment\", \"1937\"]]}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Hernieuwbare energie (%)",
+      "CO₂ emissie (kg/m²)",
+      "Warmtebehoefte (kWh/m²)",
+      "Building type",
+      "Built"
+     ],
+     "error": false,
+     "alert_fired": true,
+     "alert_delivered": true
+    },
+    {
+     "headers": [
+      "Address",
+      "Energy label",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Hernieuwbare energie berekend (%)",
+      "CO₂ emissie berekend (kg/m²)",
+      "Warmtebehoefte berekend (kWh/m²)",
+      "Building type",
+      "Built"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-4.5",
+   "wave": 5,
+   "slot": 4,
+   "arm": "q22d-content",
+   "model": "claude-haiku-4-5-20251001",
+   "verdict": "wrong",
+   "render_calls": 1,
+   "alert_fired": true,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 24517,
+   "duration_ms": 22640,
+   "answer_chars": 1856,
+   "answer": "ANSWER: Both buildings hold energy label A. Gustav Mahlerlaan 10 (1999 office building in Amsterdam) has lower net energy demand (EP-1: 81.68 kWh/m²) and includes 21.6% renewable energy; Van Beuningenstraat 1-01 (1937 apartment in Rotterdam, first of three units) has higher net energy demand (EP-1: 110.74 kWh/m²) and significantly higher space-heating demand (99.12 vs 16.46 kWh/m²), reflecting its age and residential use. All figures are calculated by EP-Online label method, not measured consumption.\n\nCALLS: 3\nTOOLS: get_building_profile, get_building_profile, render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Fetch energy label figures for Gustav Mahlerlaan 10 Amsterdam\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Fetch energy label figures for Van Beuningenstraat 1 Rotterdam\"},{\"title\":\"Energy label figures: side by side\",\"columns\":[{\"key\":\"address\",\"header\":\"Address\",\"type\":\"text\"},{\"key\":\"label\",\"header\":\"Energy label\",\"type\":\"badge\",\"badgeMap\":{\"A\":{\"color\":\"green\"},\"B\":{\"color\":\"green\"},\"C\":{\"color\":\"yellow\"},\"D\":{\"color\":\"yellow\"},\"E\":{\"color\":\"orange\"},\"F\":{\"color\":\"red\"},\"G\":{\"color\":\"red\"}}},{\"key\":\"bouwjaar\",\"header\":\"Built\",\"type\":\"text\"},{\"key\":\"gebruiksdoel\",\"header\":\"Use\",\"type\":\"text\"},{\"key\":\"ep1\",\"header\":\"EP-1 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"ep2\",\"header\":\"EP-2 berekend (kWh/m²)\",\"type\":\"number\"},{\"key\":\"hernieuwbaar\",\"header\":\"Renewable % berekend\",\"type\":\"percentage\"},{\"key\":\"co2\",\"header\":\"CO₂ berekend (kg/m²)\",\"type\":\"number\"},{\"key\":\"warmte\",\"header\":\"Space heating (kWh/m²)\",\"type\":\"number\"}],\"data\":[[\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"A\",\"1999\",\"Office\",81.68,179.06,0.216,53.47,16.46],[\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"A\",\"1937\",\"Apartment\",110.74,156.01,0,28.59,99.12]],\"queryIntent\":\"Compare energy label figures for two Dutch addresses\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Address",
+      "Energy label",
+      "Built",
+      "Use",
+      "EP-1 berekend (kWh/m²)",
+      "EP-2 berekend (kWh/m²)",
+      "Renewable % berekend",
+      "CO₂ berekend (kg/m²)",
+      "Space heating (kWh/m²)"
+     ],
+     "error": false,
+     "alert_fired": true,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 1,
+   "slot": 1,
+   "arm": "q22d-content",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 31991,
+   "duration_ms": 11657,
+   "answer_chars": 1899,
+   "answer": "ANSWER: The side-by-side table is rendered above. Both buildings carry label A: Gustav Mahlerlaan 10 (utiliteit, 1999, 118,174 m² thermal zone) has EP2 179.06 kWh/m² and CO2 53.47 kg/m², and Van Beuningenstraat 1 (woningbouw, 1937, 92 m²) has EP2 156.01 kWh/m² and CO2 28.59 kg/m². All figures are calculated by the NTA 8800 label method, not measured. The Van Beuningenstraat figures are for unit 1-01, the first of three verblijfsobjecten in that pand (1-01, 1-02, 1-BG), so the label may not cover the whole building.\nCALLS: 3\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, Amsterdam, for side-by-side table\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, Rotterdam, for side-by-side table\"},{\"title\":\"Energielabel-figuren (berekend, NTA 8800, niet gemeten)\",\"queryIntent\":\"Side-by-side energy label figures for two addresses\",\"columns\":[{\"key\":\"kenmerk\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gml\",\"header\":\"Gustav Mahlerlaan 10, Amsterdam\",\"type\":\"text\"},{\"key\":\"vb\",\"header\":\"Van Beuningenstraat 1-01, Rotterdam\",\"type\":\"text\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Berekeningstype\",\"NTA 8800:2022 (utiliteitsbouw)\",\"NTA 8800:2020 (woningbouw)\"],[\"Gebouwklasse\",\"Utiliteitsbouw (kantoorfunctie)\",\"Woningbouw (appartement)\"],[\"Bouwjaar\",\"1999\",\"1937\"],[\"EP1 energiebehoefte, berekend (kWh/m²)\",\"81.68\",\"110.74\"],[\"EP2 primair fossiel, berekend (kWh/m²)\",\"179.06\",\"156.01\"],[\"Aandeel hernieuwbare energie, berekend (%)\",\"21.6\",\"0\"],[\"CO2-emissie, berekend (kg/m²)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte, berekend (kWh/m²)\",\"16.46\",\"99.12\"],[\"Gebruiksoppervlakte thermische zone (m²)\",\"118174\",\"92\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"]]}]",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, Amsterdam",
+      "Van Beuningenstraat 1-01, Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 1,
+   "slot": 2,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 2,
+   "alert_fired": true,
+   "alert_delivered": true,
+   "rerendered_after_alert": true,
+   "prose_says_calculated": true,
+   "tool_uses": 4,
+   "subagent_tokens": 35356,
+   "duration_ms": 20943,
+   "answer_chars": 3070,
+   "answer": "ANSWER: Both addresses carry energielabel A. Gustav Mahlerlaan 10 (office, NTA 8800:2022, valid to 2032-06-09) has EP-2 179.06 kWh/m², a 21.6% renewable share, CO2 53.47 kg/m², and a thermal zone of 118,174 m². Van Beuningenstraat 1-01 (apartment, valid to 2032-01-31) has EP-2 156.01 kWh/m², 0% renewable, warmtebehoefte 99.12 kWh/m², a significant overheating indicator of 3.59, and a thermal zone of 92 m². Van Beuningenstraat 1 has three verblijfsobjecten (01, 02, BG), so these figures are for 1-01, the first match, and the other units may differ; all figures are calculated by the label method, not metered, and the side-by-side table is rendered above.\nCALLS: 4\nTOOLS: get_building_profile, get_building_profile, render_table, render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, for side-by-side comparison\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, for side-by-side comparison\"},{\"columns\":[{\"key\":\"metric\",\"header\":\"Kenmerk\"},{\"key\":\"gml\",\"header\":\"Gustav Mahlerlaan 10, Amsterdam (berekend)\"},{\"key\":\"vb\",\"header\":\"Van Beuningenstraat 1-01, Rotterdam (berekend)\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Gebouwklasse\",\"Utiliteitsbouw (kantoorfunctie)\",\"Woningbouw (appartement)\"],[\"Berekeningstype\",\"NTA 8800:2022 (basisopname utiliteitsbouw)\",\"NTA 8800:2020 (basisopname woningbouw)\"],[\"Energiebehoefte EP1 (kWh/m² per jaar)\",\"81.68\",\"110.74\"],[\"Primair fossiel EP2 (kWh/m² per jaar)\",\"179.06\",\"156.01\"],[\"Aandeel hernieuwbare energie (%)\",\"21.6\",\"0\"],[\"CO2-emissie (kg/m² per jaar)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte (kWh/m² per jaar)\",\"16.46\",\"99.12\"],[\"Temperatuuroverschrijding (indicator)\",\"0 (geen risico)\",\"3.59 (significant)\"],[\"Gebruiksoppervlakte thermische zone (m²)\",\"118174\",\"92\"],[\"Label geldig tot\",\"2032-06-09\",\"2031-01-31\"]],\"title\":\"Energielabel-cijfers: Gustav Mahlerlaan 10 en Van Beuningenstraat 1-01\",\"queryIntent\":\"Side-by-side energy-label figures for two addresses\"},{\"columns\":[{\"key\":\"metric\",\"header\":\"Kenmerk\"},{\"key\":\"gml\",\"header\":\"Gustav Mahlerlaan 10, Amsterdam\"},{\"key\":\"vb\",\"header\":\"Van Beuningenstraat 1-01, Rotterdam\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Gebouwklasse\",\"Utiliteitsbouw (kantoorfunctie)\",\"Woningbouw (appartement)\"],[\"Berekeningstype\",\"NTA 8800:2022 (basisopname utiliteitsbouw)\",\"NTA 8800:2020 (basisopname woningbouw)\"],[\"EP-1 energiebehoefte berekend (kWh/m²)\",\"81.68\",\"110.74\"],[\"EP-2 primair fossiel berekend (kWh/m²)\",\"179.06\",\"156.01\"],[\"Aandeel hernieuwbare energie berekend (%)\",\"21.6\",\"0\"],[\"CO2-emissie berekend (kg/m²)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte berekend (kWh/m²)\",\"16.46\",\"99.12\"],[\"Temperatuuroverschrijding indicator (eenheidloos)\",\"0 (geen risico)\",\"3.59 (significant)\"],[\"Gebruiksoppervlakte thermische zone (m²)\",\"118174\",\"92\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"]],\"title\":\"Energielabel-cijfers: Gustav Mahlerlaan 10 en Van Beuningenstraat 1-01\",\"queryIntent\":\"Side-by-side energy-label figures for two addresses, headers marked as calculated\"}]",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, Amsterdam (berekend)",
+      "Van Beuningenstraat 1-01, Rotterdam (berekend)"
+     ],
+     "error": false,
+     "alert_fired": true,
+     "alert_delivered": true
+    },
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, Amsterdam",
+      "Van Beuningenstraat 1-01, Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 1,
+   "slot": 3,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32522,
+   "duration_ms": 13181,
+   "answer_chars": 2031,
+   "answer": "ANSWER: Both addresses have label A. Gustav Mahlerlaan 10 (office, NTA 8800:2022, built 1999) has EP2 179.06 kWh/m2, CO2 53.47 kg/m2 and 21.6% renewable share, over a thermal zone of 118,174 m2. Van Beuningenstraat 1 (residential, NTA 8800:2020, built 1937) has EP2 156.01 kWh/m2, CO2 28.59 kg/m2 and 0% renewable share, over 92 m2. The side-by-side table is rendered above, and all figures are calculated by the label method, not metered. Van Beuningenstraat 1 has three units, so the table shows the first match (1-01); the other two units (1-02 and 1-BG) were not checked.\nCALLS: 3\nTOOLS: mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, Amsterdam, for side-by-side table\"}, {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, Rotterdam, for side-by-side table\"}, {\"columns\":[{\"key\":\"kenmerk\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gustav\",\"header\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"type\":\"text\"},{\"key\":\"van\",\"header\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"type\":\"text\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Gebouwklasse\",\"Utiliteitsbouw\",\"Woningbouw\"],[\"Berekeningstype\",\"NTA 8800:2022 (basisopname utiliteitsbouw)\",\"NTA 8800:2020 (basisopname woningbouw)\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"],[\"EP1 energiebehoefte berekend (kWh/m2)\",\"81.68\",\"110.74\"],[\"EP2 primair fossiel berekend (kWh/m2)\",\"179.06\",\"156.01\"],[\"Aandeel hernieuwbare energie berekend (%)\",\"21.6\",\"0\"],[\"CO2-emissie berekend (kg/m2)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte berekend (kWh/m2)\",\"16.46\",\"99.12\"],[\"Gebruiksoppervlakte thermische zone (m2)\",\"118174\",\"92\"],[\"Temperatuuroverschrijding indicator (eenheidloos)\",\"0\",\"3.59\"],[\"Bouwjaar\",\"1999\",\"1937\"]],\"title\":\"Energielabel-figuren (berekend, NTA 8800; geen gemeten verbruik)\",\"queryIntent\":\"Side-by-side energy-label figures for two addresses\"}",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, 1082PP Amsterdam",
+      "Van Beuningenstraat 1-01, 3039WB Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 1,
+   "slot": 4,
+   "arm": "q22d-content",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32158,
+   "duration_ms": 12371,
+   "answer_chars": 1965,
+   "answer": "ANSWER: Both addresses carry energielabel A, and the table with the calculated figures was rendered inline. Gustav Mahlerlaan 10 (kantoorfunctie, NTA 8800:2022) has EP2 179.06 kWh/m² and 21.6% renewable share, over a thermal zone of 118,174 m². Van Beuningenstraat 1 (woonfunctie, NTA 8800:2020) has EP2 156.01 kWh/m², 0% renewable share and warmtebehoefte 99.12 kWh/m² over 92 m². All figures are calculated by the label method, not measured, and the Rotterdam address matched three verblijfsobjecten (1-01, 1-02, 1-BG), so the figures shown are for 1-01 only.\nCALLS: 4\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10 for side-by-side table\"}\n{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1 for side-by-side table\"}\n{\"columns\":[{\"key\":\"metric\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gm10\",\"header\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"type\":\"text\"},{\"key\":\"vb1\",\"header\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"type\":\"text\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Berekeningstype\",\"NTA 8800:2022 (utiliteitsbouw)\",\"NTA 8800:2020 (woningbouw)\"],[\"Gebouwklasse\",\"Utiliteitsbouw\",\"Woningbouw\"],[\"Bouwjaar\",\"1999\",\"1937\"],[\"Gebruiksoppervlakte thermische zone (m²)\",\"118174\",\"92\"],[\"EP1 energiebehoefte, berekend (kWh/m²/jaar)\",\"81.68\",\"110.74\"],[\"EP2 primair fossiel, berekend (kWh/m²/jaar)\",\"179.06\",\"156.01\"],[\"Aandeel hernieuwbare energie, berekend (%)\",\"21.6\",\"0\"],[\"CO2-emissie, berekend (kg/m²/jaar)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte, berekend (kWh/m²/jaar)\",\"16.46\",\"99.12\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"]],\"title\":\"EP-Online energielabel: Gustav Mahlerlaan 10 vs Van Beuningenstraat 1\",\"queryIntent\":\"Side-by-side energy-label figures for Gustav Mahlerlaan 10 and Van Beuningenstraat 1\"}",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, 1082PP Amsterdam",
+      "Van Beuningenstraat 1-01, 3039WB Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 2,
+   "slot": 1,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 2,
+   "alert_fired": true,
+   "alert_delivered": true,
+   "rerendered_after_alert": true,
+   "prose_says_calculated": true,
+   "tool_uses": 4,
+   "subagent_tokens": 34591,
+   "duration_ms": 19105,
+   "answer_chars": 1868,
+   "answer": "ANSWER: Both addresses carry energy label A, and the table is rendered above with the calculated figures side by side. Gustav Mahlerlaan 10 (office, NTA 8800:2022) has EP1 81.68 and EP2 179.06 kWh/m² per year, CO₂ 53.47 kg/m², and 21.6% renewable share. Van Beuningenstraat 1-01 (apartment, NTA 8800:2020) has EP1 110.74 and EP2 156.01 kWh/m² per year, CO₂ 28.59 kg/m², 0% renewable share, and a significant overheating indicator of 3.59. The Van Beuningenstraat figures are for unit 01 only, because the address matches three units (01, 02 and BG) and the tool returned the first; all figures are calculated by the label method, not metered.\nCALLS: 4\nTOOLS: mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__render_table, mcp__eval-q22d-mirror__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, Amsterdam, for side-by-side comparison\"}, {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, Rotterdam, for side-by-side comparison\"}, {\"title\":\"Energielabel-kenmerken: twee adressen naast elkaar\",\"columns\":[{\"key\":\"metric\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gustav\",\"header\":\"Gustav Mahlerlaan 10 (berekend), Amsterdam\",\"type\":\"text\"},{\"key\":\"vanb\",\"header\":\"Van Beuningenstraat 1-01 (berekend), Rotterdam\",\"type\":\"text\"}],\"data\":\"11 rows, first attempt rejected for header wording\",\"features\":{\"pageSize\":20}}, {\"title\":\"Energielabel-kenmerken: twee adressen naast elkaar\",\"columns\":[{\"key\":\"metric\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gustav\",\"header\":\"Gustav Mahlerlaan 10, Amsterdam\",\"type\":\"text\"},{\"key\":\"vanb\",\"header\":\"Van Beuningenstraat 1-01, Rotterdam\",\"type\":\"text\"}],\"data\":\"11 rows, headers marked 'berekend' on the calculated metrics\",\"features\":{\"pageSize\":20}}",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, Amsterdam (berekend)",
+      "Van Beuningenstraat 1-01, Rotterdam (berekend)"
+     ],
+     "error": false,
+     "alert_fired": true,
+     "alert_delivered": true
+    },
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, Amsterdam",
+      "Van Beuningenstraat 1-01, Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 2,
+   "slot": 2,
+   "arm": "q22d-content",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 31686,
+   "duration_ms": 11643,
+   "answer_chars": 2021,
+   "answer": "ANSWER: Both addresses have label A, and the table is rendered above with the calculated figures. Gustav Mahlerlaan 10 (office, NTA 8800:2022): EP1 81.68, EP2 179.06 kWh/m2, 21.6% renewable, 53.47 kg CO2/m2, valid to 2032-06-09. Van Beuningenstraat 1 (residential, NTA 8800:2020): EP1 110.74, EP2 156.01 kWh/m2, 0% renewable, 28.59 kg CO2/m2, valid to 2032-01-31. The Rotterdam address matches 3 units in the building, and the label shown is for the first one (1-01), so check the other two (1-02, 1-BG) if you need their labels. All figures are calculated by the label method, not metered, and per m2 of thermal-zone floor area (118,174 m2 for Gustav Mahlerlaan 10, 92 m2 for Van Beuningenstraat 1-01).\nCALLS: 3\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10 for side-by-side table\"}, {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1 for side-by-side table\"}, {\"columns\":[{\"key\":\"adres\",\"header\":\"Adres\"},{\"key\":\"label\",\"header\":\"Energielabel\",\"type\":\"badge\",\"badgeMap\":{\"A\":{\"color\":\"green\"}}},{\"key\":\"ep1\",\"header\":\"EP1 energiebehoefte berekend (kWh/m2)\",\"type\":\"number\"},{\"key\":\"ep2\",\"header\":\"EP2 primair fossiel berekend (kWh/m2)\",\"type\":\"number\"},{\"key\":\"hern\",\"header\":\"Aandeel hernieuwbare energie berekend (%)\",\"type\":\"number\"},{\"key\":\"co2\",\"header\":\"CO2 berekend (kg/m2)\",\"type\":\"number\"},{\"key\":\"area\",\"header\":\"Gebruiksoppervlakte thermische zone (m2)\",\"type\":\"number\"},{\"key\":\"bereken\",\"header\":\"Berekeningstype\",\"type\":\"text\"},{\"key\":\"geldig\",\"header\":\"Label geldig tot\",\"type\":\"date\"}],\"data\":[[\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"A\",81.68,179.06,21.6,53.47,118174,\"NTA 8800:2022 (basisopname utiliteitsbouw)\",\"2032-06-09\"],[\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"A\",110.74,156.01,0,28.59,92,\"NTA 8800:2020 (basisopname woningbouw)\",\"2032-01-31\"]]}",
+   "tables": [
+    {
+     "headers": [
+      "Adres",
+      "Energielabel",
+      "EP1 energiebehoefte berekend (kWh/m2)",
+      "EP2 primair fossiel berekend (kWh/m2)",
+      "Aandeel hernieuwbare energie berekend (%)",
+      "CO2 berekend (kg/m2)",
+      "Gebruiksoppervlakte thermische zone (m2)",
+      "Berekeningstype",
+      "Label geldig tot"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 2,
+   "slot": 3,
+   "arm": "q22d-content",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32163,
+   "duration_ms": 13943,
+   "answer_chars": 1864,
+   "answer": "ANSWER: Side by side, both addresses have energy label A. Gustav Mahlerlaan 10 (office, built 1999) has EP2 179.06 kWh/m2, 21.6% renewable and 53.47 kg CO2/m2. Van Beuningenstraat 1 (apartment, built 1937) has EP2 156.01 kWh/m2, 0% renewable and 28.59 kg CO2/m2. All figures are calculated by the NTA 8800 label method, not metered. The Rotterdam address matches three units (01, 02, BG) and the table shows unit 01, the first match, so the figures may not apply to the other two.\nCALLS: 3\nTOOLS: get_building_profile, get_building_profile, render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, Amsterdam, for side-by-side table\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, Rotterdam, for side-by-side table\"},{\"title\":\"Energielabel-cijfers, berekend volgens de labelmethode (niet gemeten)\",\"queryIntent\":\"Side-by-side energy-label figures for two addresses\",\"columns\":[{\"key\":\"kenmerk\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gustav\",\"header\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"type\":\"text\"},{\"key\":\"vanbeun\",\"header\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"type\":\"text\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Gebouwklasse / gebruiksdoel\",\"Utiliteitsbouw (kantoorfunctie)\",\"Woningbouw (appartement, hoekmidden)\"],[\"Bouwjaar\",\"1999\",\"1937\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"],[\"EP1 energiebehoefte berekend (kWh/m2)\",\"81.68\",\"110.74\"],[\"EP2 primair fossiel berekend (kWh/m2)\",\"179.06\",\"156.01\"],[\"Aandeel hernieuwbare energie berekend (%)\",\"21.6\",\"0\"],[\"CO2-emissie berekend (kg/m2)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte berekend (kWh/m2)\",\"16.46\",\"99.12\"],[\"Gebruiksoppervlakte thermische zone (m2)\",\"118174\",\"92\"],[\"Temperatuuroverschrijding indicator (TOjuli, eenheidloos)\",\"0 (geen risico)\",\"3.59 (significant)\"]]}]",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, 1082PP Amsterdam",
+      "Van Beuningenstraat 1-01, 3039WB Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 2,
+   "slot": 4,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 31977,
+   "duration_ms": 11286,
+   "answer_chars": 1224,
+   "answer": "ANSWER: Both addresses have energy label A, and the table is rendered above. Gustav Mahlerlaan 10 (Amsterdam, office, 1999) has EP2 179.06 kWh/m² and CO2 53.47 kg/m², with 21.6% renewable share. Van Beuningenstraat 1 (Rotterdam, apartment, 1937) has EP2 156.01 kWh/m² and CO2 28.59 kg/m², with 0% renewable share and a significant overheating indicator (3.59). All figures are calculated by the NTA 8800 label method, not metered. The Rotterdam address matches three units, so I used the first one, Van Beuningenstraat 1-01; the other two (1-02, 1-BG) were not checked.\nCALLS: 3\nTOOLS: get_building_profile, get_building_profile, render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, Amsterdam, for side-by-side comparison\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, Rotterdam, for side-by-side comparison\"},{\"title\":\"Energielabel-cijfers: Gustav Mahlerlaan 10 vs Van Beuningenstraat 1\",\"queryIntent\":\"Side-by-side comparison of calculated EP-Online label figures for two addresses\",\"columns\":\"13 rows, 3 columns (kenmerk, Gustav Mahlerlaan 10, Van Beuningenstraat 1-01)\",\"features\":{\"pageSize\":20}}]",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, 1082PP Amsterdam (berekend)",
+      "Van Beuningenstraat 1-01, 3039WB Rotterdam (berekend)"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 3,
+   "slot": 1,
+   "arm": "q22d-content",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32430,
+   "duration_ms": 13566,
+   "answer_chars": 2166,
+   "answer": "ANSWER: Both addresses have energielabel A, and the table above sets their calculated figures side by side. Gustav Mahlerlaan 10 (office, built 1999, label valid to 2032-06-09) has EP2 primair fossiel 179.06 kWh/m2, CO2 53.47 kg/m2, 21.6% renewable and a thermal zone of 118,174 m2. Van Beuningenstraat 1 (apartment, built 1937) has EP2 156.01 kWh/m2, CO2 28.59 kg/m2, 0% renewable and a thermal zone of 92 m2, but the address has three units (1-01, 1-02, 1-BG) and the profile shows 1-01, the first match. All figures are calculated by the NTA 8800 label method, not metered, and the per-m2 values are per thermal zone.\nCALLS: 3\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10 for side-by-side table\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1 for side-by-side table\"},{\"title\":\"Energielabel en berekende energiecijfers: Gustav Mahlerlaan 10 en Van Beuningenstraat 1\",\"queryIntent\":\"Side-by-side comparison of EP-Online label figures for two addresses\",\"columns\":[{\"key\":\"adres\",\"header\":\"Adres\",\"type\":\"text\"},{\"key\":\"gebouwklasse\",\"header\":\"Gebouwklasse\",\"type\":\"text\"},{\"key\":\"bouwjaar\",\"header\":\"Bouwjaar\",\"type\":\"text\"},{\"key\":\"label\",\"header\":\"Energielabel\",\"type\":\"badge\",\"badgeMap\":{\"A\":{\"color\":\"green\"}}},{\"key\":\"ep1\",\"header\":\"EP1 energiebehoefte berekend (kWh/m2)\",\"type\":\"number\"},{\"key\":\"ep2\",\"header\":\"EP2 primair fossiel berekend (kWh/m2)\",\"type\":\"number\"},{\"key\":\"hern\",\"header\":\"Aandeel hernieuwbaar berekend (%)\",\"type\":\"number\"},{\"key\":\"co2\",\"header\":\"CO2 berekend (kg/m2)\",\"type\":\"number\"},{\"key\":\"wb\",\"header\":\"Warmtebehoefte berekend (kWh/m2)\",\"type\":\"number\"},{\"key\":\"opp\",\"header\":\"Gebruiksoppervlakte thermische zone (m2)\",\"type\":\"number\"}],\"data\":[[\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"Utiliteitsbouw (kantoorfunctie)\",1999,\"A\",81.68,179.06,21.6,53.47,16.46,118174],[\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"Woningbouw (appartement)\",1937,\"A\",110.74,156.01,0,28.59,99.12,92]]}]",
+   "tables": [
+    {
+     "headers": [
+      "Adres",
+      "Gebouwklasse",
+      "Bouwjaar",
+      "Energielabel",
+      "EP1 energiebehoefte berekend (kWh/m2)",
+      "EP2 primair fossiel berekend (kWh/m2)",
+      "Aandeel hernieuwbaar berekend (%)",
+      "CO2 berekend (kg/m2)",
+      "Warmtebehoefte berekend (kWh/m2)",
+      "Gebruiksoppervlakte thermische zone (m2)"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 3,
+   "slot": 2,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32888,
+   "duration_ms": 14167,
+   "answer_chars": 2124,
+   "answer": "ANSWER: Both addresses have energy label A, but the figures are not directly comparable because they use different calculation methods and area bases. Gustav Mahlerlaan 10 (office, NTA 8800:2022) has EP2 179.06 kWh/m², CO2 53.47 kg/m² and 21.6% renewable share, per m² of a 118,174 m² thermal zone. Van Beuningenstraat 1-01 (apartment, NTA 8800:2020) has EP2 156.01 kWh/m², CO2 28.59 kg/m² and 0% renewable share, per m² of a 92 m² zone. The Van Beuningenstraat address matches 3 units and I show the first (1-01), and all figures are calculated by the label method, not metered; the table is above.\nCALLS: 3\nTOOLS: mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, for side-by-side comparison\"}\n{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, for side-by-side comparison\"}\n{\"columns\":[{\"key\":\"kenmerk\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gml\",\"header\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"type\":\"text\"},{\"key\":\"vb\",\"header\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"type\":\"text\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Gebouwklasse\",\"Utiliteitsbouw\",\"Woningbouw\"],[\"Berekeningstype\",\"NTA 8800:2022 (basisopname utiliteitsbouw)\",\"NTA 8800:2020 (basisopname woningbouw)\"],[\"Label opnamedatum\",\"2022-06-09\",\"2022-01-31\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"],[\"Gebruiksoppervlakte thermische zone (m²)\",\"118174\",\"92\"],[\"EP1 energiebehoefte, berekend (kWh/m²/jaar)\",\"81.68\",\"110.74\"],[\"EP2 primair fossiel, berekend (kWh/m²/jaar)\",\"179.06\",\"156.01\"],[\"Aandeel hernieuwbare energie, berekend (%)\",\"21.6\",\"0\"],[\"CO2-emissie, berekend (kg/m²/jaar)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte, berekend (kWh/m²/jaar)\",\"16.46\",\"99.12\"],[\"Temperatuuroverschrijding-indicator (eenheidloos)\",\"0\",\"3.59\"]],\"title\":\"Energielabel: Gustav Mahlerlaan 10 vs Van Beuningenstraat 1\",\"queryIntent\":\"Side-by-side energy-label figures for two addresses (calculated by the label method, not metered)\"}",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, 1082PP Amsterdam",
+      "Van Beuningenstraat 1-01, 3039WB Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 3,
+   "slot": 3,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32284,
+   "duration_ms": 12556,
+   "answer_chars": 1966,
+   "answer": "ANSWER: The side-by-side table is rendered above. Both buildings hold an energy label A, but the figures are calculated by the NTA 8800 method, not metered. Gustav Mahlerlaan 10 (utiliteit, kantoor, 1999) has EP2 179.06 kWh/m², CO2 53.47 kg/m² and 21.6% renewable share, over a thermal zone of 118,174 m². Van Beuningenstraat 1 (woningbouw, 1937) has EP2 156.01 kWh/m², CO2 28.59 kg/m² and 0% renewable share, over 92 m², and its address matches three units, so the figures shown are for unit 1-01 (the first match), not the whole building.\nCALLS: 4\nTOOLS: mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, Amsterdam, for side-by-side table\"}\n{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, Rotterdam, for side-by-side table\"}\n{\"columns\":[{\"key\":\"metric\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gm10\",\"header\":\"Gustav Mahlerlaan 10, Amsterdam\",\"type\":\"text\"},{\"key\":\"vb1\",\"header\":\"Van Beuningenstraat 1-01, Rotterdam\",\"type\":\"text\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Berekeningstype\",\"NTA 8800:2022 (basisopname utiliteitsbouw)\",\"NTA 8800:2020 (basisopname woningbouw)\"],[\"Gebouwklasse / gebruiksdoel\",\"Utiliteitsbouw / kantoorfunctie\",\"Woningbouw / woonfunctie (appartement)\"],[\"Bouwjaar\",\"1999\",\"1937\"],[\"Gebruiksoppervlakte thermische zone (m²)\",\"118174\",\"92\"],[\"EP1 energiebehoefte, berekend (kWh/m²)\",\"81.68\",\"110.74\"],[\"EP2 primair fossiel, berekend (kWh/m²)\",\"179.06\",\"156.01\"],[\"Aandeel hernieuwbare energie, berekend (%)\",\"21.6\",\"0\"],[\"CO₂-emissie, berekend (kg/m²)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte, berekend (kWh/m²)\",\"16.46\",\"99.12\"],[\"Temperatuuroverschrijding-indicator\",\"0\",\"3.59\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"]],\"title\":\"Energielabel: Gustav Mahlerlaan 10 vs Van Beuningenstraat 1 (berekend)\"}",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, Amsterdam",
+      "Van Beuningenstraat 1-01, Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 3,
+   "slot": 4,
+   "arm": "q22d-content",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32711,
+   "duration_ms": 14818,
+   "answer_chars": 2110,
+   "answer": "ANSWER: The table is rendered above. Both buildings carry energielabel A, but every figure is calculated by the NTA 8800 method, not metered. Gustav Mahlerlaan 10 (office, 1999) has EP2 179.06 kWh/m2, CO2 53.47 kg/m2 and 21.6% renewable share. Van Beuningenstraat 1-01 (apartment, 1937) has EP2 156.01 kWh/m2, CO2 28.59 kg/m2 and 0% renewable, and a significant overheating indicator of 3.59. The Rotterdam address matches three units in one building, so these figures are for 1-01 only; 1-02 and 1-BG were not checked.\nCALLS: 3\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, for side-by-side comparison\"}, {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, for side-by-side comparison\"}, {\"columns\":[{\"key\":\"kenmerk\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gustav\",\"header\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"type\":\"text\"},{\"key\":\"van\",\"header\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"type\":\"text\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Berekeningstype\",\"NTA 8800:2022 (basisopname utiliteitsbouw)\",\"NTA 8800:2020 (basisopname woningbouw)\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"],[\"Gebouwklasse / gebruiksdoel\",\"Utiliteitsbouw / kantoorfunctie\",\"Woningbouw / woonfunctie (appartement)\"],[\"Bouwjaar\",\"1999\",\"1937\"],[\"EP1 energiebehoefte, berekend (kWh/m2)\",\"81.68\",\"110.74\"],[\"EP2 primair fossiel, berekend (kWh/m2)\",\"179.06\",\"156.01\"],[\"Aandeel hernieuwbare energie, berekend (%)\",\"21.6\",\"0\"],[\"CO2-emissie, berekend (kg/m2)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte, berekend (kWh/m2)\",\"16.46\",\"99.12\"],[\"Energieverbruik, berekend niet gemeten (kWh/m2)\",\"229.17\",\"155.77\"],[\"Gebruiksoppervlakte thermische zone (m2)\",\"118174\",\"92\"],[\"Temperatuuroverschrijding indicator (eenheidloos)\",\"0 (geen risico)\",\"3.59 (significant)\"]],\"title\":\"Energielabel-figuren (berekend, niet gemeten)\",\"queryIntent\":\"Side-by-side energy-label figures for two addresses\"}",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, 1082PP Amsterdam",
+      "Van Beuningenstraat 1-01, 3039WB Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 4,
+   "slot": 1,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32834,
+   "duration_ms": 14042,
+   "answer_chars": 2252,
+   "answer": "ANSWER: The energy-label figures are in a table rendered above. Both buildings carry label A: Gustav Mahlerlaan 10 (kantoorfunctie, NTA 8800:2022) has EP2 179.06 kWh/m² and CO2 53.47 kg/m², and Van Beuningenstraat 1 (woonfunctie, NTA 8800:2020) has EP2 156.01 kWh/m² and CO2 28.59 kg/m². Van Beuningenstraat 1 matches three verblijfsobjecten, so the table shows 1-01 only (1-02 and 1-BG were not fetched), and all figures are calculated by the label method, not measured. The two labels use different calculation methods (utiliteitsbouw versus woningbouw), so the figures are not directly comparable.\nCALLS: 3\nTOOLS: mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, Amsterdam, for side-by-side comparison\"}\n{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, Rotterdam, for side-by-side comparison\"}\n{\"columns\":[{\"key\":\"kenmerk\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gustav\",\"header\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"type\":\"text\"},{\"key\":\"beuningen\",\"header\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam (1 van 3 verblijfsobjecten)\",\"type\":\"text\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Gebouwklasse\",\"Utiliteitsbouw (kantoorfunctie)\",\"Woningbouw (appartement)\"],[\"Berekeningstype\",\"NTA 8800:2022 (basisopname utiliteitsbouw)\",\"NTA 8800:2020 (basisopname woningbouw)\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"],[\"EP1 energiebehoefte, berekend (kWh/m²)\",\"81.68\",\"110.74\"],[\"EP2 primair fossiel, berekend (kWh/m²)\",\"179.06\",\"156.01\"],[\"Aandeel hernieuwbare energie, berekend (%)\",\"21.6\",\"0\"],[\"CO2-emissie, berekend (kg/m²)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte, berekend (kWh/m²)\",\"16.46\",\"99.12\"],[\"Energieverbruik, berekend niet gemeten (kWh/m²)\",\"229.17\",\"155.77\"],[\"Gebruiksoppervlakte thermische zone (m²)\",\"118174\",\"92\"],[\"Temperatuuroverschrijding-indicator (eenheidloos)\",\"0 (geen risico)\",\"3.59 (significant)\"]],\"title\":\"Energielabel-figuren: Gustav Mahlerlaan 10 vs Van Beuningenstraat 1\",\"queryIntent\":\"Side-by-side comparison of EP-Online label figures (calculated, not measured) for two addresses\"}",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, 1082PP Amsterdam",
+      "Van Beuningenstraat 1-01, 3039WB Rotterdam (1 van 3 verblijfsobjecten)"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 4,
+   "slot": 2,
+   "arm": "q22d-content",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32719,
+   "duration_ms": 16014,
+   "answer_chars": 2188,
+   "answer": "ANSWER: Both addresses have energy label A, and the table with the full label figures is rendered above. Gustav Mahlerlaan 10 (office, 1999) has calculated primary fossil energy (EP2) of 179,06 kWh/m² and CO2 of 53,47 kg/m², with 21,6% renewable. Van Beuningenstraat 1 (apartment, 1937) has EP2 of 156,01 kWh/m², CO2 of 28,59 kg/m², 0% renewable, and a significant overheating indicator of 3,59. The Rotterdam address matches three units (-01, -02, -BG), so the table shows only the first one, -01, and all figures are calculated by the NTA 8800 method, not metered.\nCALLS: 3\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, Amsterdam, for side-by-side comparison\"}\n{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, Rotterdam, for side-by-side comparison\"}\n{\"columns\":[{\"key\":\"kenmerk\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gustav\",\"header\":\"Gustav Mahlerlaan 10, Amsterdam (kantoor)\",\"type\":\"text\"},{\"key\":\"beuningen\",\"header\":\"Van Beuningenstraat 1-01, Rotterdam (woning)\",\"type\":\"text\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Berekeningstype\",\"NTA 8800:2022 (basisopname utiliteitsbouw)\",\"NTA 8800:2020 (basisopname woningbouw)\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"],[\"EP1 energiebehoefte, berekend (kWh/m² per jaar)\",\"81,68\",\"110,74\"],[\"EP2 primair fossiel, berekend (kWh/m² per jaar)\",\"179,06\",\"156,01\"],[\"Aandeel hernieuwbare energie, berekend (%)\",\"21,6\",\"0\"],[\"CO2-emissie, berekend (kg/m² per jaar)\",\"53,47\",\"28,59\"],[\"Warmtebehoefte, berekend (kWh/m² per jaar)\",\"16,46\",\"99,12\"],[\"Energieverbruik, berekend niet gemeten (kWh/m² per jaar)\",\"229,17\",\"155,77\"],[\"Temperatuuroverschrijding-indicator (eenheidloos)\",\"0\",\"3,59\"],[\"Gebruiksoppervlakte thermische zone (m²)\",\"118.174\",\"92\"],[\"Oppervlakte BAG verblijfsobject (m²)\",\"66.581\",\"100\"]],\"title\":\"Energielabel-figuren: Gustav Mahlerlaan 10 vs Van Beuningenstraat 1\",\"queryIntent\":\"Side-by-side table of EP-Online label figures for two addresses (calculated, not metered)\"}",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, Amsterdam (kantoor)",
+      "Van Beuningenstraat 1-01, Rotterdam (woning)"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 4,
+   "slot": 3,
+   "arm": "q22d-content",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32718,
+   "duration_ms": 15205,
+   "answer_chars": 1986,
+   "answer": "ANSWER: Both buildings have energielabel A, and the table is rendered inline. Gustav Mahlerlaan 10 (Utiliteitsbouw, NTA 8800:2022) has EP2 179.06 kWh/m² and CO2 53.47 kg/m², with 21.6% renewable share and 118,174 m² thermal zone. Van Beuningenstraat 1 (Woningbouw, NTA 8800:2020) has EP2 156.01 kWh/m² and CO2 28.59 kg/m², with 0% renewable share and 92 m² thermal zone. The Van Beuningenstraat figures are for unit 1-01 only, because the address matches three units (1-01, 1-02, 1-BG) and I used the first. All figures are calculated by the label method, not metered.\nCALLS: 3\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10 for side-by-side comparison\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1 for side-by-side comparison\"},{\"title\":\"Energielabel-figuren, berekend (niet gemeten)\",\"queryIntent\":\"Side-by-side table of the calculated energy-label figures for Gustav Mahlerlaan 10 and Van Beuningenstraat 1-01\",\"columns\":[{\"key\":\"kenmerk\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gml10\",\"header\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"type\":\"text\"},{\"key\":\"vb1\",\"header\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"type\":\"text\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Berekeningstype\",\"NTA 8800:2022 (basisopname utiliteitsbouw)\",\"NTA 8800:2020 (basisopname woningbouw)\"],[\"Gebouwklasse\",\"Utiliteitsbouw\",\"Woningbouw\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"],[\"EP1 energiebehoefte, berekend (kWh/m²/jaar)\",\"81.68\",\"110.74\"],[\"EP2 primair fossiel, berekend (kWh/m²/jaar)\",\"179.06\",\"156.01\"],[\"Aandeel hernieuwbare energie, berekend (%)\",\"21.6\",\"0\"],[\"CO2-emissie, berekend (kg/m²/jaar)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte, berekend (kWh/m²/jaar)\",\"16.46\",\"99.12\"],[\"Gebruiksoppervlakte thermische zone (m²)\",\"118174\",\"92\"]]}]",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, 1082PP Amsterdam",
+      "Van Beuningenstraat 1-01, 3039WB Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 4,
+   "slot": 4,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32622,
+   "duration_ms": 17841,
+   "answer_chars": 1755,
+   "answer": "ANSWER: Both addresses carry energy label A, and the table with the figures below was rendered inline. All figures are calculated by the NTA 8800 label method, not metered. Van Beuningenstraat 1 matched three units, so these figures are for the first, 1-01 (Van Beuningenstraat 1-02 and 1-BG have their own labels, not retrieved).\n\n| Kenmerk | Gustav Mahlerlaan 10, Amsterdam | Van Beuningenstraat 1-01, Rotterdam |\n|---|---|---|\n| Energielabel | A | A |\n| Gebouwklasse | Utiliteitsbouw (kantoor) | Woningbouw (appartement) |\n| Bouwjaar | 1999 | 1937 |\n| EP1 energiebehoefte (kWh/m2) | 81.68 | 110.74 |\n| EP2 primair fossiel (kWh/m2) | 179.06 | 156.01 |\n| Aandeel hernieuwbaar (%) | 21.6 | 0 |\n| CO2 (kg/m2) | 53.47 | 28.59 |\n| Warmtebehoefte (kWh/m2) | 16.46 | 99.12 |\n| Gebruiksoppervlakte thermische zone (m2) | 118,174 | 92 |\n| Label geldig tot | 2032-06-09 | 2032-01-31 |\n\nCALLS: 3\nTOOLS: mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10 for side-by-side comparison\"}\n{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1 for side-by-side comparison\"}\n{\"columns\":\"[11 columns: adres, label (badge), klasse, bouwjaar, ep1, ep2, hern, co2, wb, oppz, geldig (date)]\",\"data\":\"[[\\\"Gustav Mahlerlaan 10, 1082PP Amsterdam\\\",\\\"A\\\",\\\"Utiliteitsbouw (kantoorfunctie)\\\",1999,81.68,179.06,21.6,53.47,16.46,118174,\\\"2032-06-09\\\"],[\\\"Van Beuningenstraat 1-01, 3039WB Rotterdam\\\",\\\"A\\\",\\\"Woningbouw (appartement)\\\",1937,110.74,156.01,0,28.59,99.12,92,\\\"2032-01-31\\\"]]\",\"title\":\"Energielabel Gustav Mahlerlaan 10 en Van Beuningenstraat 1\"}",
+   "tables": [
+    {
+     "headers": [
+      "Adres",
+      "Energielabel",
+      "Gebouwklasse",
+      "Bouwjaar",
+      "EP1 energiebehoefte berekend (kWh/m2)",
+      "EP2 primair fossiel berekend (kWh/m2)",
+      "Aandeel hernieuwbaar berekend (%)",
+      "CO2 berekend (kg/m2)",
+      "Warmtebehoefte berekend (kWh/m2)",
+      "Gebruiksoppervlakte thermische zone (m2)",
+      "Label geldig tot"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 5,
+   "slot": 1,
+   "arm": "q22d-content",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 31629,
+   "duration_ms": 10525,
+   "answer_chars": 1237,
+   "answer": "ANSWER: Both buildings have energy label A, but the figures are calculated by the NTA 8800 label method, not metered. Gustav Mahlerlaan 10 (office, 1999, 118,174 m² thermal zone) has EP2 179.06 kWh/m²/yr, 21.6% renewable share and 53.47 kg CO₂/m²/yr. Van Beuningenstraat 1 (apartment, 1937, 92 m²) has EP2 156.01 kWh/m²/yr, 0% renewable share, 28.59 kg CO₂/m²/yr and a significant overheating indicator of 3.59. The Van Beuningenstraat profile is for unit 1-01, the first of three units at that address (1-02 and 1-BG also match), so its figures may not cover the whole building. The table above shows the full side-by-side comparison.\nCALLS: 3\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10 to compare side by side\"}; {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1 to compare side by side\"}; {\"kenmerk\":\"energielabel table\",\"columns\":\"Kenmerk, Gustav Mahlerlaan 10, Van Beuningenstraat 1-01\",\"title\":\"Energielabel: Gustav Mahlerlaan 10 vs Van Beuningenstraat 1-01 (berekend, niet gemeten)\"}",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, 1082PP Amsterdam",
+      "Van Beuningenstraat 1-01, 3039WB Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 5,
+   "slot": 2,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32235,
+   "duration_ms": 11951,
+   "answer_chars": 1697,
+   "answer": "ANSWER: Both buildings carry energy label A, and the side-by-side table is rendered above. Gustav Mahlerlaan 10 (office, 1999, NTA 8800:2022) has EP2 primary fossil energy of 179.06 kWh/m² per year, CO₂ of 53.47 kg/m², and 21.6% renewable share. Van Beuningenstraat 1-01 (apartment, 1937, NTA 8800:2020) has EP2 of 156.01 kWh/m², CO₂ of 28.59 kg/m², and 0% renewable share, with a significant overheating indicator of 3.59. All figures are calculated by the label method, not measured, and the Van Beuningenstraat figures cover only unit 1-01 because the address has three units (1-01, 1-02, 1-BG) and only the first was profiled.\nCALLS: 3\nTOOLS: mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__render_table\nPARAMS: [{\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, for side-by-side comparison\"},{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, for side-by-side comparison\"},{\"title\":\"Energielabel-cijfers: Gustav Mahlerlaan 10 vs Van Beuningenstraat 1\",\"queryIntent\":\"Side-by-side comparison of the EP-Online label figures of two addresses\",\"columns\":[{\"key\":\"kenmerk\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gustav\",\"header\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"type\":\"text\"},{\"key\":\"beuningen\",\"header\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"type\":\"text\"}],\"data\":\"12 rows of label figures (energielabel, gebouwklasse, bouwjaar, berekeningstype, geldigheid, EP1, EP2, hernieuwbaar %, CO2, warmtebehoefte, thermische zone m², overheating indicator), as returned by the two profile calls\",\"features\":{\"pageSize\":20}}]",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, 1082PP Amsterdam",
+      "Van Beuningenstraat 1-01, 3039WB Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 5,
+   "slot": 3,
+   "arm": "q22d-mirror",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32794,
+   "duration_ms": 13857,
+   "answer_chars": 2135,
+   "answer": "ANSWER: The side-by-side table is rendered above. Both buildings are energy label A, but the figures are calculated by the NTA 8800 label method, not metered. Gustav Mahlerlaan 10 is an office (Utiliteitsbouw, 118,174 m² thermal zone) with 21.6% renewable share, while Van Beuningenstraat 1 is a residential unit (Woningbouw, 92 m²) with 0% renewable and an overheating indicator of 3.59 (significant). The Van Beuningenstraat address matches three units in the building (1-01, 1-02, 1-BG), so the table shows 1-01 only and the other two may differ.\nCALLS: 3\nTOOLS: mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__get_building_profile, mcp__eval-q22d-mirror__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, Amsterdam, for side-by-side table\"}; {\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, Rotterdam, for side-by-side table\"}; {\"title\":\"Energielabel-cijfers: Gustav Mahlerlaan 10 vs Van Beuningenstraat 1-01\",\"queryIntent\":\"Side-by-side comparison of EP-Online label figures (calculated, NTA 8800) for two addresses\",\"columns\":[{\"key\":\"kenmerk\",\"header\":\"Kenmerk\",\"type\":\"text\"},{\"key\":\"gustav\",\"header\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"type\":\"text\"},{\"key\":\"van\",\"header\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"type\":\"text\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Gebouwklasse\",\"Utiliteitsbouw\",\"Woningbouw\"],[\"Berekeningstype\",\"NTA 8800:2022 (basisopname utiliteitsbouw)\",\"NTA 8800:2020 (basisopname woningbouw)\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"],[\"Energiebehoefte EP1 (kWh/m² per jaar, berekend)\",\"81.68\",\"110.74\"],[\"Primair fossiel EP2 (kWh/m² per jaar, berekend)\",\"179.06\",\"156.01\"],[\"Primair fossiel EP2 forfaitair (kWh/m² per jaar, berekend)\",\"233.59\",\"156.01\"],[\"Aandeel hernieuwbare energie (%, berekend)\",\"21.6\",\"0\"],[\"CO2-emissie (kg/m² per jaar, berekend)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte (kWh/m² per jaar, berekend)\",\"16.46\",\"99.12\"],[\"Gebruiksoppervlakte thermische zone (m²)\",\"118174\",\"92\"],[\"Oververhittingsindicator (eenheidloos)\",\"0\",\"3.59\"]]}",
+   "tables": [
+    {
+     "headers": [
+      "Kenmerk",
+      "Gustav Mahlerlaan 10, 1082PP Amsterdam",
+      "Van Beuningenstraat 1-01, 3039WB Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  },
+  {
+   "batch": "haiku-5.5",
+   "wave": 5,
+   "slot": 4,
+   "arm": "q22d-content",
+   "model": "claude-haiku-5-5",
+   "verdict": "correct",
+   "render_calls": 1,
+   "alert_fired": false,
+   "alert_delivered": false,
+   "rerendered_after_alert": false,
+   "prose_says_calculated": true,
+   "tool_uses": 3,
+   "subagent_tokens": 32679,
+   "duration_ms": 12923,
+   "answer_chars": 2297,
+   "answer": "ANSWER: Both addresses have energy label A, but the figures are not like-for-like: Gustav Mahlerlaan 10 is a utility (kantoor) building with a 118,174 m² thermal zone under NTA 8800:2022, while Van Beuningenstraat 1 is a 92 m² apartment under NTA 8800:2020. Gustav Mahlerlaan 10 has the higher primary fossil energy (179.06 vs 156.01 kWh/m²) and 21.6% renewable share, against 0% for Van Beuningenstraat 1, which has the higher heat demand (99.12 vs 16.46 kWh/m²). All figures are calculated by the label method, not measured, and the Van Beuningenstraat 1 profile is unit 1-01 of 3 units at that address (1-02 and 1-BG were not fetched). The table is rendered above.\nCALLS: 3\nTOOLS: mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__get_building_profile, mcp__eval-q22d-content__render_table\nPARAMS: {\"postcode\":\"1082PP\",\"huisnummer\":10,\"queryIntent\":\"Energy-label figures for Gustav Mahlerlaan 10, for side-by-side comparison with Van Beuningenstraat 1\"}\n{\"postcode\":\"3039WB\",\"huisnummer\":1,\"queryIntent\":\"Energy-label figures for Van Beuningenstraat 1, for side-by-side comparison with Gustav Mahlerlaan 10\"}\n{\"columns\":[{\"key\":\"figuur\",\"header\":\"Figuur\",\"type\":\"text\"},{\"key\":\"gma\",\"header\":\"Gustav Mahlerlaan 10, 1082PP Amsterdam\",\"type\":\"text\"},{\"key\":\"vb\",\"header\":\"Van Beuningenstraat 1-01, 3039WB Rotterdam\",\"type\":\"text\"}],\"data\":[[\"Energielabel\",\"A\",\"A\"],[\"Gebouwklasse\",\"Utiliteitsbouw\",\"Woningbouw (Appartement, Hoekmidden)\"],[\"Berekeningstype\",\"NTA 8800:2022 (basisopname utiliteitsbouw)\",\"NTA 8800:2020 (basisopname woningbouw)\"],[\"Label geldig tot\",\"2032-06-09\",\"2032-01-31\"],[\"Bouwjaar\",\"1999\",\"1937\"],[\"Gebruiksoppervlakte thermische zone (m²)\",\"118174\",\"92\"],[\"EP1 energiebehoefte berekend (kWh/m²)\",\"81.68\",\"110.74\"],[\"EP2 primair fossiel berekend (kWh/m²)\",\"179.06\",\"156.01\"],[\"Aandeel hernieuwbare energie berekend (%)\",\"21.6\",\"0\"],[\"CO₂-emissie berekend (kg/m²)\",\"53.47\",\"28.59\"],[\"Warmtebehoefte berekend (kWh/m²)\",\"16.46\",\"99.12\"],[\"Energieverbruik berekend, niet gemeten (kWh/m²)\",\"229.17\",\"155.77\"],[\"Temperatuuroverschrijding indicator (eenheidloos)\",\"0 (geen risico)\",\"3.59 (significant)\"]],\"title\":\"Energielabel-figuren (berekend, niet gemeten)\",\"queryIntent\":\"Side-by-side energy-label figures for Gustav Mahlerlaan 10 and Van Beuningenstraat 1\"}",
+   "tables": [
+    {
+     "headers": [
+      "Figuur",
+      "Gustav Mahlerlaan 10, 1082PP Amsterdam",
+      "Van Beuningenstraat 1-01, 3039WB Rotterdam"
+     ],
+     "error": false,
+     "alert_fired": false,
+     "alert_delivered": false
+    }
+   ]
+  }
+ ]
+}

@@ -22,7 +22,7 @@ Two readers, two destinations:
 |---|---|---|---|
 | What a value IS (quantity, scope, provenance, unit) | the **field name** | `ep1_energiebehoefte_berekend_kwh_m2` | model |
 | Renames of upstream fields | `FIELD_NAMES` table in source (e.g. [`best-field-names.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-field-names.ts)) | `{ upstream, name, reason, provenance }` | maintainer |
-| What the tool is/is not, input conventions, record-independent rules | description head (≤ 2,048) | prose, fact + instruction per rule | model |
+| What the tool is/is not, input conventions, record-independent rules | description head (≤ 4,096) | prose, fact + instruction per rule | model |
 | Formats, valid values, misbehaving params, valid `select` names | input schema `.describe()`/`.meta()` | one sentence + a working example | model |
 | Rules that interpret returned values | **rule registry** in source (e.g. [`best-building-rules.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-building-rules.ts)) | `{ id, relates_to_fields, applies, render, provenance }` | maintainer: all of it, in source. Model: **only the line `render()` returns**, in `interpretation` — `relates_to_fields` and `provenance` are never serialized |
 | Determinate derived values and verdicts | `transform` / `summarize` code | computed field with `unit`, `basis`, `provenance`, or `null` + `reason` | model |

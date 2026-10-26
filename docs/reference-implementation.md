@@ -8,13 +8,13 @@ three groups from the talk). Links go to the reference implementation, `best`
 [`rich-domain-mcp-server`](../.claude/skills/rich-domain-mcp-server/SKILL.md) skill produced when
 its audit was run on this repo's own tools. Why it is built this way: [`design.md`](design.md).
 
-To see what a tier actually sends, with the 2,048-character cut marked, read its wire view:
+To see what a tier actually sends, with the 4,096-character cut marked, read its wire view:
 [`best`](wire/best.md) · [`rich`](wire/rich.md) · [`thin`](wire/minimal.md).
 
 ## 1 · WHEN — before the call
 
 Does this tool fit the question, what is it not for, what does it join with? These must be in the
-first 2,048 characters of the description (Claude Code's cut, the strictest measured), because the
+first 4,096 characters of the description (the cut of Claude Code and Cowork), because the
 model decides before it has any response:
 
 - building: [`WHEN TO USE` · `WHEN NOT TO USE` · `RELATED TOOLS`](../src/tools/get-building-profile-best.ts#L33-L37),
@@ -36,7 +36,7 @@ How to form the arguments, and what comes back:
 ## 3 · WHAT — meaning and interpretation, after the answer
 
 What a value is, and how to read it for this record. Most of it travels in the response, where
-there is no 2,048 cut:
+there is no description cut:
 
 - **names first**, in [the rename table](../src/domain/best-field-names.ts#L31-L147): upstream name →
   name that says quantity, scope, provenance and unit, with a reason and provenance per row

@@ -2,8 +2,8 @@
  * The app tools (render_chart, render_table, render_map, get_tool_call_log) — reference implementation.
  *
  * The data tools fetch; these draw. What the model needs from them is mostly BEFORE the call (which
- * tool, which chart type, how to shape the payload), so each description fits within the 2,048
- * characters a host delivers, and the per-parameter rules live in the input schema, which is
+ * tool, which chart type, how to shape the payload), so each description fits within the 4,096
+ * characters Claude Code and Cowork deliver, and the per-parameter rules live in the input schema, which is
  * delivered too. What can be checked on the finished call is checked here and returned under
  * `interpretation.alerts`, instead of being left to prose. Audit: docs/app-tools-findings.md.
  */
@@ -70,7 +70,7 @@ export const BEST_ANNOTATION_EXAMPLES = {
 /**
  * A question-first decision path for render_chart's `type`: what the data IS decides the type,
  * then the per-type rules check it. Prepended to the rules, in the input schema, where it is
- * delivered (a description would lose it past char 2,048).
+ * delivered (a description would lose it past the cut).
  */
 export const CHART_DECISION_TREE =
   'Chart type. Decide from what the data IS, in this order, then check the per-type rules below.\n' +
@@ -92,6 +92,17 @@ export const CHART_DECISION_TREE =
   'Per-type rules:\n';
 
 // ── Checks on a finished call ────────────────────────────────────────────────
+
+/**
+ * A successful app-tool result: `interpretation` and `rendered` first, then the UI payload, all in
+ * structuredContent, and the same JSON as the content text. Each host reads a different channel:
+ * Claude Code only structuredContent, claude.ai chat only content, ChatGPT both
+ * (evals/results/2026-10-26-q28-result-channel.json). Mirrored, every host gets the alerts.
+ */
+export function bestRenderResult(alerts: string[], rendered: string, payload: Record<string, unknown>) {
+  const structuredContent = { interpretation: { alerts, notes: [] as string[] }, rendered, ...payload };
+  return { content: [{ type: 'text' as const, text: JSON.stringify(structuredContent) }], structuredContent };
+}
 
 const METERED_TARGET = /paris\s*proof|weii/i;
 

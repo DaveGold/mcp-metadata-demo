@@ -19,11 +19,11 @@ bottom. Bracketed tags (`[Q7]`) resolve in [`evidence.md`](evidence.md).
 | surface | reaches the model? | budget | what belongs there | evidence |
 |---|---|---|---|---|
 | **field names** in the returned data | **always** — in every response, on every host | none | what the value IS: quantity, scope, provenance, unit | [N1]–[N6] |
-| **tool description** | **first 2,048 characters only**, re-sent on every request | 2,048 chars (keep a working ceiling ~1,800) | what the tool is and is not, when to pick it, input conventions, the few rules that must hold *before* a call | [Q7] [Q15] [Q15b] |
-| **server instructions** | same 2,048 cut on Claude Code; **512** on ChatGPT, **not at all** on claude.ai chat and ChatGPT Work, whole on Cowork (4,096 cap) | 512 chars | cross-tool routing, "read `interpretation` first", what the server does NOT have — each repeated in a description head or the response | [Q7] [HD] |
+| **tool description** | **the head only**, re-sent on every request: 2,048 chars on Claude Code up to 2.1.294; 4,096 up front and 16,384 through tool search since 2.1.296; 4,096 on Cowork | 4,096 chars (keep a working ceiling ~3,600) | what the tool is and is not, when to pick it, input conventions, the few rules that must hold *before* a call | [Q7] [Q15] [Q15b] [CC] |
+| **server instructions** | cut at 2,048 on Claude Code up to 2.1.294, 4,096 since 2.1.296 [CC]; **512** on ChatGPT, **not at all** on claude.ai chat and ChatGPT Work, whole on Cowork (4,096 cap) | 512 chars | cross-tool routing, "read `interpretation` first", what the server does NOT have — each repeated in a description head or the response | [Q7] [HD] |
 | **input schema** (`.describe()`/`.meta()` per param) | **yes, in full** on Claude Code, claude.ai chat, Cowork and ChatGPT Chat: no cut seen up to ~21.7k chars per tool; **Codex and ChatGPT Work drop every describe past 5,000 chars** [HD] — but re-sent every turn, for every tool, used or not | what forming the call needs; cost per turn | formats, working examples, the list of valid `select` names, misbehaving params, how to choose an enum value | [L3] [Q11] [IS] |
 | **output schema** annotations | **no** on Claude Code, Cowork and claude.ai chat — a 7,659-char schema difference cost +181–336 tokens; **yes** on Codex and ChatGPT Work [HD] | — | validation + UI only; keep shape-only | [Q11] |
-| **tool response** | yes, **up to ~25k tokens**; above that the host replaces the result with a "saved to file" notice | keep < ~25k tokens (this repo guards at 50k chars) | the instance, record-conditional interpretation, computed verdicts, the data a rule needs | [Q9] [Q13] [Q14] [Q16] |
+| **tool response** | yes, **up to ~25k tokens**; above that the host replaces the result with a "saved to file" notice. Which channel arrives depends on the host: Claude Code `structuredContent` only; claude.ai chat `content` only; ChatGPT both, or `structuredContent` only with an `outputSchema`; `_meta` never; an error's text always [Q28]. Mirror the two | keep < ~25k tokens (this repo guards at 50k chars) | the instance, record-conditional interpretation, computed verdicts, the data a rule needs | [Q9] [Q13] [Q14] [Q16] |
 | **guidance call / meta-tool** | only if the model makes the call — and it makes it only when the pointer is an instruction | — | procedures and recipes, when they cannot go in the response | [Q8] [Q8b] |
 | MCP Resources | client-dependent, not measured here | — | never the sole home of essential guidance | — |
 
@@ -43,11 +43,14 @@ against 118 of 120) and 7.6% cheaper, so `best` uses the guided form.
 
 What each client delivered from the `rich` tier (a 7,978-char description, 2,829-char server
 instructions, a 20,181-char `render_table` input schema). SKILL.md turns this into budgets per
-target client.
+target client. The Claude Code row is the version the evals ran on (2.1.275–2.1.280); the row
+below it is the same host since 2.1.296, read from the changelog and the binary and probed live
+on 2.1.308 [CC].
 
 | client | tool description | server instructions | input schema | output schema |
 |---|---|---|---|---|
-| Claude Code | cut at 2,048 | cut at 2,048 | whole | not delivered |
+| Claude Code up to 2.1.294 | cut at 2,048 | cut at 2,048 | whole | not delivered |
+| Claude Code 2.1.296+ (2026-10-26) [CC] | cut at 4,096 up front; at 16,384 through tool search (the default for MCP tools): whole | cut at 4,096: whole | not re-probed | not re-probed |
 | Cowork (web, desktop app) | cut at 4,096 | whole | whole | not delivered |
 | claude.ai chat (web, desktop app) | whole, after tool search | **none** | whole | not delivered |
 | ChatGPT Chat | whole | cut at 512 | whole | sometimes (1 in 3) |
@@ -71,8 +74,8 @@ row is read from the request.
    model that only has the spilled file can still `jq` it out [Q9].
 3. **The description head is prime real estate.** Anything a model must know *before* it calls
    (the refusal "this server has no metered consumption data", the input convention
-   `28A = huisnummer 28 + huisletter "A"`) has to live in the first 2,048 characters, because no
-   response exists yet.
+   `28A = huisnummer 28 + huisletter "A"`) has to live in the first 4,096 characters (Claude Code
+   2.1.296+ up front, Cowork [CC] [HD]), because no response exists yet.
 4. **Never put model-facing meaning only in the output schema** [Q11]. Keep it canonical for the
    server (validation, UI); project what the model needs into the description head or the
    response.
@@ -81,7 +84,9 @@ row is read from the request.
    parameterless tool, 10/10, every caller correct, ~0.5% extra tokens [Q8b].
 6. **Raising the client cap is not a fix.** `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=20000`
    delivered the block, and cost +23.7% tokens, mostly from *other* tools' long descriptions
-   [Q15b]. Fix delivery in the server.
+   [Q15b]. Fix delivery in the server. Claude Code raised its own defaults in 2.1.295–2.1.296
+   [CC]; that helps users on new versions and none on old ones or on Cowork. The same variable
+   set to `2048` reproduces the old cut on a new version, for an eval that depends on it.
 7. **Distance barely matters under the limit.** A recipe fetched once was still applied after
    ~62k chars of other tool output (haiku 10/10, 10/10, 9/10) [Q9]. Deliver once per session;
    there is no need to repeat guidance in every response.
@@ -93,7 +98,9 @@ text [Q7]. Check the model side.
 
 - **Ask the model where its description ends.** Spawn a fresh subagent that has the tool and ask
   it to quote the last 100 characters of the tool's description. A cut shows as a quote that
-  stops mid-sentence with `… [truncated]` at exactly char 2,048. (This is how Q7 was found.)
+  stops mid-sentence with `… [truncated]` at exactly the host's cut (2,048 on Claude Code up to
+  2.1.294, 4,096 or 16,384 since). (This is how Q7 was found; a quote of the true end is how CC
+  was confirmed.)
 - **On another host, read the request or fingerprint the cut** [HD]. Codex CLI: run with
   `RUST_LOG=trace`; the `response.created` event echoes the tools the model got (MCP tools are
   deferred there, reachable through `ALL_TOOLS` in the `exec` tool). Chat hosts (ChatGPT,
@@ -103,7 +110,7 @@ text [Q7]. Check the model side.
   `--disable apps`, or the account's ChatGPT apps join the tool list.
 - **Token accounting.** Change only surface X by N characters and compare per-run input tokens.
   If a 7,659-char change moves input by ~200 tokens, X is not in the request [Q11].
-- **Measure offsets in CI.** A test that asserts `description.length <= 2048` and that each
+- **Measure offsets in CI.** A test that asserts `description.length <= 4096` and that each
   load-bearing sentence starts before a fixed offset (`indexOf('CALCULATED') < 900`) is the only
   thing that stops a later edit silently pushing a rule past the cut. See
   [`best-arm.test.ts`](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/best-arm.test.ts).

@@ -39,8 +39,8 @@ and tell the user which service the next tab is for.
 
 | surface | Claude only (Code, claude.ai, Cowork) | ChatGPT / Codex only | all clients |
 |---|---|---|---|
-| tool description | ≤ 2,048 (Claude Code cuts there) | no cut measured | ≤ 2,048 |
-| server instructions | ≤ 2,048, and nothing required (claude.ai chat gets none) | ≤ 512, and nothing required (Work gets none) | ≤ 512, nothing required |
+| tool description | ≤ 4,096 (Claude Code 2.1.296+ for a tool sent up front, and Cowork; 2,048 before 2.1.296) | no cut measured | ≤ 4,096 |
+| server instructions | ≤ 4,096, and nothing required (claude.ai chat gets none) | ≤ 512, and nothing required (Work gets none) | ≤ 512, nothing required |
 | input schema | whole | ≤ 5,000 serialized, or every describe is dropped (bisected on Codex; ChatGPT Work consistent, not bisected) | ≤ 5,000 |
 | output schema | never delivered: meaning there is review-only | delivered on Codex and Work | review-only |
 

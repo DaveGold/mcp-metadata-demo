@@ -14,7 +14,7 @@ description: >-
   triggers on "the agent picks the wrong tool", "the agent misreads this field", "the agent
   ignores the description", user-feedback triage, and tool-call-log pattern analysis.
 metadata:
-  version: 1.2.1
+  version: 1.4.1
 ---
 
 # rich-domain-mcp-server — build, audit and measure MCP tools
@@ -54,16 +54,16 @@ Do not skip the audit because the metadata looks rich. In this repo the richest 
 28% of its own description to the model, and one of its computed alerts asserted a verdict the
 eval set had already shown to be wrong.
 
-## What reaches the model (Claude Code, the strictest host measured)
+## What reaches the model (Claude Code, the host every eval ran on)
 
 | surface | delivered | budget |
 |---|---|---|
 | field names | **always**, every response | — |
-| tool description | **first 2,048 chars only**, every request [Q7] | ≤ 2,048, ceiling ~1,800 |
-| server instructions | first 2,048 chars [Q7]; other hosts deliver 512, all, or none [HD] | ≤ 512; nothing load-bearing only here |
+| tool description | **the head only**, every request: 2,048 chars up to 2.1.294 [Q7]; since 2.1.296, 4,096 for a tool sent up front and 16,384 for one loaded through tool search, the default for MCP tools [CC] | ≤ 4,096, ceiling ~3,600 |
+| server instructions | first 2,048 chars up to 2.1.294 [Q7], 4,096 since 2.1.296 [CC]; other hosts deliver 512, all, or none [HD] | ≤ 512; nothing load-bearing only here |
 | input schema | yes, in full [IS] (also claude.ai, Cowork, ChatGPT Chat; Codex and ChatGPT Work drop every describe past 5,000 chars [HD]) — re-sent every turn | ≤ 5,000 per tool where Codex matters; paid on every call |
 | output schema | **no** [Q11] (nor claude.ai, Cowork; Codex yes, ChatGPT sometimes [HD]) | validation/UI only |
-| response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9] | guard it |
+| response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9]. With `structuredContent`, only its JSON; `content` text is dropped (claude.ai chat does the opposite) [Q28] | guard it; mirror it in both channels |
 | guidance tool | only if the pointer is a requirement [Q8b] | — |
 
 ### Budgets by target client [HD]
@@ -73,8 +73,8 @@ never the only home of a rule. Pick the column for the clients the server must w
 
 | surface | Claude only (Code, claude.ai, Cowork) | ChatGPT / Codex only | all clients |
 |---|---|---|---|
-| server instructions | nothing required (claude.ai chat gets none); ≤ 2,048 | nothing required (Work gets none; Codex prepends them to every tool); ≤ 512 | nothing required; ≤ 512 |
-| tool description | ≤ 2,048 (Claude Code; Cowork cuts at 4,096) | no cut measured; the head still decides the search | ≤ 2,048 |
+| server instructions | nothing required (claude.ai chat gets none); ≤ 4,096 | nothing required (Work gets none; Codex prepends them to every tool); ≤ 512 | nothing required; ≤ 512 |
+| tool description | ≤ 4,096 (Claude Code 2.1.296+ for a tool sent up front, and Cowork [CC] [HD]) | no cut measured; the head still decides the search | ≤ 4,096 |
 | input schema | whole; size it for cost only | ≤ 5,000 per tool (Codex drops every describe above it, bisected; Work consistent, not bisected) | ≤ 5,000 per tool |
 | output schema | validation only (never delivered) | may help (Codex, Work deliver it; Chat 1 in 3); never required | validation only |
 | response | the meaning of the record; < ~25k tokens on Claude Code | the meaning of the record | the meaning of the record |
@@ -92,8 +92,11 @@ In every column:
 - **Found before read.** claude.ai, Cowork, Codex and ChatGPT Work defer tools until the model
   searches. The tool name and first sentence say what the user can do with it, in the words they
   would search with.
-- **These are one day's host versions (2026-09-27).** Re-verify with `references/delivery.md`
-  before relying on a number.
+- **These are one day's host versions (2026-09-27).** Claude Code has moved since: its 2,048 cut
+  became 4,096 (16,384 through tool search) in 2.1.295–2.1.296 [CC], and the budget followed.
+  Claude Code updates itself, so its versions before 2.1.296 are no longer a target; an eval that
+  needs the old cut sets it. Re-verify with `references/delivery.md` before relying
+  on a number.
 
 To score an existing server against this table in a minute, run the `mcp-compat-check` skill
 (`.claude/skills/mcp-compat-check/check.mjs <url>`): red per tool and per client column, with the
@@ -115,7 +118,7 @@ leverage and by how model-independent each mechanism is:
 1. **Ship the facts the payload lacks** — constants, conversions. No model reasons its way to a
    calorific value; opus scored 1–3/10 without it [L2].
 2. **Make sure guidance is delivered** — in the response under `interpretation`, or in the first
-   2,048 chars of the description [Q15]. Prefer the response for anything that interprets values.
+   4,096 chars of the description [Q15] [CC]. Prefer the response for anything that interprets values.
 3. **Ship the data a rule needs**, not only the rule: haiku 2/20 → 15/20, strong models −87% calls
    [Q16] [Q16b].
 4. **Compute determinate verdicts server-side** — 78/78, identical on all models [L1] — and give
@@ -162,7 +165,7 @@ HARDEN     the eval set becomes a regression suite: budget, name and rule tests,
 ```
 
 Measuring belongs **inside** the loop, not after it. Every large defect in this repo was found by
-a run during iteration, not by a test or a review: the 2,048-character cut [Q7], the undelivered
+a run during iteration, not by a test or a review: the 2,048-character cut [Q7] (and its removal [CC]), the undelivered
 output schema [Q11], a computed alert that asserted a wrong verdict [BT] [Q19], a stale deploy [D],
 and an upstream quota the tool itself exhausted [Q19]. Waiting until "the loop stabilises" means
 several passes of metadata written into a channel that does not arrive.
@@ -174,7 +177,7 @@ Copy this checklist into your response and tick it off:
 - [ ] E. Examine the data (probe matrix) and the model (what it received, which field it used, how many calls)
 - [ ] F. Flag: every finding carries [CONFIDENCE: …  TODO: DOMAIN EXPERT — …]
 - [ ] V. Validate by the agent against the data; measure with a minimal eval (evaluation.md §0)
-- [ ] E. Encode: names, description ≤2,048, instructions ≤512, input schema, `interpretation` rules + computed values, provenance per rule
+- [ ] E. Encode: names, description ≤4,096, instructions ≤512, input schema, `interpretation` rules + computed values, provenance per rule
 - [ ] I. Iterate: fresh session, re-measure, then telemetry
 - [ ] V. Expert session for what the agent could not settle (validation.md), then one more pass
 - [ ] H. Harden: regression suite (evaluation.md §7), docs/<name>-findings.md, agent guide
@@ -234,7 +237,7 @@ guess — which reads exactly like an observation.
 2. **Description head** (§1, the eight blocks: the before-the-call and calling-it groups here, the
    after-the-answer group in the response) — what it is and is NOT (refusals must be possible before a call),
    "read `interpretation` first", the few rules that hold for every record as fact + instruction,
-   input conventions. ≤ 2,048, enforced by a test.
+   input conventions. ≤ 4,096, enforced by a test.
 3. **Input schema** (§2) — types, regex, working examples, valid-name lists, misbehaving params.
 4. **Output schema** (§3) — shape-only.
 5. **Response** (§4) — `interpretation { alerts, notes, constants }` first; notes selected from a
@@ -265,7 +268,7 @@ one more pass of the loop with the answers encoded.
 What the talk calls "tests, a findings log": concretely, the parts of the eval that keep guarding
 after the loop has stabilised ([`references/evaluation.md`](references/evaluation.md) §7):
 
-- **Budget tests:** description ≤ 2,048 (ceiling ~1,800), instructions ≤ 512, input schema ≤ 5,000
+- **Budget tests:** description ≤ 4,096 (ceiling ~3,600), instructions ≤ 512, input schema ≤ 5,000
   per tool where Codex or ChatGPT Work matter, load-bearing sentences before fixed offsets,
   worst-case response under the size guard.
 - **Name and rule tests:** units in names, a provenance line on every rename and rule, each rule
@@ -282,8 +285,9 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
 ## Hard rules
 
 - **Never claim what you have not observed.** Give the count, or the confidence marker.
-- **Nothing load-bearing past char 2,048** of a description, and nothing load-bearing only in the
-  instructions; a test enforces it [Q7] [HD].
+- **Nothing load-bearing past char 4,096** of a description, and nothing load-bearing only in the
+  instructions; a test enforces it [Q7] [HD] [CC]. Most important first all the same: tool search
+  ranks on the head.
 - **No model-facing meaning only in the output schema** [Q11].
 - **No field name that implies a quantity it is not; every numeric name carries its unit; calculated
   values say so in the name** when a measured counterpart exists [N2] [N5].
@@ -305,10 +309,17 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
   quarter figure in hand, 10 of 16 correct haiku answers still extrapolated it to a year; with an
   explicit "do not scale it to a year", 5 of 18 [Q19d]. It reduces the misuse; it does not end it.
 - **Never prune the note about a null decision field** [AS].
-- **A fix that must happen is a refusal, not an alert.** After a successful call the model reads an
-  alert as a note: 0/10 re-rendered a table whose headers the alert said were wrong [Q22b]. The
-  same check as a refusal with the fix in the message: 10/10, every refused run retried [Q22c].
-  Keep alerts for what the user should know.
+- **A fix that must happen is a refusal, not an alert.** A refusal is an error result, and an
+  error result reaches the model as its text: 10/10 headers fixed, every refused run retried
+  [Q22c], on every host [Q28]. A delivered alert is acted on too: mirrored, it made 6/6 runs
+  re-render and fix the table; left in `content` only, Claude Code never delivered it and 0/2 did
+  [Q22d]. But an alert works only where it is delivered and read, and a refusal depends on neither.
+  Keep alerts for what can wait or what the user should know, and mirror them.
+- **Mirror the result: the same JSON in `structuredContent` and as the `content` text** [Q28].
+  Each host reads a different channel: Claude Code only `structuredContent`, claude.ai chat only
+  `content`, ChatGPT both (only `structuredContent` once an `outputSchema` is declared). Meaning
+  in one channel alone is lost somewhere. A render tool whose `structuredContent` is the UI
+  payload puts `interpretation` first inside it, and mirrors it. Nothing for the model in `_meta`.
 - **Walk every branch with data built for it.** For each value of an enum like a chart `type`,
   send the payload the description prescribes and check it passes the INPUT SCHEMA. Three of 14
   chart types were unreachable on every tier because the schema refused the right call; the model
@@ -421,7 +432,7 @@ the codebase's own implementations, and those come first where the pattern match
 |---|---|
 | Field renames with reason + provenance | [best-field-names.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-field-names.ts) |
 | Rule registry, record-conditional selection, provenance | [best-rules.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-rules.ts), [best-building-rules.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-building-rules.ts), [best-weather-rules.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/best-weather-rules.ts) |
-| Description ≤ 2,048 + `interpretation`-first response + computed `derived` values | [get-building-profile-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-best.ts) |
+| Description inside the budget + `interpretation`-first response + computed `derived` values | [get-building-profile-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-best.ts) |
 | Shipping the data a rule needs (reference-period degree days), size guard, complete lists | [get-weather-context-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-weather-context-best.ts), [reference-period.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/domain/reference-period.ts) |
 | Defects an eval found in the reference itself, and their fixes (query-relative reference 0/10 → fixed span 8/10; annualising 10/16 → 5/18) | [docs/weather-findings.md](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/weather-findings.md) §7 |
 | Small input schema + a REQUIRED guidance tool + full-shape validation in the handler | [chart-guidance.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/chart-guidance.ts), [render-chart-schema-best.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart-schema-best.ts) |
@@ -431,15 +442,16 @@ the codebase's own implementations, and those come first where the pattern match
 
 Contrast cases, kept frozen because results were measured on them:
 `rich` ([wire view](https://github.com/DaveGold/mcp-metadata-demo/blob/main/docs/wire/rich.md): an ~8,000-char
-description of which the first 2,048 arrive; its EP-1 vs Paris Proof alert, the calculated-vs-measured
+description of which the first 2,048 arrived on the Claude Code the evals ran on, and all of it on 2.1.296+ through tool search [CC]; its EP-1 vs Paris Proof alert, the calculated-vs-measured
 defect the audit flagged, was removed on 2026-09-24) and
 [get-building-profile-minimal.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/get-building-profile-minimal.ts) (no metadata
 layer). [render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/main/src/tools/render-chart.ts) is the MCP App (render) example.
 
 ## Caveats
 
-- **Host-specific numbers.** The 2,048-char cut, the ~25k-token response limit and the absent
-  output schema were measured on Claude Code. Delivery of the description, instructions and both
+- **Host-specific and version-specific numbers.** The 2,048-char cut, the ~25k-token response
+  limit and the absent output schema were measured on Claude Code 2.1.275–2.1.280; the cut changed
+  in 2.1.295–2.1.296 [CC]. Delivery of the description, instructions and both
   schemas was also probed on Codex CLI, ChatGPT, claude.ai and Cowork [HD]; the response limit and
   every effect on answers are unmeasured elsewhere. Re-verify on
   another host with the techniques in `delivery.md` before relying on them — or design for the
@@ -453,7 +465,7 @@ layer). [render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/mai
 
 - "Add an MCP server for backend X" → Scaffold → EFVEI.
 - "Review / improve the tools on this server" → `audit.md`, then EFVEI.
-- "The agent ignores what the description says" → `delivery.md`: is it past char 2,048?
+- "The agent ignores what the description says" → `delivery.md`: is it past the host's cut (2,048, 4,096 or 16,384)?
 - "The agent misreads this field" → `audit.md` step 2 (names), then `metadata.md` §0.
 - "The agent keeps picking the wrong tool" → description head: WHEN NOT TO USE + RELATED TOOLS in both tools.
 - "Which fields are always empty / what does this field mean?" → `discovery.md`, then encode.

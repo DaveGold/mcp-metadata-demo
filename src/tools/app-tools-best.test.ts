@@ -154,3 +154,46 @@ describe('render_chart on the wire', () => {
     expect(JSON.stringify(chart.inputSchema)).not.toMatch(/Paris Proof target|value:70 for Paris Proof/);
   });
 });
+
+// Claude Code reads only structuredContent, claude.ai chat only the content text, ChatGPT both
+// (evals/results/2026-10-26-q28-result-channel.json). So best mirrors its alerts in both.
+describe('best app tools — the delivered channel (Q28)', () => {
+  const calls = [
+    {
+      name: 'render_chart',
+      arguments: {
+        type: 'pie',
+        title: 'shares',
+        labels: ['a', 'b', 'c', 'd', 'e', 'f'],
+        datasets: [['n', [1, 2, 3, 4, 5, 6]]],
+      },
+      alert: /6 slices/,
+    },
+    {
+      name: 'render_table',
+      arguments: { title: 't', columns: [{ key: 'adres', header: 'Address' }], data: [['Mahlerlaan 10']] },
+      alert: undefined,
+    },
+    {
+      name: 'render_map',
+      arguments: { title: 'm', markers: [{ lat: 4.87, lng: 52.34, label: 'Mahlerlaan' }] },
+      alert: /swapped/,
+    },
+  ];
+
+  it.each(calls)('$name: interpretation leads the structuredContent, and the text mirrors it', async (call) => {
+    const r = await (await connect('best')).callTool({ name: call.name, arguments: call.arguments });
+    expect(r.isError).toBeFalsy();
+    const structured = r.structuredContent as { interpretation: { alerts: string[] }; rendered: string };
+    expect(Object.keys(structured).slice(0, 2)).toEqual(['interpretation', 'rendered']);
+    if (call.alert) expect(structured.interpretation.alerts[0]).toMatch(call.alert);
+    else expect(structured.interpretation.alerts).toEqual([]);
+    expect(JSON.parse(textOf(r))).toEqual(structured);
+  });
+
+  it.each(calls)('$name: the older tiers keep their one-line confirmation', async (call) => {
+    const r = await (await connect('rich')).callTool({ name: call.name, arguments: call.arguments });
+    expect(r.structuredContent).not.toHaveProperty('interpretation');
+    expect(textOf(r)).toMatch(/rendered:/);
+  });
+});

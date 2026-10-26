@@ -127,6 +127,16 @@ BAG and EP-Online are live registers. Re-capture before a scoring run.
 
 ## What we found
 
+> ### ⚠️ 2026-10-26 — Claude Code no longer cuts at 2,048: reproduce with the cut pinned
+>
+> Every run below used Claude Code 2.1.275–2.1.280, which cut descriptions and server
+> instructions at 2,048 characters. Since 2.1.296 the cut is 4,096 for a tool sent up front and
+> for server instructions, and 16,384 for a tool loaded through tool search, the default for MCP
+> tools ([CC](results/2026-10-26-claude-code-cut-raised.json)). The numbers below stand for the
+> version they ran on. A re-run on today's host delivers the whole `words` / `rich` description,
+> so arms that differ only past char 2,048 converge. To reproduce a result that depends on the
+> cut, set `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=2048` or pin Claude Code ≤ 2.1.294.
+
 > ### ⚠️ 2026-09-22 — the description channel was truncated in every run below
 >
 > The host these runs used (Claude Code) sends only the **first 2,048 characters** of each
@@ -164,7 +174,8 @@ a general MCP rule; it says plainly what this repo can and cannot support.
 **The short version, as of 2026-09-23.** Guidance works when it **reaches the model**. On
 Claude Code, three things decide that:
 
-- a tool description is cut at 2,048 characters (Q7);
+- a tool description is cut at 2,048 characters (Q7; 4,096, or 16,384 through tool search,
+  since 2.1.296: [CC](results/2026-10-26-claude-code-cut-raised.json));
 - a tool result over ~25k tokens is replaced by a "saved to file" notice (Q9);
 - `outputSchema` is never sent (Q11).
 
@@ -240,7 +251,7 @@ same as the response (§10). So this is 29/30 delivered against 4/30 absent.
 
 The structural argument survives. The description is written before the data is
 known, so it must carry every branch; the response is the only channel that can be
-conditional on the record, and the only one no host truncates at 2,048 characters.
+conditional on the record, and the only one no host truncates at a fixed character count.
 That still makes the response the robust default. It is no longer a claim that
 models read responses more carefully.
 
@@ -482,8 +493,8 @@ time and still scored **0/20**, misreading boundary values (14.1 °C, 20.5 °C).
 
 | what you ship | what Claude Code does | found by |
 |---|---|---|
-| a tool description | sends the first **2,048 characters**, then `… [truncated]` | Q7 |
-| server instructions | the same 2,048-character cut | Q7 |
+| a tool description | sends the first **2,048 characters**, then `… [truncated]` (up to 2.1.294; since 2.1.296, 4,096 up front and 16,384 through tool search) | Q7, CC |
+| server instructions | the same 2,048-character cut (4,096 since 2.1.296) | Q7, CC |
 | a tool result | replaces anything over **~25k tokens** with a "saved to file" notice: lost without file tools; an agent with jq pulled the named `interpretation` key back (manual test, n=1) | Q9 |
 | `outputSchema` | **not sent** to the model | Q11 |
 | input schemas | sent (the `select` field list, 430 chars, arrives) | Q11 |

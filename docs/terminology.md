@@ -83,14 +83,16 @@ knowledge actually reaches the model in a form it can act on. Three states, and 
 A rule can be correct in the source and present in `tools/list` and still have no effect, because
 the host truncates it, drops its channel, replaces the result, or never fetches the source that
 holds it ([Q7, Q9, Q11, Q8](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
-And delivered is not yet applied: a delivered alert can still be read as a note
-([Q22b](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
+It can also sit in the wrong channel of the result: Claude Code reads only `structuredContent`,
+claude.ai chat only `content`, ChatGPT both (or only `structuredContent` with an output schema)
+([Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 ### The cut / the delivered budget
 
-On Claude Code, only the first **2,048 characters** of a tool description (and of server
-instructions) reach the model, on every request
-([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). _The cut_ is that
+On Claude Code up to 2.1.294, only the first **2,048 characters** of a tool description (and of
+server instructions) reached the model, on every request
+([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); since 2.1.296 the
+cut is 4,096, and 16,384 for a tool loaded through tool search ([CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). _The cut_ is that
 boundary; _the delivered budget_ is the space before it. _The description head_ is what sits
 inside it. The number is host-specific: verify it per client. Cowork (web) cuts at 4,096; Codex
 CLI, ChatGPT and claude.ai chat deliver the whole description; ChatGPT cuts server instructions at
@@ -139,8 +141,11 @@ for this record, not for every possible record.
 
 An **alert** is a conditional message in a successful result: _this applies to what you just got_.
 A **refusal** rejects the call and says how to fix it. Use the refusal when a correction is
-mandatory: an alert after a successful render is read as a note, not as a reason to redo the call
-([Q22b, Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
+mandatory: a refusal is an error result, which every measured path delivers as text, and it was
+acted on 10/10
+([Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
+An alert must reach every host: the same JSON in `structuredContent` and as the text
+([Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 ### queryIntent
 

@@ -70,9 +70,10 @@ One plausible line made 59 of 60 answers wrong; one sentence took the same quest
 
 `MEASURED` · [Q7, Q11](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery) ·
 MCPCon, slide 17. Proven more sharply after the talk: only the first 2,048 characters of a
-description reach the model on Claude Code, and the output schema never does. Where the line falls
-is the host's: Cowork cuts at 4,096, claude.ai chat not at all, and Codex does send the output
-schema ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
+description reached the model on the Claude Code the evals ran on, and the output schema never
+does. Where the line falls is the host's, and it moves: Cowork cuts at 4,096, claude.ai chat not at
+all, Codex does send the output schema ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)),
+and Claude Code went from 2,048 to 4,096 in October 2026 ([CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 > **Check what the model received, not what the server sent.**
 
@@ -89,10 +90,11 @@ the tested cases, on one host.
 > **Delivered is necessary, not sufficient.**
 
 `MEASURED` · [Q4](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship),
-[Q8](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery),
-[Q22b](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19).
-A delivered instruction without its fact, a guidance tool nobody calls, a delivered alert read as
-a note.
+[Q8](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery).
+A delivered instruction without its fact, a guidance tool nobody calls. (A third example, "a
+delivered alert read as a note" from Q22b, was withdrawn: the alert was never delivered,
+[Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery). Delivered, it was
+acted on, [Q22d](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19).)
 
 > **An instruction is not executable without the semantics that say when it applies.**
 
@@ -119,8 +121,10 @@ shipped, the strong models' answers converged to one value.
 
 > **A fix that must happen is a refusal, not an alert.**
 
-`MEASURED` · [Q22b, Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19).
-Alert after a successful render: 2/10 fixed, 0/10 re-rendered. Refusal with the fix in the
+`MEASURED` · [Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19),
+[Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery).
+Alert after a successful render: 2/10 fixed, 0/10 re-rendered, but that alert never reached the
+model (Q28), so the comparison is refusal against nothing. Refusal with the fix in the
 message: 10/10. _Scope:_ the tested app-tool case.
 
 > **In these evals, volume did not hurt; wrongness did.**
@@ -162,7 +166,7 @@ it could not settle.
 > **Unit tests protect the truth of domain knowledge. Evals protect its effect on the model.**
 
 `PRINCIPLE` · [Design §6](design.md#6--domain-knowledge-is-infrastructure). The evals caught what
-the green test suite could not: Claude Code's 2,048 cut, a stale deploy, this repo's own wrong alert.
+the green test suite could not: Claude Code's 2,048 cut (since raised), a stale deploy, this repo's own wrong alert.
 
 > **Plumbing is a day; metadata is the product.**
 
@@ -258,8 +262,9 @@ of the thinking stays inspectable, and so they are not reused by accident.
 |---|---|---|---|
 | ~~Most MCP servers are empty.~~ | early posts | **Most MCP servers are empty of meaning.** | Literally false: they have tools. |
 | ~~The agent can call every endpoint and understand nothing.~~ | MCPCon announcement | **The models are good. It's the metadata that isn't.** | Models reason well; the premise was missing from the payload. |
-| ~~The tool description reaches the model before the call.~~ | MCPCon, slide 17 | **Only the description head does**: the first 2,048 chars on Claude Code. | [Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery), four days after the talk. |
+| ~~The tool description reaches the model before the call.~~ | MCPCon, slide 17 | **Only the description head does**: the first 2,048 chars on the Claude Code of the evals. | [Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery), four days after the talk. |
 | ~~Only the first 2,048 characters of a description reach the model.~~ | README, design notes, talk annotations | **On Claude Code.** Cowork cuts at 4,096; claude.ai chat, ChatGPT and Codex deliver the whole description. | [HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery): every eval ran on Claude Code; the other hosts were measured on 2026-09-27. |
+| ~~On Claude Code only the first 2,048 characters of a description reach the model.~~ | README, design notes, talk annotations, skill | **On Claude Code up to 2.1.294.** Since 2.1.296 it cuts at 4,096, and at 16,384 for a tool loaded through tool search. | [CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery): changelog, binary and a live probe, 2026-10-26. |
 | ~~The response beats the description.~~ | first eval round | **Delivery decides; the channel did not.** | The description copy sat past the cut ([Q1, reversed](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). |
 | ~~Agents won't call a meta-tool to learn something.~~ | MCPCon talk notes | **They won't on a hint. They will when the pointer says REQUIRED, or the guidance is its own tool.** | Soft pointer 0/10, REQUIRED 10/10 ([Q8b](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). |
 | ~~Specify behaviour, not semantics.~~ | earlier design rule | **Ship the fact with the instruction.** | [Q4](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship) |
