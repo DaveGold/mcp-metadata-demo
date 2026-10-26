@@ -12,7 +12,7 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { bestMapDescription, mapAlerts } from './app-tools-best.js';
+import { bestMapDescription, bestRenderResult, mapAlerts } from './app-tools-best.js';
 import { z } from 'zod';
 import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -355,20 +355,12 @@ export function registerRenderMapTool(server: McpServer, opts: { minimal?: boole
 
         await logToolCall({ auth, args: { ...args, markers }, start, status: 'success' });
 
+        const rendered = `${markers.length} marker(s) — "${args.title ?? 'Untitled'}"`;
+        // Pass the normalized keyed shape to the UI so it doesn't need to
+        // re-implement the same conversion client-side.
+        if (opts.best) return bestRenderResult(mapAlerts(markers), rendered, { ...args, markers });
         return {
-          content: [
-            {
-              type: 'text' as const,
-              text: opts.best
-                ? JSON.stringify({
-                    interpretation: { alerts: mapAlerts(markers), notes: [] },
-                    rendered: `${markers.length} marker(s) — "${args.title ?? 'Untitled'}"`,
-                  })
-                : `Map rendered: ${markers.length} marker(s) — "${args.title ?? 'Untitled'}"`,
-            },
-          ],
-          // Pass the normalized keyed shape to the UI so it doesn't need to
-          // re-implement the same conversion client-side.
+          content: [{ type: 'text' as const, text: `Map rendered: ${rendered}` }],
           structuredContent: { ...args, markers },
         };
       } catch (error) {

@@ -93,6 +93,17 @@ export const CHART_DECISION_TREE =
 
 // ── Checks on a finished call ────────────────────────────────────────────────
 
+/**
+ * A successful app-tool result: `interpretation` and `rendered` first, then the UI payload, all in
+ * structuredContent, and the same JSON as the content text. Each host reads a different channel:
+ * Claude Code only structuredContent, claude.ai chat only content, ChatGPT both
+ * (evals/results/2026-10-26-q28-result-channel.json). Mirrored, every host gets the alerts.
+ */
+export function bestRenderResult(alerts: string[], rendered: string, payload: Record<string, unknown>) {
+  const structuredContent = { interpretation: { alerts, notes: [] as string[] }, rendered, ...payload };
+  return { content: [{ type: 'text' as const, text: JSON.stringify(structuredContent) }], structuredContent };
+}
+
 const METERED_TARGET = /paris\s*proof|weii/i;
 
 /** Determinate problems with a render_chart call, each with its fix. Rendered anyway: the user may know better. */

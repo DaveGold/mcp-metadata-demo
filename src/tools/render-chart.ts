@@ -17,7 +17,13 @@ import { z } from 'zod';
 import { logger } from '../logger.js';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
-import { BEST_ANNOTATION_EXAMPLES, CHART_DECISION_TREE, bestChartDescription, chartAlerts } from './app-tools-best.js';
+import {
+  BEST_ANNOTATION_EXAMPLES,
+  CHART_DECISION_TREE,
+  bestChartDescription,
+  bestRenderResult,
+  chartAlerts,
+} from './app-tools-best.js';
 import { guidedChartInputSchema, guidedShapeProblem } from './chart-guidance.js';
 import { registerAppTool, registerAppResource, RESOURCE_MIME_TYPE } from '@modelcontextprotocol/ext-apps/server';
 import { getAuthExtra } from '../shared/auth.js';
@@ -1155,21 +1161,18 @@ export function registerRenderChartTool(
           status: 'success',
         });
 
+        // Ship normalized keyed shapes to the UI so it doesn't need to re-implement
+        // the same conversion client-side.
+        const payload = { ...args, datasets, sankey, matrix, treemap, graph };
+        if (opts.best)
+          return bestRenderResult(
+            chartAlerts({ ...args, datasets }),
+            `${args.type} — "${args.title ?? 'Untitled'}"`,
+            payload,
+          );
         return {
-          content: [
-            {
-              type: 'text' as const,
-              text: opts.best
-                ? JSON.stringify({
-                    interpretation: { alerts: chartAlerts({ ...args, datasets }), notes: [] },
-                    rendered: `${args.type} — "${args.title ?? 'Untitled'}"`,
-                  })
-                : `Chart rendered: ${args.type} — "${args.title ?? 'Untitled'}"`,
-            },
-          ],
-          // Ship normalized keyed shapes to the UI so it doesn't need to re-implement
-          // the same conversion client-side.
-          structuredContent: { ...args, datasets, sankey, matrix, treemap, graph },
+          content: [{ type: 'text' as const, text: `Chart rendered: ${args.type} — "${args.title ?? 'Untitled'}"` }],
+          structuredContent: payload,
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
