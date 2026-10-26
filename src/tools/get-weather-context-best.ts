@@ -3,7 +3,7 @@
  *
  * Same data path and numbers as get-weather-context.ts (executeWeatherQuery + summarizeWeather).
  * What changes is what the model receives:
- * - a description within the 2,048 characters a host delivers, the rules that matter first;
+ * - a description within the 4,096 characters Claude Code and Cowork deliver, the rules that matter first;
  * - `interpretation` first in the response, lines from a rule registry (best-weather-rules.ts);
  * - the partial-period REFERENCE shipped as data, the annual factor null outside a full year and
  *   renamed so its validity is in its name;

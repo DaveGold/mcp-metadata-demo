@@ -4344,3 +4344,27 @@ up/down values, and the change is measured again.
 >   icon are 5/5 either way.
 >
 > P1–P6 hold. Audit exact (shared with Q26c).
+
+## CC — Does Claude Code still cut descriptions at 2,048? Found 2026-10-26, not a registered experiment
+
+An eval smoke run in a production repo saw the old variant of a tool quote facts at chars 2,782
+and 7,677 of its description. Under Q7 those could not have arrived.
+
+> **CC ANSWERED 2026-10-26 — no. Claude Code 2.1.296+ cuts at 4,096, and at 16,384 through tool
+> search.** See [`results/2026-10-26-claude-code-cut-raised.json`](results/2026-10-26-claude-code-cut-raised.json).
+> - **Changelog:** 2.1.280 added `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH`; 2.1.295 raised a
+>   description loaded through tool search to 16,384; 2.1.296 raised a description sent up front
+>   and server instructions to 4,096.
+> - **Binary (2.1.296):** `Px(deferred) = env ?? (deferred ? 16384 : 4096)`. MCP tools are
+>   deferred by default, so the 16,384 path is the usual one.
+> - **Live (desktop app Code tab, 2.1.308):** the `rich` instructions (2,829 chars) and the
+>   `rich` description (7,978 chars, loaded through ToolSearch) arrived whole.
+>
+> Q7, Q15, Q15b, Q20 and Q21 are not re-run and stay valid for 2.1.275–2.1.280. What follows:
+> - An arm pair that differs only past char 2,048 no longer differs on delivery on today's host.
+>   A run that depends on the cut sets `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=2048`, and says so.
+> - ~~The 2,048 description budget stays~~ **Decision 2026-10-26: the budget is now 4,096**
+>   (ceiling ~3,600). Claude Code updates itself, Cowork cuts at 4,096, and 2,048 had become too
+>   tight. Skill 1.4.0. Tool search still ranks on the head, so most important first.
+> - **Open:** a description sent up front (4,096 path) was not probed live, and neither was a
+>   subagent, the path the Q-series used. Cowork's 4,096 (HD) was not re-probed.

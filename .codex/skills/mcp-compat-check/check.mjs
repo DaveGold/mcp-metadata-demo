@@ -2,7 +2,8 @@
 /**
  * MCP client-compatibility check. Reads a server's tools/list and instructions and scores each
  * surface against what each client family delivered when measured (2026-09-27; see the
- * rich-domain-mcp-server skill, evidence tag HD). No model, no tool calls: deterministic.
+ * rich-domain-mcp-server skill, evidence tags HD and CC). Claude Code raised its cut from 2,048 to
+ * 4,096 in 2.1.296 (CC); Cowork cuts at 4,096 too, so that is the description budget. No model, no tool calls: deterministic.
  *
  *   node check.mjs https://example.com/mcp            # streamable HTTP
  *   node check.mjs --header "Authorization: Bearer $T" https://…
@@ -15,15 +16,15 @@ import { spawn } from 'node:child_process';
 
 // What each client family delivers. null = no limit measured.
 const CLIENTS = {
-  claude: { label: 'Claude only (Code, claude.ai, Cowork)', desc: 2048, instr: 0, schema: null, output: false },
+  claude: { label: 'Claude only (Code, claude.ai, Cowork)', desc: 4096, instr: 0, schema: null, output: false },
   openai: { label: 'ChatGPT / Codex only', desc: null, instr: 0, schema: 5000, output: 'partial' },
-  all: { label: 'all clients', desc: 2048, instr: 0, schema: 5000, output: false },
+  all: { label: 'all clients', desc: 4096, instr: 0, schema: 5000, output: false },
 };
 // instr: 0 means "some client in this family delivers none", so nothing may be required there.
-const INSTR_SOFT = { claude: 2048, openai: 512, all: 512 };
+const INSTR_SOFT = { claude: 4096, openai: 512, all: 512 };
 const HOST_NOTES = {
-  desc: 'Claude Code cuts at 2,048, Cowork at 4,096; claude.ai chat, ChatGPT and Codex deliver it whole.',
-  instr: 'claude.ai chat and ChatGPT Work deliver none; ChatGPT Chat cuts at 512; Claude Code at 2,048.',
+  desc: 'Claude Code cut at 2,048 up to 2.1.294 and at 4,096 since 2.1.296 (16,384 through tool search); Cowork cuts at 4,096; claude.ai chat, ChatGPT and Codex deliver it whole.',
+  instr: 'claude.ai chat and ChatGPT Work deliver none; ChatGPT Chat cuts at 512; Claude Code at 2,048 up to 2.1.294, 4,096 since.',
   schema: 'Codex drops every describe once the serialized input schema passes 5,000 chars (bisected: 5,000 kept, 5,001 dropped); ChatGPT Work behaves the same (20k dropped, 739 kept; not bisected).',
   output: 'Not delivered on Claude Code, claude.ai chat or Cowork; delivered on Codex and ChatGPT Work.',
 };
@@ -261,8 +262,8 @@ function markdown(r, target) {
   const shortHeads = r.tools.filter((t) => t.firstSentence.length < 25);
   if (shortHeads.length) o.push(`- ${shortHeads.length} tools have a first sentence under 25 chars; on clients that load tools by search (claude.ai, Cowork, Codex, ChatGPT Work) the name and first sentence decide whether the tool is found.`);
   o.push('', '## Rules behind the columns', '', '| surface | Claude only | ChatGPT / Codex only | all clients |', '|---|---|---|---|',
-    '| tool description | red if > 2,048 (Claude Code cut) | no limit (none measured) | red if > 2,048 |',
-    '| server instructions | red if > 2,048, or if they hold more text than all descriptions together | red if > 512 (ChatGPT Chat cut), or the same | red if > 512, or the same |',
+    '| tool description | red if > 4,096 (Claude Code 2.1.296+ sent up front, Cowork) | no limit (none measured) | red if > 4,096 |',
+    '| server instructions | red if > 4,096, or if they hold more text than all descriptions together | red if > 512 (ChatGPT Chat cut), or the same | red if > 512, or the same |',
     '| input schema | no limit (delivered whole up to ~21.7k) | red if serialized > 5,000 and it has describes (Codex cut, bisected; Work consistent) | red if > 5,000 with describes |',
     '| output schema | amber if a field is described only there (never delivered) | green (delivered on Codex and Work) | amber if described only there |',
     '| overall | the worst of the four | the worst of the four | the worst of the four |', '');

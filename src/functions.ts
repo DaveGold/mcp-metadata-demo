@@ -126,7 +126,7 @@ export const mcpGuidanceRecipe = onRequest(
 
 /**
  * The `best` arm — the reference implementation built with the rich-domain-mcp-server
- * skill: renamed fields, ≤2,048-char descriptions, `interpretation`-first responses from a
+ * skill: renamed fields, descriptions inside the delivered budget, `interpretation`-first responses from a
  * rule registry, computed values, shipped reference data. Measured as open-questions.md Q19.
  */
 export const mcpBest = onRequest(functionOptions, createHttpApp({ hosted: true, variant: 'best' }));

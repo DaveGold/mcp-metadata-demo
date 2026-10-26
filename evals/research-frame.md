@@ -40,7 +40,7 @@ what exists in the MCP protocol objects. Q7 is that inspection, and nothing in t
 about "the description weakened" is safe to quote until Q7 lands.
 
 > **Q7 landed on 2026-09-22 and proved this paragraph right in the bluntest way.** The
-> host sends only the first 2,048 characters of each MCP tool description. So 70–72% of the
+> host (Claude Code up to 2.1.294) sends only the first 2,048 characters of each MCP tool description. So 70–72% of the
 > `words` / `rich` prose, which exists in the protocol objects, was never in the model's
 > context. Protocol-visible and model-effective were different on every run here. See
 > [`results/2026-09-22-q7-description-truncation.json`](results/2026-09-22-q7-description-truncation.json).
@@ -167,9 +167,10 @@ See *Design guidance* in [`open-questions.md`](open-questions.md).
 What can be said today, and nothing wider:
 
 > **In the evaluated record-conditional task, the same domain guidance was applied when
-> it reached the model, whichever channel carried it. On Claude Code a tool description
-> reaches the model only up to character 2,048; guidance past that point was never
-> applied because it never arrived.** (Until 2026-09-23 this read "far more effective
+> it reached the model, whichever channel carried it. On the Claude Code these runs used
+> (2.1.275–2.1.280) a tool description reached the model only up to character 2,048; guidance
+> past that point was never applied because it never arrived.** Since 2.1.296 the cut is 4,096,
+> or 16,384 through tool search ([CC](results/2026-10-26-claude-code-cut-raised.json)). (Until 2026-09-23 this read "far more effective
 > when delivered with the tool result". Q15/Q15b withdrew that.)
 
 Still hypotheses, and to be written as hypotheses:

@@ -1,7 +1,9 @@
 /**
  * What a tier actually sends to the model, as readable markdown: server instructions and every
- * model-visible tool's description, with Claude Code's 2,048-char cut (Q7) and Cowork's 4,096-char cut (HD)
- * marked, plus the input parameters.
+ * model-visible tool's description, with the 4,096-char cut of Claude Code 2.1.296+ (a tool sent up
+ * front) and Cowork marked (CC, HD), plus the input parameters. Claude Code cuts a description loaded
+ * through tool search at 16,384, past every tier here. The evals ran on a Claude Code that cut at
+ * 2,048 (Q7); set CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=2048 to reproduce that.
  * The output schema is listed by size only, because the model never receives it (Q11).
  *
  * Generated from the live server factory, never written by hand: `npm run wire-view` rewrites
@@ -12,9 +14,11 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createServer, type ServerVariant } from './server.js';
 import type { BagClientLike, EpOnlineClientLike } from './tools/get-building-profile.js';
 
-export const CUT = 2048;
-/** Cowork's cut (HD, 2026-09-27). claude.ai chat, ChatGPT and Codex deliver the whole description. */
-export const COWORK_CUT = 4096;
+/**
+ * Claude Code 2.1.296+ for a tool sent up front and for server instructions (CC, 2026-10-26), and
+ * Cowork (HD, 2026-09-27). claude.ai chat, ChatGPT and Codex deliver the whole description.
+ */
+export const CUT = 4096;
 export const WIRE_VIEW_ARMS: { arm: ServerVariant; blurb: string }[] = [
   {
     arm: 'best',
@@ -24,7 +28,7 @@ export const WIRE_VIEW_ARMS: { arm: ServerVariant; blurb: string }[] = [
   {
     arm: 'rich',
     blurb:
-      'The older, description-heavy tier: most of its INTERPRETATION sits past the cut and never reaches the model on Claude Code.',
+      'The older, description-heavy tier: half its description sits past the cut, and the evals ran on a Claude Code that cut it at 2,048.',
   },
   { arm: 'minimal', blurb: 'The thin wrapper: same data, one-line descriptions, no guidance.' },
 ];
@@ -41,23 +45,16 @@ const noEp: EpOnlineClientLike = { getByBagVboId: async () => [] };
 
 const fence = (text: string) => '````text\n' + text + '\n````';
 
-/** The text as delivered, with a visible marker where Claude Code, then Cowork, stop sending it. */
+/** The text as delivered, with a visible marker where Claude Code and Cowork stop sending it. */
 export function markCut(text: string): string {
   if (text.length <= CUT) return fence(text);
-  const pct = (n: number) => Math.round((100 * n) / text.length);
   const lost = text.length - CUT;
-  const past = text.length > COWORK_CUT;
   return (
     fence(text.slice(0, CUT)) +
-    `\n\n> ✂ **Claude Code cuts here, at character ${CUT.toLocaleString('en')}.** ` +
-    `Claude Code never sends the ${lost.toLocaleString('en')} characters below (${pct(lost)}%).\n\n` +
-    '<details><summary>Not delivered on Claude Code</summary>\n\n' +
-    fence(text.slice(CUT, past ? COWORK_CUT : undefined)) +
-    (past
-      ? `\n\n> ✂ **Cowork cuts here, at character ${COWORK_CUT.toLocaleString('en')}.** ` +
-        `Cowork never sends the ${(text.length - COWORK_CUT).toLocaleString('en')} characters below (${pct(text.length - COWORK_CUT)}%).\n\n` +
-        fence(text.slice(COWORK_CUT))
-      : '') +
+    `\n\n> ✂ **Claude Code (a tool sent up front) and Cowork cut here, at character ${CUT.toLocaleString('en')}.** ` +
+    `They never send the ${lost.toLocaleString('en')} characters below (${Math.round((100 * lost) / text.length)}%).\n\n` +
+    '<details><summary>Not delivered on Claude Code or Cowork</summary>\n\n' +
+    fence(text.slice(CUT)) +
     '\n\n</details>'
   );
 }

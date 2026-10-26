@@ -25,7 +25,7 @@ this file is the portable method, and [`harness/`](harness/) is a portable harne
 
 | found by an eval run | what tests, review and logs showed |
 |---|---|
-| Descriptions are cut at 2,048 chars; 70% of the richest description never arrived [Q7] | `tools/list`, tests and logs all showed the full text |
+| Descriptions were cut at 2,048 chars (Claude Code up to 2.1.294; 4,096 since [CC]); 70% of the richest description never arrived [Q7] | `tools/list`, tests and logs all showed the full text |
 | The output schema never reaches the model [Q11] | the schema is right there in `tools/list` |
 | The server's own computed alert compares a CALCULATED figure with a MEASURED target: 0/60 [BT], and still 0/20 in [Q19] | every test green — the code does what it says |
 | A stale deploy wrote `variant: "unknown"` for a whole run [D] | 182 tests green, source correct |
@@ -170,7 +170,7 @@ running session may not reach a variant added after it began; a new `claude -p` 
 
 Once the loop stabilises, keep these running (CI where possible, a scheduled re-run otherwise):
 
-- [ ] **Budget tests:** description ≤ 2,048 (ceiling ~1,800), instructions ≤ 512, load-bearing
+- [ ] **Budget tests:** description ≤ 4,096 (ceiling ~3,600), instructions ≤ 512, load-bearing
       sentences before fixed offsets, worst-case response under the size guard.
 - [ ] **Name and rule tests:** units in names, provenance on every rename and rule, each rule on a
       fixture record that triggers it, no numeric threshold that compares calculated with measured.

@@ -59,8 +59,8 @@ The data can be perfectly understood and the tool still fail, because the model 
 the sentence that explains it, or received it and read a field name instead. Probe that directly:
 
 - **What did it receive?** Ask a fresh subagent to quote the last 100 characters of the tool
-  description and of the server instructions. A quote ending at char 2,048 with `… [truncated]` is
-  the host cut [Q7]. See [`delivery.md`](delivery.md) for the other checks (token accounting,
+  description and of the server instructions. A quote ending at char 2,048 (Claude Code up to
+  2.1.294 [Q7]) or 4,096 (Cowork, Claude Code 2.1.296+ [CC]) with `… [truncated]` is the host cut. See [`delivery.md`](delivery.md) for the other checks (token accounting,
   offsets, response size).
 - **Which fields does it misread? — the field-reading probe.** Do not test every field with an
   eval. Hand a fresh, tool-less model (the weakest you might be called by) one real response with

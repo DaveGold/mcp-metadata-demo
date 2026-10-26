@@ -58,9 +58,10 @@ ones its closing slide promised.
 
 **What changed since the talk.** The talk said _bound is not the same as delivered_, and marked
 the tool description as reaching the model before the call. Four days later the evals showed that
-on Claude Code only the first **2,048 characters** of a description arrive, and 74% of the rich
+on Claude Code only the first **2,048 characters** of a description arrived, and 74% of the rich
 tier's description never did. That line is the host's: Cowork cuts at 4,096 and claude.ai chat
-not at all ([HD](evals/results/2026-09-27-host-delivery.json)). The thesis held; what changed is where the knowledge has to go.
+not at all ([HD](evals/results/2026-09-27-host-delivery.json)), and Claude Code itself moved its cut
+to 4,096 (16,384 through tool search) in October 2026 ([CC](evals/results/2026-10-26-claude-code-cut-raised.json)). The thesis held; what changed is where the knowledge has to go.
 
 - **`rich` is the server from the talk.** Afterwards only its measured defects were fixed, among
   them a wrong alert removed and one correcting sentence moved inside the cut. The rest is as
@@ -95,8 +96,9 @@ before its run, every run audited against the server's own call log. Six results
 - **Wrong is worse than missing.** One plausible line (`EP-1 … Paris Proof: 70 kWh/m²`) made 59 of
   60 answers wrong; one sentence saying the figures are CALCULATED, not MEASURED, took the same
   question from 0/60 to 59/60. ([BT](.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship))
-- **Delivered is what counts.** Claude Code sends only the first 2,048 characters of a tool
-  description, and never the output schema (other hosts differ: [HD](evals/results/2026-09-27-host-delivery.json)). Moving one correcting sentence inside the cut took a
+- **Delivered is what counts.** The Claude Code these evals ran on sent only the first 2,048
+  characters of a tool description, and never the output schema (other hosts differ: [HD](evals/results/2026-09-27-host-delivery.json);
+  Claude Code 2.1.296+ cuts at 4,096: [CC](evals/results/2026-10-26-claude-code-cut-raised.json)). Moving one correcting sentence inside the cut took a
   failing question from 0/10 to 10/10. ([Q7](.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery),
   [Q21](.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19))
 - **Ship the data, not just the rule.** A rule that sent the model off to fetch history: Haiku

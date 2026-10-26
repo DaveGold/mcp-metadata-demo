@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { WIRE_VIEW_ARMS, renderWireView, markCut, CUT, COWORK_CUT } from './wire-view.js';
+import { WIRE_VIEW_ARMS, renderWireView, markCut, CUT } from './wire-view.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 
@@ -12,17 +12,10 @@ describe('docs/wire', () => {
     expect(onDisk, 'stale — run `npm run wire-view`').toBe(await renderWireView(arm as never, blurb));
   });
 
-  it('marks the cut only past 2,048 characters, at exactly that character', () => {
+  it('marks the cut only past 4,096 characters, at exactly that character', () => {
     expect(markCut('x'.repeat(CUT))).not.toContain('✂');
     const marked = markCut('a'.repeat(CUT) + 'LOST');
-    expect(marked).toContain('✂');
+    expect(marked).toContain('at character 4,096');
     expect(marked.indexOf('LOST')).toBeGreaterThan(marked.indexOf('✂'));
-  });
-
-  it("adds Cowork's cut only past 4,096 characters, after Claude Code's", () => {
-    expect(markCut('x'.repeat(COWORK_CUT))).not.toContain('Cowork cuts');
-    const marked = markCut('a'.repeat(COWORK_CUT) + 'GONE');
-    expect(marked.indexOf('Cowork cuts')).toBeGreaterThan(marked.indexOf('Claude Code cuts'));
-    expect(marked.indexOf('GONE')).toBeGreaterThan(marked.indexOf('Cowork cuts'));
   });
 });

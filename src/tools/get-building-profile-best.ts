@@ -4,7 +4,7 @@
  * BAG → VBO/Pand → EP-Online, the same registers and data path as the other tiers. What the
  * model receives:
  * - field names that say quantity, scope, provenance and unit (best-field-names.ts);
- * - a description within the 2,048 characters a host delivers, carrying only what must be known
+ * - a description within the 4,096 characters Claude Code and Cowork deliver, carrying only what must be known
  *   BEFORE a call;
  * - `interpretation` first in the response: record-conditional lines from a rule registry with
  *   provenance in source (best-building-rules.ts);

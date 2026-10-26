@@ -46,7 +46,8 @@ Repro: `npx tsx scripts/smoke.ts 3543AR 1` (NEN 7120), `1082PP 10` (NTA 8800 off
   instructions' alerts bullet; the rich-only output-schema describe for ep1 now says CALCULATED.
   **Kept, deliberately:** the `ep1 … Paris Proof 2040 targets` line in the shared
   `interpretationBlock`. Six eval arms carry that block, and that line is what benchmark-trap
-  measured (0/60 → 59/60). In `rich` it sits past char 2,048, so it is not delivered.
+  measured (0/60 → 59/60). In `rich` it sits past char 2,048, so it was not delivered on the
+  Claude Code these evals ran on (2.1.296+ delivers it: [CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
   Measured as Q20: the removal did NOT fix `rich` on benchmark-trap (haiku 0/10, sonnet 1/10),
   because the correcting CALCULATED vs MEASURED line is past its cut; it did end the "Paris
   Proof target" misnaming on heat-pump-triage (0/10, was 8/20). **Second half, Q21:** the

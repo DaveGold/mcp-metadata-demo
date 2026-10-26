@@ -145,8 +145,10 @@ Read that before quoting any number from this directory.
 
 > ### ⚠️ DESCRIPTION TRUNCATION — read before quoting ANY description-channel number
 >
-> Found 2026-09-22 by Q7. The host every run here used sends only the **first 2,048
-> characters** of each MCP tool description. `words`, `rich` and `words-recipe` lose
+> Found 2026-09-22 by Q7. The host every run here used (Claude Code up to 2.1.294) sends only
+> the **first 2,048 characters** of each MCP tool description. Since 2.1.296 it cuts at 4,096,
+> or 16,384 through tool search ([CC](2026-10-26-claude-code-cut-raised.json)): pin the cut to
+> 2,048 to reproduce these numbers. `words`, `rich` and `words-recipe` lose
 > 70–72% of theirs — almost the whole INTERPRETATION block, including CALCULATED vs
 > MEASURED (char 3,377), the Paris Proof line (3,194), the overheating threshold (6,181),
 > `rich`'s ALERTS paragraph and `words-recipe`'s recipe (6,781). `opaque-words` loses 57%,
