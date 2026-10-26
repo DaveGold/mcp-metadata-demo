@@ -3869,6 +3869,52 @@ LAST successful render_table call.
 | P3 | `best-v1` ≤ 2/10 (control) | ≥ 5/10 |
 | P4 | `best` median tokens ≤ +20% of `best-v1` (the retry costs a call) | > +35% |
 
+
+## Q22d — Does a DELIVERED alert on a finished table call get acted on? Registered 2026-10-26, BEFORE the run
+
+> **ANSWERED 2026-10-26 — yes.** See [`results/2026-10-26-q22d-delivered-alert.json`](results/2026-10-26-q22d-delivered-alert.json).
+> - **haiku 4.5, mirrored:** the alert fired in 6/10 runs, reached all 6, and all 6 re-rendered
+>   with the headers fixed. 10/10 CORRECT.
+> - **haiku 4.5, `content` only:** the alert fired in 2/10 runs and reached neither (the delivered
+>   result is the payload JSON); neither re-rendered. 8/10 CORRECT, the 8 marked from the start.
+> - **haiku 5.5:** at ceiling, 20/20 CORRECT; the alert fired twice (mirror), both acted on.
+> - **Cost:** +4.9% median tokens (mirror vs content).
+>
+> Q22b's "an alert after a successful render is read as a note" was an absent alert. Delivered,
+> it is acted on. The refusal (Q22c) stays the sure form for a fix that must happen: it needs
+> neither the right channel nor a model that reads it. P1 falsified on its score (the content
+> baseline is 8/10, not Q22b's 2/10; the delivery half holds), P2–P5 confirmed. n of fired runs is
+> small (6 vs 2). No server log (local stdio); calls read from the host transcripts, 40/40 match.
+
+> **REGISTERED before any run.** Q22b concluded that an alert after a successful render is read as
+> a note (0/10 re-renders). Q28 showed that alert never reached the model: it sat in `content`, and
+> Claude Code delivers only `structuredContent` when both are present. Q22b's conclusion is
+> withdrawn. This re-runs Q22b with the alert delivered.
+
+**Change, one variable: the channel the alert travels in.** An experiment build of `best` (current
+source, patch in the result file) where the header check of Q22b/Q22c is an alert on a rendered
+table again, not a refusal ("Rendered, but check the headers: … say so in the header … and call
+render_table again"). Two arms, run locally over stdio from the same build:
+- `q22d-content`: the alert only in the `content` text, the payload as `structuredContent` (Q22b's form).
+- `q22d-mirror`: the same JSON in both channels (`bestRenderResult`, the Q28 fix).
+
+**Run.** `table-label-figures`, haiku, n=10 per arm, 5 waves of 2+2 interleaved, portable harness,
+Claude Code 2.1.296. Scored on the LAST successful render_table call (a re-render counts). Whether
+the alert reached the model is read from the delivered tool_result in the subagent transcript.
+
+| # | prediction | falsified if |
+|---|---|---|
+| P1 | `q22d-content` reproduces Q22b: the alert is absent from 10/10 delivered results, ≤ 2/10 CORRECT, 0 re-renders | the alert text appears in any delivered result, or ≥ 5/10 CORRECT |
+| P2 | `q22d-mirror` delivers the alert in every run that renders an unmarked header | any such run without it |
+| P3 | `q22d-mirror` re-renders after the alert in ≥ 6/10 runs | ≤ 3/10 |
+| P4 | `q22d-mirror` ≥ 7/10 CORRECT | ≤ 4/10 |
+| P5 | `q22d-mirror` median tokens ≤ +25% of `q22d-content` (a re-render costs a call) | > +40% |
+
+> **Added after the first batch, before the second.** `haiku` now resolves to haiku 5.5, which
+> marked the headers itself in 18/20 runs (the alert fired 2×), so that batch has no headroom. A
+> second batch runs the same waves on haiku 4.5 (`claude-haiku-4-5-20251001`, Q22b's model, via
+> `ANTHROPIC_DEFAULT_HAIKU_MODEL`). P1–P5 are scored on that batch.
+
 ## Q23 — Does the chart and table guidance make the model choose the right FORM from the data? Registered 2026-09-24, NOT YET RUN
 
 > **Arm retired 2026-09-28.** The frozen arm this question compares with (`best-v1`, `best-no-type-rules`) is no longer in the code; it is at commit `6e1796e`.

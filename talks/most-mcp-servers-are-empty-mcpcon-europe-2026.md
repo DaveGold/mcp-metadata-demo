@@ -179,7 +179,8 @@ Alerts narrowed: when a correction is mandatory, refuse the call instead
 ([Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)). The reason first given, "an alert is read as a
 note" (Q22b), was withdrawn on 2026-10-26: on Claude Code that alert sat in the result's `content`
 text, which Claude Code drops from a `structuredContent` result, so it never arrived
-([Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
+([Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). Delivered, it is
+acted on ([Q22d](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
 The same mechanism as selective retrieval, on other data and with other numbers: the weather
 tool's `select` ([live demo](../docs/live-demo.md)).
 

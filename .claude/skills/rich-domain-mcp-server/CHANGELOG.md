@@ -6,6 +6,16 @@ Semantic versions; each release is the git tag `skill-v<version>` in
 sharpens rules; a **patch** fixes wording, links or tooling. Every change to the skill bumps
 `metadata.version` in `SKILL.md` and adds an entry here (CI checks both).
 
+## 1.4.1 — 2026-10-26
+
+Q22b re-run with the alert delivered [Q22d]; no rule changes.
+
+- One experiment build of `best`, the header alert on a rendered table in two channels. haiku 4.5:
+  mirrored, the alert arrived in 6/6 runs it fired in, and all 6 re-rendered and fixed the table;
+  in `content` only it arrived in 0/2, and neither did. haiku 5.5 is at ceiling on the question.
+- The refusal rule stands (a refusal does not depend on delivery or reading); its parenthesis on
+  Q22b is replaced by Q22d. New evidence row Q22d.
+
 ## 1.4.0 — 2026-10-26
 
 **Description budget raised from 2,048 to 4,096 characters** (working ceiling ~3,600) [CC].

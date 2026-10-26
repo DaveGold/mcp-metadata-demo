@@ -93,7 +93,8 @@ the tested cases, on one host.
 [Q8](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery).
 A delivered instruction without its fact, a guidance tool nobody calls. (A third example, "a
 delivered alert read as a note" from Q22b, was withdrawn: the alert was never delivered,
-[Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery).)
+[Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery). Delivered, it was
+acted on, [Q22d](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19).)
 
 > **An instruction is not executable without the semantics that say when it applies.**
 

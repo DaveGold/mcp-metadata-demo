@@ -70,7 +70,9 @@ alert with the fix. Where the fix is mandatory, it refuses: a refusal was acted 
 ([Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
 **Fixed 2026-10-26:** those alerts sat in the result's `content` text, and on Claude Code a
 result with `structuredContent` (here the payload for the UI) reaches the model as that JSON only.
-The alerts never arrived; Q22b's 2/10 measured their absence. claude.ai chat does the opposite
+The alerts never arrived; Q22b's 2/10 measured their absence. Delivered, the same alert was
+acted on in 6/6 runs
+([Q22d](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)). claude.ai chat does the opposite
 (it reads `content` only), and ChatGPT reads both. `best` now puts `interpretation`
 first in `structuredContent`, before the UI payload, and mirrors the same JSON as the text
 ([`bestRenderResult`](../src/tools/app-tools-best.ts))

@@ -14,7 +14,7 @@ description: >-
   triggers on "the agent picks the wrong tool", "the agent misreads this field", "the agent
   ignores the description", user-feedback triage, and tool-call-log pattern analysis.
 metadata:
-  version: 1.4.0
+  version: 1.4.1
 ---
 
 # rich-domain-mcp-server — build, audit and measure MCP tools
@@ -311,9 +311,10 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
 - **Never prune the note about a null decision field** [AS].
 - **A fix that must happen is a refusal, not an alert.** A refusal is an error result, and an
   error result reaches the model as its text: 10/10 headers fixed, every refused run retried
-  [Q22c]. (Q22b's "alert read as a note" is withdrawn: that alert sat in `content` next to a
-  `structuredContent` echo, and Claude Code, where the eval ran, reads only the echo [Q28].) Keep alerts for what the user should know,
-  and put them where they are delivered.
+  [Q22c], on every host [Q28]. A delivered alert is acted on too: mirrored, it made 6/6 runs
+  re-render and fix the table; left in `content` only, Claude Code never delivered it and 0/2 did
+  [Q22d]. But an alert works only where it is delivered and read, and a refusal depends on neither.
+  Keep alerts for what can wait or what the user should know, and mirror them.
 - **Mirror the result: the same JSON in `structuredContent` and as the `content` text** [Q28].
   Each host reads a different channel: Claude Code only `structuredContent`, claude.ai chat only
   `content`, ChatGPT both (only `structuredContent` once an `outputSchema` is declared). Meaning
