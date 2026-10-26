@@ -1,0 +1,184 @@
+{
+  "_comment": "Q28: when a tool result carries both `content` and `structuredContent`, which reaches the model? Claude Code only so far: the delivered tool_result blocks read from `claude -p --output-format stream-json` (not a self-report), on the Homebrew CLI 2.1.296 and the desktop app's bundled 2.1.308, against evals/host-probe/result-channel-probe-server.mjs; the conversion read from the 2.1.296 binary; and the eval transcripts of Q22–Q24 re-read for what their render tools delivered. claude.ai chat and ChatGPT Chat measured the same day through a Cloudflare quick tunnel to the same probe server, by self-report checked against the fingerprints (2 runs each). Cowork and Codex registered in open-questions.md Q28, not run.",
+  "date": "2026-10-26",
+  "host": "Claude Code 2.1.296 (CLI) and 2.1.308 (desktop app Code tab), haiku, `claude -p --strict-mcp-config --setting-sources '' --tools ''`, empty cwd; and the live session on 2.1.308 (Opus 5.5) calling eval-best render_table",
+  "probe": {
+    "server": "evals/host-probe/result-channel-probe-server.mjs: eight no-argument tools; a fingerprint per channel: C_<tool> in content text, S_<tool> in structuredContent, M_<tool> in result _meta, and a 1×1 PNG image block",
+    "delivered": {
+      "2.1.296": {
+        "probe_content_only": {
+          "is_error": false,
+          "delivered": [
+            "C_content_only: this sentence is the content text of content_only."
+          ]
+        },
+        "probe_structured_only": {
+          "is_error": false,
+          "delivered": "{\"fingerprint\":\"S_structured_only\",\"note\":\"this object is the structuredContent of structured_only.\"}"
+        },
+        "probe_both_divergent": {
+          "is_error": false,
+          "delivered": "{\"fingerprint\":\"S_both_divergent\",\"note\":\"this object is the structuredContent of both_divergent.\"}"
+        },
+        "probe_both_divergent_schema": {
+          "is_error": false,
+          "delivered": "{\"fingerprint\":\"S_both_divergent_schema\",\"note\":\"this object is the structuredContent of both_divergent_schema.\"}"
+        },
+        "probe_both_json_mirror": {
+          "is_error": false,
+          "delivered": "{\"fingerprint\":\"S_both_json_mirror\",\"note\":\"this object is the structuredContent of both_json_mirror.\"}"
+        },
+        "probe_both_with_image": {
+          "is_error": false,
+          "delivered": [
+            "<image block>",
+            "{\"fingerprint\":\"S_both_with_image\",\"note\":\"this object is the structuredContent of both_with_image.\"}"
+          ]
+        },
+        "probe_both_with_meta": {
+          "is_error": false,
+          "delivered": "{\"fingerprint\":\"S_both_with_meta\",\"note\":\"this object is the structuredContent of both_with_meta.\"}"
+        },
+        "probe_error_with_structured": {
+          "is_error": true,
+          "delivered": "C_error_with_structured: this sentence is the content text of error_with_structured."
+        }
+      },
+      "2.1.308": {
+        "probe_content_only": {
+          "is_error": false,
+          "delivered": [
+            "C_content_only: this sentence is the content text of content_only."
+          ]
+        },
+        "probe_structured_only": {
+          "is_error": false,
+          "delivered": "{\"fingerprint\":\"S_structured_only\",\"note\":\"this object is the structuredContent of structured_only.\"}"
+        },
+        "probe_both_divergent": {
+          "is_error": false,
+          "delivered": "{\"fingerprint\":\"S_both_divergent\",\"note\":\"this object is the structuredContent of both_divergent.\"}"
+        },
+        "probe_both_divergent_schema": {
+          "is_error": false,
+          "delivered": "{\"fingerprint\":\"S_both_divergent_schema\",\"note\":\"this object is the structuredContent of both_divergent_schema.\"}"
+        },
+        "probe_both_json_mirror": {
+          "is_error": false,
+          "delivered": "{\"fingerprint\":\"S_both_json_mirror\",\"note\":\"this object is the structuredContent of both_json_mirror.\"}"
+        },
+        "probe_both_with_image": {
+          "is_error": false,
+          "delivered": [
+            "<image block>",
+            "{\"fingerprint\":\"S_both_with_image\",\"note\":\"this object is the structuredContent of both_with_image.\"}"
+          ]
+        },
+        "probe_both_with_meta": {
+          "is_error": false,
+          "delivered": "{\"fingerprint\":\"S_both_with_meta\",\"note\":\"this object is the structuredContent of both_with_meta.\"}"
+        },
+        "probe_error_with_structured": {
+          "is_error": true,
+          "delivered": "C_error_with_structured: this sentence is the content text of error_with_structured."
+        }
+      }
+    }
+  },
+  "binary": {
+    "file": "Claude Code 2.1.296, MCP result conversion",
+    "rule": "if structuredContent is present (and the call is not an error): the model gets JSON.stringify(structuredContent) as one text block; the content array's text blocks are dropped; its non-text blocks (image, audio, resource) are kept, in front of the JSON. Without structuredContent the content array is passed as is. An isError result never carries structuredContent to the model.",
+    "gate": "a remote feature flag (`tengu_eventual_noodle`, default false, telemetry event `mcp_content_over_structured`) flips the rule: content first, structuredContent only when every content text is blank. Off in both measured versions for this account.",
+    "size_guard": "structuredContent over 1,048,576 chars of JSON (8,388,608 for a tool with a ui:// resource) is left off the result message; content is then kept"
+  },
+  "live_session_probe": "eval-best render_table (2.1.308): the result was the echoed structuredContent {columns, data, title, queryIntent}; the content text {interpretation: {alerts}, rendered} did not arrive. The same tool's refusal (isError, no structuredContent) arrived as text.",
+  "retroactive": {
+    "method": "result_chars (the length of the tool_result block in each subagent transcript, extract.py) against the serialized input, for every successful render call in the eval results",
+    "finding": "every render_chart / render_table / render_map result in Q22, Q22b, Q22c, Q23, Q24 (pilot and confirm) is the input plus 10–400 chars of normalisation: the structuredContent echo. `best`'s content text with interpretation.alerts, and `best-v1`'s one-line confirmation, never reached the model.",
+    "examples": [
+      {
+        "file": "2026-09-24-q22b-table-alert.json",
+        "arm": "best",
+        "tool": "render_table",
+        "n": 10,
+        "mean_result_chars": 1335,
+        "mean_input_chars": 1047
+      },
+      {
+        "file": "2026-09-24-q22b-table-alert.json",
+        "arm": "best-v1",
+        "tool": "render_table",
+        "n": 10,
+        "mean_result_chars": 1515,
+        "mean_input_chars": 1242
+      },
+      {
+        "file": "2026-09-24-q22-app-tools.json",
+        "arm": "best",
+        "tool": "render_chart",
+        "n": 28,
+        "mean_result_chars": 429,
+        "mean_input_chars": 421
+      },
+      {
+        "file": "2026-09-24-q24-chart-paths-confirm.json",
+        "arm": "best",
+        "tool": "render_chart",
+        "n": 281,
+        "mean_result_chars": 622,
+        "mean_input_chars": 529
+      }
+    ],
+    "consequence": "Q22b measured an alert that was not delivered. Its reading 'an alert after a successful render is read as a note' is withdrawn; 2/10 headers fixed and 0/10 re-renders are what an absent alert scores. Q22c stands, and now has its mechanism: a refusal is an error result, and an error result delivers its content text. Every chart alert of `best` (pie slices, line series, radar) was likewise undelivered on Claude Code; results that counted only the chart type chosen are unaffected."
+  },
+  "headline": [
+    "Each host reads a different channel. Claude Code: structuredContent only, whenever present. claude.ai chat: content only, structuredContent only when content is empty. ChatGPT Chat: both without an outputSchema, structuredContent only with one. No host delivered _meta. Every host delivered an error result's content text.",
+    "So the only portable form is a mirror: the same meaning in structuredContent and in the content text. A tool that puts meaning in only one channel loses it on at least one host: content-only meaning on Claude Code and on ChatGPT with an outputSchema, structuredContent-only meaning on claude.ai.",
+    "Q22b's alert sat in content beside a structuredContent echo, so on Claude Code (where every eval ran) it never arrived; its conclusion is withdrawn. On claude.ai the same tool would have delivered the alert and not the payload.",
+    "Q22c stands: a refusal is an error result, and every host delivered its text."
+  ],
+  "caveats": [
+    "The behaviour sits behind a remote flag; another account or a later rollout can flip it. Re-probe before relying on it.",
+    "Probe on haiku, n=1 per tool per version; the conversion is deterministic code, so n measures nothing here.",
+    "Chat-host results are self-reports (two runs each), checked against unique fingerprints, as in HD; the Claude Code result is read from the delivered tool_result.",
+    "claude.ai: the connector was added as a team connector (the only option offered) and removed after the runs. Cowork, ChatGPT Work and Codex not run."
+  ],
+  "fix": "Same day, in source: best's render_chart, render_table and render_map return interpretation and rendered first in structuredContent, before the UI payload, with the same JSON as the content text (src/tools/app-tools-best.ts bestRenderResult; tests in app-tools-best.test.ts). Not deployed to mcpBest at the time of writing; not re-measured.",
+  "chat_hosts": {
+    "method": "probe server behind `cloudflared tunnel --url` (temporary trycloudflare.com URL), added as a custom connector (claude.ai, team connector, no sign-in) and as a developer-mode app (ChatGPT, no auth); a new chat per run asking the model to call the probes and quote every block of each result verbatim; fingerprints counted. Run 1: all eight probes; run 2: five. Connector and app removed afterwards.",
+    "claude.ai chat": {
+      "version": "claude.ai web, Opus 5.5 High, 2026-10-26; tools deferred, loaded by tool_search",
+      "per_probe": {
+        "content_only": "C_",
+        "structured_only": "S_ (serialised with spaces: the client turned the object into text because content was empty)",
+        "both_divergent": "C_ only (2/2)",
+        "both_divergent_schema": "C_ only (2/2)",
+        "both_json_mirror": "one copy of the JSON (channel indistinguishable)",
+        "both_with_image": "image block + C_; no S_",
+        "both_with_meta": "C_ only; no S_, no M_ (2/2)",
+        "error_with_structured": "C_ in an <error> wrapper, no S_ (2/2)"
+      },
+      "rule": "content wins; structuredContent reaches the model only when content is empty; _meta never"
+    },
+    "ChatGPT Chat": {
+      "version": "chatgpt.com Chat mode, Extra High reasoning, 2026-10-26; developer-mode app",
+      "per_probe": {
+        "content_only": "C_ (as {\"text\": …})",
+        "structured_only": "S_",
+        "both_divergent": "S_ and C_, as {structuredContent, content} (2/2)",
+        "both_divergent_schema": "S_ only (2/2)",
+        "both_json_mirror": "S_ only",
+        "both_with_image": "S_, C_, and the content items including the base64 PNG",
+        "both_with_meta": "S_ and C_; no M_ (2/2)",
+        "error_with_structured": "C_ inside an INVALID_ARGUMENT exception text, no S_ (2/2)"
+      },
+      "rule": "without an outputSchema both channels arrive; with an outputSchema only structuredContent; _meta never; an error arrives as exception text"
+    }
+  },
+  "predictions": {
+    "P1 claude.ai and Cowork behave like Claude Code": "FALSIFIED for claude.ai chat: the opposite channel (content). Cowork not run.",
+    "P2 ChatGPT delivers both, never _meta": "HOLDS without an outputSchema; with one only structuredContent arrives. _meta never.",
+    "P3 Codex delivers structuredContent": "not run",
+    "P4 every host delivers the error's content text": "HOLDS on Claude Code, claude.ai chat and ChatGPT Chat"
+  }
+}

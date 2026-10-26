@@ -27,7 +27,9 @@ checkPermission (if you have an auth layer)
   → inject alerts      empty-result branch, feedback reminder (if you have one)
   → size guard         serialize; over budget → drop bulk rows + alert naming the remedy
   → validate output    Zod safeParse against outputSchema
-  → return             { structuredContent, content } with `interpretation` as the first key
+  → return             { structuredContent, content } with `interpretation` as the first key;
+                       content = the same JSON as text. Claude Code reads only
+                       structuredContent, claude.ai chat only content [Q28]: mirror them
 finally
   → log the call       wherever you keep tool-call history, if anywhere
 ```

@@ -4368,3 +4368,58 @@ and 7,677 of its description. Under Q7 those could not have arrived.
 >   tight. Skill 1.4.0. Tool search still ranks on the head, so most important first.
 > - **Open:** a description sent up front (4,096 path) was not probed live, and neither was a
 >   subagent, the path the Q-series used. Cowork's 4,096 (HD) was not re-probed.
+
+## Q28 — Which result channel reaches the model: `content`, `structuredContent`, or both? Registered 2026-10-26; Claude Code answered, other hosts BEFORE the run
+
+The skill tells a handler to return `{ structuredContent, content }`, and the data tools put the
+same JSON in both. The `best` render tools do not: `structuredContent` echoes the payload for the
+UI, and `content` carries `interpretation.alerts`. Nobody checked which of the two the model gets.
+
+**Method.** [`host-probe/result-channel-probe-server.mjs`](host-probe/result-channel-probe-server.mjs):
+eight no-argument tools, a fingerprint per channel (`C_` content text, `S_` structuredContent,
+`M_` result `_meta`, an image block). Read what was delivered from the request or the transcript
+where the host allows it (Claude Code stream-json, Codex `RUST_LOG=trace`); on chat hosts, ask for
+each tool's result verbatim and count the fingerprints quoted, twice, as in HD. Run the server
+with `http <port>` behind a tunnel for the hosted clients.
+
+> **Q28 ANSWERED for Claude Code 2026-10-26 — `structuredContent` replaces the content text.**
+> See [`results/2026-10-26-q28-result-channel.json`](results/2026-10-26-q28-result-channel.json).
+> - **2.1.296 and 2.1.308, read from the delivered tool_result:** with `structuredContent`
+>   present, the model gets its JSON only; `C_` never arrives, with or without an `outputSchema`,
+>   divergent or mirrored. An image block is kept. `M_` never arrives. An `isError` result
+>   arrives as its content text, without `S_`.
+> - **Binary:** the rule above, behind a remote flag (default off) that would put content first.
+> - **Retroactive:** every successful render call in Q22, Q22b, Q22c, Q23 and Q24 returned the
+>   input plus normalisation (`result_chars` ≈ input + 10–400). `best`'s render alerts were never
+>   delivered. **Q22b's conclusion is withdrawn**: an absent alert, not an alert read as a note.
+>   Q22c stands; a refusal is an error result, and those deliver their text.
+> - **Fixed in source the same day:** `best`'s render tools put `interpretation` and `rendered`
+>   first in `structuredContent` and mirror that JSON as the text (`bestRenderResult`). Not yet
+>   deployed to `mcpBest`, and not re-measured: re-running Q22b on the fixed arm is the open
+>   question of whether a *delivered* alert triggers a redo.
+
+> **Q28 ANSWERED for claude.ai chat and ChatGPT Chat 2026-10-26 — each host reads a different
+> channel.** Same probe behind a Cloudflare quick tunnel, two runs per host, fingerprints quoted:
+> - **claude.ai chat:** `content` wins. `C_` on every both-channel probe, `S_` only on
+>   `probe_structured_only` (content empty); image kept; no `M_`; the error as its text. The
+>   opposite of Claude Code.
+> - **ChatGPT Chat:** without an `outputSchema` both `C_` and `S_` arrive; with one, only `S_`.
+>   No `M_`; the error as exception text.
+> - **P1 falsified** (claude.ai is the opposite of Claude Code; Cowork not run). **P2 holds
+>   without an outputSchema** only. **P4 holds** on all three. P3 (Codex) not run.
+> - **The portable form is a mirror**: the same meaning in `structuredContent` and in the content
+>   text. `best`'s render tools already do this since the same-day fix.
+
+Predictions for the other hosts, registered before any run:
+- **P1 claude.ai chat and Cowork** behave like Claude Code (`S_` only, image kept, `M_` absent):
+  same client code family. Falsified if `C_` is quoted on `probe_both_divergent`.
+- **P2 ChatGPT (Chat and Work)** delivers both `C_` and `S_`, never `M_` (the Apps SDK
+  documents `_meta` as widget-only). Falsified if either `C_` or `S_` is missing on
+  `probe_both_divergent`.
+- **P3 Codex CLI** delivers `S_` when present, as it delivers the output schema as a return type
+  (HD). Falsified if only `C_` arrives.
+- **P4 every host** delivers the content text of `probe_error_with_structured`.
+
+What it decides: if P1 holds and P2 holds, the portable rule is "put model-facing meaning in
+`structuredContent`, and mirror it in `content` text": Claude hosts read the first, ChatGPT both.
+A render tool then needs its `interpretation` inside `structuredContent`, next to the UI payload.

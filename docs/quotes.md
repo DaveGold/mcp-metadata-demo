@@ -90,10 +90,10 @@ the tested cases, on one host.
 > **Delivered is necessary, not sufficient.**
 
 `MEASURED` · [Q4](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship),
-[Q8](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery),
-[Q22b](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19).
-A delivered instruction without its fact, a guidance tool nobody calls, a delivered alert read as
-a note.
+[Q8](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery).
+A delivered instruction without its fact, a guidance tool nobody calls. (A third example, "a
+delivered alert read as a note" from Q22b, was withdrawn: the alert was never delivered,
+[Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery).)
 
 > **An instruction is not executable without the semantics that say when it applies.**
 
@@ -120,8 +120,10 @@ shipped, the strong models' answers converged to one value.
 
 > **A fix that must happen is a refusal, not an alert.**
 
-`MEASURED` · [Q22b, Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19).
-Alert after a successful render: 2/10 fixed, 0/10 re-rendered. Refusal with the fix in the
+`MEASURED` · [Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19),
+[Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery).
+Alert after a successful render: 2/10 fixed, 0/10 re-rendered, but that alert never reached the
+model (Q28), so the comparison is refusal against nothing. Refusal with the fix in the
 message: 10/10. _Scope:_ the tested app-tool case.
 
 > **In these evals, volume did not hurt; wrongness did.**

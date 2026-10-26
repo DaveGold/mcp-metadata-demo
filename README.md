@@ -110,9 +110,13 @@ before its run, every run audited against the server's own call log. Six results
 - **Compute what is determinate.** A server-computed value scored 20/20 on value and derivation;
   every arm that left the arithmetic to the model, 2/60 combined.
   ([L1](.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship))
-- **Refuse, don't alert, when a fix is mandatory.** An alert after a successful render fixed 2/10
-  and triggered no redo; refusing the call with the fix in the message: 10/10.
-  ([Q22b, Q22c](.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19))
+- **Refuse, don't alert, when a fix is mandatory.** Refusing the call with the fix in the message:
+  10/10. ([Q22c](.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19))
+- **Mirror the result in both channels.** Each host reads a different one: Claude Code only
+  `structuredContent`, claude.ai chat only `content`, ChatGPT both (or only `structuredContent`
+  with an output schema). The render tools' alerts sat in `content` and never arrived on Claude
+  Code, which withdrew an earlier "alerts are read as notes" result.
+  ([Q28](evals/results/2026-10-26-q28-result-channel.json))
 
 **13 of the first 23 predictions were wrong.** The implementation changed with the evidence.
 

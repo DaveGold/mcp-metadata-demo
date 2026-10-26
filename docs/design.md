@@ -34,7 +34,11 @@ The evals kept the thesis and sharpened the delivery half:
   ([BT](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship),
   [Q20](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
 - A fix the model must make needs a refusal, not an alert
-  ([Q22b, Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
+  ([Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)):
+  a refusal is an error result, and every host delivers an error's text. A successful result
+  arrives through a different channel per host (Claude Code `structuredContent`, claude.ai chat
+  `content`, ChatGPT both), so mirror the two
+  ([Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 ## 1 · The capability owns the knowledge
 
@@ -111,8 +115,10 @@ The response has no description budget, and it arrives exactly when meaning is n
   ([AS](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship)).
 - **Guard the response size**: drop records before you lose the interpretation to a file notice.
 - **Alert or refuse.** Use an alert when the user should know something. Refuse the call, with the
-  fix in the message, when the operation must be corrected before it continues: a model reads an
-  alert after a successful call as a note, not as a reason to redo it.
+  fix in the message, when the operation must be corrected before it continues: a refusal is an
+  error result, and every measured path delivers its text
+  ([Q22c, Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). An alert must reach every host: put it in both result
+  channels, the same JSON in `structuredContent` and as the text.
 
 ## 5 · What you do not need to worry about
 

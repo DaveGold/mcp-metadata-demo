@@ -17,6 +17,23 @@ sharpens rules; a **patch** fixes wording, links or tooling. Every change to the
 - Claude-only server instructions: ≤ 4,096. For ChatGPT / Codex and all clients they stay ≤ 512.
 - Evals that need the old cut set `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=2048`.
 
+## 1.3.0 — 2026-10-26
+
+Which result channel reaches the model [Q28].
+
+- **New rule: mirror the result, the same JSON in `structuredContent` and as the `content`
+  text.** Each host reads a different channel: Claude Code (2.1.296, 2.1.308) only
+  `structuredContent`; claude.ai chat only `content` (`structuredContent` when content is empty);
+  ChatGPT Chat both, or only `structuredContent` once an `outputSchema` is declared. No host
+  delivered `_meta`; every host delivered an error's text. Probe server, Claude Code read from the
+  delivered tool_result, chat hosts 2/2 by fingerprint. Cowork, ChatGPT Work and Codex not run.
+- **Q22b withdrawn.** Its alert sat in `content` beside a `structuredContent` echo and never
+  arrived; the eval transcripts show the echo in every render result of Q22–Q24. The refusal rule
+  stands on Q22c, which now has its mechanism.
+- `handlers.md`, `delivery.md` and the SKILL.md table say where the response's meaning must sit.
+- The reference implementation follows the rule: `best`'s render tools put `interpretation` first
+  in `structuredContent`, before the UI payload, and mirror it as the text.
+
 ## 1.2.2 — 2026-10-26
 
 Claude Code's description cut moved [CC]; no rule changes.

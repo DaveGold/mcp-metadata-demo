@@ -175,9 +175,11 @@ this repo.
 
 **Since the talk:** derived values measured as the most reliable form
 ([L1](../.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship)).
-Alerts narrowed: when a correction is mandatory, an alert after a successful call is read as a
-note, so refuse the call instead
-([Q22b, Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)).
+Alerts narrowed: when a correction is mandatory, refuse the call instead
+([Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)). The reason first given, "an alert is read as a
+note" (Q22b), was withdrawn on 2026-10-26: on Claude Code that alert sat in the result's `content`
+text, which Claude Code drops from a `structuredContent` result, so it never arrived
+([Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 The same mechanism as selective retrieval, on other data and with other numbers: the weather
 tool's `select` ([live demo](../docs/live-demo.md)).
 

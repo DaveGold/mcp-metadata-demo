@@ -54,16 +54,16 @@ Do not skip the audit because the metadata looks rich. In this repo the richest 
 28% of its own description to the model, and one of its computed alerts asserted a verdict the
 eval set had already shown to be wrong.
 
-## What reaches the model (Claude Code, the strictest host measured)
+## What reaches the model (Claude Code, the host every eval ran on)
 
 | surface | delivered | budget |
 |---|---|---|
 | field names | **always**, every response | — |
-| tool description | **first 2,048 chars only**, every request [Q7] | ≤ 2,048, ceiling ~1,800 |
-| server instructions | first 2,048 chars [Q7]; other hosts deliver 512, all, or none [HD] | ≤ 512; nothing load-bearing only here |
+| tool description | **the head only**, every request: 2,048 chars up to 2.1.294 [Q7]; since 2.1.296, 4,096 for a tool sent up front and 16,384 for one loaded through tool search, the default for MCP tools [CC] | ≤ 4,096, ceiling ~3,600 |
+| server instructions | first 2,048 chars up to 2.1.294 [Q7], 4,096 since 2.1.296 [CC]; other hosts deliver 512, all, or none [HD] | ≤ 512; nothing load-bearing only here |
 | input schema | yes, in full [IS] (also claude.ai, Cowork, ChatGPT Chat; Codex and ChatGPT Work drop every describe past 5,000 chars [HD]) — re-sent every turn | ≤ 5,000 per tool where Codex matters; paid on every call |
 | output schema | **no** [Q11] (nor claude.ai, Cowork; Codex yes, ChatGPT sometimes [HD]) | validation/UI only |
-| response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9] | guard it |
+| response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9]. With `structuredContent`, only its JSON; `content` text is dropped (claude.ai chat does the opposite) [Q28] | guard it; mirror it in both channels |
 | guidance tool | only if the pointer is a requirement [Q8b] | — |
 
 ### Budgets by target client [HD]
@@ -309,10 +309,16 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
   quarter figure in hand, 10 of 16 correct haiku answers still extrapolated it to a year; with an
   explicit "do not scale it to a year", 5 of 18 [Q19d]. It reduces the misuse; it does not end it.
 - **Never prune the note about a null decision field** [AS].
-- **A fix that must happen is a refusal, not an alert.** After a successful call the model reads an
-  alert as a note: 0/10 re-rendered a table whose headers the alert said were wrong [Q22b]. The
-  same check as a refusal with the fix in the message: 10/10, every refused run retried [Q22c].
-  Keep alerts for what the user should know.
+- **A fix that must happen is a refusal, not an alert.** A refusal is an error result, and an
+  error result reaches the model as its text: 10/10 headers fixed, every refused run retried
+  [Q22c]. (Q22b's "alert read as a note" is withdrawn: that alert sat in `content` next to a
+  `structuredContent` echo, and Claude Code, where the eval ran, reads only the echo [Q28].) Keep alerts for what the user should know,
+  and put them where they are delivered.
+- **Mirror the result: the same JSON in `structuredContent` and as the `content` text** [Q28].
+  Each host reads a different channel: Claude Code only `structuredContent`, claude.ai chat only
+  `content`, ChatGPT both (only `structuredContent` once an `outputSchema` is declared). Meaning
+  in one channel alone is lost somewhere. A render tool whose `structuredContent` is the UI
+  payload puts `interpretation` first inside it, and mirrors it. Nothing for the model in `_meta`.
 - **Walk every branch with data built for it.** For each value of an enum like a chart `type`,
   send the payload the description prescribes and check it passes the INPUT SCHEMA. Three of 14
   chart types were unreachable on every tier because the schema refused the right call; the model
