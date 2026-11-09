@@ -278,7 +278,7 @@ Full, up-to-date list: [davidgolverdingen.nl/en/talks](https://davidgolverdingen
 ## Who built this, and why
 
 **David Golverdingen**, AI Engineering Lead at Warmtebouw, a 350-person Dutch
-mechanical building-services contractor with five developers.
+mechanical building-services contractor with a small IT team and no AI department.
 
 There, eighteen custom MCP servers run in production (ERP, estimating, BIM, building automation,
 energy, tickets, product data), with 114 tools and 8 MCP Apps, used mostly by people who are not
