@@ -7,7 +7,7 @@ reaches the model.
 > Domain knowledge belongs with the capability that owns the data.
 > Then measure whether it arrives.
 
-Built from seven months of MCP in production at a 350-person Dutch building-services contractor
+Built from eight and a half months of MCP in production at a 350-person Dutch building-services contractor
 ([who and why](#who-built-this-and-why)).
 
 **[Try it live](#try-it-live)** · **[How it's built](docs/reference-implementation.md)** · **[The research](evals/README.md)** · **[The paper](https://davidgolverdingen.nl/en/the-missing-layer)** · **[From a talk?](#if-you-came-from-a-talk)**
@@ -27,6 +27,33 @@ That part comes from production and is a thesis; the evals below measure the cap
 company. → [Capability architecture](docs/capability-architecture.md)
 
 ## If you came from a talk
+
+### Update Conference Prague: _Adoption is the hard part_
+
+The closing slide promised three things. Here they are:
+
+1. **The slides of this talk**: [_Adoption is the hard part_, PDF](talks/adoption-is-the-hard-part-update-conference-2026.pdf)
+2. **The capability architecture**: the _How it all fits together_ slide, written out. Systems of
+   record, capabilities with their meaning, skills, activation (a prompt, a schedule, an event),
+   and a general agent on top: [Capability architecture](docs/capability-architecture.md#the-shape-in-one-view)
+3. **A reference MCP server**: one capability with the meaning built in. The 3.59 from
+   _Is this building at risk of overheating?_, in code: [`bp.overheating`](src/domain/best-building-rules.ts#L287);
+   read through in [`docs/reference-implementation.md`](docs/reference-implementation.md), and
+   [try it live](#try-it-live) next to the thin server that gets it wrong
+
+**From the slides to the repo.** The talk is a field report: what happened at one company
+(`PRODUCTION`), which this repo cannot reproduce. Where the repo has more:
+
+| slide | read more |
+|---|---|
+| _The bet: put the meaning in the capability_ | [Capabilities first, agents on top](docs/capability-architecture.md#2--capabilities-first-agents-on-top) · what goes in the tool: [Rich Domain MCP](docs/terminology.md#rich-domain-mcp) · [Design](docs/design.md), measured |
+| _We didn't wait for clean data_ | how the capability tells the agent: [alert vs refusal](docs/terminology.md#alert-vs-refusal) |
+| _One person, one problem, fixed the next day_ · _What got people started_ | [Start with one useful capability](docs/capability-architecture.md#4--start-with-one-useful-capability) · [Adoption is part of the loop](docs/capability-architecture.md#5--adoption-is-part-of-the-loop) · [Ambassador](docs/terminology.md#ambassador) |
+| _What was hard_: hosts cut tool descriptions, every client behaves differently | [The cut](docs/terminology.md#the-cut--the-delivered-budget), measured per client ([HD](evals/results/2026-09-27-host-delivery.json)) · check your own server: [`mcp-compat-check`](.claude/skills/mcp-compat-check/SKILL.md) · build or audit one: [`rich-domain-mcp-server`](.claude/skills/rich-domain-mcp-server/SKILL.md) |
+| _What people build: skills_ · _personal agents_ · _How it all fits together_ | [Skills: the procedure layer](docs/capability-architecture.md#6--skills-the-procedure-layer) · [A skill is a journey](docs/capability-architecture.md#7--a-skill-is-a-journey) |
+| _The analyst's skill, IT's controlled write_ | the human at the right step: [A skill is a journey](docs/capability-architecture.md#7--a-skill-is-a-journey) · the apps in this repo (chart, table, map; the approval form is production only): [MCP Apps](docs/mcp-apps.md) |
+| _An AI-native SDLC_ · _When everybody can build_ | [The engineering multiplier](docs/capability-architecture.md#8--the-engineering-multiplier) · where it leads: [the agent-readable company](docs/capability-architecture.md#9--the-agent-readable-company) |
+| the lines worth quoting | [Quotes & principles](docs/quotes.md#what-production-taught) |
 
 ### VibeKode Utrecht: _Domain knowledge belongs in the MCP server_
 
@@ -242,19 +269,19 @@ the measurements stop.
   · [slide by slide](talks/most-mcp-servers-are-empty-mcpcon-europe-2026.md))
 - **Domain knowledge belongs in the MCP server**: [VibeKode Netherlands 2026](https://vibekode.it/agentic-engineering/domain-knowledge-belongs-in-the-mcp-server/)
   · Utrecht · Oct 7 2026 ([slides, PDF](talks/domain-knowledge-belongs-in-the-mcp-server-vibekode-2026.pdf))
-- **Adoption is the hard part: six months of MCP in production at an HVAC company**:
+- **Adoption is the hard part: 8.5 months of MCP in production at an HVAC company**:
   [Update Conference Prague 2026](https://prague.updateconference.net/en/2026/schedule/adoption-is-the-hard-part-six-months-of-mcp-in-production-at-an-hvac-company)
-  · Prague · Nov 12–13 2026
+  · Prague · Nov 12 2026 ([slides, PDF](talks/adoption-is-the-hard-part-update-conference-2026.pdf))
 
 Full, up-to-date list: [davidgolverdingen.nl/en/talks](https://davidgolverdingen.nl/en/talks).
 
 ## Who built this, and why
 
-**David Golverdingen**, Senior Engineer & MCP Architect at Warmtebouw, a 350-person Dutch
+**David Golverdingen**, AI Engineering Lead at Warmtebouw, a 350-person Dutch
 mechanical building-services contractor with five developers.
 
-There, twelve custom MCP servers run in production (ERP, energy, BIM, estimating, building
-automation, external registers), with 97 tools and 8 MCP Apps, used mostly by people who are not
+There, eighteen custom MCP servers run in production (ERP, estimating, BIM, building automation,
+energy, tickets, product data), with 114 tools and 8 MCP Apps, used mostly by people who are not
 developers. One general-purpose model on top, no agent per domain: _we scaled capabilities, not
 agents_.
 

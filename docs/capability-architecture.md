@@ -12,8 +12,9 @@ Read every section with its status, in the same key as [Quotes & principles](quo
 the broader claim that production suggests and nothing here establishes. What _is_ measured:
 [Design](design.md). The terms: [Terminology](terminology.md#the-larger-thesis).
 
-The adoption story gets its own page with the talk _Adoption is the hard part_ (Update Conference
-Prague, November 2026). This page keeps the model and points there.
+The adoption story is told in the talk _Adoption is the hard part_ (Update Conference Prague,
+12 November 2026): [slides, PDF](../talks/adoption-is-the-hard-part-update-conference-2026.pdf).
+This page keeps the model; the talk has the people and the numbers.
 
 ---
 
