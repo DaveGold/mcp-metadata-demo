@@ -4456,6 +4456,13 @@ with `http <port>` behind a tunnel for the hosted clients.
 > - **The portable form is a mirror**: the same meaning in `structuredContent` and in the content
 >   text. `best`'s render tools already do this since the same-day fix.
 
+> **Q28 extended 2026-11-17 (HD2) — the rest of the hosts.** See
+> [`results/2026-11-17-host-delivery-retest.json`](results/2026-11-17-host-delivery-retest.json).
+> Claude Code 2.1.325 and claude.ai unchanged (claude.ai now chat and Cowork merged, still `content`
+> only). ChatGPT Chat unchanged; images kept. **P3 falsified:** Codex CLI 0.165 and ChatGPT Work pass
+> the whole `CallToolResult`, both channels, errors included. Mistral Vibe (new): `structuredContent`
+> only; Work drops images, Code keeps them. `_meta` reached no host. The mirror stays the portable form.
+
 Predictions for the other hosts, registered before any run:
 - **P1 claude.ai chat and Cowork** behave like Claude Code (`S_` only, image kept, `M_` absent):
   same client code family. Falsified if `C_` is quoted on `probe_both_divergent`.

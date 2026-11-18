@@ -6,7 +6,7 @@
  *
  * Why this shape (the evidence behind each point: .claude/skills/rich-domain-mcp-server/references/evidence.md):
  * - In the response, not the description: a host may deliver only the head of a description (4,096
- *   characters on Claude Code and Cowork), and a response line arrives whole.
+ *   characters on Claude Code for a tool sent up front), and a response line arrives whole.
  * - Record-conditional: a line about a field this record does not have is noise. But a note about
  *   a NULL decision field is gated on the field BEING null, never pruned: without it the model
  *   fills the gap with an invented figure.

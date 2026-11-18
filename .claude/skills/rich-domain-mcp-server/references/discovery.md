@@ -60,7 +60,7 @@ the sentence that explains it, or received it and read a field name instead. Pro
 
 - **What did it receive?** Ask a fresh subagent to quote the last 100 characters of the tool
   description and of the server instructions. A quote ending at char 2,048 (Claude Code up to
-  2.1.294 [Q7]) or 4,096 (Cowork, Claude Code 2.1.296+ [CC]) with `… [truncated]` is the host cut. See [`delivery.md`](delivery.md) for the other checks (token accounting,
+  2.1.294 [Q7]) or 4,096 / 16,384 (Claude Code 2.1.296+ up front / through tool search [CC]) with `… [truncated]` is the host cut. See [`delivery.md`](delivery.md) for the other checks (token accounting,
   offsets, response size).
 - **Which fields does it misread? — the field-reading probe.** Do not test every field with an
   eval. Hand a fresh, tool-less model (the weakest you might be called by) one real response with
@@ -190,7 +190,7 @@ few hundred rows it is `HIGH`.
   where field population changes?
 - Sentinel dates (`0001-01-01`, `1900-01-01`, `9999-12-31`) and sentinel numbers. Normalise them
   to null in `transform`, and say so where the model reads it: the input `.meta()` for a
-  param, otherwise a response rule (no Claude host delivers the output schema [Q11] [HD]).
+  param, otherwise a response rule (no Claude host delivers the output schema [Q11] [HD2]).
 - Soft-deleted / inactive rows: are they returned by default? Can you filter them out?
 - Aggregation semantics: is a "meter reading" a period value (summable) or a running totalizer
   (summing it is 100× wrong)? Same unit, different meaning. Detect and route, never silently sum.

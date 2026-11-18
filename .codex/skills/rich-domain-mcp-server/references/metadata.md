@@ -10,7 +10,7 @@ metadata here. **Where** each piece goes is decided by what reaches the model �
 | surface | delivered | use it for |
 |---|---|---|
 | field names | always | what each value is |
-| description | the head: 4,096 chars on Claude Code (sent up front) and Cowork [CC] | what the tool is/is not, input conventions, record-independent rules |
+| description | the head: 4,096 chars on Claude Code (sent up front; 16,384 through tool search, also on claude.ai) [CC] [HD2] | what the tool is/is not, input conventions, record-independent rules |
 | input schema | yes | formats, examples, valid names, misbehaving params |
 | output schema | **no** | validation and UI only |
 | response | yes, < ~25k tokens | interpretation of THIS record, computed verdicts, constants, the data a rule needs |
@@ -62,7 +62,7 @@ Rules:
 ## 1. Tool description — 4,096 characters, most important first
 
 The description is truncated at 4,096 characters on Claude Code 2.1.296+ for a tool sent up front
-(16,384 for one loaded through tool search) and on Cowork, and re-sent on every request [CC] [HD]
+(16,384 for one loaded through tool search, as on claude.ai), and re-sent on every request [CC] [HD2]
 [Q7]. Before 2.1.296 Claude Code cut at 2,048; those versions are no longer a target. It is also
 paid for on every turn, relevant or not [Q5]. Treat it as a budget:
 
@@ -105,7 +105,7 @@ needs them. The evals made that grouping literal: each moment has its own channe
 | and one more | FEEDBACK | one line in the head or instructions | only if a feedback mechanism exists |
 
 Why the third group moved: an INTERPRETATION block in the description arrived only up to char
-2,048 [Q7] (4,096 on Cowork and on Claude Code 2.1.296+ [CC]), and a description is written before the data exists, so it cannot be conditional on the
+2,048 [Q7] (4,096 on Claude Code 2.1.296+ for a tool sent up front [CC]), and a description is written before the data exists, so it cannot be conditional on the
 record. In the response it is always delivered and can be.
 
 **Naming the blocks costs little.** Eight headers are ~30–40 tokens per tool (~0.1% of a typical
@@ -312,8 +312,9 @@ spec. `openWorldHint: true` whenever the tool calls an external system.
 
 ## Server instructions
 
-Claude Code cut them at 2,048 like descriptions up to 2.1.294 [Q7], at 4,096 since [CC]; ChatGPT Chat cuts them at 512, claude.ai chat
-and ChatGPT Work do not deliver them, and Codex prepends them to every tool description [HD]. Keep
+Claude Code cut them at 2,048 like descriptions up to 2.1.294 [Q7], at 4,096 since [CC]; claude.ai
+delivers 4,096 only after the first call to the server, ChatGPT (Chat and Work) cuts them at 512,
+Mistral does not deliver them, and Codex prepends them whole to every tool description [HD2]. Keep
 them ≤ 512. Use them for what spans tools:
 what the server is, what it does **not** have, "every data tool returns `interpretation` — read it
 first", the join chain between tools (`coordinaten` → `latitude`/`longitude`). Do not make them the
@@ -362,7 +363,7 @@ parameterless tool [Q8b]. `z.object({})` breaks parameterless tools — use `{}`
 
 | anti-pattern | why | evidence |
 |---|---|---|
-| Interpretation past char 4,096 | not delivered on Cowork or on Claude Code for a tool sent up front | Q7, CC, HD |
+| Interpretation past char 4,096 | not delivered on Claude Code for a tool sent up front | Q7, CC, HD2 |
 | Meaning only in output `.describe()` | never delivered | Q11 |
 | A readable name that implies another quantity | overrides the prose beside it | N2 |
 | An opaque code without a delivered glossary | confidently misread | N3, N6 |

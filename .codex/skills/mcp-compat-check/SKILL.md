@@ -2,22 +2,22 @@
 name: mcp-compat-check
 description: >-
   Checks in about a minute whether an MCP server's metadata survives the clients it will run in
-  (Claude Code, claude.ai, Cowork, ChatGPT Chat and Work, Codex): reads tools/list and the server
+  (Claude Code, claude.ai, ChatGPT Chat and Work, Codex, Mistral Vibe): reads tools/list and the server
   instructions over HTTP or stdio, and scores each tool against each client's measured limits on
   descriptions, server instructions, input schemas and output schemas. Invoke when asked to check,
   health-check, lint or score an MCP server, to ask "will this server work in ChatGPT / Codex /
   claude.ai", "why does the agent ignore my description or parameter docs", or to compare public
   servers. Hands fixes to the rich-domain-mcp-server skill.
 metadata:
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # mcp-compat-check — does the metadata reach the model on every client?
 
 A server can ship perfect metadata and still not deliver it, because each client cuts or drops
 different surfaces. This check compares what a server ships with what each client delivered when
-it was measured (2026-09-27; evidence: `rich-domain-mcp-server` → `references/evidence.md`, tag
-HD). It is static: no model and no tool calls, so it runs in seconds and gives the same answer
+it was measured (2026-11-17; evidence: `rich-domain-mcp-server` → `references/evidence.md`, tag
+HD2; the 5,000 schema limit from HD). It is static: no model and no tool calls, so it runs in seconds and gives the same answer
 every time.
 
 ## Run it
@@ -37,12 +37,12 @@ and tell the user which service the next tab is for.
 
 ## What it checks, per client column
 
-| surface | Claude only (Code, claude.ai, Cowork) | ChatGPT / Codex only | all clients |
-|---|---|---|---|
-| tool description | ≤ 4,096 (Claude Code 2.1.296+ for a tool sent up front, and Cowork; 2,048 before 2.1.296) | no cut measured | ≤ 4,096 |
-| server instructions | ≤ 4,096, and nothing required (claude.ai chat gets none) | ≤ 512, and nothing required (Work gets none) | ≤ 512, nothing required |
-| input schema | whole | ≤ 5,000 serialized, or every describe is dropped (bisected on Codex; ChatGPT Work consistent, not bisected) | ≤ 5,000 |
-| output schema | never delivered: meaning there is review-only | delivered on Codex and Work | review-only |
+| surface | Claude only (Code, claude.ai) | ChatGPT / Codex only | Mistral only (Vibe Work, Code) | all clients |
+|---|---|---|---|---|
+| tool description | ≤ 4,096 (Claude Code, a tool sent up front; 16,384 through tool search, also on claude.ai) | no cut measured | no cut measured | ≤ 4,096 |
+| server instructions | ≤ 4,096, and nothing required (claude.ai gets them only after the first call) | ≤ 512 (ChatGPT Chat and Work; Codex whole) | none delivered: nothing may live there | ≤ 512, nothing required |
+| input schema | whole | ≤ 5,000 serialized, or every describe is dropped (Codex and ChatGPT Work; bisected on Codex) | whole | ≤ 5,000 |
+| output schema | never delivered: meaning there is review-only | delivered on ChatGPT and Codex | not on Mistral Code: review-only | review-only |
 
 It also flags: guidance that lives mostly in the server instructions, tools with a first sentence
 too short to be found by clients that load tools by search, missing annotations, and the size of
@@ -58,7 +58,7 @@ The **Verdict** table has one column per client group and one row per surface:
 | tool description | tools whose description is longer than the column's cut |
 | server instructions | their length against the column's budget, and whether the guidance lives there; within budget is green, with a note that some clients deliver none |
 | input schema | tools whose serialized schema is over 5,000, so Codex and ChatGPT Work drop every describe |
-| output schema | tools that ship one; on the Claude clients it never arrives, so meaning found only there is flagged |
+| output schema | tools that ship one; on the Claude clients and Mistral Code it never arrives, so meaning found only there is flagged |
 
 - 🟢 **portable**: within every measured limit for that column.
 - 🟡 **host-dependent**: it arrives on some clients, or is never needed; review it. Output-schema

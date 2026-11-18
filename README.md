@@ -49,7 +49,7 @@ The closing slide promised three things. Here they are:
 | _The bet: put the meaning in the capability_ | [Capabilities first, agents on top](docs/capability-architecture.md#2--capabilities-first-agents-on-top) · what goes in the tool: [Rich Domain MCP](docs/terminology.md#rich-domain-mcp) · [Design](docs/design.md), measured |
 | _We didn't wait for clean data_ | how the capability tells the agent: [alert vs refusal](docs/terminology.md#alert-vs-refusal) |
 | _One person, one problem, fixed the next day_ · _What got people started_ | [Start with one useful capability](docs/capability-architecture.md#4--start-with-one-useful-capability) · [Adoption is part of the loop](docs/capability-architecture.md#5--adoption-is-part-of-the-loop) · [Ambassador](docs/terminology.md#ambassador) |
-| _What was hard_: one server, many clients | [The cut](docs/terminology.md#the-cut--the-delivered-budget), measured per client ([HD](evals/results/2026-09-27-host-delivery.json)) · check your own server: [`mcp-compat-check`](.claude/skills/mcp-compat-check/SKILL.md) · build or audit one: [`rich-domain-mcp-server`](.claude/skills/rich-domain-mcp-server/SKILL.md) |
+| _What was hard_: one server, many clients | [The cut](docs/terminology.md#the-cut--the-delivered-budget), measured per client ([HD2](evals/results/2026-11-17-host-delivery-retest.json), [HD](evals/results/2026-09-27-host-delivery.json)) · check your own server: [`mcp-compat-check`](.claude/skills/mcp-compat-check/SKILL.md) · build or audit one: [`rich-domain-mcp-server`](.claude/skills/rich-domain-mcp-server/SKILL.md) |
 | _What people build: skills_ · _personal agents_ · _How it all fits together_ | [Skills: the procedure layer](docs/capability-architecture.md#6--skills-the-procedure-layer) · [A skill is a journey](docs/capability-architecture.md#7--a-skill-is-a-journey) |
 | _The analyst's skill, IT's controlled write_ | the human at the right step: [A skill is a journey](docs/capability-architecture.md#7--a-skill-is-a-journey) · the apps in this repo (chart, table, map; the approval form is production only): [MCP Apps](docs/mcp-apps.md) |
 | _An AI-native SDLC_ · _When everybody can build_ | [The engineering multiplier](docs/capability-architecture.md#8--the-engineering-multiplier) · where it leads: [the agent-readable company](docs/capability-architecture.md#9--the-agent-readable-company) |
@@ -63,7 +63,7 @@ The closing slide promised six things. Here they are:
    every rule linked to the run behind it: [Claude Code](.claude/skills/rich-domain-mcp-server/SKILL.md)
    · [Codex](.codex/skills/rich-domain-mcp-server/SKILL.md)
 2. **A check of what each client drops from it**: reads your server's `tools/list` and scores it
-   against the measured limits of Claude Code, claude.ai, Cowork, ChatGPT and Codex:
+   against the measured limits of Claude Code, claude.ai, ChatGPT, Codex and Mistral:
    [Claude Code](.claude/skills/mcp-compat-check/SKILL.md)
    · [Codex](.codex/skills/mcp-compat-check/SKILL.md)
 3. **The practitioner paper**: [_The Missing Layer_](https://davidgolverdingen.nl/en/the-missing-layer)
@@ -86,9 +86,12 @@ ones its closing slide promised.
 **What changed since the talk.** The talk said _bound is not the same as delivered_, and marked
 the tool description as reaching the model before the call. Four days later the evals showed that
 on Claude Code only the first **2,048 characters** of a description arrived, and 74% of the rich
-tier's description never did. That line is the host's: Cowork cuts at 4,096 and claude.ai chat
-not at all ([HD](evals/results/2026-09-27-host-delivery.json)), and Claude Code itself moved its cut
-to 4,096 (16,384 through tool search) in October 2026 ([CC](evals/results/2026-10-26-claude-code-cut-raised.json)). The thesis held; what changed is where the knowledge has to go.
+tier's description never did. That line is the host's, and it moves: in September Cowork cut at
+4,096 and claude.ai chat not at all ([HD](evals/results/2026-09-27-host-delivery.json)); in October
+Claude Code moved its cut to 4,096 (16,384 through tool search) ([CC](evals/results/2026-10-26-claude-code-cut-raised.json));
+by November chat and Cowork had merged into one claude.ai at 16,384, and ChatGPT, Codex and Mistral
+deliver the whole description ([HD2](evals/results/2026-11-17-host-delivery-retest.json)). The
+thesis held; what changed is where the knowledge has to go.
 
 - **`rich` is the server from the talk.** Afterwards only its measured defects were fixed, among
   them a wrong alert removed and one correcting sentence moved inside the cut. The rest is as
@@ -124,7 +127,7 @@ before its run, every run audited against the server's own call log. Six results
   60 answers wrong; one sentence saying the figures are CALCULATED, not MEASURED, took the same
   question from 0/60 to 59/60. ([BT](.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship))
 - **Delivered is what counts.** The Claude Code these evals ran on sent only the first 2,048
-  characters of a tool description, and never the output schema (other hosts differ: [HD](evals/results/2026-09-27-host-delivery.json);
+  characters of a tool description, and never the output schema (other hosts differ: [HD2](evals/results/2026-11-17-host-delivery-retest.json);
   Claude Code 2.1.296+ cuts at 4,096: [CC](evals/results/2026-10-26-claude-code-cut-raised.json)). Moving one correcting sentence inside the cut took a
   failing question from 0/10 to 10/10. ([Q7](.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery),
   [Q21](.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19))
@@ -139,11 +142,12 @@ before its run, every run audited against the server's own call log. Six results
   ([L1](.claude/skills/rich-domain-mcp-server/references/evidence.md#content--what-to-ship))
 - **Refuse, don't alert, when a fix is mandatory.** Refusing the call with the fix in the message:
   10/10. ([Q22c](.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19))
-- **Mirror the result in both channels.** Each host reads a different one: Claude Code only
-  `structuredContent`, claude.ai chat only `content`, ChatGPT both (or only `structuredContent`
-  with an output schema). The render tools' alerts sat in `content` and never arrived on Claude
-  Code, which withdrew an earlier "alerts are read as notes" result.
-  ([Q28](evals/results/2026-10-26-q28-result-channel.json))
+- **Mirror the result in both channels.** Each host reads a different one: Claude Code and
+  Mistral only `structuredContent`, claude.ai only `content`, ChatGPT both (or only
+  `structuredContent` with an output schema), Codex the whole result. The render tools' alerts sat
+  in `content` and never arrived on Claude Code, which withdrew an earlier "alerts are read as
+  notes" result. ([Q28](evals/results/2026-10-26-q28-result-channel.json),
+  [HD2](evals/results/2026-11-17-host-delivery-retest.json))
 
 **13 of the first 23 predictions were wrong.** The implementation changed with the evidence.
 

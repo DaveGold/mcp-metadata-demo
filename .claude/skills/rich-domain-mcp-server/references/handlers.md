@@ -29,7 +29,7 @@ checkPermission (if you have an auth layer)
   → validate output    Zod safeParse against outputSchema
   → return             { structuredContent, content } with `interpretation` as the first key;
                        content = the same JSON as text. Claude Code reads only
-                       structuredContent, claude.ai chat only content [Q28]: mirror them
+                       structuredContent, claude.ai only content [Q28] [HD2]: mirror them
 finally
   → log the call       wherever you keep tool-call history, if anywhere
 ```

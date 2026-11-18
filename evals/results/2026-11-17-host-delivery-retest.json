@@ -1,0 +1,98 @@
+{
+ "_comment": "HD2: re-measure of HD (2026-09-27) and Q28 (2026-10-26) after claude.ai merged Chat and Cowork, plus Mistral as a new host; ChatGPT (Chat and Work) and Codex CLI re-measured the same evening. One probe server for every surface: evals/host-probe/delivery-probe-server.mjs (13 tools; `truth` mode prints every label). Each surface is numbered blocks '[X-<offset> <code>]' with a seeded 3-letter code, so a model can only quote a block that reached it; the last quotable block is the cut. Prompts: evals/host-probe/delivery-probe-prompts.md. Hosted clients via a Cloudflare quick tunnel, connector named zz-deliveryprobe, removed after the runs. Every quoted code below was checked against `truth`; none was wrong.",
+ "date": "2026-11-17",
+ "probe": {
+  "server_instructions": "8,192 chars, blocks of 256 ([I-00000 ckn] … [I-07936 rhr])",
+  "probe_desc_8k": "8,192 chars, blocks of 256 (last [D8-07936 deq]; [D8-03840 fev] is the last block before 4,096)",
+  "probe_desc_20k": "20,480 chars, blocks of 512 (last [D20-19968 jyk]; [D20-15872 mzk] before 16,384, [D20-03584 tze] before 4,096)",
+  "probe_schema_small": "input schema 2,000 chars, 8 described params ([PS-00 cxx] … [PS-07 mmv])",
+  "probe_schema_large": "input schema 6,982 chars, 30 described params ([PL-00 sjv] … [PL-29 ujh])",
+  "probe_output": "outputSchema with 4 described fields [O-0 srn] [O-1 gtz] [O-2 zue] [O-3 jgj]",
+  "chan_*": "the eight Q28 result-channel tools, fresh fingerprints (C_ content text, S_ structuredContent, M_ _meta, image block)"
+ },
+ "hosts": {
+  "claude-code": {
+   "version": "Claude Code 2.1.325 (the desktop app's bundled binary), Opus 5.5, headless `-p --output-format stream-json`, stdio, 2026-11-17",
+   "method": "self-report checked against the ToolSearch and tool_result blocks in the stream; binary: Pne(e)=CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH??(e?16384:4096), unchanged since 2.1.296",
+   "runs": "1 with tool search (default), 1 with ENABLE_TOOL_SEARCH=false",
+   "tool_description": "via tool search (default, MCP tools deferred): cut at 16,384 + '… [truncated]' (last [D20-15872 mzk]); the 8k description whole. Sent up front (tool search off): cut at 4,096 (last [D8-03840 fev], [D20-03584 tze]).",
+   "server_instructions": "cut at 4,096 + '… [truncated]' (last [I-03840 kms]), in both runs",
+   "input_schema": "in full, both schemas, every describe",
+   "output_schema": "not delivered",
+   "result_channel": "structuredContent replaces the content text (S_ only on every both-channel probe), image kept, no M_, an isError result as its content text without S_. Same as Q28 on 2.1.296/2.1.308."
+  },
+  "claude-ai": {
+   "version": "claude.ai web, 2026-11-17, Opus 5.5 High, 'Manual' permission mode. The Chat/Cowork switch is gone: the composer offers 'Claude' or 'Code'; old /chat/ and /cowork/ conversations sit side by side in one list. ~25 other connectors enabled.",
+   "harness": "the model says, 2/2, that it runs on 'a Claude Code / Claude Agent SDK harness in the Claude app (claude.ai)', 'a cloud session'. The probe connector reached the server as ua=Claude-User.",
+   "runs": 2,
+   "tool_description": "deferred, loaded with ToolSearch; cut at 16,384 + '… [truncated]' (last [D20-15872 mzk]), 2/2; the 8k description whole. Was: whole (old Chat), 4,096 (old Cowork).",
+   "server_instructions": "NOT there before the first tool call (2/2: the 'MCP Server Instructions' block held only claude-artifacts). They arrive after the first call to the connector, cut at 4,096 + '… [truncated]' (last [I-03840 kms]), 2/2. Was: none (old Chat), whole up to 2,829 (old Cowork).",
+   "input_schema": "in full, both schemas",
+   "output_schema": "not delivered, 2/2",
+   "result_channel": "content wins: C_ on every both-channel probe, S_ only where content is empty (structured_only) or is the JSON mirror; image kept; no M_; the error as its C_ text without S_. Same as Q28 claude.ai chat, the opposite of Claude Code, although the model reports a Claude Code harness."
+  },
+  "mistral-vibe-work": {
+   "version": "chat.mistral.ai, now 'Vibe' (Work and Code tabs), Warmtebouw workspace, custom connector under Context → Connectoren, 'Geen authenticatie' detected, tools set to Toestaan. 2026-11-17.",
+   "model": "self-report, 2/2 and in both modes: 'Vibe (built by Mistral), powered by the GLM 5.3 model, served on Mistral AI infrastructure'. Not verified.",
+   "runs": "2: one in 'Denken', one in 'Snel' (the default); identical results",
+   "client": "ua=MistralAI-MCPClient/1.0; tools/list before every tools/call",
+   "tool_description": "deferred (searched, then loaded); delivered IN FULL, 20,480 chars (last [D20-19968 jyk]), no marker, 2/2",
+   "server_instructions": "NOT delivered, before or after the calls, 2/2",
+   "input_schema": "in full, both schemas (6,982 chars, no 5,000 limit), 2/2",
+   "output_schema": "DELIVERED as a return type ('ProbeOutputReturned') with all four describes, 2/2",
+   "result_channel": "structuredContent wins: S_ only on every both-channel probe, C_ only on content_only; the image is DROPPED; no M_; the error delivers both C_ and S_ (as 'ToolError … structuredContent: {…}'), 2/2"
+  },
+  "mistral-vibe-code": {
+   "version": "chat.mistral.ai, Vibe 'Code' tab (async coding agent, cloud /workspace), same Warmtebouw workspace, same custom connector (re-added on a new tunnel URL), attached per session via + → Connectors. 2026-11-17.",
+   "model": "self-report, 2/2: 'Vibe Code, an async software-engineering agent built by Mistral AI, powered by the model mistral-large-4-0'; the composer shows 'Mistral Large 4'. Work self-reports GLM 5.3: the two tabs run different models.",
+   "runs": "2: run 1 as prompts A then B; run 2 as one combined prompt",
+   "discovery": "tools hidden; found with list_tools (search), full contracts with get_tool. Run 2 also called mistral_mcp_list_connector_tools / mistral_mcp_get_connector_details.",
+   "tool_description": "delivered IN FULL, 20,480 chars (last [D20-19968 jyk]), 2/2",
+   "server_instructions": "NOT delivered, before or after the calls (list_tools 'guidance': null), 2/2",
+   "input_schema": "in full, both schemas, 2/2",
+   "output_schema": "NOT in the tool contract (get_tool returns name, description, input_schema, error), 2/2. In run 2 the agent found all four [O-...] labels by calling Mistral's own connector-listing tool (mistral_mcp_list_connector_tools): reachable on request, not delivered with the tool.",
+   "result_channel": "structuredContent wins: S_ only on every both-channel probe, C_ only on content_only; the image is KEPT (saved to /workspace/.vibe/tool-results/…png, readable with analyze_image); no M_; the error as its C_ text without S_, 2/2. Differs from Work on images and errors."
+  },
+  "chatgpt-chat": {
+   "version": "chatgpt.com, Chat mode, 2026-11-17; custom MCP plug-in zz-deliveryprobe (Geen authenticatie, no app description), invoked with @; reasoning 'Extra High' / 'Zeer hoog'; model self-report 'GPT-6'",
+   "runs": 2,
+   "tool_description": "in context from the start (no search, 2/2); delivered IN FULL, 20,480 chars (last [D20-19968 jyk]), 2/2. Unchanged from HD.",
+   "server_instructions": "cut at 512 + '...' (last [I-00256 cnq]), 2/2. Unchanged from HD.",
+   "input_schema": "in full, both schemas (6,982 chars, [PL-29 ujh]), 2/2. Unchanged from HD.",
+   "output_schema": "DELIVERED as a TypeScript return type with all four describes, 2/2. Was: 1/3 runs (HD).",
+   "result_channel": "without an outputSchema both C_ and S_ (both_divergent, both_with_image, both_with_meta); with one, S_ only (both_divergent_schema, both_json_mirror, structured_only); image kept as base64; no M_; the error as exception text with C_ only, no S_, 2/2. Same as Q28 (2026-10-26), image now confirmed."
+  },
+  "chatgpt-work": {
+   "version": "chatgpt.com, Work mode, 2026-11-17, GPT-6.2 Sol (composer), same plug-in; the model calls itself 'Codex in ChatGPT Work Mode, based on GPT-6'; the server saw ua=openai-mcp/1.0.0 (Codex)",
+   "runs": 2,
+   "tool_description": "deferred: looked up in the tool registry before use (2/2); IN FULL (last [D20-19968 jyk]), 2/2",
+   "server_instructions": "cut at 512 + '...' (last [I-00256 cnq]), 2/2. Was: NOT delivered, the ChatGPT-side app description in their place (HD, 1 run; that run's plug-in had an app description, this one none).",
+   "input_schema": "small schema in full; the 6,982-char schema with NO parameter describes, 2/2 (the 5,000 limit of HD holds)",
+   "output_schema": "DELIVERED as a return type with all four describes, 2/2",
+   "result_channel": "the whole CallToolResult as JSON: content and structuredContent both, image data included, no M_/_meta; the error keeps both C_ and S_ (plus an error_code), 2/2"
+  },
+  "codex-cli": {
+   "version": "codex-cli 0.165.0, `codex exec --ignore-user-config --disable apps`, model gpt-6.1-sol (read from the request trace; self-report 'GPT-6'), 2026-11-17; probe over stdio. Run 2 with mcp_servers.deliveryprobe.default_tools_approval_mode = \"approve\" (run 1's calls were refused: 'MCP tool call requires approval, but approval policy is never').",
+   "method": "RUST_LOG=trace request trace plus the agent's quotes, as HD",
+   "runs": "2 for metadata, 1 for result channels",
+   "tool_description": "deferred (tool_search_always_defer_mcp_tools = true); found through ALL_TOOLS, IN FULL (last [D20-19968 jyk] in the request), 2/2. Unchanged from HD.",
+   "server_instructions": "WHOLE, 8,192 chars (last [I-07936 rhr]), prepended to every tool's entry, 2/2. Unchanged from HD.",
+   "input_schema": "small schema in full; the 6,982-char schema with NO parameter describes ([PL-29 ujh] only in the raw MCP log, never in the request), 2/2. The 5,000 limit holds.",
+   "output_schema": "DELIVERED as Promise<CallToolResult<{…}>> with all four describes, 2/2. Unchanged from HD.",
+   "result_channel": "the whole CallToolResult as JSON: content and structuredContent both, image as base64 data, no _meta (M_ only in the raw MCP log), the error keeps both C_ and S_. First measurement (Q28 had not run Codex)."
+  }
+ },
+ "headline": [
+  "claude.ai Chat and Cowork are one host now, on a Claude Code harness: descriptions cut at 16,384 (via tool search), server instructions cut at 4,096 and only after the first call to that connector, no output schema, and `content` wins the result channel.",
+  "Claude Code 2.1.325: 4,096 up front, 16,384 through tool search, instructions 4,096, no output schema, `structuredContent` wins. Unchanged since 2.1.296.",
+  "Mistral Vibe: Work and Code are two hosts (GLM 5.3 vs Mistral Large 4, self-reported). Both deliver the whole description and input schema and no server instructions; only Work puts the output schema in the tool definition; Work drops images and puts structuredContent into errors, Code keeps images and returns only the error text.",
+  "ChatGPT Chat as in September except the output schema, which now arrives 2/2 (was 1/3). ChatGPT Work is the Codex runtime (ua openai-mcp (Codex)) and now gets server instructions cut at 512 (was none). Codex CLI 0.165 unchanged: whole description, instructions whole on every tool, describes dropped past 5,000, output schema delivered; it passes the whole CallToolResult (both channels) to the model.",
+  "Server instructions: whole only on Codex CLI; 4,096 on Claude Code and (after the first call) claude.ai; 512 on ChatGPT Chat and Work; none on Mistral. Nothing that must hold may live only there.",
+  "Result channel, the portable rule unchanged: mirror. claude.ai reads only the text, Claude Code and Mistral only structuredContent, ChatGPT and Codex both (ChatGPT Chat only structured with an outputSchema)."
+ ],
+ "caveats": [
+  "Self-report probes on the chat hosts, but every quote carries a 3-letter code that only the delivered block holds; all codes checked against `truth`. Claude Code and Codex also checked against their request/stream traces.",
+  "One model per host (Opus 5.5 on Claude hosts; GPT-6.x on OpenAI hosts; Mistral Work self-reports GLM 5.3, Code mistral-large-4-0). The Claude desktop app's Chat/Cowork surface was not probed separately.",
+  "Codex result channels: one run, read from the request trace. ChatGPT Work's September instruction result came from a plug-in with an app description; this one had none."
+ ]
+}

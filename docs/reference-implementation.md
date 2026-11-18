@@ -14,7 +14,7 @@ To see what a tier actually sends, with the 4,096-character cut marked, read its
 ## 1 · WHEN — before the call
 
 Does this tool fit the question, what is it not for, what does it join with? These must be in the
-first 4,096 characters of the description (the cut of Claude Code and Cowork), because the
+first 4,096 characters of the description (Claude Code's cut for a tool sent up front), because the
 model decides before it has any response:
 
 - building: [`WHEN TO USE` · `WHEN NOT TO USE` · `RELATED TOOLS`](../src/tools/get-building-profile-best.ts#L33-L37),

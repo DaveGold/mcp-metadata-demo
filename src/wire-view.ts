@@ -1,8 +1,8 @@
 /**
  * What a tier actually sends to the model, as readable markdown: server instructions and every
  * model-visible tool's description, with the 4,096-char cut of Claude Code 2.1.296+ (a tool sent up
- * front) and Cowork marked (CC, HD), plus the input parameters. Claude Code cuts a description loaded
- * through tool search at 16,384, past every tier here. The evals ran on a Claude Code that cut at
+ * front) marked (CC, HD2), plus the input parameters. Claude Code and claude.ai cut a description
+ * loaded through tool search at 16,384, past every tier here. The evals ran on a Claude Code that cut at
  * 2,048 (Q7); set CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH=2048 to reproduce that.
  * The output schema is listed by size only, because the model never receives it (Q11).
  *
@@ -15,8 +15,9 @@ import { createServer, type ServerVariant } from './server.js';
 import type { BagClientLike, EpOnlineClientLike } from './tools/get-building-profile.js';
 
 /**
- * Claude Code 2.1.296+ for a tool sent up front and for server instructions (CC, 2026-10-26), and
- * Cowork (HD, 2026-09-27). claude.ai chat, ChatGPT and Codex deliver the whole description.
+ * Claude Code 2.1.296+ for a tool sent up front and for server instructions (CC, 2026-10-26; HD2,
+ * 2026-11-17 on 2.1.325). claude.ai cuts at 16,384; ChatGPT, Codex and Mistral deliver the whole
+ * description (HD2).
  */
 export const CUT = 4096;
 export const WIRE_VIEW_ARMS: { arm: ServerVariant; blurb: string }[] = [
@@ -45,15 +46,15 @@ const noEp: EpOnlineClientLike = { getByBagVboId: async () => [] };
 
 const fence = (text: string) => '````text\n' + text + '\n````';
 
-/** The text as delivered, with a visible marker where Claude Code and Cowork stop sending it. */
+/** The text as delivered, with a visible marker where Claude Code stops sending it (a tool sent up front). */
 export function markCut(text: string): string {
   if (text.length <= CUT) return fence(text);
   const lost = text.length - CUT;
   return (
     fence(text.slice(0, CUT)) +
-    `\n\n> ✂ **Claude Code (a tool sent up front) and Cowork cut here, at character ${CUT.toLocaleString('en')}.** ` +
-    `They never send the ${lost.toLocaleString('en')} characters below (${Math.round((100 * lost) / text.length)}%).\n\n` +
-    '<details><summary>Not delivered on Claude Code or Cowork</summary>\n\n' +
+    `\n\n> ✂ **Claude Code cuts here for a tool sent up front, at character ${CUT.toLocaleString('en')}.** ` +
+    `It never sends the ${lost.toLocaleString('en')} characters below (${Math.round((100 * lost) / text.length)}%); through tool search, and on claude.ai, the cut is 16,384.\n\n` +
+    '<details><summary>Not delivered on Claude Code for a tool sent up front</summary>\n\n' +
     fence(text.slice(CUT)) +
     '\n\n</details>'
   );
@@ -119,7 +120,7 @@ export async function renderWireView(arm: ServerVariant, blurb: string): Promise
       '### Output schema (not delivered on Claude hosts)',
       '',
       tool.outputSchema
-        ? `${JSON.stringify(tool.outputSchema).length.toLocaleString('en')} chars, ${Object.keys((tool.outputSchema as { properties?: object }).properties ?? {}).length} top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.`
+        ? `${JSON.stringify(tool.outputSchema).length.toLocaleString('en')} chars, ${Object.keys((tool.outputSchema as { properties?: object }).properties ?? {}).length} top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.`
         : '_none_',
     );
   }

@@ -34,7 +34,7 @@ import type { BagClientLike, EpOnlineClientLike } from './get-building-profile.j
 import addresses from '../../evals/addresses.json' with { type: 'json' };
 import weatherFixtures from '../../evals/weather-fixtures.json' with { type: 'json' };
 
-// Claude Code 2.1.296+ for a tool sent up front, and Cowork (CC, HD). 2,048 before 2.1.296 (Q7).
+// Claude Code 2.1.296+ for a tool sent up front (CC, HD2). 2,048 before 2.1.296 (Q7).
 const HOST_CUT = 4096;
 const CEILING = 3600;
 

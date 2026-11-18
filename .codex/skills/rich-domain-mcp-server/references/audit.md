@@ -29,9 +29,9 @@ For each tool, produce a table:
 | every alert and every threshold/benchmark constant in the code | grep the summarize/alert code |
 
 Anything past char 4,096, anything only in the output schema, and anything inside a response over
-~25k tokens is **not delivered** on Claude Code or Cowork [CC] [HD] [Q11] [Q9] (the evals ran on a
+~25k tokens is **not delivered** on Claude Code [CC] [HD2] [Q11] [Q9] (the evals ran on a
 Claude Code that cut at 2,048 [Q7]); the output schema is dropped by
-every Claude host, and Codex and ChatGPT Work drop input-schema describes past 5,000 chars [HD]. Mark it; you will move it in step 3.
+every Claude host and Mistral Code, and Codex and ChatGPT Work drop input-schema describes past 5,000 chars [HD] [HD2]. Mark it; you will move it in step 3.
 
 ## Step 2 — Name audit
 
@@ -112,7 +112,7 @@ test until the new one has been measured.
 
 - [ ] Inventory table per tool (offsets, lengths, schema-only text, max response size)
 - [ ] Name audit: every misleading / unitless / magnet / opaque name listed with a decision
-- [ ] Nothing load-bearing past char 4,096; instructions ≤ 512, nothing load-bearing only there [HD]
+- [ ] Nothing load-bearing past char 4,096; instructions ≤ 512, nothing load-bearing only there [HD2]
 - [ ] No model-facing meaning only in the output schema
 - [ ] Every alert/threshold: quantity kinds on both sides, sourced constant, determinate, complete
 - [ ] Every rule and rename has provenance or a confidence marker
