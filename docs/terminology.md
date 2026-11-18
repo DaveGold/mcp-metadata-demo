@@ -83,9 +83,9 @@ knowledge actually reaches the model in a form it can act on. Three states, and 
 A rule can be correct in the source and present in `tools/list` and still have no effect, because
 the host truncates it, drops its channel, replaces the result, or never fetches the source that
 holds it ([Q7, Q9, Q11, Q8](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
-It can also sit in the wrong channel of the result: Claude Code reads only `structuredContent`,
-claude.ai chat only `content`, ChatGPT both (or only `structuredContent` with an output schema)
-([Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
+It can also sit in the wrong channel of the result: Claude Code and Mistral read only
+`structuredContent`, claude.ai only `content`, ChatGPT both (or only `structuredContent` with an
+output schema), Codex the whole result ([Q28, HD2](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 ### The cut / the delivered budget
 
@@ -94,9 +94,10 @@ server instructions) reached the model, on every request
 ([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); since 2.1.296 the
 cut is 4,096, and 16,384 for a tool loaded through tool search ([CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). _The cut_ is that
 boundary; _the delivered budget_ is the space before it. _The description head_ is what sits
-inside it. The number is host-specific: verify it per client. Cowork (web) cuts at 4,096; Codex
-CLI, ChatGPT and claude.ai chat deliver the whole description; ChatGPT cuts server instructions at
-512 characters and claude.ai chat does not deliver them ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
+inside it. The number is host-specific and it moves: verify it per client. In November 2026
+claude.ai (chat and Cowork, merged) cut at 16,384 after tool search; ChatGPT, Codex and Mistral
+delivered the whole description. Server instructions: 4,096 on claude.ai but only after the first
+call, 512 on ChatGPT, whole on Codex, none on Mistral ([HD2](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery); September: [HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 ### Channel
 

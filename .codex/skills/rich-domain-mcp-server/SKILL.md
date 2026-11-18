@@ -14,7 +14,7 @@ description: >-
   triggers on "the agent picks the wrong tool", "the agent misreads this field", "the agent
   ignores the description", user-feedback triage, and tool-call-log pattern analysis.
 metadata:
-  version: 1.4.1
+  version: 1.5.0
 ---
 
 # rich-domain-mcp-server — build, audit and measure MCP tools
@@ -60,24 +60,24 @@ eval set had already shown to be wrong.
 |---|---|---|
 | field names | **always**, every response | — |
 | tool description | **the head only**, every request: 2,048 chars up to 2.1.294 [Q7]; since 2.1.296, 4,096 for a tool sent up front and 16,384 for one loaded through tool search, the default for MCP tools [CC] | ≤ 4,096, ceiling ~3,600 |
-| server instructions | first 2,048 chars up to 2.1.294 [Q7], 4,096 since 2.1.296 [CC]; other hosts deliver 512, all, or none [HD] | ≤ 512; nothing load-bearing only here |
-| input schema | yes, in full [IS] (also claude.ai, Cowork, ChatGPT Chat; Codex and ChatGPT Work drop every describe past 5,000 chars [HD]) — re-sent every turn | ≤ 5,000 per tool where Codex matters; paid on every call |
-| output schema | **no** [Q11] (nor claude.ai, Cowork; Codex yes, ChatGPT sometimes [HD]) | validation/UI only |
-| response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9]. With `structuredContent`, only its JSON; `content` text is dropped (claude.ai chat does the opposite) [Q28] | guard it; mirror it in both channels |
+| server instructions | first 2,048 chars up to 2.1.294 [Q7], 4,096 since 2.1.296 [CC]; other hosts deliver 4,096 only after the first call, 512, all, or none [HD2] | ≤ 512; nothing load-bearing only here |
+| input schema | yes, in full [IS] (also claude.ai, ChatGPT Chat, Mistral; Codex and ChatGPT Work drop every describe past 5,000 chars [HD] [HD2]) — re-sent every turn | ≤ 5,000 per tool where Codex matters; paid on every call |
+| output schema | **no** [Q11] (nor claude.ai or Mistral Code; ChatGPT, Codex and Mistral Work yes [HD2]) | validation/UI only |
+| response | yes, **< ~25k tokens**; larger is replaced by a file notice [Q9]. With `structuredContent`, only its JSON; `content` text is dropped (claude.ai does the opposite; ChatGPT and Codex pass both) [Q28] [HD2] | guard it; mirror it in both channels |
 | guidance tool | only if the pointer is a requirement [Q8b] | — |
 
-### Budgets by target client [HD]
+### Budgets by target client [HD2]
 
 Design against what every host you target delivers; a host's richer surfaces are an enhancement,
 never the only home of a rule. Pick the column for the clients the server must work in:
 
-| surface | Claude only (Code, claude.ai, Cowork) | ChatGPT / Codex only | all clients |
-|---|---|---|---|
-| server instructions | nothing required (claude.ai chat gets none); ≤ 4,096 | nothing required (Work gets none; Codex prepends them to every tool); ≤ 512 | nothing required; ≤ 512 |
-| tool description | ≤ 4,096 (Claude Code 2.1.296+ for a tool sent up front, and Cowork [CC] [HD]) | no cut measured; the head still decides the search | ≤ 4,096 |
-| input schema | whole; size it for cost only | ≤ 5,000 per tool (Codex drops every describe above it, bisected; Work consistent, not bisected) | ≤ 5,000 per tool |
-| output schema | validation only (never delivered) | may help (Codex, Work deliver it; Chat 1 in 3); never required | validation only |
-| response | the meaning of the record; < ~25k tokens on Claude Code | the meaning of the record | the meaning of the record |
+| surface | Claude only (Code, claude.ai) | ChatGPT / Codex only | Mistral only (Vibe Work, Code) | all clients |
+|---|---|---|---|---|
+| server instructions | nothing required (claude.ai gets them only after the first call); ≤ 4,096 | nothing required (ChatGPT cuts at 512; Codex prepends them to every tool); ≤ 512 | none delivered: nothing may live there | nothing required; ≤ 512 |
+| tool description | ≤ 4,096 (Claude Code for a tool sent up front; 16,384 through tool search, also on claude.ai [CC] [HD2]) | no cut measured; the head still decides the search | no cut measured | ≤ 4,096 |
+| input schema | whole; size it for cost only | ≤ 5,000 per tool (Codex and ChatGPT Work drop every describe above it; bisected on Codex) | whole | ≤ 5,000 per tool |
+| output schema | validation only (never delivered) | may help (ChatGPT and Codex deliver it); never required | validation only (not on Code) | validation only |
+| response | the meaning of the record; < ~25k tokens on Claude Code | the meaning of the record | the meaning of the record | the meaning of the record |
 
 In every column:
 
@@ -89,11 +89,12 @@ In every column:
 - **Detail that does not fit a budget goes in a REQUIRED guidance tool.** Its answer is a
   response, so it arrives on every host [Q8b] [Q25c]. Choices carried in enums and names survive
   every cut.
-- **Found before read.** claude.ai, Cowork, Codex and ChatGPT Work defer tools until the model
-  searches. The tool name and first sentence say what the user can do with it, in the words they
+- **Found before read.** Claude Code, claude.ai, Codex, ChatGPT Work and Mistral defer tools
+  until the model searches. The tool name and first sentence say what the user can do with it, in the words they
   would search with.
-- **These are one day's host versions (2026-09-27).** Claude Code has moved since: its 2,048 cut
-  became 4,096 (16,384 through tool search) in 2.1.295–2.1.296 [CC], and the budget followed.
+- **These are one day's host versions (2026-11-17) [HD2].** They move: Claude Code's 2,048 cut
+  became 4,096 (16,384 through tool search) in 2.1.295–2.1.296 [CC], and the budget followed;
+  claude.ai merged chat and Cowork onto a Claude Code harness between HD and HD2.
   Claude Code updates itself, so its versions before 2.1.296 are no longer a target; an eval that
   needs the old cut sets it. Re-verify with `references/delivery.md` before relying
   on a number.
@@ -286,7 +287,7 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
 
 - **Never claim what you have not observed.** Give the count, or the confidence marker.
 - **Nothing load-bearing past char 4,096** of a description, and nothing load-bearing only in the
-  instructions; a test enforces it [Q7] [HD] [CC]. Most important first all the same: tool search
+  instructions; a test enforces it [Q7] [HD2] [CC]. Most important first all the same: tool search
   ranks on the head.
 - **No model-facing meaning only in the output schema** [Q11].
 - **No field name that implies a quantity it is not; every numeric name carries its unit; calculated
@@ -316,8 +317,9 @@ after the loop has stabilised ([`references/evaluation.md`](references/evaluatio
   [Q22d]. But an alert works only where it is delivered and read, and a refusal depends on neither.
   Keep alerts for what can wait or what the user should know, and mirror them.
 - **Mirror the result: the same JSON in `structuredContent` and as the `content` text** [Q28].
-  Each host reads a different channel: Claude Code only `structuredContent`, claude.ai chat only
-  `content`, ChatGPT both (only `structuredContent` once an `outputSchema` is declared). Meaning
+  Each host reads a different channel: Claude Code and Mistral only `structuredContent`, claude.ai
+  only `content`, ChatGPT both (only `structuredContent` once an `outputSchema` is declared),
+  Codex and ChatGPT Work the whole result [HD2]. Meaning
   in one channel alone is lost somewhere. A render tool whose `structuredContent` is the UI
   payload puts `interpretation` first inside it, and mirrors it. Nothing for the model in `_meta`.
 - **Walk every branch with data built for it.** For each value of an enum like a chart `type`,
@@ -451,8 +453,9 @@ layer). [render-chart.ts](https://github.com/DaveGold/mcp-metadata-demo/blob/mai
 
 - **Host-specific and version-specific numbers.** The 2,048-char cut, the ~25k-token response
   limit and the absent output schema were measured on Claude Code 2.1.275–2.1.280; the cut changed
-  in 2.1.295–2.1.296 [CC]. Delivery of the description, instructions and both
-  schemas was also probed on Codex CLI, ChatGPT, claude.ai and Cowork [HD]; the response limit and
+  in 2.1.295–2.1.296 [CC]. Delivery of the description, instructions, both schemas and the
+  result channel was also probed on claude.ai, ChatGPT (Chat, Work), Codex CLI and Mistral (Work,
+  Code) [HD2], after an earlier round [HD]; the response limit and
   every effect on answers are unmeasured elsewhere. Re-verify on
   another host with the techniques in `delivery.md` before relying on them — or design for the
   strictest, as this skill does.

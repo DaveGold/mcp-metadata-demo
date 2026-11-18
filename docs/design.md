@@ -23,7 +23,8 @@ The evals kept the thesis and sharpened the delivery half:
 - The talk's table marked the tool description as reaching the model before the call. On Claude
   Code up to 2.1.294 only its first **2,048 characters** did ([Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)),
   on Cowork its first 4,096, in claude.ai chat all of it ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery));
-  Claude Code 2.1.296+ cuts at 4,096, or 16,384 through tool search ([CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
+  Claude Code 2.1.296+ cuts at 4,096, or 16,384 through tool search ([CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)),
+  and by November 2026 claude.ai (chat and Cowork merged) cut at 16,384 too ([HD2](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
   On the strictest client still in use, most of a long description is bound and never delivered.
 - Once delivered, the channel does not matter: description and response tie
   ([Q15](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). An earlier
@@ -36,8 +37,8 @@ The evals kept the thesis and sharpened the delivery half:
 - A fix the model must make needs a refusal, not an alert
   ([Q22c](../.claude/skills/rich-domain-mcp-server/references/evidence.md#the-composite-reference-q19)):
   a refusal is an error result, and every host delivers an error's text. A successful result
-  arrives through a different channel per host (Claude Code `structuredContent`, claude.ai chat
-  `content`, ChatGPT both), so mirror the two
+  arrives through a different channel per host (Claude Code and Mistral `structuredContent`,
+  claude.ai `content`, ChatGPT and Codex both), so mirror the two
   ([Q28](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 ## 1 · The capability owns the knowledge
@@ -55,10 +56,10 @@ Canonical truth can be projected through several surfaces, and they do not all a
 | surface | reaches the model? |
 |---|---|
 | field names | always, in every response |
-| tool description | only the head: 2,048 chars on Claude Code up to 2.1.294, 4,096 on Cowork and on Claude Code 2.1.296+ (16,384 through tool search); in full on Codex, ChatGPT and claude.ai chat ([HD, CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
-| server instructions | the first 2,048 chars on Claude Code up to 2.1.294, 4,096 since; 512 on ChatGPT Chat; whole on Cowork; prepended to every tool on Codex; not at all in claude.ai chat or ChatGPT Work ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
-| input schema | in full on Claude Code, Cowork, claude.ai chat and ChatGPT Chat; on Codex and ChatGPT Work every parameter describe is dropped once the schema passes 5,000 chars ([IS, HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
-| output schema | not on Claude Code, Cowork or claude.ai chat ([Q11, HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); on Codex and ChatGPT Work yes, on ChatGPT Chat sometimes. Keep it for validation and UI |
+| tool description | only the head: 2,048 chars on Claude Code up to 2.1.294; 4,096 up front and 16,384 through tool search since 2.1.296; 16,384 on claude.ai (chat and Cowork merged); in full on ChatGPT, Codex and Mistral ([CC, HD2](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
+| server instructions | the first 2,048 chars on Claude Code up to 2.1.294, 4,096 since; 4,096 on claude.ai but only after the first call; 512 on ChatGPT Chat and Work; whole, on every tool, on Codex; not at all on Mistral ([HD2](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
+| input schema | in full on Claude Code, claude.ai, ChatGPT Chat and Mistral; on Codex and ChatGPT Work every parameter describe is dropped once the schema passes 5,000 chars ([IS, HD, HD2](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
+| output schema | not on Claude Code, claude.ai or Mistral Code ([Q11, HD2](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); on ChatGPT, Codex and Mistral Work yes. Keep it for validation and UI |
 | response | yes, below a size limit; above it, Claude Code replaces it with a file notice ([Q9](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); other hosts unmeasured |
 | a skill, a resource, a guidance tool | only if something makes the model fetch it ([Q8, Q8b](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)) |
 
@@ -175,7 +176,7 @@ Every principle above resolves to a row with a status: `settled`, `direction`, `
 `reversed` or `open`. Read the status before quoting a principle as fact. The standing caveat on
 all of it: one author wrote the metadata, questions, ground truth and scoring; one domain family
 (Dutch building and weather data); one host for every effect on answers (Claude Code), with what
-arrives also measured on five more clients ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery));
+arrives also measured on six more clients ([HD2](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery), after [HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery));
 one model family (Claude haiku, sonnet, opus). Thirteen of the first twenty-three preregistered predictions were wrong, which is the
 argument for measuring rather than reasoning about what a model reads. Open questions and their
 predictions: [`evals/open-questions.md`](../evals/open-questions.md).

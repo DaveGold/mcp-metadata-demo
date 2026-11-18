@@ -53,7 +53,7 @@ ALERTS: interpretation.alerts — computed verdicts and this record's branch (no
 
 ### Output schema (not delivered on Claude hosts)
 
-5,332 chars, 49 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
+5,332 chars, 49 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
 
 ## `get_weather_context`
 
@@ -99,7 +99,7 @@ ALERTS: interpretation.alerts — the correction valid for THIS window, all figh
 
 ### Output schema (not delivered on Claude hosts)
 
-4,610 chars, 4 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
+4,610 chars, 4 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
 
 ## `render_chart`
 
@@ -257,4 +257,4 @@ INTERPRETATION: environment "local" is this process's in-memory buffer (last 50 
 
 ### Output schema (not delivered on Claude hosts)
 
-2,656 chars, 3 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
+2,656 chars, 3 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.

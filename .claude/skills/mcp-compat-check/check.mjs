@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
  * MCP client-compatibility check. Reads a server's tools/list and instructions and scores each
- * surface against what each client family delivered when measured (2026-09-27; see the
- * rich-domain-mcp-server skill, evidence tags HD and CC). Claude Code raised its cut from 2,048 to
- * 4,096 in 2.1.296 (CC); Cowork cuts at 4,096 too, so that is the description budget. No model, no tool calls: deterministic.
+ * surface against what each client family delivered when measured (2026-11-17, evidence tag HD2 in
+ * the rich-domain-mcp-server skill; HD 2026-09-27 and CC before it). Claude Code sends 4,096 of a
+ * description up front (16,384 through tool search), so 4,096 is the description budget. No model,
+ * no tool calls: deterministic.
  *
  *   node check.mjs https://example.com/mcp            # streamable HTTP
  *   node check.mjs --header "Authorization: Bearer $T" https://…
@@ -16,17 +17,20 @@ import { spawn } from 'node:child_process';
 
 // What each client family delivers. null = no limit measured.
 const CLIENTS = {
-  claude: { label: 'Claude only (Code, claude.ai, Cowork)', desc: 4096, instr: 0, schema: null, output: false },
-  openai: { label: 'ChatGPT / Codex only', desc: null, instr: 0, schema: 5000, output: 'partial' },
-  all: { label: 'all clients', desc: 4096, instr: 0, schema: 5000, output: false },
+  claude: { label: 'Claude only (Code, claude.ai)', desc: 4096, instr: 0, schema: null, output: false, outputMiss: 'never delivered' },
+  openai: { label: 'ChatGPT / Codex only', desc: null, instr: 512, schema: 5000, output: true },
+  mistral: { label: 'Mistral only (Vibe Work, Code)', desc: null, instr: 0, schema: null, output: false, outputMiss: 'not delivered on Mistral Code' },
+  all: { label: 'all clients', desc: 4096, instr: 0, schema: 5000, output: false, outputMiss: 'not delivered on every client' },
 };
-// instr: 0 means "some client in this family delivers none", so nothing may be required there.
-const INSTR_SOFT = { claude: 4096, openai: 512, all: 512 };
+// instr: 0 means "some client in this family delivers none, or only after the first call", so
+// nothing may be required there. INSTR_SOFT is the strictest cut among the clients that do deliver
+// them; null means no client in the family delivers them at all.
+const INSTR_SOFT = { claude: 4096, openai: 512, mistral: null, all: 512 };
 const HOST_NOTES = {
-  desc: 'Claude Code cut at 2,048 up to 2.1.294 and at 4,096 since 2.1.296 (16,384 through tool search); Cowork cuts at 4,096; claude.ai chat, ChatGPT and Codex deliver it whole.',
-  instr: 'claude.ai chat and ChatGPT Work deliver none; ChatGPT Chat cuts at 512; Claude Code at 2,048 up to 2.1.294, 4,096 since.',
-  schema: 'Codex drops every describe once the serialized input schema passes 5,000 chars (bisected: 5,000 kept, 5,001 dropped); ChatGPT Work behaves the same (20k dropped, 739 kept; not bisected).',
-  output: 'Not delivered on Claude Code, claude.ai chat or Cowork; delivered on Codex and ChatGPT Work.',
+  desc: 'Claude Code sends 4,096 of a tool sent up front and 16,384 through tool search (2,048 up to 2.1.294); claude.ai (chat and Cowork, merged) 16,384 through tool search; ChatGPT, Codex and Mistral deliver it whole.',
+  instr: 'Codex delivers them whole on every tool; Claude Code and claude.ai cut at 4,096, claude.ai only after the first call to the server; ChatGPT Chat and Work cut at 512; Mistral delivers none.',
+  schema: 'Codex and ChatGPT Work (the same runtime) drop every describe once the serialized input schema passes 5,000 chars (bisected on Codex: 5,000 kept, 5,001 dropped); Claude, ChatGPT Chat and Mistral deliver it whole.',
+  output: 'Not delivered on Claude Code, claude.ai or Mistral Code; delivered on ChatGPT (Chat and Work), Codex and Mistral Work.',
 };
 
 // ── transport ────────────────────────────────────────────────────────────────
@@ -174,14 +178,20 @@ function analyse(server) {
       if (c.desc && d > c.desc) issues.push(`description ${d.toLocaleString('en')} > ${c.desc.toLocaleString('en')}: ${(d - c.desc).toLocaleString('en')} chars (${Math.round((100 * (d - c.desc)) / d)}%) not delivered on the strictest client`);
       if (c.schema && schemaChars > c.schema && nDescribes > 0) issues.push(`input schema ${schemaChars.toLocaleString('en')} > ${c.schema.toLocaleString('en')}: all ${nDescribes} parameter describes dropped on Codex / ChatGPT Work`);
       const reviews = [];
-      if (!c.output && outOnly.length) reviews.push(`${outOnly.length} output-schema describe(s) never delivered here (${outOnly.slice(0, 4).join(', ')}${outOnly.length > 4 ? ', …' : ''}): check each meaning also travels in the field name or the response`);
+      if (!c.output && outOnly.length) reviews.push(`${outOnly.length} output-schema describe(s) ${c.outputMiss} (${outOnly.slice(0, 4).join(', ')}${outOnly.length > 4 ? ', …' : ''}): check each meaning also travels in the field name or the response`);
       perClient[key] = { status: issues.length ? 'red' : reviews.length ? 'amber' : 'green', issues, reviews };
     }
     return { name: t.name, title: t.title ?? t.annotations?.title, descriptionChars: d, firstSentence: firstSentence(t.description), inputSchemaChars: schemaChars, parameterDescribes: nDescribes, outputSchemaChars: out, outputOnlyFields: outOnly, annotationsMissing: annMissing, perClient };
   });
   const instr = len(server.instructions);
   const instrByClient = {};
-  for (const key of Object.keys(CLIENTS)) instrByClient[key] = { status: instr > INSTR_SOFT[key] ? 'red' : 'green', note: instr === 0 ? 'none shipped' : instr > INSTR_SOFT[key] ? `${instr.toLocaleString('en')} > ${INSTR_SOFT[key].toLocaleString('en')}` : `${instr.toLocaleString('en')} ≤ ${INSTR_SOFT[key].toLocaleString('en')}` };
+  for (const key of Object.keys(CLIENTS)) {
+    const soft = INSTR_SOFT[key];
+    instrByClient[key] =
+      soft === null
+        ? { status: 'green', note: instr === 0 ? 'none shipped' : `${instr.toLocaleString('en')} shipped, none delivered here` }
+        : { status: instr > soft ? 'red' : 'green', note: instr === 0 ? 'none shipped' : instr > soft ? `${instr.toLocaleString('en')} > ${soft.toLocaleString('en')}` : `${instr.toLocaleString('en')} ≤ ${soft.toLocaleString('en')}` };
+  }
   const listChars = JSON.stringify(server.tools).length;
   const descTotal = tools.reduce((n, t) => n + t.descriptionChars, 0);
   const instructionsHeavy = instr > 512 && instr > descTotal;
@@ -202,7 +212,7 @@ function analyse(server) {
       },
       instructions: {
         status: instructionsHeavy ? 'red' : i.status,
-        cell: instr === 0 ? 'none shipped' : `${i.note}${instructionsHeavy ? '; the guidance lives here' : ''}; not delivered on every client, so nothing may be required there`,
+        cell: instr === 0 ? 'none shipped' : `${i.note}${instructionsHeavy ? '; the guidance lives here' : ''}${c.instr ? '' : '; not delivered on every client, so nothing may be required there'}`,
       },
       inputSchema: {
         status: schemaOver.length ? 'red' : 'green',
@@ -211,7 +221,7 @@ function analyse(server) {
       },
       outputSchema: {
         status: outReview.length ? 'amber' : 'green',
-        cell: !withOutput.length ? 'none shipped' : c.output ? `${withOutput.length} of ${n} shipped; delivered on Codex and Work` : `${withOutput.length} of ${n} shipped, never delivered${outReview.length ? `; ${outReview.length} carry meaning to check` : ''}`,
+        cell: !withOutput.length ? 'none shipped' : c.output ? `${withOutput.length} of ${n} shipped; delivered on ChatGPT and Codex` : `${withOutput.length} of ${n} shipped, ${c.outputMiss}${outReview.length ? `; ${outReview.length} carry meaning to check` : ''}`,
         tools: outReview.map((t) => t.name),
       },
     };
@@ -240,8 +250,8 @@ function markdown(r, target) {
   for (const [key, label] of SURF)
     o.push(`| ${label} | ` + cols.map((k) => `${dot[r.summary[k].surfaces[key].status]} ${r.summary[k].surfaces[key].cell}`).join(' | ') + ' |');
   o.push('', '🟢 portable under the measured limits · 🟡 host-dependent: arrives on some clients, or is never needed; review it · 🔴 not portable: relies on a surface or size that some measured client in that column does not deliver.', '', '_A portability finding, not a quality rating: a protocol-correct server can still be red._', '');
-  if (r.instructionsHeavy) o.push(`🔴 **The guidance lives in the server instructions** (${r.instructionsChars.toLocaleString('en')} chars, against ${r.descriptionCharsTotal.toLocaleString('en')} in all tool descriptions together). On claude.ai chat and ChatGPT Work none of it reaches the model; move each rule into the description head of the tool it governs.`, '');
-  else if (r.instructionsChars) o.push('Server instructions reach no model on claude.ai chat or ChatGPT Work: every rule in them must also be in a description head or a response.', '');
+  if (r.instructionsHeavy) o.push(`🔴 **The guidance lives in the server instructions** (${r.instructionsChars.toLocaleString('en')} chars, against ${r.descriptionCharsTotal.toLocaleString('en')} in all tool descriptions together). On Mistral none of it reaches the model, on claude.ai only after the first call and on ChatGPT only the first 512 chars; move each rule into the description head of the tool it governs.`, '');
+  else if (r.instructionsChars) o.push('Server instructions reach no model on Mistral, reach claude.ai only after the first call, and are cut at 512 on ChatGPT: every rule in them must also be in a description head or a response.', '');
   const reds = r.tools.filter((t) => t.perClient.all.status === 'red').sort((a, b) => b.perClient.all.issues.length - a.perClient.all.issues.length || b.descriptionChars - a.descriptionChars);
   if (reds.length) {
     o.push('## Start here (all clients)', '');
@@ -254,21 +264,21 @@ function markdown(r, target) {
     for (const t of ambers.slice(0, 5)) o.push(`- \`${t.name}\`: ${t.perClient.all.reviews.join('; ')}`);
     o.push('');
   }
-  o.push('## Per tool', '', '| tool | description | input schema | describes | output schema | Claude | ChatGPT/Codex | all |', '|---|---:|---:|---:|---:|:-:|:-:|:-:|');
-  for (const t of r.tools) o.push(`| \`${t.name}\` | ${t.descriptionChars.toLocaleString('en')} | ${t.inputSchemaChars.toLocaleString('en')} | ${t.parameterDescribes} | ${t.outputSchemaChars ? t.outputSchemaChars.toLocaleString('en') : '—'} | ${dot[t.perClient.claude.status]} | ${dot[t.perClient.openai.status]} | ${dot[t.perClient.all.status]} |`);
+  o.push('## Per tool', '', '| tool | description | input schema | describes | output schema | Claude | ChatGPT/Codex | Mistral | all |', '|---|---:|---:|---:|---:|:-:|:-:|:-:|:-:|');
+  for (const t of r.tools) o.push(`| \`${t.name}\` | ${t.descriptionChars.toLocaleString('en')} | ${t.inputSchemaChars.toLocaleString('en')} | ${t.parameterDescribes} | ${t.outputSchemaChars ? t.outputSchemaChars.toLocaleString('en') : '—'} | ${dot[t.perClient.claude.status]} | ${dot[t.perClient.openai.status]} | ${dot[t.perClient.mistral.status]} | ${dot[t.perClient.all.status]} |`);
   o.push('', '## Also worth a look', '');
   const noAnn = r.tools.filter((t) => t.annotationsMissing.length);
   if (noAnn.length) o.push(`- ${noAnn.length}/${r.tools.length} tools leave annotations implicit (${[...new Set(noAnn.flatMap((t) => t.annotationsMissing))].join(', ')}).`);
   const shortHeads = r.tools.filter((t) => t.firstSentence.length < 25);
-  if (shortHeads.length) o.push(`- ${shortHeads.length} tools have a first sentence under 25 chars; on clients that load tools by search (claude.ai, Cowork, Codex, ChatGPT Work) the name and first sentence decide whether the tool is found.`);
-  o.push('', '## Rules behind the columns', '', '| surface | Claude only | ChatGPT / Codex only | all clients |', '|---|---|---|---|',
-    '| tool description | red if > 4,096 (Claude Code 2.1.296+ sent up front, Cowork) | no limit (none measured) | red if > 4,096 |',
-    '| server instructions | red if > 4,096, or if they hold more text than all descriptions together | red if > 512 (ChatGPT Chat cut), or the same | red if > 512, or the same |',
-    '| input schema | no limit (delivered whole up to ~21.7k) | red if serialized > 5,000 and it has describes (Codex cut, bisected; Work consistent) | red if > 5,000 with describes |',
-    '| output schema | amber if a field is described only there (never delivered) | green (delivered on Codex and Work) | amber if described only there |',
-    '| overall | the worst of the four | the worst of the four | the worst of the four |', '');
+  if (shortHeads.length) o.push(`- ${shortHeads.length} tools have a first sentence under 25 chars; on clients that load tools by search (Claude Code, claude.ai, Codex, ChatGPT Work, Mistral) the name and first sentence decide whether the tool is found.`);
+  o.push('', '## Rules behind the columns', '', '| surface | Claude only | ChatGPT / Codex only | Mistral only | all clients |', '|---|---|---|---|---|',
+    '| tool description | red if > 4,096 (Claude Code, a tool sent up front) | no limit (none measured) | no limit (none measured) | red if > 4,096 |',
+    '| server instructions | red if > 4,096, or if they hold more text than all descriptions together | red if > 512 (ChatGPT cut), or the same | none delivered: red only if they hold more text than all descriptions | red if > 512, or the same |',
+    '| input schema | no limit (delivered whole up to ~21.7k) | red if serialized > 5,000 and it has describes (Codex and ChatGPT Work) | no limit measured | red if > 5,000 with describes |',
+    '| output schema | amber if a field is described only there (never delivered) | green (delivered on ChatGPT and Codex) | amber if described only there (not on Code) | amber if described only there |',
+    '| overall | the worst of the four | the worst of the four | the worst of the four | the worst of the four |', '');
   o.push(`- Measured limits: ${HOST_NOTES.desc} ${HOST_NOTES.instr} ${HOST_NOTES.schema} ${HOST_NOTES.output}`);
-  o.push('', '_Static check of what the server ships against client limits measured on 2026-09-27. It does not call tools, so response size and response-side meaning are not checked._');
+  o.push('', '_Static check of what the server ships against client limits measured on 2026-11-17 (HD2). It does not call tools, so response size and response-side meaning are not checked._');
   return o.join('\n') + '\n';
 }
 

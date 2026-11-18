@@ -140,7 +140,7 @@ Look up daily weather and degree-day/solar metrics for a Dutch location and date
 
 ### Output schema (not delivered on Claude hosts)
 
-5,564 chars, 4 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
+5,564 chars, 4 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
 
 ## `get_tool_call_log`
 
@@ -162,4 +162,4 @@ Look up recent tool calls and their queryIntent values.
 
 ### Output schema (not delivered on Claude hosts)
 
-2,656 chars, 3 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
+2,656 chars, 3 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.

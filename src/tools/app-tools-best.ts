@@ -3,7 +3,7 @@
  *
  * The data tools fetch; these draw. What the model needs from them is mostly BEFORE the call (which
  * tool, which chart type, how to shape the payload), so each description fits within the 4,096
- * characters Claude Code and Cowork deliver, and the per-parameter rules live in the input schema, which is
+ * characters Claude Code delivers up front, and the per-parameter rules live in the input schema, which is
  * delivered too. What can be checked on the finished call is checked here and returned under
  * `interpretation.alerts`, instead of being left to prose. Audit: docs/app-tools-findings.md.
  */

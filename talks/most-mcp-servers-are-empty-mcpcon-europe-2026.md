@@ -214,6 +214,12 @@ does not.
 and to 16,384 for a tool loaded through tool search ([CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). The 74% above is what
 Claude Code up to 2.1.294 lost; the point stands, the number is a version's.
 
+**And the hosts move (2026-11-17):** claude.ai merged chat and Cowork into one host on a Claude
+Code harness: descriptions to 16,384 after tool search, server instructions only after the first
+call. ChatGPT, Codex and Mistral (new) deliver the whole description; the output schema now reaches
+ChatGPT, Codex and Mistral Work, not the Claude hosts
+([HD2](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). Still true on every host.
+
 **On server instructions:** the slide marks them client-dependent, and the 2026-07-28 spec keeps
 it that way: with the `initialize` handshake gone, `instructions` moved to the result of
 `server/discover`, which clients _may_ call

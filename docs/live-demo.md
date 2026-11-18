@@ -167,9 +167,9 @@ Exact bytes per tier: [`thin`](wire/minimal.md) · [`rich`](wire/rich.md) · [`b
 
 | | **thin** (`/mcpThin`) | **rich** (`/mcp`) | **best** (`/mcpBest`) |
 |---|---|---|---|
-| `get_building_profile` description _(model-visible up to char 2,048 on Claude Code up to 2.1.294, 4,096 on Cowork, all of it in claude.ai chat and on Claude Code 2.1.296+ through tool search)_ | one sentence (~50 chars) | ~8,000 chars; 74% past the old Claude Code cut, 49% past Cowork's | 1,800 chars, all delivered |
+| `get_building_profile` description _(model-visible up to char 2,048 on Claude Code up to 2.1.294; 4,096 up front and 16,384 through tool search since; all of it on claude.ai, ChatGPT, Codex and Mistral)_ | one sentence (~50 chars) | ~8,000 chars; 74% past the old Claude Code cut, 49% past the 4,096 one | 1,800 chars, all delivered |
 | Input schema _(model-visible)_ | 2 bare fields, no descriptions, no validation | 4 fields, each `.describe()`d, format-validated | each `.describe()`d; weather's `select` lists its exact field names |
-| Output schema _(not model-visible on Claude Code, Cowork or claude.ai chat; Codex sees it)_ | none (text-only result) | full Zod schema, shape only | shape only; meaning is in the field names |
+| Output schema _(not model-visible on Claude Code, claude.ai or Mistral Code; ChatGPT and Codex see it)_ | none (text-only result) | full Zod schema, shape only | shape only; meaning is in the field names |
 | Response-side meaning _(model-visible)_ | none | curated `alerts[]` | `interpretation` first: alerts, per-record notes, computed values with provenance |
 | Render apps | stripped to one sentence each | full self-describing schemas | audited for delivery (Q22); refuses a mislabelled table |
 

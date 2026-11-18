@@ -81,9 +81,9 @@ Which fields are populated depends on the berekeningstype:
 - CALCULATED vs MEASURED — ep1_energ
 ````
 
-> ✂ **Claude Code (a tool sent up front) and Cowork cut here, at character 4,096.** They never send the 3,882 characters below (49%).
+> ✂ **Claude Code cuts here for a tool sent up front, at character 4,096.** It never sends the 3,882 characters below (49%); through tool search, and on claude.ai, the cut is 16,384.
 
-<details><summary>Not delivered on Claude Code or Cowork</summary>
+<details><summary>Not delivered on Claude Code for a tool sent up front</summary>
 
 ````text
 iebehoefte, ep2_fossiel and berekend_energieverbruik are all CALCULATED NTA 8800 figures, not meter readings: ep1 is net energy DEMAND, ep2 is PRIMARY FOSSIL energy, berekend is modelled total use. Paris Proof and other metered benchmarks are defined on MEASURED FINAL energy at the meter, and this server holds NO metered data, so none of these three can be ranked against such a target as though it were measured consumption — the unit (kWh/m²) matches and the quantity does not. Where a question asks how a building compares to a metered benchmark, say that the comparison cannot be made from this data and why, rather than producing a ratio.
@@ -122,7 +122,7 @@ ALERTS: Always check interpretation.alerts — they contain bouwjaar era warning
 
 ### Output schema (not delivered on Claude hosts)
 
-7,376 chars, 45 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
+7,376 chars, 45 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
 
 ## `render_chart`
 
@@ -179,9 +179,9 @@ Question → chart patterns (use these when the question matches; they cover the
 - Hierarchical breakdown (project → phase → item, ≥6 items, max 3 levels) → tre
 ````
 
-> ✂ **Claude Code (a tool sent up front) and Cowork cut here, at character 4,096.** They never send the 3,881 characters below (49%).
+> ✂ **Claude Code cuts here for a tool sent up front, at character 4,096.** It never sends the 3,881 characters below (49%); through tool search, and on claude.ai, the cut is 16,384.
 
-<details><summary>Not delivered on Claude Code or Cowork</summary>
+<details><summary>Not delivered on Claude Code for a tool sent up front</summary>
 
 ````text
 emap; cost flow over 2-3 tiers (budget → discipline → cost item) → sankey
@@ -303,9 +303,9 @@ DATA VALUE SHAPES (per column type — send the SIMPLEST value that fits; column
   badge                                                     → scalar value
 ````
 
-> ✂ **Claude Code (a tool sent up front) and Cowork cut here, at character 4,096.** They never send the 5,874 characters below (59%).
+> ✂ **Claude Code cuts here for a tool sent up front, at character 4,096.** It never sends the 5,874 characters below (59%); through tool search, and on claude.ai, the cut is 16,384.
 
-<details><summary>Not delivered on Claude Code or Cowork</summary>
+<details><summary>Not delivered on Claude Code for a tool sent up front</summary>
 
 ````text
 ; badgeMap on the column maps it to label + color  (e.g. value "active" + badgeMap {active:{color:"green", label:"Active"}})
@@ -531,9 +531,9 @@ INTERPRETATION:
   year-over-year comparison, use 
 ````
 
-> ✂ **Claude Code (a tool sent up front) and Cowork cut here, at character 4,096.** They never send the 1,195 characters below (23%).
+> ✂ **Claude Code cuts here for a tool sent up front, at character 4,096.** It never sends the 1,195 characters below (23%); through tool search, and on claude.ai, the cut is 16,384.
 
-<details><summary>Not delivered on Claude Code or Cowork</summary>
+<details><summary>Not delivered on Claude Code for a tool sent up front</summary>
 
 ````text
 the HDD ratio directly: normalizedEnergy = energy × (refPeriodHDD /
@@ -573,7 +573,7 @@ composition, fighting-system risk days, select-projection notes, and data qualit
 
 ### Output schema (not delivered on Claude hosts)
 
-5,564 chars, 4 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
+5,564 chars, 4 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
 
 ## `get_tool_call_log`
 
@@ -646,4 +646,4 @@ ALERTS: notes when the environment is "local" (so an empty or short list isn't m
 
 ### Output schema (not delivered on Claude hosts)
 
-2,656 chars, 3 top-level fields. Claude Code, Cowork and claude.ai chat do not pass it to the model (Q11, HD); Codex and ChatGPT Work do. Nothing only in it can carry meaning.
+2,656 chars, 3 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.

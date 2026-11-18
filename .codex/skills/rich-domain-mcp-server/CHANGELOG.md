@@ -6,6 +6,21 @@ Semantic versions; each release is the git tag `skill-v<version>` in
 sharpens rules; a **patch** fixes wording, links or tooling. Every change to the skill bumps
 `metadata.version` in `SKILL.md` and adds an entry here (CI checks both).
 
+## 1.5.0 — 2026-11-17
+
+Delivery re-measured on every host [HD2]; budgets sharpened, nothing loosened.
+
+- claude.ai chat and Cowork merged onto a Claude Code harness: descriptions 16,384 through tool
+  search, server instructions 4,096 **only after the first call** to the server, no output
+  schema, `content` read instead of `structuredContent`. The Cowork column is gone.
+- Mistral (Vibe Work and Code) added as its own column: whole description and input schema, no
+  server instructions, output schema only on Work.
+- ChatGPT Work now gets 512 chars of server instructions; ChatGPT Chat now always gets the output
+  schema; Codex CLI 0.165 unchanged and measured on the result channel (both channels).
+- `delivery.md` has the 2026-11-17 per-host table with a result-channel column, keeps the
+  2026-09-27 table as history, and points at the new delivery probe. New evidence row HD2; HD
+  marked partly superseded.
+
 ## 1.4.1 — 2026-10-26
 
 Q22b re-run with the alert delivered [Q22d]; no rule changes.

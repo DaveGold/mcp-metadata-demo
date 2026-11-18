@@ -71,9 +71,10 @@ One plausible line made 59 of 60 answers wrong; one sentence took the same quest
 `MEASURED` · [Q7, Q11](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery) ·
 MCPCon, slide 17. Proven more sharply after the talk: only the first 2,048 characters of a
 description reached the model on the Claude Code the evals ran on, and the output schema never
-does. Where the line falls is the host's, and it moves: Cowork cuts at 4,096, claude.ai chat not at
-all, Codex does send the output schema ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)),
-and Claude Code went from 2,048 to 4,096 in October 2026 ([CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
+does. Where the line falls is the host's, and it moves: in September Cowork cut at 4,096 and
+claude.ai chat not at all ([HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); Claude Code went from 2,048 to 4,096 in October 2026
+([CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)); in November claude.ai (chat and Cowork merged) cut at 16,384, and ChatGPT, Codex and
+Mistral delivered the whole description ([HD2](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)).
 
 > **Check what the model received, not what the server sent.**
 
@@ -264,6 +265,7 @@ of the thinking stays inspectable, and so they are not reused by accident.
 | ~~The agent can call every endpoint and understand nothing.~~ | MCPCon announcement | **The models are good. It's the metadata that isn't.** | Models reason well; the premise was missing from the payload. |
 | ~~The tool description reaches the model before the call.~~ | MCPCon, slide 17 | **Only the description head does**: the first 2,048 chars on the Claude Code of the evals. | [Q7](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery), four days after the talk. |
 | ~~Only the first 2,048 characters of a description reach the model.~~ | README, design notes, talk annotations | **On Claude Code.** Cowork cuts at 4,096; claude.ai chat, ChatGPT and Codex deliver the whole description. | [HD](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery): every eval ran on Claude Code; the other hosts were measured on 2026-09-27. |
+| ~~Cowork cuts at 4,096; claude.ai chat delivers the whole description and no server instructions.~~ | README, design notes, VibeKode deck | **claude.ai chat and Cowork are one host now:** 16,384 after tool search, server instructions 4,096 only after the first call, `content` only. | [HD2](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery): re-measured 2026-11-17, with Mistral added. |
 | ~~On Claude Code only the first 2,048 characters of a description reach the model.~~ | README, design notes, talk annotations, skill | **On Claude Code up to 2.1.294.** Since 2.1.296 it cuts at 4,096, and at 16,384 for a tool loaded through tool search. | [CC](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery): changelog, binary and a live probe, 2026-10-26. |
 | ~~The response beats the description.~~ | first eval round | **Delivery decides; the channel did not.** | The description copy sat past the cut ([Q1, reversed](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). |
 | ~~Agents won't call a meta-tool to learn something.~~ | MCPCon talk notes | **They won't on a hint. They will when the pointer says REQUIRED, or the guidance is its own tool.** | Soft pointer 0/10, REQUIRED 10/10 ([Q8b](../.claude/skills/rich-domain-mcp-server/references/evidence.md#delivery)). |
