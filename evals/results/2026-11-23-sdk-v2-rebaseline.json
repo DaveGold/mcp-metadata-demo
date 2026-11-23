@@ -1,5 +1,5 @@
 {
- "_comment": "Deliberate re-baseline of every arm's wire freeze, 2026-11-23: the move from MCP TypeScript SDK 1.29.0 (@modelcontextprotocol/sdk) to the split SDK v2 packages (@modelcontextprotocol/server 2.4.0, ext-apps 2.0.4). No metadata changed. The SDK changed two things in every tools/list, on every arm: each schema's `$schema` URI moves from draft-07 to 2020-12 (5 chars longer per schema), and every tool loses `execution: {taskSupport: \"forbidden\"}`, which v2 no longer emits by default. Proof that nothing else moved: per arm, the v1 tools/list with exactly those two changes applied (`v1_normalised`) hashes identical to the v2 tools/list (`after`). Server instructions are byte-identical on every arm. No input or output schema crosses a measured host cut: the closest is best's render_table input schema, 4,861 -> 4,866 chars, under the 5,000 cut (HD2). Earlier results measured on these arms are unaffected: what the model reads (descriptions, field names, describes, enums, instructions, responses) is unchanged. A smoke re-run of `best` waits on the deploy (see smoke_rerun). The host-probe instruments in evals/host-probe/ stay on SDK 1.29.0 (pinned devDependency) so HD/HD2 remain reproducible.",
+ "_comment": "Deliberate re-baseline of every arm's wire freeze, 2026-11-23: the move from MCP TypeScript SDK 1.29.0 (@modelcontextprotocol/sdk) to the split SDK v2 packages (@modelcontextprotocol/server 2.4.0, ext-apps 2.0.4). No metadata changed. The SDK changed two things in every tools/list, on every arm: each schema's `$schema` URI moves from draft-07 to 2020-12 (5 chars longer per schema), and every tool loses `execution: {taskSupport: \"forbidden\"}`, which v2 no longer emits by default. Proof that nothing else moved: per arm, the v1 tools/list with exactly those two changes applied (`v1_normalised`) hashes identical to the v2 tools/list (`after`). Server instructions are byte-identical on every arm. No input or output schema crosses a measured host cut: the closest is best's render_table input schema, 4,861 -> 4,866 chars, under the 5,000 cut (HD2). Earlier results measured on these arms are unaffected: what the model reads (descriptions, field names, describes, enums, instructions, responses) is unchanged. Confirmed after the deploy with a smoke re-run of `best` (see smoke_rerun). The host-probe instruments in evals/host-probe/ stay on SDK 1.29.0 (pinned devDependency) so HD/HD2 remain reproducible.",
  "date": "2026-11-23",
  "sdk_before": "@modelcontextprotocol/sdk 1.29.0, ext-apps 1.7.4",
  "sdk_after": "@modelcontextprotocol/server/client/core 2.4.0, @modelcontextprotocol/node 2.1.2, ext-apps 2.0.4",
@@ -131,5 +131,17 @@
  },
  "host_side_check": "mcp-compat-check --json on rich: local SDK v2 server vs the deployed SDK v1 function (europe-west4 .../mcp), 2026-11-23. 44 of 44 per-tool, per-client verdicts identical; tools/list 104,750 -> 104,520 chars.",
  "protocol_2026_07_28": "Not part of the freeze: the freeze hashes the 2025-era path every eval ran on. On 2026-07-28 (HTTP via createMcpHandler, stdio via serveStdio) tools/list is deep-equal to the 2025 one, same characters and length, but the SDK serialises `$schema` first in each schema, and the list result adds `_meta.io.modelcontextprotocol/serverInfo`, `ttlMs: 0` and `cacheScope: \"private\"`. Instructions identical across eras. Host delivery on 2026-07-28 is unmeasured.",
- "smoke_rerun": "PENDING: eval-best is the deployed Cloud Function (mcpBest), still SDK v1 until `npm run deploy`. Re-run one best question after the deploy and record it here."
+ "smoke_rerun": {
+  "question": "benchmark-trap",
+  "arm": "best (deployed mcpBest, SDK v2)",
+  "model": "claude-haiku-5-5 (Q19 baseline ran claude-haiku-4-5, so this is a smoke check, not a like-for-like re-measure)",
+  "protocol": "One wave through the portable harness (run_wave.sh): a fresh headless parent, so the subagents read tools/list from the v2 deploy, not a cached v1 list; each subagent got only the question string. Default description cap.",
+  "n": 3,
+  "correct": 3,
+  "must_not_say_hits": 0,
+  "baseline": "Q19 (2026-09-24-q19-best-arm.json): best 20/20 haiku, 10/10 sonnet, 10/10 opus on benchmark-trap",
+  "notes": "All three made one get_building_profile call, declined the ratio and named calculated vs measured. One also flagged the 1.77x area-basis gap (f_ga vs BAG oppervlakte).",
+  "audit": "get_tool_call_log variant=best: 3 rows for 3 runs, all success, 2026-11-23T08:15:38Z."
+ },
+ "deploy": "2026-11-23: all 16 functions deployed from commit 449afce. Deployed mcpBest and mcp report 2.1.0, answer 2025-11-25 and 2026-07-28, and their 2025-path tools/list hashes equal tools_after above."
 }
