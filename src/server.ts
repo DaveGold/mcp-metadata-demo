@@ -5,7 +5,7 @@
  * so tool registration lives in exactly one place.
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/server';
 import packageJson from '../package.json' with { type: 'json' };
 import { BagClient } from './clients/bag-client.js';
 import { EpOnlineClient } from './clients/ep-online-client.js';

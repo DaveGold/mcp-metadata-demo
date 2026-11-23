@@ -15,8 +15,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { z } from 'zod';
 import { logger } from '../logger.js';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
+import type { McpServer } from '@modelcontextprotocol/server';
+import type { ServerContext } from '@modelcontextprotocol/server';
 import {
   BEST_ANNOTATION_EXAMPLES,
   CHART_DECISION_TREE,
@@ -250,7 +250,7 @@ function chartOptionsSchema(ex: AnnotationExamples) {
 }
 
 // ── Input schema ─────────────────────────────────────────────────────────────
-// Raw Zod shape (NOT z.object()) — required by registerAppTool
+// Zod shape; wrapped in z.object() at registration (ext-apps 2 deprecates the raw-shape overload)
 
 const inputSchema = {
   type: z
@@ -869,21 +869,23 @@ export function registerRenderChartTool(
     {
       title: 'Render Chart',
       description: opts.best ? bestChartDescription : opts.minimal ? 'Render data as a chart.' : description,
-      inputSchema: opts.guided
-        ? guidedChartInputSchema
-        : opts.best
-          ? {
-              ...inputSchema,
-              ...(opts.decisionTree
-                ? {
-                    type: inputSchema.type.describe(
-                      CHART_DECISION_TREE + (inputSchema.type.description ?? '').replace(/^[^\n]*\n/, ''),
-                    ),
-                  }
-                : {}),
-              options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES),
-            }
-          : inputSchema,
+      inputSchema: z.object(
+        opts.guided
+          ? guidedChartInputSchema
+          : opts.best
+            ? {
+                ...inputSchema,
+                ...(opts.decisionTree
+                  ? {
+                      type: inputSchema.type.describe(
+                        CHART_DECISION_TREE + (inputSchema.type.description ?? '').replace(/^[^\n]*\n/, ''),
+                      ),
+                    }
+                  : {}),
+                options: chartOptionsSchema(BEST_ANNOTATION_EXAMPLES),
+              }
+            : inputSchema,
+      ),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -892,7 +894,7 @@ export function registerRenderChartTool(
       },
       _meta: { ui: { resourceUri: RESOURCE_URI } },
     },
-    async (rawArgs: Record<string, unknown>, extra: { authInfo?: AuthInfo }) => {
+    async (rawArgs: Record<string, unknown>, ctx: ServerContext) => {
       const start = Date.now();
       let auth: { email: string; userId: string; roles: string[] } | null = null;
 
@@ -903,7 +905,7 @@ export function registerRenderChartTool(
       const args = rawArgs as unknown as ChartArgs;
 
       try {
-        auth = getAuthExtra(extra.authInfo);
+        auth = getAuthExtra(ctx.http?.authInfo);
 
         // Every refusal is logged, so the call log shows what was refused and in what shape.
         const fail = async (text: string) => {

@@ -31,7 +31,7 @@ import { z } from 'zod';
 import { createHash } from 'node:crypto';
 import { lookup as dnsLookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@modelcontextprotocol/server';
 import { registerAppTool } from '@modelcontextprotocol/ext-apps/server';
 import { logger } from '../logger.js';
 import { requestContext } from '../shared/log-context.js';
@@ -254,7 +254,7 @@ export function registerFetchImageTool(server: McpServer, opts: { openWorld?: bo
       description:
         'Internal tool for the table UI — fetches external image URLs server-side and returns base64. ' +
         'App-only — DO NOT call this tool directly. Only the render_table UI can call it via bridge.callTool().',
-      inputSchema,
+      inputSchema: z.object(inputSchema),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,

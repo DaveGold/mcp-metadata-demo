@@ -20,7 +20,7 @@
  */
 
 import { z } from 'zod';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@modelcontextprotocol/server';
 import { logger } from '../logger.js';
 import type { BagClient } from '../clients/bag-client.js';
 import type { EpOnlineClient } from '../clients/ep-online-client.js';

@@ -18,8 +18,8 @@ import { bestRenderResult, bestTableDescription, tableAlerts } from './app-tools
 import { bestTableInputSchema } from './render-table-schema-best.js';
 import { z } from 'zod';
 import { logger } from '../logger.js';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
+import type { McpServer } from '@modelcontextprotocol/server';
+import type { ServerContext } from '@modelcontextprotocol/server';
 import { registerAppTool, registerAppResource, RESOURCE_MIME_TYPE } from '@modelcontextprotocol/ext-apps/server';
 import { getAuthExtra } from '../shared/auth.js';
 import { requestContext } from '../shared/log-context.js';
@@ -158,7 +158,7 @@ Maximum 500 rows. Always set column types for proper formatting — default "tex
 Do not combine footer aggregation with pagination — the footer shows totals across ALL rows, which is confusing when only a subset is visible. Use footer only when all rows fit on one page (pagination=false or dataset ≤ pageSize).`;
 
 // ── Input schema ─────────────────────────────────────────────────────────────
-// Raw Zod shape (NOT z.object()) — required by registerAppTool
+// Zod shape; wrapped in z.object() at registration (ext-apps 2 deprecates the raw-shape overload)
 
 const inputSchema = {
   columns: z
@@ -623,7 +623,7 @@ export function registerRenderTableTool(
     {
       title: 'Render Table',
       description: opts.best ? bestTableDescription : opts.minimal ? 'Render data as a table.' : description,
-      inputSchema: opts.leanSchema ? bestTableInputSchema : inputSchema,
+      inputSchema: z.object(opts.leanSchema ? bestTableInputSchema : inputSchema),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -632,12 +632,12 @@ export function registerRenderTableTool(
       },
       _meta: { ui: { resourceUri: RESOURCE_URI } },
     },
-    async (args: TableArgs, extra: { authInfo?: AuthInfo }) => {
+    async (args: TableArgs, ctx: ServerContext) => {
       const start = Date.now();
       let auth: { email: string; userId: string; roles: string[] } | null = null;
 
       try {
-        auth = getAuthExtra(extra.authInfo);
+        auth = getAuthExtra(ctx.http?.authInfo);
 
         // Every refusal is logged, so the call log shows what was refused and in what shape.
         const refuse = async (text: string) => {

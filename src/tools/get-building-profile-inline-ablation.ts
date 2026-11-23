@@ -38,7 +38,7 @@
  * different experiment. It is recorded in the results file, not patched here.
  */
 
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 import { logger } from '../logger.js';
 import {

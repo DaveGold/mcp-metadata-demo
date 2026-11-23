@@ -27,7 +27,7 @@ node .claude/skills/mcp-compat-check/check.mjs https://example.com/mcp
 node .claude/skills/mcp-compat-check/check.mjs --header "Authorization: Bearer $TOKEN" https://example.com/mcp
 node .claude/skills/mcp-compat-check/check.mjs --stdio -- node dist/stdio.js
 node .claude/skills/mcp-compat-check/check.mjs --json https://example.com/mcp   # for CI or diffing
-node .claude/skills/mcp-compat-check/check.mjs --oauth https://mcp.example.com/mcp  # OAuth servers (needs @modelcontextprotocol/sdk)
+node .claude/skills/mcp-compat-check/check.mjs --oauth https://mcp.example.com/mcp  # OAuth servers (needs @modelcontextprotocol/client)
 ```
 
 Never put a token in the command yourself: ask the user to export it as an environment variable,

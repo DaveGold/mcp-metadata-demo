@@ -7,11 +7,13 @@
  * both for each frozen arm; the snapshot was recorded on the commit before the
  * `best` arm was added (base 0986cb8). A diff here means an old arm moved —
  * re-baseline deliberately, never by updating the snapshot to make CI green.
+ * Re-baselines so far, each with its proof in evals/results/: 2026-09-24 (render_chart schema) and
+ * 2026-11-23 (MCP SDK v2: $schema URI and execution field only, no metadata).
  */
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/client';
+import { InMemoryTransport } from '@modelcontextprotocol/server';
 import { createServer, type ServerVariant } from './server.js';
 import type { BagClientLike, EpOnlineClientLike } from './tools/get-building-profile.js';
 

@@ -8,8 +8,8 @@ describe('rich description — delivery (Q21)', () => {
     expect(at + calcLine.length).toBeLessThan(2048);
   });
 });
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/client';
+import { InMemoryTransport } from '@modelcontextprotocol/server';
 import { createServer } from '../server.js';
 import { outputSchema, type BagClientLike, type EpOnlineClientLike } from './get-building-profile.js';
 import type { BagAddress, BagVerblijfsobject, BagPand } from '../clients/bag-client.js';

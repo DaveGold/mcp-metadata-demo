@@ -1,0 +1,135 @@
+{
+ "_comment": "Deliberate re-baseline of every arm's wire freeze, 2026-11-23: the move from MCP TypeScript SDK 1.29.0 (@modelcontextprotocol/sdk) to the split SDK v2 packages (@modelcontextprotocol/server 2.4.0, ext-apps 2.0.4). No metadata changed. The SDK changed two things in every tools/list, on every arm: each schema's `$schema` URI moves from draft-07 to 2020-12 (5 chars longer per schema), and every tool loses `execution: {taskSupport: \"forbidden\"}`, which v2 no longer emits by default. Proof that nothing else moved: per arm, the v1 tools/list with exactly those two changes applied (`v1_normalised`) hashes identical to the v2 tools/list (`after`). Server instructions are byte-identical on every arm. No input or output schema crosses a measured host cut: the closest is best's render_table input schema, 4,861 -> 4,866 chars, under the 5,000 cut (HD2). Earlier results measured on these arms are unaffected: what the model reads (descriptions, field names, describes, enums, instructions, responses) is unchanged. A smoke re-run of `best` waits on the deploy (see smoke_rerun). The host-probe instruments in evals/host-probe/ stay on SDK 1.29.0 (pinned devDependency) so HD/HD2 remain reproducible.",
+ "date": "2026-11-23",
+ "sdk_before": "@modelcontextprotocol/sdk 1.29.0, ext-apps 1.7.4",
+ "sdk_after": "@modelcontextprotocol/server/client/core 2.4.0, @modelcontextprotocol/node 2.1.2, ext-apps 2.0.4",
+ "changes_on_wire": [
+  "$schema: http://json-schema.org/draft-07/schema# -> https://json-schema.org/draft/2020-12/schema (every input and output schema)",
+  "execution: {taskSupport: \"forbidden\"} removed (every tool)"
+ ],
+ "arms": {
+  "rich": {
+   "tools_before": "f3416d82732de7fb9df0ab62cf9312872aa78b9fdd056ee0e161e51f2dcd8aca",
+   "tools_after": "57799d39b541d5cbe77abd1a02e3f9ae90179196112dd1fbbb124b0bd0077d52",
+   "tools_v1_normalised": "57799d39b541d5cbe77abd1a02e3f9ae90179196112dd1fbbb124b0bd0077d52",
+   "instructions_identical": true,
+   "tools_chars_before": 104750,
+   "tools_chars_after": 104520
+  },
+  "words": {
+   "tools_before": "e22c790bfe45db239f3e4ee686928932b641d4946f275ef877948fda663e1616",
+   "tools_after": "36aa5ceee2789dab626e878297bb026aba4028722f95b2ccd1b99f8ffd649025",
+   "tools_v1_normalised": "36aa5ceee2789dab626e878297bb026aba4028722f95b2ccd1b99f8ffd649025",
+   "instructions_identical": true,
+   "tools_chars_before": 103419,
+   "tools_chars_after": 103189
+  },
+  "inline": {
+   "tools_before": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
+   "tools_after": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
+   "tools_v1_normalised": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
+   "instructions_identical": true,
+   "tools_chars_before": 65118,
+   "tools_chars_after": 64923
+  },
+  "inline-recipe": {
+   "tools_before": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
+   "tools_after": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
+   "tools_v1_normalised": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
+   "instructions_identical": true,
+   "tools_chars_before": 65118,
+   "tools_chars_after": 64923
+  },
+  "inline-conditional": {
+   "tools_before": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
+   "tools_after": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
+   "tools_v1_normalised": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
+   "instructions_identical": true,
+   "tools_chars_before": 65118,
+   "tools_chars_after": 64923
+  },
+  "inline-oneline": {
+   "tools_before": "5092a967e4f079acf40701bd74e3454579fec9bbf313060a2b3f46a237e30b65",
+   "tools_after": "eacb112489ad5800e296fbbde38f914ac818a105e3cccbe9580a181bc1599feb",
+   "tools_v1_normalised": "eacb112489ad5800e296fbbde38f914ac818a105e3cccbe9580a181bc1599feb",
+   "instructions_identical": true,
+   "tools_chars_before": 71909,
+   "tools_chars_after": 71714
+  },
+  "inline-fact": {
+   "tools_before": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
+   "tools_after": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
+   "tools_v1_normalised": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
+   "instructions_identical": true,
+   "tools_chars_before": 65118,
+   "tools_chars_after": 64923
+  },
+  "inline-instruction": {
+   "tools_before": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
+   "tools_after": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
+   "tools_v1_normalised": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
+   "instructions_identical": true,
+   "tools_chars_before": 65118,
+   "tools_chars_after": 64923
+  },
+  "words-recipe": {
+   "tools_before": "eda953ff9857c7e29cd7c72c7a771d1f5e4de769b15c06f44dcca9eb7cd19f42",
+   "tools_after": "0a2b9728a34ab42d4cda3bfd24c2e4dc99cf02e71a252a40ddbfbbd0354bde83",
+   "tools_v1_normalised": "0a2b9728a34ab42d4cda3bfd24c2e4dc99cf02e71a252a40ddbfbbd0354bde83",
+   "instructions_identical": true,
+   "tools_chars_before": 103863,
+   "tools_chars_after": 103633
+  },
+  "schema": {
+   "tools_before": "27dfe77eefae9edd3f96fd92751e5f66cc76cf92d55574418360f2cf274fb273",
+   "tools_after": "d97900c1a1d3a8a8f8e5d0f425070e02c007c80e304f4f960fc7b84f0dbecc0d",
+   "tools_v1_normalised": "d97900c1a1d3a8a8f8e5d0f425070e02c007c80e304f4f960fc7b84f0dbecc0d",
+   "instructions_identical": true,
+   "tools_chars_before": 64920,
+   "tools_chars_after": 64725
+  },
+  "minimal": {
+   "tools_before": "fb420eff53ff25d37e07e0ad311b770e8db18892f2da6e0c788b96c26b822360",
+   "tools_after": "b3441a7b00e0e7704f23b7bb22eb74aae5044622bd0e33e2a4c1759be043c836",
+   "tools_v1_normalised": "b3441a7b00e0e7704f23b7bb22eb74aae5044622bd0e33e2a4c1759be043c836",
+   "instructions_identical": true,
+   "tools_chars_before": 57044,
+   "tools_chars_after": 56844
+  },
+  "opaque": {
+   "tools_before": "be6118b058276f55ab64f15833af01a1aba5595c3d549001f62f21b7afb52220",
+   "tools_after": "9d1dd0f09ac06d90ec7dd6b12604165ed28a64287b9b3b087beb0b659643e793",
+   "tools_v1_normalised": "9d1dd0f09ac06d90ec7dd6b12604165ed28a64287b9b3b087beb0b659643e793",
+   "instructions_identical": true,
+   "tools_chars_before": 57106,
+   "tools_chars_after": 56906
+  },
+  "opaque-words": {
+   "tools_before": "f648aac6e191c4671a2f3873ce33e4fc20c40508cffaf7ea76f2089f3a1d20da",
+   "tools_after": "cf99e1e6eb51e45f439ff71e527ec7dfbc6dd8c802af828ae1a0fff6d0b7d4d5",
+   "tools_v1_normalised": "cf99e1e6eb51e45f439ff71e527ec7dfbc6dd8c802af828ae1a0fff6d0b7d4d5",
+   "instructions_identical": true,
+   "tools_chars_before": 61892,
+   "tools_chars_after": 61692
+  },
+  "guidance-recipe": {
+   "tools_before": "c3dfe855f9033e4b674e24490771ff6163400deabbeb5db019cba275207ee6a9",
+   "tools_after": "111f522d4e391508c74d4d48cab60ea9f2ad7bc816fdf7093db292f9760640c2",
+   "tools_v1_normalised": "111f522d4e391508c74d4d48cab60ea9f2ad7bc816fdf7093db292f9760640c2",
+   "instructions_identical": true,
+   "tools_chars_before": 64188,
+   "tools_chars_after": 63993
+  },
+  "best": {
+   "tools_before": "d959fb29aaf2482723cbc14ed5dc17ec9f65988175e08445b3e67fe3bee1b99b",
+   "tools_after": "36b1de74c4831571a6b8eec7df9acee973166099dbcffad77202fd322c151b8e",
+   "tools_v1_normalised": "36b1de74c4831571a6b8eec7df9acee973166099dbcffad77202fd322c151b8e",
+   "instructions_identical": true,
+   "tools_chars_before": 38187,
+   "tools_chars_after": 37922
+  }
+ },
+ "host_side_check": "mcp-compat-check --json on rich: local SDK v2 server vs the deployed SDK v1 function (europe-west4 .../mcp), 2026-11-23. 44 of 44 per-tool, per-client verdicts identical; tools/list 104,750 -> 104,520 chars.",
+ "protocol_2026_07_28": "Not part of the freeze: the freeze hashes the 2025-era path every eval ran on. On 2026-07-28 (HTTP via createMcpHandler, stdio via serveStdio) tools/list is deep-equal to the 2025 one, same characters and length, but the SDK serialises `$schema` first in each schema, and the list result adds `_meta.io.modelcontextprotocol/serverInfo`, `ttlMs: 0` and `cacheScope: \"private\"`. Instructions identical across eras. Host delivery on 2026-07-28 is unmeasured.",
+ "smoke_rerun": "PENDING: eval-best is the deployed Cloud Function (mcpBest), still SDK v1 until `npm run deploy`. Re-run one best question after the deploy and record it here."
+}

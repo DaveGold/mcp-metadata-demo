@@ -5,8 +5,8 @@
  * on the constants, because what matters is what the host receives (skill delivery.md).
  */
 import { describe, it, expect } from 'vitest';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/client';
+import { InMemoryTransport } from '@modelcontextprotocol/server';
 import { createServer } from '../server.js';
 import { emptyProfile } from '../domain/build-profile.js';
 import type { ProfileCore } from '../domain/generate-alerts.js';

@@ -20,7 +20,7 @@ Look up a Dutch building by postcode and house number.
 
 ### Input parameters (delivered)
 
-181 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+186 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -41,7 +41,7 @@ Render data as a chart.
 
 ### Input parameters (delivered)
 
-20,548 chars serialized. Over 5,000: Codex and ChatGPT Work drop every description below (HD).
+20,553 chars serialized. Over 5,000: Codex and ChatGPT Work drop every description below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -72,7 +72,7 @@ Render data as a table.
 
 ### Input parameters (delivered)
 
-20,181 chars serialized. Over 5,000: Codex and ChatGPT Work drop every description below (HD).
+20,186 chars serialized. Over 5,000: Codex and ChatGPT Work drop every description below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -101,7 +101,7 @@ Render data as a map with markers.
 
 ### Input parameters (delivered)
 
-2,966 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+2,971 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -126,7 +126,7 @@ Look up daily weather and degree-day/solar metrics for a Dutch location and date
 
 ### Input parameters (delivered)
 
-2,115 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+2,120 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -140,7 +140,7 @@ Look up daily weather and degree-day/solar metrics for a Dutch location and date
 
 ### Output schema (not delivered on Claude hosts)
 
-5,564 chars, 4 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
+5,569 chars, 4 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
 
 ## `get_tool_call_log`
 
@@ -152,7 +152,7 @@ Look up recent tool calls and their queryIntent values.
 
 ### Input parameters (delivered)
 
-937 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+942 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -162,4 +162,4 @@ Look up recent tool calls and their queryIntent values.
 
 ### Output schema (not delivered on Claude hosts)
 
-2,656 chars, 3 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
+2,661 chars, 3 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.

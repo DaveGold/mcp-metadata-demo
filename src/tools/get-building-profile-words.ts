@@ -27,7 +27,7 @@
  * identical to the rich tier — any divergence makes the comparison meaningless.
  */
 
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 import { logger } from '../logger.js';
 import {

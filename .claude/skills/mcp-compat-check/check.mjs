@@ -91,21 +91,20 @@ async function readServer(session) {
 }
 
 // OAuth servers: the user signs in in their own browser; the token lives only in this process.
-// Needs @modelcontextprotocol/sdk resolvable from this file (npm i @modelcontextprotocol/sdk).
+// Needs @modelcontextprotocol/client (MCP SDK v2) resolvable from this file (npm i @modelcontextprotocol/client).
 async function readServerOAuth(url) {
-  const { Client } = await import('@modelcontextprotocol/sdk/client/index.js');
-  const { StreamableHTTPClientTransport } = await import('@modelcontextprotocol/sdk/client/streamableHttp.js');
+  const { Client, StreamableHTTPClientTransport } = await import('@modelcontextprotocol/client');
   const { createServer } = await import('node:http');
   const PORT = 33418;
   const redirect = `http://127.0.0.1:${PORT}/callback`;
-  let gotCode;
-  const code = new Promise((resolve) => (gotCode = resolve));
+  let gotCallback;
+  const callbackParams = new Promise((resolve) => (gotCallback = resolve));
   const callback = createServer((req, res) => {
     const u = new URL(req.url, redirect);
     if (u.pathname !== '/callback') return res.writeHead(404).end();
     const c = u.searchParams.get('code');
     res.end(c ? 'Signed in. You can close this tab.' : `No code: ${u.searchParams.get('error') ?? 'unknown'}`);
-    if (c) gotCode(c);
+    if (c) gotCallback(u.searchParams); // the whole query: the SDK checks RFC 9207 `iss` before redeeming `code`
   }).listen(PORT, '127.0.0.1');
   const mem = {};
   const provider = {
@@ -135,7 +134,7 @@ async function readServerOAuth(url) {
   } catch (e) {
     if (!/unauthori[sz]ed/i.test(`${e?.name} ${e?.message}`)) throw e;
     const t = new StreamableHTTPClientTransport(new URL(url), { authProvider: provider });
-    await t.finishAuth(await code);
+    await t.finishAuth(await callbackParams);
     client = await open();
   }
   const tools = [];

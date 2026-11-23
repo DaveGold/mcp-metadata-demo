@@ -15,7 +15,8 @@
 
 import { randomUUID } from 'node:crypto';
 import express, { type Express, type Request, type Response } from 'express';
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { createMcpHandler, isLegacyRequest } from '@modelcontextprotocol/server';
+import { NodeStreamableHTTPServerTransport, toNodeHandler, toWebRequest } from '@modelcontextprotocol/node';
 import { createServer, type ServerVariant } from './server.js';
 import { logger } from './logger.js';
 import { requestContext } from './shared/log-context.js';
@@ -44,6 +45,33 @@ export function createHttpApp(options: CreateHttpAppOptions = {}): Express {
   });
 
   const mcpMiddleware = options.hosted ? [dailyCap, rateLimitMcp] : [];
+  const variant = options.variant ?? 'rich';
+  const onerror = (error: Error): void => {
+    logger.error('http.handler_error', { error: error.message });
+  };
+
+  // Protocol 2026-07-28: every request carries its own envelope, served by the SDK's
+  // per-request entry (its default 'auto' response mode answers in JSON, as no tool here emits
+  // mid-call notifications). 2025-era requests are routed to the leg below instead (legacy:
+  // 'reject' here), because the SDK's built-in stateless fallback cannot answer in JSON.
+  const serveModern = toNodeHandler(
+    createMcpHandler(() => createServer({ variant }), { legacy: 'reject', onerror }),
+    {
+      onerror,
+    },
+  );
+
+  // Protocol 2025-11-25 and earlier: stateless, one fresh McpServer + transport per request,
+  // JSON responses — the wiring every eval and host-delivery measurement in this repo ran on.
+  async function serveLegacy(req: Request, res: Response): Promise<void> {
+    const server = createServer({ variant });
+    const transport = new NodeStreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+      enableJsonResponse: true,
+    });
+    await server.connect(transport);
+    await transport.handleRequest(req, res, req.body);
+  }
 
   async function handleMcpRequest(req: Request, res: Response): Promise<void> {
     // Open a request context so tool handlers can stamp `tool.invoked` audit
@@ -52,16 +80,13 @@ export function createHttpApp(options: CreateHttpAppOptions = {}): Express {
     const sessionId = req.requestId ?? randomUUID();
     const environment = process.env.K_SERVICE ? 'cloud' : 'local';
 
-    await requestContext.run({ sessionId, environment, variant: options.variant ?? 'rich' }, async () => {
+    await requestContext.run({ sessionId, environment, variant }, async () => {
       try {
-        // Stateless: one fresh McpServer + transport pair per request.
-        const server = createServer({ variant: options.variant ?? 'rich' });
-        const transport = new StreamableHTTPServerTransport({
-          sessionIdGenerator: undefined,
-          enableJsonResponse: true,
-        });
-        await server.connect(transport);
-        await transport.handleRequest(req, res, req.body);
+        if (await isLegacyRequest(await toWebRequest(req, req.body), req.body)) {
+          await serveLegacy(req, res);
+        } else {
+          await serveModern(req, res, req.body);
+        }
       } catch (error) {
         logger.error('http.handler_error', {
           requestId: req.requestId,

@@ -86,8 +86,8 @@ import type {
   CreateMessageRequest,
   CreateMessageResult,
   CreateMessageResultWithTools,
-} from '@modelcontextprotocol/sdk/types.js';
-import type { RequestOptions } from '@modelcontextprotocol/sdk/shared/protocol.js';
+} from '@modelcontextprotocol/client';
+import type { RequestOptions } from '@modelcontextprotocol/client';
 
 @Injectable({ providedIn: 'root' })
 export class McpBridgeService {
