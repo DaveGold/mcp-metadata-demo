@@ -79,7 +79,9 @@ in the `server/discover` result instead of `initialize`, and a client opts in to
 v2 client still connects on 2025 unless told otherwise). How much of the instructions each host
 passes to the model on that channel is an open question; nothing in this repo's delivery tables
 describes it. The surfaces the design rules are about (description, input and output schema,
-response, instructions) all still exist.
+response, instructions) all still exist. To measure it, use the SDK v2 delivery probe
+([`delivery-probe-server-v2.mjs`](../evals/host-probe/delivery-probe-server-v2.mjs)): the same
+labels and codes as the HD/HD2 probe, served in both eras, with the era of every request logged.
 
 ### Layers
 

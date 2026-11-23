@@ -4,6 +4,19 @@ Paste each into a NEW chat on the host, with only the `deliveryprobe` connector 
 Prompt A first; prompt B in the same chat after A is answered. Score against
 `node evals/host-probe/delivery-probe-server.mjs truth`.
 
+## Which server
+
+- **`delivery-probe-server.mjs`** (SDK 1.29, 2025 era only) is the probe HD and HD2 ran on. Use it to
+  reproduce those results.
+- **`delivery-probe-server-v2.mjs`** (SDK v2) serves the same labels and codes (its `truth` is
+  identical, checked by `delivery-probe-v2.test.ts`) in both eras: 2026-07-28 and 2025. Use it to
+  measure a host on 2026-07-28, where the server instructions arrive via `server/discover` instead of
+  `initialize`. Its stderr log names the era, protocol version and client of every request, so a run
+  can be tied to the protocol the host actually spoke; record that with the scores. Start it with
+  `--modern-only` to refuse 2025-era clients: a host that then fails to connect cannot speak 2026-07-28.
+
+The prompts below work unchanged on both servers.
+
 ## Prompt A: metadata
 
 ```text
