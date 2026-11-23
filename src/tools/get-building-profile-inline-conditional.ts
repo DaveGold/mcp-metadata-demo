@@ -30,7 +30,7 @@
  * cannot drift from `words` and `inline`. Every line it emits is a line of theirs.
  */
 
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 import { logger } from '../logger.js';
 import {

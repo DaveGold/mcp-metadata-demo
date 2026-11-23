@@ -1,5 +1,6 @@
 import type { AddressInfo } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
 import { createHttpApp } from './http.js';
 
 describe('createHttpApp', () => {
@@ -36,6 +37,34 @@ describe('createHttpApp', () => {
       }),
     });
     expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toMatch(/^application\/json/);
     expect((await res.json()).result.serverInfo.name).toBe('metadata-demo');
+  });
+
+  // Both protocol eras are served: 2026-07-28 via server/discover, 2025-era via initialize.
+  // The surface the model reads (tools/list, instructions) must be the same on both.
+  async function connect(mode: { pin: string } | 'legacy') {
+    const client = new Client({ name: 'http-test', version: '0' }, { versionNegotiation: { mode } });
+    await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`)));
+    const surface = {
+      era: client.getProtocolEra(),
+      version: client.getNegotiatedProtocolVersion(),
+      instructions: client.getInstructions(),
+      tools: (await client.listTools()).tools,
+    };
+    await client.close();
+    return surface;
+  }
+
+  it('serves protocol 2026-07-28 and the 2025 era with the same tools and instructions', async () => {
+    const modern = await connect({ pin: '2026-07-28' });
+    const legacy = await connect('legacy');
+    expect(modern.era).toBe('modern');
+    expect(modern.version).toBe('2026-07-28');
+    expect(legacy.era).toBe('legacy');
+    expect(modern.instructions).toBeTruthy();
+    expect(modern.instructions).toBe(legacy.instructions);
+    expect(modern.tools.length).toBeGreaterThan(0);
+    expect(modern.tools).toEqual(legacy.tools);
   });
 });

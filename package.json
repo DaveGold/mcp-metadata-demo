@@ -1,6 +1,6 @@
 {
   "name": "mcp-metadata-demo",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Demo MCP server + MCP Apps showing Introspective Context Engineering for MCP (ICE): using domain knowledge and agent-facing capabilities to turn thin API wrappers into Rich Domain MCP Servers. Companion to 'The Missing Layer', using Dutch open building data (BAG + EP-Online).",
   "type": "module",
   "bin": {
@@ -88,8 +88,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/ext-apps": "^1.7.4",
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/client": "^2.4.0",
+    "@modelcontextprotocol/core": "^2.4.0",
+    "@modelcontextprotocol/ext-apps": "^2.0.4",
+    "@modelcontextprotocol/node": "^2.1.2",
+    "@modelcontextprotocol/server": "^2.4.0",
     "express": "^5.2.1",
     "express-rate-limit": "^7.5.1",
     "firebase-admin": "^13.10.0",
@@ -107,6 +110,7 @@
     "@angular/platform-browser": "^22.0.0",
     "@angular/router": "^22.0.0",
     "@modelcontextprotocol/inspector": "^0.14.0",
+    "@modelcontextprotocol/sdk": "1.29.0",
     "@sgratzl/chartjs-chart-boxplot": "^4.4.5",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/angular-table": "9.2.1",

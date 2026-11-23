@@ -4,63 +4,63 @@ exports[`frozen arms — wire surface unchanged > tools/list and instructions ha
 {
   "best": {
     "instructions": "5c3de892307ce0f115b48295d7dd5834b3f345a557d658a93091a03f39c16f74",
-    "tools": "d959fb29aaf2482723cbc14ed5dc17ec9f65988175e08445b3e67fe3bee1b99b",
+    "tools": "36b1de74c4831571a6b8eec7df9acee973166099dbcffad77202fd322c151b8e",
   },
   "guidance-recipe": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "c3dfe855f9033e4b674e24490771ff6163400deabbeb5db019cba275207ee6a9",
+    "tools": "111f522d4e391508c74d4d48cab60ea9f2ad7bc816fdf7093db292f9760640c2",
   },
   "inline": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
+    "tools": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
   },
   "inline-conditional": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
+    "tools": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
   },
   "inline-fact": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
+    "tools": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
   },
   "inline-instruction": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
+    "tools": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
   },
   "inline-oneline": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "5092a967e4f079acf40701bd74e3454579fec9bbf313060a2b3f46a237e30b65",
+    "tools": "eacb112489ad5800e296fbbde38f914ac818a105e3cccbe9580a181bc1599feb",
   },
   "inline-recipe": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "897376a1f5de13a3cc9a615abff2bc45efcccfb0ae52af2196298e843291a18c",
+    "tools": "92bad60f9e2a8fb15cc545eb1831c5624522156fedb4e58d22ccd4c616a09e3a",
   },
   "minimal": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "fb420eff53ff25d37e07e0ad311b770e8db18892f2da6e0c788b96c26b822360",
+    "tools": "b3441a7b00e0e7704f23b7bb22eb74aae5044622bd0e33e2a4c1759be043c836",
   },
   "opaque": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "be6118b058276f55ab64f15833af01a1aba5595c3d549001f62f21b7afb52220",
+    "tools": "9d1dd0f09ac06d90ec7dd6b12604165ed28a64287b9b3b087beb0b659643e793",
   },
   "opaque-words": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "f648aac6e191c4671a2f3873ce33e4fc20c40508cffaf7ea76f2089f3a1d20da",
+    "tools": "cf99e1e6eb51e45f439ff71e527ec7dfbc6dd8c802af828ae1a0fff6d0b7d4d5",
   },
   "rich": {
     "instructions": "c389e91b120684aa2a61b811c0ebebe20edbb8aacd8b3a1a7540aed5db535eab",
-    "tools": "f3416d82732de7fb9df0ab62cf9312872aa78b9fdd056ee0e161e51f2dcd8aca",
+    "tools": "57799d39b541d5cbe77abd1a02e3f9ae90179196112dd1fbbb124b0bd0077d52",
   },
   "schema": {
     "instructions": "170d2b8c9626b7572eb8fe6edf5f6510e4ac4f4b6b0c1bcd2cb21eafdca1971d",
-    "tools": "27dfe77eefae9edd3f96fd92751e5f66cc76cf92d55574418360f2cf274fb273",
+    "tools": "d97900c1a1d3a8a8f8e5d0f425070e02c007c80e304f4f960fc7b84f0dbecc0d",
   },
   "words": {
     "instructions": "3b2847026b13c4a2e876decd62b27d00837d85355c1a04c2af87e11839519f73",
-    "tools": "e22c790bfe45db239f3e4ee686928932b641d4946f275ef877948fda663e1616",
+    "tools": "36aa5ceee2789dab626e878297bb026aba4028722f95b2ccd1b99f8ffd649025",
   },
   "words-recipe": {
     "instructions": "3b2847026b13c4a2e876decd62b27d00837d85355c1a04c2af87e11839519f73",
-    "tools": "eda953ff9857c7e29cd7c72c7a771d1f5e4de769b15c06f44dcca9eb7cd19f42",
+    "tools": "0a2b9728a34ab42d4cda3bfd24c2e4dc99cf02e71a252a40ddbfbbd0354bde83",
   },
 }
 `;

@@ -12,7 +12,7 @@
  * cheaper per run (evals/results/2026-09-25-q25b-lean-vs-guided-confirm.json).
  */
 import { z } from 'zod';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@modelcontextprotocol/server';
 import { requestContext } from '../shared/log-context.js';
 import { writeToolCallLog } from '../shared/log-store.js';
 import { CHART_DECISION_TREE } from './app-tools-best.js';

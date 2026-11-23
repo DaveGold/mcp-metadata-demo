@@ -1,7 +1,7 @@
 /** Render calls log their SHAPE — the form chosen and its counts — never labels, titles or values. */
 import { describe, it, expect, vi } from 'vitest';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/client';
+import { InMemoryTransport } from '@modelcontextprotocol/server';
 import { createServer } from '../server.js';
 import { logger } from '../logger.js';
 import { requestContext } from './log-context.js';

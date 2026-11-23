@@ -15,8 +15,8 @@ import path from 'node:path';
 import { bestMapDescription, bestRenderResult, mapAlerts } from './app-tools-best.js';
 import { z } from 'zod';
 import { logger } from '../logger.js';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
+import type { McpServer } from '@modelcontextprotocol/server';
+import type { ServerContext } from '@modelcontextprotocol/server';
 import { registerAppTool, registerAppResource, RESOURCE_MIME_TYPE } from '@modelcontextprotocol/ext-apps/server';
 import { getAuthExtra } from '../shared/auth.js';
 import { requestContext } from '../shared/log-context.js';
@@ -113,7 +113,7 @@ Coordinates must be valid: latitude -90 to 90, longitude -180 to 180.
 Netherlands coordinates are roughly: lat 50.7-53.6, lng 3.3-7.2.`;
 
 // ── Input schema ─────────────────────────────────────────────────────────────
-// Raw Zod shape (NOT z.object()) — required by registerAppTool
+// Zod shape; wrapped in z.object() at registration (ext-apps 2 deprecates the raw-shape overload)
 
 export const inputSchema = {
   markers: z
@@ -296,7 +296,7 @@ export function registerRenderMapTool(server: McpServer, opts: { minimal?: boole
     {
       title: 'Render Map',
       description: opts.best ? bestMapDescription : opts.minimal ? 'Render data as a map with markers.' : description,
-      inputSchema,
+      inputSchema: z.object(inputSchema),
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -305,7 +305,7 @@ export function registerRenderMapTool(server: McpServer, opts: { minimal?: boole
       },
       _meta: { ui: { resourceUri: RESOURCE_URI } },
     },
-    async (rawArgs, extra: { authInfo?: AuthInfo }) => {
+    async (rawArgs, ctx: ServerContext) => {
       const start = Date.now();
       let auth: { email: string; userId: string; roles: string[] } | null = null;
 
@@ -316,7 +316,7 @@ export function registerRenderMapTool(server: McpServer, opts: { minimal?: boole
       const args = rawArgs as unknown as MapArgs;
 
       try {
-        auth = getAuthExtra(extra.authInfo);
+        auth = getAuthExtra(ctx.http?.authInfo);
 
         // Normalize positional rows to keyed objects before any validation.
         const markers = normalizeMarkers(args.markers);

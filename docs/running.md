@@ -59,15 +59,27 @@ three entrypoints (tool registration lives in exactly one place):
 
 ### Protocol version
 
-The servers speak MCP **2025-11-25**, through `@modelcontextprotocol/sdk` 1.29. Every eval in
-this repo ran on that version. The [2026-07-28 revision](https://modelcontextprotocol.io/specification/2026-07-28/changelog)
-is not supported yet because no TypeScript SDK release supports it (1.30.1, 23 Sep 2026, still
-tops out at 2025-11-25). The migration is small: the HTTP transport is already stateless, one
-fresh server per request with no session id ([src/http.ts](../src/http.ts)). What remains is
-`server/discover` (which now carries the server `instructions`), protocol version and client
-capabilities read from each request's `_meta`, `resultType` on every result, and `ttlMs` /
-`cacheScope` on list results. None of it changes a surface the design rules are about: the
-description, the input and output schema, the response and the instructions all still exist.
+The servers speak both MCP **2026-07-28** and the 2025 era (up to **2025-11-25**), through the
+split TypeScript SDK v2 packages (`@modelcontextprotocol/server`, `client`, `core`, `node`) and
+`@modelcontextprotocol/ext-apps` 2. [src/http.ts](../src/http.ts) routes each request by era:
+2026-07-28 requests go to the SDK's per-request `createMcpHandler`; 2025-era requests keep the
+wiring every eval ran on (stateless, one fresh server per request, JSON responses). stdio serves
+both eras through the SDK's own transport.
+
+**Every eval and host-delivery measurement in this repo ran on 2025-11-25**, through
+`@modelcontextprotocol/sdk` 1.29. Moving to SDK v2 changed no metadata, but it changed two bytes
+of envelope in every `tools/list`: the `$schema` URI moved from draft-07 to 2020-12 and the
+`execution.taskSupport` field is gone. The eval freeze was re-baselined with proof that nothing
+else moved ([`2026-11-23-sdk-v2-rebaseline`](../evals/results/2026-11-23-sdk-v2-rebaseline.json)).
+The host-probe servers in [`evals/host-probe/`](../evals/host-probe/) deliberately stay on SDK
+1.29.0 (a pinned devDependency), so HD and HD2 remain reproducible as measured.
+
+**Not measured yet: delivery on 2026-07-28.** In that revision the server `instructions` arrive
+in the `server/discover` result instead of `initialize`, and a client opts in to the new era (the
+v2 client still connects on 2025 unless told otherwise). How much of the instructions each host
+passes to the model on that channel is an open question; nothing in this repo's delivery tables
+describes it. The surfaces the design rules are about (description, input and output schema,
+response, instructions) all still exist.
 
 ### Layers
 

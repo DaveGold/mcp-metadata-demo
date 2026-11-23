@@ -9,7 +9,7 @@
  * Start: `node dist/index.js` (or `mcp-metadata-demo` after `npm install`).
  */
 
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { serveStdio } from '@modelcontextprotocol/server/stdio';
 import { createServer, type ServerVariant } from './server.js';
 import { logger } from './logger.js';
 
@@ -21,9 +21,11 @@ async function main(): Promise<void> {
   ).includes(rawVariant as never)
     ? (rawVariant as ServerVariant)
     : 'rich';
-  const server = createServer({ variant });
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
+  // The opening message picks the era: 2026-07-28 (server/discover) or a 2025-era initialize,
+  // which is served exactly as a hand-wired stdio server serves it (legacy: 'serve', the default).
+  serveStdio(() => createServer({ variant }), {
+    onerror: (error) => logger.error('stdio.error', { error: error.message }),
+  });
   logger.info('server.started', { transport: 'stdio', variant });
 }
 

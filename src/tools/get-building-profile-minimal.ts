@@ -15,7 +15,7 @@
  */
 
 import { z } from 'zod';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@modelcontextprotocol/server';
 import { logger } from '../logger.js';
 import { resolveBuildingProfile, type BagClientLike, type EpOnlineClientLike } from './get-building-profile.js';
 

@@ -1,7 +1,7 @@
 /** The app tools' checks on a finished call, and the render_chart refusal of an unplaced line. */
 import { describe, it, expect } from 'vitest';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/client';
+import { InMemoryTransport } from '@modelcontextprotocol/server';
 import { createServer } from '../server.js';
 import { chartAlerts, mapAlerts, tableAlerts } from './app-tools-best.js';
 import type { BagClientLike, EpOnlineClientLike } from './get-building-profile.js';

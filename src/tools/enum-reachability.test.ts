@@ -5,8 +5,8 @@
  * reached the server log, because schema validation runs before the handler.
  */
 import { describe, it, expect } from 'vitest';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/client';
+import { InMemoryTransport } from '@modelcontextprotocol/server';
 import { createServer, type ServerVariant } from '../server.js';
 import type { BagClientLike, EpOnlineClientLike } from './get-building-profile.js';
 

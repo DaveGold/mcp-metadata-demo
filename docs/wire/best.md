@@ -41,7 +41,7 @@ ALERTS: interpretation.alerts — computed verdicts and this record's branch (no
 
 ### Input parameters (delivered)
 
-739 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+744 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -53,7 +53,7 @@ ALERTS: interpretation.alerts — computed verdicts and this record's branch (no
 
 ### Output schema (not delivered on Claude hosts)
 
-5,332 chars, 49 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
+5,337 chars, 49 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
 
 ## `get_weather_context`
 
@@ -82,7 +82,7 @@ ALERTS: interpretation.alerts — the correction valid for THIS window, all figh
 
 ### Input parameters (delivered)
 
-1,872 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+1,877 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -99,7 +99,7 @@ ALERTS: interpretation.alerts — the correction valid for THIS window, all figh
 
 ### Output schema (not delivered on Claude hosts)
 
-4,610 chars, 4 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
+4,615 chars, 4 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
 
 ## `render_chart`
 
@@ -123,7 +123,7 @@ ALERTS: interpretation.alerts — problems found in this call, each with its fix
 
 ### Input parameters (delivered)
 
-2,998 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+3,003 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -154,7 +154,7 @@ WHEN TO USE: REQUIRED before render_chart for any chart other than a plain bar o
 
 ### Input parameters (delivered)
 
-318 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+323 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -184,7 +184,7 @@ INTERPRETATION: a header must not claim more than the field does. Label figures 
 
 ### Input parameters (delivered)
 
-4,861 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+4,866 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -216,7 +216,7 @@ RETURNS: the map, rendered inline for the user, and `interpretation.alerts` when
 
 ### Input parameters (delivered)
 
-2,966 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+2,971 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -247,7 +247,7 @@ INTERPRETATION: environment "local" is this process's in-memory buffer (last 50 
 
 ### Input parameters (delivered)
 
-586 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+591 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -257,4 +257,4 @@ INTERPRETATION: environment "local" is this process's in-memory buffer (last 50 
 
 ### Output schema (not delivered on Claude hosts)
 
-2,656 chars, 3 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
+2,661 chars, 3 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.

@@ -4,9 +4,9 @@
  * runs (bestChartInputSchema), so that is the one compared.
  */
 import { describe, it, expect } from 'vitest';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { Client } from '@modelcontextprotocol/client';
+import { InMemoryTransport } from '@modelcontextprotocol/server';
+import { McpServer } from '@modelcontextprotocol/server';
 import { createServer, type ServerVariant } from '../server.js';
 import { bestChartInputSchema } from './render-chart-schema-best.js';
 import type { BagClientLike, EpOnlineClientLike } from './get-building-profile.js';

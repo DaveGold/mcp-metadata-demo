@@ -9,8 +9,8 @@
  * Generated from the live server factory, never written by hand: `npm run wire-view` rewrites
  * docs/wire/, and src/wire-view.test.ts fails when a file there no longer matches.
  */
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client } from '@modelcontextprotocol/client';
+import { InMemoryTransport } from '@modelcontextprotocol/server';
 import { createServer, type ServerVariant } from './server.js';
 import type { BagClientLike, EpOnlineClientLike } from './tools/get-building-profile.js';
 

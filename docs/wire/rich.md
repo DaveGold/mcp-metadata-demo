@@ -110,7 +110,7 @@ ALERTS: Always check interpretation.alerts — they contain bouwjaar era warning
 
 ### Input parameters (delivered)
 
-642 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+647 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -122,7 +122,7 @@ ALERTS: Always check interpretation.alerts — they contain bouwjaar era warning
 
 ### Output schema (not delivered on Claude hosts)
 
-7,376 chars, 45 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
+7,381 chars, 45 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
 
 ## `render_chart`
 
@@ -226,7 +226,7 @@ Labels array is REQUIRED for bar, line, pie, doughnut, radar, polarArea, boxplot
 
 ### Input parameters (delivered)
 
-20,548 chars serialized. Over 5,000: Codex and ChatGPT Work drop every description below (HD).
+20,553 chars serialized. Over 5,000: Codex and ChatGPT Work drop every description below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -366,7 +366,7 @@ Do not combine footer aggregation with pagination — the footer shows totals ac
 
 ### Input parameters (delivered)
 
-20,181 chars serialized. Over 5,000: Codex and ChatGPT Work drop every description below (HD).
+20,186 chars serialized. Over 5,000: Codex and ChatGPT Work drop every description below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -452,7 +452,7 @@ Netherlands coordinates are roughly: lat 50.7-53.6, lng 3.3-7.2.
 
 ### Input parameters (delivered)
 
-2,966 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+2,971 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -559,7 +559,7 @@ composition, fighting-system risk days, select-projection notes, and data qualit
 
 ### Input parameters (delivered)
 
-2,115 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+2,120 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -573,7 +573,7 @@ composition, fighting-system risk days, select-projection notes, and data qualit
 
 ### Output schema (not delivered on Claude hosts)
 
-5,564 chars, 4 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
+5,569 chars, 4 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
 
 ## `get_tool_call_log`
 
@@ -636,7 +636,7 @@ ALERTS: notes when the environment is "local" (so an empty or short list isn't m
 
 ### Input parameters (delivered)
 
-937 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
+942 chars serialized. Under 5,000, so every measured client receives the descriptions below (HD).
 
 | parameter | type | description |
 |---|---|---|
@@ -646,4 +646,4 @@ ALERTS: notes when the environment is "local" (so an empty or short list isn't m
 
 ### Output schema (not delivered on Claude hosts)
 
-2,656 chars, 3 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
+2,661 chars, 3 top-level fields. Claude Code, claude.ai and Mistral Code do not pass it to the model (Q11, HD2); ChatGPT, Codex and Mistral Work do. Nothing only in it can carry meaning.
