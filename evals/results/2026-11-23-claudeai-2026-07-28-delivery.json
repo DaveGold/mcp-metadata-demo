@@ -1,0 +1,26 @@
+{
+ "_comment": "HD3a: claude.ai measured on MCP protocol 2026-07-28, with the SDK v2 delivery probe (evals/host-probe/delivery-probe-server-v2.mjs, both eras served, every request logged with its era, protocol version and client). Same labels and codes as HD2 (`truth` identical, checked by delivery-probe-v2.test.ts), same prompts (delivery-probe-prompts.md), two runs. Cloudflare quick tunnel, connector zz-deliveryprobe added in Chrome and removed for everyone afterwards; every other connector off in the chat. Every quoted code was checked against `truth`; none was wrong.",
+ "date": "2026-11-23",
+ "host": "claude.ai web, Opus 5.5 High, 'Load tools when needed' (default tool access), tools set to 'Always allow'",
+ "protocol": {
+  "negotiated": "2026-07-28 for everything the model touches. The probe log has no 2025-era tools/list or tools/call.",
+  "connector_add": "the add dialog's auth detection, and the Connect step, each send one 2025 `initialize` (pv=2025-11-25, client=Anthropic/1.0.0, ua=python-httpx/0.28.1). Nothing follows on that era.",
+  "connect": "right after: `server/discover` + `tools/list` on 2026-07-28 from client Anthropic/Toolbox/1.0.0 and Anthropic/ClaudeAI/1.0.0 (ua=Claude-User).",
+  "in_chat": "no request while answering prompt A: the tool definitions came from the copy fetched at connect, although the probe's list results carry ttlMs 0. On the first tool call, the chat's harness connects itself: `server/discover` + `tools/list` + every `tools/call` on 2026-07-28 from client claude-code/2.1.331-ccs (the Claude Code harness HD2 inferred from the model's self-report, now confirmed on the wire).",
+  "request_counts": "2026-07-28: server/discover 6, tools/list 4, tools/call 16 (8 per run). 2025: initialize 2 (connector add only)."
+ },
+ "runs": 2,
+ "results": {
+  "tool_description": "deferred, loaded with tool search 2/2; probe_desc_8k whole ([D8-07936 deq], no marker); probe_desc_20k cut at 16,384 + '… [truncated]' (last [D20-15872 mzk]), 2/2.",
+  "server_instructions": "NOT there before the first tool call (2/2: the 'MCP Server Instructions' block held only claude-artifacts), although `server/discover` returned them at connect. After the first call they arrive, cut at 4,096 + '… [truncated]' (last [I-03840 kms]), 2/2.",
+  "input_schema": "in full, both schemas, 2/2 ([PS-00 cxx] … [PS-07 mmv]; [PL-00 sjv] … [PL-29 ujh]).",
+  "output_schema": "not delivered, 2/2.",
+  "result_channel": "content wins, 2/2: C_ on every both-channel probe; S_ only for structured_only (content empty) and the JSON mirror; image kept; no M_; error_with_structured as its C_ text without S_."
+ },
+ "versus_hd2": "Identical on every surface, in both runs. HD2 (2026-11-17, same labels) ran on the 2025 era through the v1 probe; this run negotiated 2026-07-28 and changed nothing the model receives. The instructions channel moved from `initialize` to `server/discover`, and claude.ai treats it exactly as before: held back until the first tool call, then cut at 4,096.",
+ "caveats": [
+  "One host. Claude Code, ChatGPT, Codex, Mistral are not re-measured on 2026-07-28 here.",
+  "Chat-host results are self-reports; the coded labels make them checkable, and the probe log ties each run to the era it spoke.",
+  "Default tool access ('Load tools when needed'); 'Tools already loaded' was not tried, as in HD2."
+ ]
+}

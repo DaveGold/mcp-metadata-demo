@@ -74,12 +74,14 @@ else moved ([`2026-11-23-sdk-v2-rebaseline`](../evals/results/2026-11-23-sdk-v2-
 The host-probe servers in [`evals/host-probe/`](../evals/host-probe/) deliberately stay on SDK
 1.29.0 (a pinned devDependency), so HD and HD2 remain reproducible as measured.
 
-**Not measured yet: delivery on 2026-07-28.** In that revision the server `instructions` arrive
-in the `server/discover` result instead of `initialize`, and a client opts in to the new era (the
-v2 client still connects on 2025 unless told otherwise). How much of the instructions each host
-passes to the model on that channel is an open question; nothing in this repo's delivery tables
-describes it. The surfaces the design rules are about (description, input and output schema,
-response, instructions) all still exist. To measure it, use the SDK v2 delivery probe
+**Delivery on 2026-07-28: measured on claude.ai only.** In that revision the server
+`instructions` arrive in the `server/discover` result instead of `initialize`, and a client opts in
+to the new era (the v2 client still connects on 2025 unless told otherwise). claude.ai already
+does: apart from one 2025 `initialize` when a connector is added, it connects and calls tools on
+2026-07-28, and it delivers exactly what HD2 measured on 2025, instructions included (4,096
+characters, only after the first tool call)
+([`2026-11-23-claudeai-2026-07-28-delivery`](../evals/results/2026-11-23-claudeai-2026-07-28-delivery.json)).
+The other hosts are not measured on 2026-07-28 yet. To measure one, use the SDK v2 delivery probe
 ([`delivery-probe-server-v2.mjs`](../evals/host-probe/delivery-probe-server-v2.mjs)): the same
 labels and codes as the HD/HD2 probe, served in both eras, with the era of every request logged.
 
